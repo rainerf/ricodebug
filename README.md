@@ -1,7 +1,7 @@
 ricodebug
 =========
 
-The name "ricodebug" is a tribute to Johnny Rico, main character of the awesome movie Starship Troopers. His aim was to fight all bugs - and so is ours. :)
+The name "ricodebug" is a tribute to Johnny Rico, main character of the awesome movie Starship Troopers. His aim was to fight all bugs - and so is ours.
 
 Introduction
 ------------
