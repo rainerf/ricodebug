@@ -28,6 +28,7 @@ from gdboutput import GdbOutput
 #import logging
 import re
 from tools import unBackslashify
+from PyQt4.QtCore import QDir
 
 reserved = {
 	"done" : "DONE",
@@ -296,7 +297,7 @@ class GdbResultParser:
 		""" this function-call is required to get the yacc running! """
 		lex.lex(reflags=re.DOTALL)
 		
-		parser = yacc.yacc(start='top',debug=1)
+		parser = yacc.yacc(start='top',debug=0,outputdir=str(QDir.homePath())+"/.ricodebug")
 		r = []
 		for line in lines:
 			line = line.strip()

@@ -31,7 +31,7 @@
 
 import sys
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import pyqtRemoveInputHook
+from PyQt4.QtCore import pyqtRemoveInputHook, QDir
 
 sys.path.append(sys.path[0] + '/models')
 sys.path.append(sys.path[0] + '/views')
@@ -48,6 +48,7 @@ from logger import Logger
 ## The main routine.
 def main():
     pyqtRemoveInputHook()
+    QDir(QDir.homePath()).mkdir(".ricodebug")
 
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
@@ -62,4 +63,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-   
+
