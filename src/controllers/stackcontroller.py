@@ -56,7 +56,7 @@ class StackController(QObject):
         
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
-        self.distributed_objects.editor_controller.jumpToLine(item.fullname, item.line)
+        self.distributed_objects.signal_proxy.openFile(item.fullname, item.line)
         
     def insertStackMarkers(self):
         if self.stackView.showStackTrace.checkState() == Qt.Checked:

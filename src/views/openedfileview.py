@@ -182,9 +182,6 @@ class OpenedFileView(QObject):
 		self.popupMenu.addMenu(self.subPopupMenu)
 		self.popupMenu.popup(point)
 		
-	def test(self, par):
-		print "---------------- blablablabla: " + par
-		
 	def addWatch(self, watch=None):
 		if watch:
 			self.signalProxy.addWatch(watch)
@@ -248,7 +245,11 @@ class OpenedFileView(QObject):
 	
 	def showExecutionPosition(self, line):
 		self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC)
+		self.showLine(line)
+	
+	def showLine(self, line):
 		self.edit.setCursorPosition(line, 1)
+		self.edit.ensureLineVisible(line)
 	
 	def clearExecutionPositionMarkers(self):
 		self.edit.markerDeleteAll(self.MARGIN_MARKER_EXEC)
@@ -298,4 +299,3 @@ class OpenedFileView(QObject):
 				self.edit.markerAdd(int(tp.line)-1, self.MARGIN_MARKER_TP)
 				
 
-				

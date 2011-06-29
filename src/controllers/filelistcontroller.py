@@ -50,4 +50,4 @@ class FileListController(QObject):
         item = index.internalPointer()
         filename = item.data(1)
         if len(filename) > 0:
-            self.distributed_objects.editor_controller.editor_view.openFile(filename)
+            self.distributed_objects.signal_proxy.openFile(filename, 0)

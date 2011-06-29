@@ -41,6 +41,7 @@ class EditorController(QObject):
         line = int(line) - 1
         self.editor_view.openFile(filename)
         file_ = self.editor_view.openedFiles[filename]
+        file_.showLine(line)
         editor = file_.edit
         editor.setSelection(line, 0, line, editor.lineLength(line))
         
