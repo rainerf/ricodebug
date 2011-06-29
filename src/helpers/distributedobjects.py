@@ -35,8 +35,8 @@ from watchcontroller import WatchController
 from pyiocontroller import PyIoController
 from inferioriocontroller import InferiorIoController
 from gdbiocontroller import GdbIoController
-from datagraph.datagraphcontroller import DataGraphController
-from variables.variablepool import VariablePool
+from datagraphcontroller import DataGraphController
+from variablepool import VariablePool
 from actions import Actions
 from stlvectorparser import StlVectorParser
 from tracepointwavecontroller import TracepointWaveController

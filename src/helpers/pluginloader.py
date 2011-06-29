@@ -26,10 +26,10 @@ import sys
 import os 
 from PyQt4.QtCore import SIGNAL, QObject, QIODevice, QFile
 from PyQt4.QtGui import QAction
-from PyQt4.QtXml import QDomDocument       
+from PyQt4.QtXml import QDomDocument
 from logger import Logger
 
-  
+
 class PluginAction(QAction):
     """ Class extends QAction to load a plugin over a menu entry."""
     def __init__(self, parent, path):
@@ -42,7 +42,7 @@ class PluginAction(QAction):
         
         # get dir name
         self.dirname = os.path.dirname(path)[os.path.dirname(path).rfind('/')+1:]
-
+        
         #import name of plugin from __init__.py
         try :
             d = __import__(self.dirname)
@@ -64,7 +64,8 @@ class PluginAction(QAction):
             self.pluginldr.loadPlugin(self.path)   
         else:
             self.pluginldr.unloadPlugin(self.path)  
-        
+
+
 class PluginLoader(QObject):
     '''PluginLoader. 
         Goes through subfolders of /plugins and searches for plugin files(ending with "plugin.py").
@@ -88,7 +89,8 @@ class PluginLoader(QObject):
         
         #xml file for plugin info            
         self.xmlFile = self.plugin_dir + '/plugins.xml'    
-                 
+
+
     def addAvailablePlugins(self): 
         """Search in all subfolders of src/plugins for plugin files and add them as menu entries."""    
         #go through subdirs of pluginfolder and identify pluginfiles (ending with "Plugins.py")  
@@ -105,16 +107,16 @@ class PluginLoader(QObject):
                     self.pluginActions.append(pAction)
                     self.emit(SIGNAL('insertPluginAction(PyQt_PyObject)'), pAction)
                     
-        #activate all plugins which where active on previous program execution            
+        #activate all plugins which where active on previous program execution
         self.__getActivePlugins()
 
-                                
+
     def loadPlugin(self, path):
-        """Load plugin from plugin folder. Name of class and file of plugin must be the same."""   
-        for i in range(self.pluginActions.__len__()):          
+        """Load plugin from plugin folder. Name of class and file of plugin must be the same."""
+        for i in range(self.pluginActions.__len__()):
             if self.pluginActions[i].path == path:
                 #print path
-                name = os.path.basename(path)[:-3]   
+                name = os.path.basename(path)[:-3]
                 try:             
                     self.plugins[path] = getattr(__import__(name),name)() 
                 except AttributeError:
@@ -123,8 +125,8 @@ class PluginLoader(QObject):
                     self.plugins[path].initPlugin(self.signalproxy)     # init plugin with signal interface 
                 except AttributeError:
                     Logger.getInstance().addLogMessage("PluginLoader", "Error while loading plugin " + name + ". Function initPlugin() not found", Logger.MSG_TYPE_ERROR, True) 
-        
-                                       
+
+
     def unloadPlugin(self, path):
         '''Called when user unloads plugin from menu'''
         try:
@@ -136,12 +138,12 @@ class PluginLoader(QObject):
         else:
             deInit()
             self.plugins.__delitem__(path)
-            
-    
+
+
     def __getActivePlugins(self, xmlfile=None):
         '''
         Function checks xml and returns if plugin was active on previous program execution
-        xmlfile: specifies alternative path to xml file with plugin information (default: plugins/plugins.xml)  
+        xmlfile: specifies alternative path to xml file with plugin information (default: plugins/plugins.xml)
         '''
         fname = self.xmlFile
         if xmlfile != None:
@@ -150,7 +152,7 @@ class PluginLoader(QObject):
             fileObject = QFile(fname)
             Xml = QDomDocument("xmldoc")
             Xml.clear()
-            if (fileObject.open(QIODevice.ReadOnly) != False): 
+            if (fileObject.open(QIODevice.ReadOnly) != False):
                 Xml.setContent(fileObject.readAll())
                 fileObject.close()
                 
@@ -162,19 +164,19 @@ class PluginLoader(QObject):
                 for a in self.pluginActions:
                     if a.path == str(bpNode.attribute("path")):
                         a.setChecked(bpNode.attribute("active") == "y")
-                    
-                
+
+
     def savePluginInfo(self, xmlfile=None):
         ''' 
         write plugin info to xml (plugin active/inactive ...)
-        xmlfile: specifies alternative path to xml file with plugin information (default: plugins/plugins.xml)  
+        xmlfile: specifies alternative path to xml file with plugin information (default: plugins/plugins.xml)
         '''
         #create xml
         Xml = QDomDocument("xmldoc")
         rootNode = Xml.createElement("SysCDbgActivePlugins")
-        Xml.appendChild(rootNode)        
+        Xml.appendChild(rootNode)
         
-        for i in range(self.pluginActions.__len__()):             
+        for i in range(self.pluginActions.__len__()):
             pluginNode = Xml.createElement("plugin")
             pluginNode.setAttribute("path", self.pluginActions[i].path)
             if self.pluginActions[i].isChecked():
@@ -189,8 +191,8 @@ class PluginLoader(QObject):
             fname = xmlfile
             if fname.endswith(".xml") == False:
                 fname += ".xml"
- 
+        
         fileObject = QFile(fname)
         fileObject.open(QIODevice.WriteOnly)
         fileObject.writeData(Xml.toString())
-        fileObject.close()  
+        fileObject.close()

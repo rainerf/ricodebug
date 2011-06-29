@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
+from datagraphvw import DataGraphVW, HtmlTemplateHandler
 
 class PendingVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for pending Variables """

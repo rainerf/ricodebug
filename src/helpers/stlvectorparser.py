@@ -25,7 +25,6 @@
 from PyQt4.QtCore import QObject
 
 class StlVectorParser(QObject):
-
     def __init__(self, distributedObjects):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects

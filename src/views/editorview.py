@@ -48,8 +48,7 @@ class EditorView(QWidget):
         self.distributed_objects = distributed_objects
         QObject.connect(self.tabWidget, SIGNAL('tabCloseRequested(int)'), self.hideTab)
         self.openedFiles = {}
-        
-        
+
     def hideTab(self, idx):
         """ Close an opened file tab. Show message box if file has been modified. """
         w = self.tabWidget.widget(idx)
