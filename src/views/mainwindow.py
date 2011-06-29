@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, self.act.actions[Actions.Open])
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
-		
+        
         # add them to menubar and also menuView to respect order
         self.ui.menubar.addAction(self.ui.menuFile.menuAction())
         self.ui.menubar.addAction(self.ui.menuView.menuAction())

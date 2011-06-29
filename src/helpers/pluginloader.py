@@ -24,11 +24,9 @@
 
 import sys
 import os 
-import imp
 from PyQt4.QtCore import SIGNAL, QObject, QIODevice, QFile
 from PyQt4.QtGui import QAction
 from PyQt4.QtXml import QDomDocument       
-from signalproxy import SignalProxy 
 from logger import Logger
 
   
@@ -94,7 +92,7 @@ class PluginLoader(QObject):
     def addAvailablePlugins(self): 
         """Search in all subfolders of src/plugins for plugin files and add them as menu entries."""    
         #go through subdirs of pluginfolder and identify pluginfiles (ending with "Plugins.py")  
-        for root, dirs, files in os.walk(self.plugin_dir):
+        for root, _, files in os.walk(self.plugin_dir):
             for f in files:
                 if root != self.plugin_dir and (f.endswith('Plugin.py') or f.endswith('plugin.py')): 
                                         
@@ -196,7 +194,3 @@ class PluginLoader(QObject):
         fileObject.open(QIODevice.WriteOnly)
         fileObject.writeData(Xml.toString())
         fileObject.close()  
-        
-      
-            
-  

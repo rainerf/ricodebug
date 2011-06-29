@@ -22,9 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
-
 
 class PendingVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for pending Variables """

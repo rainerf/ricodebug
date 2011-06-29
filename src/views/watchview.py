@@ -25,9 +25,6 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import SIGNAL, QObject, Qt
-from debugcontroller import DebugController
-from variablecontroller import VariableController
-#from gi.overrides.Gtk import TreeViewColumn
 
 class WatchView(QWidget):
     def __init__(self, watch_controller, parent=None):

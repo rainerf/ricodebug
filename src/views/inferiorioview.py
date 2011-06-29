@@ -24,7 +24,6 @@
 
 from PyQt4.QtGui import QTextEdit, QTextCursor
 from PyQt4.QtCore import SIGNAL, QObject
-from debugcontroller import DebugController
 
 class InferiorIoView(QTextEdit):
     def __init__(self, debug_controller, parent=None):

@@ -32,9 +32,7 @@ class StlVectorParser(QObject):
         self.signalProxy = distributedObjects.signal_proxy
 
     def getSize(self, vector):
-        size_var = None
         size = None
-        
         size_var = self.signalProxy.gdbEvaluateExpression("(" + vector + ").size()");
         
         if size_var is not None:

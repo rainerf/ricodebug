@@ -25,7 +25,6 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
 from PyQt4.QtCore import QObject, SIGNAL, Qt
-from debugcontroller import DebugController
 from stylesheets import STYLESHEET
 from tools import unBackslashify
 from gdboutput import GdbOutput

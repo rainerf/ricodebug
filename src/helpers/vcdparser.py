@@ -22,9 +22,6 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-import ply.lex as lex
-import ply.yacc as yacc
-
 
 """ from http://www.beyondttl.com/vcd.php
 """

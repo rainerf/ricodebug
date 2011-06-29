@@ -24,7 +24,6 @@
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
-from PyQt4.QtCore import QObject, SIGNAL
 
 class TracepointView(QWidget):
     def __init__(self, parent = None):

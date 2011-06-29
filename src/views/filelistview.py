@@ -27,7 +27,7 @@ A view that displays the content of the file list model.
 """
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QDockWidget, QWidget
+from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import QObject, SIGNAL
 
 class FileListView(QWidget):
