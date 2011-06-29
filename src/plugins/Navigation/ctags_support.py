@@ -42,6 +42,11 @@ class EntryList:
         else:
             scope = None
         
+        # Only add a class/struct if it wasn't present in the file before; this
+        # can happen if there are template specializations such as myclass and
+        # myclass<T>, which are both represented as myclass in the file. If the
+        # entry is present, it will have a line number, so use that as a
+        # heuristic ;).
         add = True
         if kind == "class":
             n = self.getScope(scope+"::"+name if scope else name)
@@ -66,8 +71,6 @@ class EntryList:
             n.setValues(name, file_, lineNumber, scope)
         if add:
             n.addToParent()
-        else:
-            print "didnt"
 
 class Entry:
     def __init__(self, entrylist):
