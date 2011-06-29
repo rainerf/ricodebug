@@ -56,7 +56,7 @@ def main():
     Logger.getInstance().init("logfile", window)
     window = MainWindow()
     if (len(sys.argv) > 1):
-        window.openExecutable(sys.argv[1])
+        window.debug_controller.openExecutable(sys.argv[1])
 
     window.show()
     sys.exit(app.exec_())
