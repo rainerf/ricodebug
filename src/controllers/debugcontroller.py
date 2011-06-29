@@ -54,7 +54,7 @@ class DebugController(QObject):
             
             if self.executableName != None:
                 #clear variables, tracepoints, watches,... by connecting to this signal
-                self.signalProxy.emitCleanupModels()           
+                self.signalProxy.emitCleanupModels()
                                      
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
@@ -113,10 +113,10 @@ class DebugController(QObject):
             if r.dest == 'frame':
                 frame = r.src
                 
-        if reason != 'exited-normally':
-            stop = False
-                        
-            if reason == 'breakpoint-hit':    
+        if reason in ['exited-normally', 'exited']:
+            self.signalProxy.emitInferiorHasExited(rec)
+        elif reason == 'breakpoint-hit':
+                stop = False
                 tp = self.distributed_objects.tracepoint_controller.tracepointModel.getTracepointIfAvailable(frame)
                 
                 if self.distributed_objects.breakpoint_controller.breakpointModel.isBreakpoint(frame) or self.lastCmdWasStep:
@@ -126,17 +126,15 @@ class DebugController(QObject):
                 if tp != None:
                     tp.tracePointOccurred(stop)
                     self.distributed_objects.signal_proxy.emitTracepointOccurred()
-            else:
-                self.signalProxy.emitInferiorHasStopped(rec)                                
         else:
-            self.signalProxy.emitInferiorHasExited(rec)
+            self.signalProxy.emitInferiorHasStopped(rec)
 
     def executePythonCode(self, code):
         exec(code)
     
     def inferiorUntil(self):
         current_opened_file = self.editor_controller.editor_view.getCurrentOpenedFile()
-        line, col = current_opened_file.edit.getCursorPosition()        
+        line, col = current_opened_file.edit.getCursorPosition()
         self.until(current_opened_file.filename, line+1)
     
     def getExecutableName(self):

@@ -215,8 +215,8 @@ class MainWindow(QMainWindow):
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
         if (filename != ""):
-            self.debug_controller.openExecutable(filename)  
-                
+            self.debug_controller.openExecutable(filename)
+        
     def showLoadPluginsDialog(self):
         dialog = QFileDialog()
         dialog.setNameFilter("*.xml")   
