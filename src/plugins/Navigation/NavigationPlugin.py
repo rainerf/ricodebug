@@ -26,7 +26,7 @@ class NavigationPlugin(QtCore.QObject):
         """Init function - called when pluginloader loads plugin."""
         
         self.signalproxy = signalproxy
-        self.entrylist = EntryList("/home/rainer/tmp/tags")
+        self.entrylist = EntryList()
 
         # create and place DockWidget in mainwindow using signalproxy
         self.dockwidget = QtGui.QDockWidget(None)
@@ -39,10 +39,13 @@ class NavigationPlugin(QtCore.QObject):
         
         # add widget to mainwindow
         self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
-        try:
-            QtCore.QObject.connect(self.signalproxy.distributedObjects.debug_controller, QtCore.SIGNAL('executableOpened'), self.update)
-        except Exception as e:
-            print e
+        QtCore.QObject.connect(self.signalproxy.distributedObjects.debug_controller, QtCore.SIGNAL('executableOpened'), self.update)
+        QtCore.QObject.connect(self.view, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.viewDoubleClicked)
+        
+    def viewDoubleClicked(self, index):
+            file_ = str(index.sibling(index.row(), 1).data().toString())
+            line = index.sibling(index.row(), 2).data().toInt()[0]
+            self.signalproxy.openFile(file_, line)
         
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
@@ -52,11 +55,7 @@ class NavigationPlugin(QtCore.QObject):
     def update(self):
         sources = self.signalproxy.distributedObjects.gdb_connector.getSources()
         tmpFile = "%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid())
-        print tmpFile
         os.system('ctags --fields=afmikKlnsStz -f %s %s' % (tmpFile, " ".join(sources)))
-        self.entrylist = EntryList(tmpFile)
+        self.entrylist.readFromFile(tmpFile)
         self.view.setModel(self.entrylist.model)
-        
-        
-        
-        
+
