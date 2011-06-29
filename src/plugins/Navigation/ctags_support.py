@@ -128,7 +128,7 @@ class Function(Entry):
 
     def setValues(self, name, file_, lineNumber, scope, signature):
         Entry.setValues(self, name, file_, lineNumber, scope)
-        self.signature = signature
+        self.signature = signature if signature else '()'
         self.items[0].setText(self.name + self.signature)
         self.items[0].setIcon(QIcon(QPixmap(":/icons/images/sc_process.png")))
         self.items[3].setText("Function")
