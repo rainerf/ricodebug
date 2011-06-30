@@ -12,12 +12,28 @@ import os
 #
 # The variable PluginName in the __init__.py file of each package may be used to define a name for the plugin
 
+from PyQt4.QtCore import QThread
+
+class CTagsRunner(QThread):
+    def __init__(self, tmpFile, parent=None):
+        super(CTagsRunner, self).__init__(parent)
+        self.tmpFile = tmpFile
+        self.sources = None
+    
+    def oneshot(self, sources):
+        self.sources = sources
+        self.start()
+        
+    def run(self):
+        os.system('ctags --fields=afmikKlnsStz -f %s %s' % (self.tmpFile, " ".join(self.sources)))
+        self.emit(QtCore.SIGNAL("tagsFileAvailable()"))
+
 class NavigationPlugin(QtCore.QObject):
     ''' CTags-based navigation plugin Widget '''
     
     # ================================= 
     # functions called by pluginloader
-    # ================================= 
+    # =================================
     def __init__(self):
         QtCore.QObject.__init__(self)
         self.dockwidget = None
@@ -42,6 +58,9 @@ class NavigationPlugin(QtCore.QObject):
         QtCore.QObject.connect(self.signalproxy.distributedObjects.debug_controller, QtCore.SIGNAL('executableOpened'), self.update)
         QtCore.QObject.connect(self.view, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.viewDoubleClicked)
         
+        self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
+        QtCore.QObject.connect(self.ctagsRunner, QtCore.SIGNAL("tagsFileAvailable()"), self.tagsFileReady, Qt.QueuedConnection)
+        
     def viewDoubleClicked(self, index):
             file_ = str(index.sibling(index.row(), 1).data().toString())
             line = index.sibling(index.row(), 2).data().toInt()[0]
@@ -54,8 +73,9 @@ class NavigationPlugin(QtCore.QObject):
         
     def update(self):
         sources = self.signalproxy.distributedObjects.gdb_connector.getSources()
-        tmpFile = "%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid())
-        os.system('ctags --fields=afmikKlnsStz -f %s %s' % (tmpFile, " ".join(sources)))
-        self.entrylist.readFromFile(tmpFile)
+        self.ctagsRunner.oneshot(sources)
+        
+    def tagsFileReady(self):
+        self.entrylist.readFromFile(self.ctagsRunner.tmpFile)
         self.view.setModel(self.entrylist.model)
 
