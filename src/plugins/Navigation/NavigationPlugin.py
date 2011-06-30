@@ -78,4 +78,5 @@ class NavigationPlugin(QtCore.QObject):
     def tagsFileReady(self):
         self.entrylist.readFromFile(self.ctagsRunner.tmpFile)
         self.view.setModel(self.entrylist.model)
+        os.remove(self.ctagsRunner.tmpFile)
 
