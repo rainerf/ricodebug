@@ -10,15 +10,8 @@ resources_rc.py: resources.qrc
 
 .PHONY: clean pylint
 clean:
-	rm $(TARGETS)
-	rm *.pyc
-	rm controllers/*.pyc
-	rm helpers/*.pyc
-	rm models/*.pyc
-	rm views/*.pyc
-	rm variables/*.pyc
-	rm datagraph/*.pyc
-	rm plugins/*/*.pyc
+	rm -f $(TARGETS)
+	find -name '*.pyc' | xargs rm -fr
 
 pylint:
 	pylint --include-ids=y --disable=W0312,C0103,C0111,C0301 *.py
