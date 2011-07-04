@@ -40,6 +40,7 @@ class DataGraphView(QGraphicsView):
 		self.leafItems = {}
 		self.model = None
 		self.data_graph_controller = datagraphcontroller
+		self.setDragMode(QGraphicsView.ScrollHandDrag)
 	
 	def clear(self):
 		""" deletes all VariableViews from the DataGraph """
