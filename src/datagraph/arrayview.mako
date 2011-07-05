@@ -12,7 +12,7 @@
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	ax.plot(data)
-	fig.savefig(g, format='svg')
+	fig.savefig(g, format='svg', transparent=True)
 %>\
 <img src="file://${g}?${time.time()}" />
 </%def>
