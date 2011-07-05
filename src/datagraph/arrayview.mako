@@ -6,6 +6,16 @@
 	import os
 	from PyQt4 import QtCore
 %>\
+<%def name="main()">
+<%
+	g = "%s/g%s%d.svg" % (str(QtCore.QDir.tempPath()), id, os.getpid())
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ax.plot(data)
+	fig.savefig(g, format='svg')
+%>\
+<img src="file://${g}?${time.time()}" />
+</%def>
 <!-- show variable if its in scope: -->
 %		if top:
 	<tr class="header">
@@ -19,14 +29,7 @@
 	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')";>
 		<td nowrap>
 			<table>
-<%
-	g = "%s/g%s%d.png" % (str(QtCore.QDir.tempPath()), id, os.getpid())
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	ax.plot(data)
-	fig.savefig(g)
-%>\
-				<img src="file://${g}?${time.time()}" oncontextmenu="${id}.openContextMenu(); event.stopPropagation();" />
+${main()}
 			</table>
 		</td>
 	</tr>
@@ -51,14 +54,7 @@
 		</td>
 		<td nowrap>
 			<table class="variablechild">
-<%
-	g = "%s/g%s%d.png" % (str(QtCore.QDir.tempPath()), id, os.getpid())
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	ax.plot(data)
-	fig.savefig(g)
-%>\
-				<img src="file://${g}?${time.time()}" oncontextmenu="${id}.openContextMenu(); event.stopPropagation();" />
+${main()}
 			</table>
 		</td>
 	</tr>
