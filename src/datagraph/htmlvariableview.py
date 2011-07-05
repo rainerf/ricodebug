@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QSize, Qt
+from PyQt4.QtCore import SIGNAL, QSize, QSizeF, Qt
 from PyQt4.QtGui import QGraphicsItem
 from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
@@ -43,6 +43,7 @@ class HtmlVariableView(QGraphicsWebView):
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0,0))
+        self.setPreferredSize(QSizeF(0, 0))
         self.setResizesToContents(True)
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks);
         self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
@@ -65,9 +66,10 @@ class HtmlVariableView(QGraphicsWebView):
         self.outgoingPointers.append(pointer)
     
     def render(self):
-        print "htmlvariableview rendering html-template"
         self.templateHandlers = []
-        self.html = (self.htmlTemplate.render(var=self.var, handlers=self.templateHandlers))
+        self.html = self.htmlTemplate.render(var=self.var, handlers=self.templateHandlers)
+        # the page's viewport will not shrink if new content is set, so set it to it's minimum
+        self.page().setViewportSize(QSize(0, 0)) 
         self.setHtml(self.html)
         return self.html
     
@@ -87,3 +89,10 @@ class HtmlVariableView(QGraphicsWebView):
     
     def onDelete(self):
         self.emit(SIGNAL('deleting()'))
+
+    def paint(self, painter, option, widget):
+        #from PyQt4.QtGui import QColor
+        #painter.setPen(QColor(Qt.red))
+        #painter.drawRoundedRect(self.boundingRect(), 5, 5)
+        QGraphicsWebView.paint(self, painter, option, widget)
+

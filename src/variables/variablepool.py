@@ -172,8 +172,8 @@ class VariablePool(QObject):
             for child in gdbChildren.children:
                 assert (child.dest == "child")
             
-                # public, private, protected
-                if (hasattr(child.src, "type") == False):                    
+                if ((hasattr(child.src, "type") == False) or    # public, private, protected
+                        child.src.exp == child.src.type):       # base classes
                     access = child.src.exp
                     #parentName = parentName + "." + access
                     self.getChildren(child.src.name, childList, access, parentName)

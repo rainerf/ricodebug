@@ -46,6 +46,8 @@ class Pointer(QGraphicsPolygonItem):
         self.distributedObjects = distributedObjects
         self.setBrush( QBrush( self.bgcolor  ) )
         self.setPen( QPen(self.fgcolor,1) )
+        QObject.connect(self.fromView, SIGNAL('geometryChanged()'), self.render)
+        QObject.connect(self.toView, SIGNAL('geometryChanged()'), self.render)
         QObject.connect(self.fromView, SIGNAL('xChanged()'), self.render)
         QObject.connect(self.fromView, SIGNAL('yChanged()'), self.render)
         QObject.connect(self.toView, SIGNAL('xChanged()'), self.render)
