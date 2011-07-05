@@ -27,10 +27,10 @@ from datagraphvw import DataGraphVW, HtmlTemplateHandler
 class PendingVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for pending Variables """
     
-    def __init__(self, var):
+    def __init__(self, var, distributedObjects):
         """ Constructor
         @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var)
+        HtmlTemplateHandler.__init__(self, var, distributedObjects)
     
     def execLinkCommand(self, commandStr, mainView):
         """ handles the given Command
@@ -38,7 +38,7 @@ class PendingVariableTemplateHandler(HtmlTemplateHandler):
         @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
         pass
     
-    def render(self, handlers=None):
+    def render(self, handlers, view):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
@@ -56,12 +56,4 @@ class PendingDataGraphVW(DataGraphVW):
         @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         DataGraphVW.__init__(self, variable, distributedObjects)
-    
-    def getTemplateHandler(self):
-        """ returns the TemplateHandler for the html-Template
-        @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
-        """
-        if (self.templateHandler == None):
-            self.templateHandler = PendingVariableTemplateHandler(self)
-        return self.templateHandler
-    
+        self.templateHandler = PendingVariableTemplateHandler(self, self.distributedObjects)

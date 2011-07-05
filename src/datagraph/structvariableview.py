@@ -25,30 +25,38 @@
 from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
+from PyQt4 import QtCore
 
 class StructVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Struct-Variables """
     
-    def __init__(self, var):
+    def __init__(self, var, distributedObjects):
         """ Constructor
         @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var)
-        self.var = var
+        HtmlTemplateHandler.__init__(self, var, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/structvariableview.mako')
     
-    def execLinkCommand(self, commandStr, mainView):
-        """ handles the given Command
-        @param commandStr  String, the Command to handle
-        @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
-        if (commandStr == "remove"):
-            print "... removing ptrvariableview ..."
-            self.var.destroy()
-        if (commandStr == "open"):
-            self.var.isOpen = True
-        if (commandStr == "close"):
-            self.var.isOpen = False
+    @QtCore.pyqtSlot()
+    def open(self):
+        self.var.isOpen = True
+        self.setDirty()
     
+    @QtCore.pyqtSlot()
+    def close(self):
+        self.var.isOpen = False
+        self.setDirty()
+#
+#    @QtCore.pyqtSlot()
+#    def graphicalView(self):
+#        self.var.setTemplateHandler(ArrayTemplateHandler)
 
+    def prepareContextMenu(self, menu):
+        if self.var.isOpen:
+            menu.addAction("Close %s" % self.var.variable.exp, self.close)
+        else:
+            menu.addAction("Open %s" % self.var.variable.exp, self.open)
+#        menu.addAction("Change to graphical view for %s" % self.var.variable.exp, self.graphicalView)
+        HtmlTemplateHandler.prepareContextMenu(self, menu)
 
 class StructDataGraphVW(DataGraphVW):
     """ VariableWrapper for Struct-Variables """
@@ -61,20 +69,50 @@ class StructDataGraphVW(DataGraphVW):
         DataGraphVW.__init__(self, variable, distributedObjects)
         self.isOpen = True
         self.vwFactory = vwFactory
-    
-    def getTemplateHandler(self):
-        """ returns the TemplateHandler for the html-Template
-        @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
-        """
-        if (self.templateHandler == None):
-            self.templateHandler = StructVariableTemplateHandler(self)
-        return self.templateHandler
+        self.children = None
+        self.templateHandler = StructVariableTemplateHandler(self, self.distributedObjects)
     
     def getChildren(self):
         """ returns list of children as DataGraphVWs
         @return    list of datagraph.datagraphvw.DataGraphVW """
-        children = []
-        for childVar in self.variable.getChildren():
-            children.append(childVar.makeWrapper(self.vwFactory))
-        return children
+        if not self.children:
+            self.children = []
+            for childVar in self.variable.getChildren():
+                self.children.append(childVar.makeWrapper(self.vwFactory))
+        return self.children
     
+    def setTemplateHandler(self, type_):
+        oldParentHandler = self.templateHandler.parentHandler
+        self.templateHandler = type_(self, self.distributedObjects)
+        self.templateHandler.parentHandler = oldParentHandler 
+        self.templateHandler.setDirty()
+
+#class ArrayTemplateHandler(StructVariableTemplateHandler):
+#    """ TemplateHandler for graphical representation of arrays"""
+#    
+#    def __init__(self, var, distributedObjects):
+#        """ Constructor
+#        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+#        StructVariableTemplateHandler.__init__(self, var, distributedObjects)
+#        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/arrayview.mako')
+#        self.data = []
+#        
+#        for var in self.var.children:
+#            self.connect(var, QtCore.SIGNAL('changed()'), self.setDirty)
+#        
+#    def render(self, view, top, parentHandler, **kwargs):
+#        data= [var.variable.value for var in self.var.children]
+#        return StructVariableTemplateHandler.render(self, view, top, parentHandler, data=data)
+#    
+#    @QtCore.pyqtSlot()
+#    def stdView(self):
+#        self.var.setTemplateHandler(StructVariableTemplateHandler)
+#
+#    def prepareContextMenu(self, menu):
+#        if self.var.isOpen:
+#            menu.addAction("Change to std view for %s" % self.var.variable.exp, self.stdView)
+#        StructVariableTemplateHandler.prepareContextMenu(self, menu)
+#
+#    def setDirty(self):
+#        print "i'm dirty"
+#        StructVariableTemplateHandler.setDirty(self)

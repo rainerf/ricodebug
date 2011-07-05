@@ -177,4 +177,6 @@ class Pointer(QGraphicsPolygonItem):
     
     def delete(self):
         """ removes the pointer from the DataGraph """
+        self.toView.incomingPointers.remove(self)
+        self.fromView.outgoingPointers.remove(self)
         self.distributedObjects.datagraph_controller.removePointer(self)

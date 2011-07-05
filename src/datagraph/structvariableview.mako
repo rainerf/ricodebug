@@ -1,17 +1,19 @@
 <!-- show variable if its in scope: -->
-%	if var.getInScope() == True:
-##
 %		if top:
-<table class="variabletop">
 	<tr class="header">
 		<td nowrap>
-		<a href="${str(var)};remove">x</a>
-		<span class="graph_typename"> ${var.getType()} </span>
-		<span class="graph_varname"> ${var.getExp()} </span>
-%			if var.isOpen:
-		&nbsp; &nbsp; <a href="${str(var)};close">-</a>
-%			else:
-			= <a href="${str(var)};open">...</a>
+			<a ondblclick="${id}.remove()">x</a>
+			<img src="qrc:icons/images/struct.png">
+			<span class="graph_typename"> ${var.getType()} </span>
+			<a ondblclick="${id}.${"close" if var.isOpen else "open"}()">
+			<span class="graph_varname"> ${var.getExp()}</span></a>
+%			if not var.isOpen:
+				=
+		</td>
+		<td>
+			<a ondblclick="${id}.open()">
+			<table class="variablechild"><tr><td>...</td></tr></table>
+			</a>
 %			endif
 		</td>
 	</tr>
@@ -20,18 +22,18 @@
 		<td nowrap>
 			<table>
 %				for childVW in var.getChildren():
-				${childVW.getTemplateHandler().render(handlers)}
+				${childVW.getTemplateHandler().render(view, False, parentHandler)}
 %				endfor
 			</table>
 		</td>
 	</tr>
-</table>
 %			endif
 ##
 %		else:
 ##
-	<tr>
+	<tr oncontextmenu="${id}.openContextMenu(); event.stopPropagation();">
 		<td nowrap>
+			<img src="qrc:icons/images/struct.png">
 %		if var.getAccess() != None:
 			${var.getAccess()}
 %		endif
@@ -40,23 +42,22 @@
 			<span class="graph_typename"> ${var.getType()} </span>
 		</td>
 		<td nowrap>
-			<span class="graph_varname"> ${var.getExp()} </span>
+			<a ondblclick="${id}.${"close" if var.isOpen else "open"}()">
+			<span class="graph_varname"> ${var.getExp()}</span></a>
 		</td>
 		<td nowrap>
 			=
 		</td>
 		<td nowrap>
-%		if var.isOpen:
-			&nbsp; &nbsp; <a href="${str(var)};close">-</a>
 			<table class="variablechild">
+%		if var.isOpen:
 %			for childVW in var.getChildren():
-				${childVW.getTemplateHandler().render(handlers)}
+				${childVW.getTemplateHandler().render(view, False, parentHandler)}
 %			endfor
-			</table>
 %		else:
-				<a href="${str(var)};open">...</a>
+			<tr><td>...</td></tr>
 %		endif
+			</table>
 		</td>
 	</tr>
 %		endif
-%	endif

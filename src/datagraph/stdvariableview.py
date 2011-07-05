@@ -26,25 +26,14 @@ from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
 
-
 class StdVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Standard-Variables """
     
-    def __init__(self, var):
+    def __init__(self, var, distributedObjects):
         """ Constructor
         @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var)
+        HtmlTemplateHandler.__init__(self, var, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/stdvariableview.mako')
-    
-    def execLinkCommand(self, commandStr, mainView):
-        """ handles the given Command
-        @param commandStr  String, the Command to handle
-        @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
-        if (commandStr == "close"):
-            print "... closing stdvarview ..."
-            self.var.destroy()
-        
-
 
 class StdDataGraphVW(DataGraphVW):
     """ VariableWrapper for Standard-Variables """
@@ -55,12 +44,4 @@ class StdDataGraphVW(DataGraphVW):
         @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         DataGraphVW.__init__(self, variable, distributedObjects)
-    
-    def getTemplateHandler(self):
-        """ returns the TemplateHandler for the html-Template
-        @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
-        """
-        if (self.templateHandler == None):
-            self.templateHandler = StdVariableTemplateHandler(self)
-        return self.templateHandler
-    
+        self.templateHandler = StdVariableTemplateHandler(self, self.distributedObjects)

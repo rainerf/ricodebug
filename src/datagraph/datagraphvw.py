@@ -22,56 +22,65 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject
+from PyQt4.QtCore import QObject, SIGNAL
 from variables.variablewrapper import VariableWrapper
 from htmlvariableview import HtmlVariableView
+from PyQt4 import QtCore, QtGui
 
 class HtmlTemplateHandler(QObject):
     """ Parent of all TemplateHandler-Classes. <br>
     renders the htmlTemplate and handles linkClicked-Events
     """
     
-    def __init__(self, var):
+    def __init__(self, var, distributedObjects):
         """ Constructor
         @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         QObject.__init__(self)
         self.var = var
+        self.distributedObjects = distributedObjects
         self.htmlTemplate = None
+        self.view = None            # the HtmlVariableView that will contain what we render
+        self.dirty = True           # true if we need to rerender our stuff
+        self.id = None              # our unique id which we can use inside the rendered HTML/JS
+        
+        self.parentHandler = None
+        self.source = ""
+        
+        self.connect(self.var, SIGNAL('changed()'), self.setDirty)
     
-    def render(self, handlers=None):
+    def render(self, view, top, parentHandler, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
         assert(self.htmlTemplate != None)
-        top = False
-        if ((handlers == None) or (len(handlers) == 0)):
-            top = True
-        if ((handlers != None) and not(handlers.__contains__(self))):
-            handlers.append(self)
-        self.html = (self.htmlTemplate.render(var=self.var, handlers=handlers, top=top))
-        return self.html
+        self.parentHandler = parentHandler
+        self.view = view
+        
+        if not self.id:
+            self.id = view.getUniqueId(self)
+        
+        if self.dirty:
+            self.source = self.htmlTemplate.render(var=self.var, view=view, top=top, parentHandler=self, id=self.id, **kwargs)
+            self.dirty = False
+        return self.source
     
-    def linkClicked(self, url, mainView):
-        """ handles the Click-Event of a Link
-        @param url         String, the clicked URL
-        @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable
-        """
-        urlStr = str(url.toString())
-        print "HtmlTemplateHandler: link clicked: " + urlStr
-        urlStrParts = urlStr.split(';')
-        assert(len(urlStrParts) >= 2)
-        #varStr = urlStrParts[0]
-        commandStr = urlStrParts[1]
-        self.execLinkCommand(commandStr, mainView)
-    
-    def execLinkCommand(self, commandStr, mainView):
-        """ abstract method <br>
-            handles the given Command
-        @param commandStr  String, the Command to handle
-        @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
-        raise "abstract method DataGraphVW.execLinkCommand() has been called."
-    
+    def setDirty(self):
+        self.dirty = True
+        if self.parentHandler:
+            self.parentHandler.setDirty()
 
+    @QtCore.pyqtSlot()
+    def openContextMenu(self):
+        menu = QtGui.QMenu()
+        self.prepareContextMenu(menu)
+        self.view.showContextMenu(menu)
+    
+    def prepareContextMenu(self, menu):
+        self.parentHandler.prepareContextMenu(menu)
+    
+    @QtCore.pyqtSlot()
+    def remove(self):
+        self.distributedObjects.datagraph_controller.removeVar(self.var)
 
 class DataGraphVW(VariableWrapper):
     """ Parent of all VariableWrappers for the DataGraph. <br>
@@ -113,7 +122,7 @@ class DataGraphVW(VariableWrapper):
         """ returns the TemplateHandler for the html-Template
         @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
         """
-        raise "abstract method DataGraphVW.getTemplateHandler() has been called."
+        return self.templateHandler
     
     def destroy(self):
         """ removes itself from the DataGraph """

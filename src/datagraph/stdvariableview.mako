@@ -1,31 +1,24 @@
 <!-- show variable if its in scope: -->
-%	if var.getInScope() == True:
-%		if top:
-<table class="variabletop">
-%		endif
-	<tr>
+	<tr oncontextmenu="${id}.openContextMenu(); event.stopPropagation();">
 		<td nowrap>
 %		if top:
-			<a href="${str(var)};close">x</a>
+			<a ondblclick="${id}.remove()">x</a>
 %		endif
+			<img src="qrc:icons/images/var.png">
 %		if var.getAccess() != None:
-				${var.getAccess()}
+			${var.getAccess()}
 %		endif
-			</td>
-			<td nowrap>
-				<span class="graph_typename"> ${var.getType()} </span>
-			</td>
-			<td nowrap>
-				<span class="graph_varname"> ${var.getExp()} </span>
-			</td>
-			<td nowrap>
-				= 
-			</td>
-			<td nowrap>
-				${var.getValue()}
-			</td>
-		</tr>
-%		if top:
- 	</table>
-%		endif
-%	endif
+		</td>
+		<td nowrap>
+			<span class="graph_typename"> ${var.getType()} </span>
+		</td>
+		<td nowrap>
+			<span class="graph_varname"> ${var.getExp()} </span>
+		</td>
+		<td nowrap>
+			= 
+		</td>
+		<td nowrap>
+			${var.getValue()}
+		</td>
+	</tr>

@@ -47,7 +47,7 @@ class VariablePool(QObject):
         # signalproxy
         self.signalProxy = distributedObjects.signal_proxy
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateVars)        
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateVars)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearVars)
         
     def clearVars(self):
@@ -88,14 +88,14 @@ class VariablePool(QObject):
         for changed in res:
             for var in self.list.itervalues():
                 if var.getGdbName() == changed.name:
-                    if (var.inscope != (bool(changed.in_scope == "true"))):                                                
-                        var.inscope = (bool(changed.in_scope == "true"))                                       
-                    if (hasattr(changed, "value")):    
-                        var.value = changed.value                           
+                    if (var.inscope != (bool(changed.in_scope == "true"))):
+                        var.inscope = (bool(changed.in_scope == "true"))
+                    if (hasattr(changed, "value")):
+                        var.value = changed.value
                     if isTracePoint == False:
                         var.changed()
         
-        # search for pending varialbes and replace them if
+        # search for pending variables and replace them if
         # they are in scope
         tempList = self.list.copy()
         for var in tempList.itervalues():

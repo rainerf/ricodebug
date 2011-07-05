@@ -23,10 +23,16 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import SIGNAL, QSize, QSizeF, Qt
-from PyQt4.QtGui import QGraphicsItem
+from PyQt4.QtGui import QGraphicsItem, QCursor
 from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
+from PyQt4 import QtCore
 import sys
+
+class TestObj(QtCore.QObject):
+    @QtCore.pyqtSlot()
+    def testSlot(self):
+        print "testSlot called"
 
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
@@ -51,6 +57,16 @@ class HtmlVariableView(QGraphicsWebView):
         self.incomingPointers = []
         self.outgoingPointers = []
         
+        self.source = None
+        
+        # ids for ourself and the template handlers we will eventually render
+        self.lastId = -1
+        self.uniqueIds = {}
+        
+        self.dirty = True
+        
+        self.id = self.getUniqueId(self)
+        
         self.render()
         
     def getIncomingPointers(self):
@@ -65,34 +81,76 @@ class HtmlVariableView(QGraphicsWebView):
     def addOutgoingPointer(self, pointer):
         self.outgoingPointers.append(pointer)
     
+    def setDirty(self):
+        self.dirty = True
+        self.render()   # FIXME: defer rendering until all changed()-events from variables have been processed
+    
     def render(self):
-        self.templateHandlers = []
-        self.html = self.htmlTemplate.render(var=self.var, handlers=self.templateHandlers)
-        # the page's viewport will not shrink if new content is set, so set it to it's minimum
-        self.page().setViewportSize(QSize(0, 0)) 
-        self.setHtml(self.html)
-        return self.html
+        if self.dirty:
+            self.source = self.htmlTemplate.render(var=self.var, view=self, top=True, parentHandler=self, id=self.id)
+            # the page's viewport will not shrink if new content is set, so set it to it's minimum
+            self.page().setViewportSize(QSize(0, 0))
+            
+            self.setHtml(self.source)
+            for template, id in self.uniqueIds.iteritems():
+                self.page().mainFrame().addToJavaScriptWindowObject(id, template)
+            self.dirty = False
+            print self.source
+        
+        return self.source
     
     def linkClicked(self, url):
-        urlStr = str(url.toString())
-        print "htmlvarview: link clicked: " + urlStr
-        urlStrParts = urlStr.split(';')
-        assert(len(urlStrParts) >= 2)
-        varStr = urlStrParts[0]
-        #commandStr = urlStrParts[1]
+        self.handleCommand(str(url.toString()))
+    
+    def prepareContextMenu(self, menu):
+        menu.addAction("Remove %s" % self.var.variable.exp)
+        menu.addAction("Show HTML for %s" % self.var.variable.exp, self.showHtml)
+    
+    @QtCore.pyqtSlot()
+    def showHtml(self):
+        print self.source
+    
+    def showContextMenu(self, menu):
+        menu.exec_(QCursor.pos())
+    
+    def contextMenuEvent(self, event):
+        pass
+    #    self.menu.exec_()
+    #    print "contextMenuEvent", self.handlerForContextMenu, self.handlerForContextMenu.var.variable.exp
+    #    menu = QMenu()
+    #    menu.addAction("Delete %s" % self.var.getTemplateHandler().var.variable.exp)
+    #    menu.addAction("Set filter for %s" % self.handlerForContextMenu.var.variable.exp)
+    #    menu.exec_()
         
-        # find handler to handle link
-        for handler in self.templateHandlers:
-            if (varStr == str(handler.var)):
-                handler.linkClicked(url, self)
-        self.render()
+    # this needs to be defined as a slot so it can be called from javascript
+#    @QtCore.pyqtSlot(str)
+#    def handleCommand(self, command):
+#        parts = command.split(";")
+#        assert(len(parts) == 2)
+#        var = parts[0]
+#        command = parts[1]
+#        self.findHandlerForStr(var).linkClicked(command, self)
+#        self.render()
+#    
+#    def findHandlerForStr(self, var):
+#        # find handler to handle link
+#        for handler in self.templateHandlers:
+#            if (str(handler.var) == var):
+#                return handler
+#        return None
+    
     
     def onDelete(self):
         self.emit(SIGNAL('deleting()'))
 
-    def paint(self, painter, option, widget):
-        #from PyQt4.QtGui import QColor
-        #painter.setPen(QColor(Qt.red))
-        #painter.drawRoundedRect(self.boundingRect(), 5, 5)
-        QGraphicsWebView.paint(self, painter, option, widget)
+    def getUniqueId(self, template):
+        if not template in self.uniqueIds:
+            self.lastId += 1
+            self.uniqueIds[template] = "tmpl%d" % self.lastId
+        return self.uniqueIds[template]
 
+# def paint(self, painter, option, widget):
+#    from PyQt4.QtGui import QColor
+#    painter.setPen(QColor(Qt.red))
+#    painter.drawRoundedRect(self.boundingRect(), 5, 5)
+#    QGraphicsWebView.paint(self, painter, option, widget)

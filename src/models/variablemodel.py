@@ -24,9 +24,6 @@
 
 from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject, SIGNAL
 from PyQt4.QtGui import QPixmap, QBrush
-from gdboutput import GdbOutput
-from signalproxy import SignalProxy
-
 
 class TreeItem(QObject):
     '''
@@ -185,7 +182,7 @@ class VariableModel(QAbstractItemModel):
         
         QAbstractItemModel.__init__(self, parent)
         
-        self.distributedObjects = distributed_objects    
+        self.distributedObjects = distributed_objects
         self.controller = controller
         
         ## @var root
@@ -202,7 +199,7 @@ class VariableModel(QAbstractItemModel):
         
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.update)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('executableOpened()'), self.clear)  
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('executableOpened()'), self.clear)
         
     def addVar(self, var):
         """ Adds a variable to the VariableModel <br>
@@ -210,8 +207,8 @@ class VariableModel(QAbstractItemModel):
             update TreeItem value and highlight state
         @par var   TreeItem, variable to be added
         """
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))   
-        self.setUnmarked(var)     
+        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.setUnmarked(var)
         self.updateData(var)
         self.emit(SIGNAL('layoutChanged()'))
         
@@ -245,7 +242,7 @@ class VariableModel(QAbstractItemModel):
         childItem = parentItem.getChildren(self.controller.vwFactory)[row]
         if childItem is not None:
                         
-            # get children for childitem            
+            # get children for childitem
             childItem.getChildren(self.controller.vwFactory)
             
             idx = self.createIndex(row, column, childItem)
@@ -398,7 +395,7 @@ class VariableModel(QAbstractItemModel):
                 item.setMarkChanged(True)
                 item.setChanged(False) 
             if item.getChildCount() != 0:
-                self.updateData(item)                   
+                self.updateData(item)
                             
     def setUnmarked(self, parent):
         """ clears highlighted TreeItems changed at previous stop
@@ -408,7 +405,7 @@ class VariableModel(QAbstractItemModel):
             if item.getMarkChanged() == True:
                 item.setMarkChanged(False)
             if item.getChildCount() != 0:
-                self.setUnmarked(item)               
+                self.setUnmarked(item)
 
     def setData(self, index, value, role):
         """ QAbstractItemModel flags function
