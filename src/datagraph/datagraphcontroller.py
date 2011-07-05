@@ -30,6 +30,8 @@ from datagraphvwfactory import DataGraphVWFactory
 from datagraphview import DataGraphView
 from variables.variablelist import VariableList
 from pointer import Pointer
+from htmlvariableview import HtmlVariableView
+
 
 class DataGraphController(QObject):
     """ the Controller for the DataGraph """
@@ -87,17 +89,6 @@ class DataGraphController(QObject):
         self.dataGraphDock.setObjectName("DataGraphView")
         self.dataGraphDock.setWidget(self.data_graph_view)
         self.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
-        
-    def getVarByWatch(self, watch):
-        """
-        @param watch    string, the watch-Expression of the desired Variable
-        @return         variables.variable.Variable, the desired Variable with var.getExp() == watch
-        """ 
-        for var in self.variableList:
-            if var.getExp() == watch:
-                return var
-        # in case that no var was found, return None
-        return None
     
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph
@@ -105,8 +96,8 @@ class DataGraphController(QObject):
         @param xPos     Integer, the X-Coordinate of the Position where to add the Variable
         @param yPos     Integer, the Y-Coordinate of the Position where to add the Variable
         """
-        vw = self.variableList.addVarByName(watch)
-        self.addVar(vw, xPos, yPos, False)
+        varWrapper = self.variableList.addVarByName(watch)
+        self.addVar(varWrapper, xPos, yPos, False)
     
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
@@ -116,6 +107,12 @@ class DataGraphController(QObject):
         @param yPos            Integer, the Y-Coordinate of the Position where to add the VariableWrapper
         @param addVarToList    Boolean, tells if varWrapper should be added to the VariableList too
         """
+        varWrapper.createView()
+        try:
+            varWrapper.getView().render()
+        except:
+            from mako import exceptions
+            print exceptions.text_error_template().render()
         varWrapper.setXPos(xPos)
         varWrapper.setYPos(yPos)
         self.data_graph_view.addItem(varWrapper.getView())
@@ -203,3 +200,14 @@ class DataGraphController(QObject):
         #            toView = toVar.getView()
         #        if (fromView != None and toView != None):
         #            self.addPointer(fromView, toView)
+
+#    def getVarByWatch(self, watch):
+#        """
+#        @param watch    string, the watch-Expression of the desired Variable
+#        @return         variables.variable.Variable, the desired Variable with var.getExp() == watch
+#        """ 
+#        for var in self.variableList:
+#            if var.getExp() == watch:
+#                return var
+#        # in case that no var was found, return None
+#        return None

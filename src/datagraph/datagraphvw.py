@@ -32,55 +32,39 @@ class HtmlTemplateHandler(QObject):
     renders the htmlTemplate and handles linkClicked-Events
     """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         QObject.__init__(self)
-        self.var = var
+        self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
         self.htmlTemplate = None
-        self.view = None            # the HtmlVariableView that will contain what we render
-        self.dirty = True           # true if we need to rerender our stuff
         self.id = None              # our unique id which we can use inside the rendered HTML/JS
-        
-        self.parentHandler = None
-        self.source = ""
-        
-        self.connect(self.var, SIGNAL('changed()'), self.setDirty)
     
-    def render(self, view, top, parentHandler, **kwargs):
+    def render(self, top, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
-        assert(self.htmlTemplate != None)
-        self.parentHandler = parentHandler
-        self.view = view
+        assert self.htmlTemplate != None
+        assert self.varWrapper.getView()
         
         if not self.id:
-            self.id = view.getUniqueId(self)
+            self.id = self.varWrapper.getView().getUniqueId(self)
         
-        if self.dirty:
-            self.source = self.htmlTemplate.render(var=self.var, view=view, top=top, parentHandler=self, id=self.id, **kwargs)
-            self.dirty = False
-        return self.source
+        return self.htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
     
-    def setDirty(self):
-        self.dirty = True
-        if self.parentHandler:
-            self.parentHandler.setDirty()
-
     @QtCore.pyqtSlot()
     def openContextMenu(self):
         menu = QtGui.QMenu()
         self.prepareContextMenu(menu)
-        self.view.showContextMenu(menu)
+        self.varWrapper.getView().showContextMenu(menu)
     
     def prepareContextMenu(self, menu):
         self.parentHandler.prepareContextMenu(menu)
     
     @QtCore.pyqtSlot()
     def remove(self):
-        self.distributedObjects.datagraph_controller.removeVar(self.var)
+        self.distributedObjects.datagraph_controller.removeVar(self.varWrapper)
 
 class DataGraphVW(VariableWrapper):
     """ Parent of all VariableWrappers for the DataGraph. <br>
@@ -94,17 +78,33 @@ class DataGraphVW(VariableWrapper):
         """
         VariableWrapper.__init__(self, variable)
         self.distributedObjects = distributedObjects
-        self.view = None
+        self._view = None
         self.templateHandler = None
+        self.parentWrapper = None
+        
+        self.dirty = True           # true if we need to rerender our stuff
+        self.connect(self, SIGNAL('changed()'), self.setDirty)
+        
+        self.source = ""
+    
+    def createView(self):
+        self._view = HtmlVariableView(self, self.distributedObjects)
+        self.parentWrapper = self._view
+    
+    def setExistingView(self, view, parentWrapper):
+        self._view = view
+        self.parentWrapper = parentWrapper
     
     def getView(self):
         """ returns the view of the Variable
         @return    datagraph.htmlvariableview.HtmlVariableView, the view of the Variable """
-        if (self.view == None):
-            self.view = HtmlVariableView(self, self.distributedObjects)
-            self.view.setX(0)
-            self.view.setY(0)
-        return self.view
+        return self._view
+    
+    @QtCore.pyqtSlot()
+    def setDirty(self):
+        self.dirty = True
+        if self.parentWrapper:
+            self.parentWrapper.setDirty()
     
     def getXPos(self):
         return self.getView().x()
@@ -118,11 +118,14 @@ class DataGraphVW(VariableWrapper):
     def setYPos(self, yPos):
         self.getView().setY(yPos)
     
-    def getTemplateHandler(self):
+    def render(self, top, **kwargs):
         """ returns the TemplateHandler for the html-Template
         @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
         """
-        return self.templateHandler
+        if self.dirty:
+            self.dirty = False
+            self.source = self.templateHandler.render(top, **kwargs)
+        return self.source
     
     def destroy(self):
         """ removes itself from the DataGraph """

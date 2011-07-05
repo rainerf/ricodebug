@@ -29,10 +29,10 @@ import sys
 class StdVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Standard-Variables """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var, distributedObjects)
+        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/stdvariableview.mako')
 
 class StdDataGraphVW(DataGraphVW):

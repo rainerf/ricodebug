@@ -37,15 +37,14 @@ class TestObj(QtCore.QObject):
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
+        @param varWrapper                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
         @param distributedObjects distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         QGraphicsWebView.__init__(self, None)
-        self.var = var
+        self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
-        self.templateHandlers = []
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0,0))
@@ -53,7 +52,7 @@ class HtmlVariableView(QGraphicsWebView):
         self.setResizesToContents(True)
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks);
         self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
-        self.connect(self.var, SIGNAL('changed()'), self.render)
+        self.connect(self.varWrapper, SIGNAL('changed()'), self.render)
         self.incomingPointers = []
         self.outgoingPointers = []
         
@@ -66,8 +65,6 @@ class HtmlVariableView(QGraphicsWebView):
         self.dirty = True
         
         self.id = self.getUniqueId(self)
-        
-        self.render()
         
     def getIncomingPointers(self):
         return self.incomingPointers
@@ -87,7 +84,7 @@ class HtmlVariableView(QGraphicsWebView):
     
     def render(self):
         if self.dirty:
-            self.source = self.htmlTemplate.render(var=self.var, view=self, top=True, parentHandler=self, id=self.id)
+            self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
             # the page's viewport will not shrink if new content is set, so set it to it's minimum
             self.page().setViewportSize(QSize(0, 0))
             
@@ -95,7 +92,6 @@ class HtmlVariableView(QGraphicsWebView):
             for template, id in self.uniqueIds.iteritems():
                 self.page().mainFrame().addToJavaScriptWindowObject(id, template)
             self.dirty = False
-            print self.source
         
         return self.source
     
@@ -103,8 +99,8 @@ class HtmlVariableView(QGraphicsWebView):
         self.handleCommand(str(url.toString()))
     
     def prepareContextMenu(self, menu):
-        menu.addAction("Remove %s" % self.var.variable.exp)
-        menu.addAction("Show HTML for %s" % self.var.variable.exp, self.showHtml)
+        menu.addAction("Remove %s" % self.varWrapper.variable.exp)
+        menu.addAction("Show HTML for %s" % self.varWrapper.variable.exp, self.showHtml)
     
     @QtCore.pyqtSlot()
     def showHtml(self):
@@ -115,30 +111,6 @@ class HtmlVariableView(QGraphicsWebView):
     
     def contextMenuEvent(self, event):
         pass
-    #    self.menu.exec_()
-    #    print "contextMenuEvent", self.handlerForContextMenu, self.handlerForContextMenu.var.variable.exp
-    #    menu = QMenu()
-    #    menu.addAction("Delete %s" % self.var.getTemplateHandler().var.variable.exp)
-    #    menu.addAction("Set filter for %s" % self.handlerForContextMenu.var.variable.exp)
-    #    menu.exec_()
-        
-    # this needs to be defined as a slot so it can be called from javascript
-#    @QtCore.pyqtSlot(str)
-#    def handleCommand(self, command):
-#        parts = command.split(";")
-#        assert(len(parts) == 2)
-#        var = parts[0]
-#        command = parts[1]
-#        self.findHandlerForStr(var).linkClicked(command, self)
-#        self.render()
-#    
-#    def findHandlerForStr(self, var):
-#        # find handler to handle link
-#        for handler in self.templateHandlers:
-#            if (str(handler.var) == var):
-#                return handler
-#        return None
-    
     
     def onDelete(self):
         self.emit(SIGNAL('deleting()'))

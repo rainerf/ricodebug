@@ -30,31 +30,29 @@ from PyQt4 import QtCore
 class StructVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Struct-Variables """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var, distributedObjects)
+        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/structvariableview.mako')
     
     @QtCore.pyqtSlot()
     def open(self):
-        self.var.isOpen = True
-        self.setDirty()
+        self.varWrapper.setOpen(True)
     
     @QtCore.pyqtSlot()
     def close(self):
-        self.var.isOpen = False
-        self.setDirty()
+        self.varWrapper.setOpen(False)
 #
 #    @QtCore.pyqtSlot()
 #    def graphicalView(self):
-#        self.var.setTemplateHandler(ArrayTemplateHandler)
+#        self.varWrapper.setTemplateHandler(ArrayTemplateHandler)
 
     def prepareContextMenu(self, menu):
-        if self.var.isOpen:
-            menu.addAction("Close %s" % self.var.variable.exp, self.close)
+        if self.varWrapper.isOpen:
+            menu.addAction("Close %s" % self.varWrapper.variable.exp, self.close)
         else:
-            menu.addAction("Open %s" % self.var.variable.exp, self.open)
+            menu.addAction("Open %s" % self.varWrapper.variable.exp, self.open)
 #        menu.addAction("Change to graphical view for %s" % self.var.variable.exp, self.graphicalView)
         HtmlTemplateHandler.prepareContextMenu(self, menu)
 
@@ -69,24 +67,30 @@ class StructDataGraphVW(DataGraphVW):
         DataGraphVW.__init__(self, variable, distributedObjects)
         self.isOpen = True
         self.vwFactory = vwFactory
-        self.children = None
+        self.children = None        # will be lazily evaluated once we need them
         self.templateHandler = StructVariableTemplateHandler(self, self.distributedObjects)
     
+    def setOpen(self, open):
+        self.isOpen = open
+        self.setDirty()
+    
     def getChildren(self):
-        """ returns list of children as DataGraphVWs
+        """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been
         @return    list of datagraph.datagraphvw.DataGraphVW """
         if not self.children:
             self.children = []
             for childVar in self.variable.getChildren():
-                self.children.append(childVar.makeWrapper(self.vwFactory))
+                wrapper = childVar.makeWrapper(self.vwFactory)
+                wrapper.setExistingView(self.getView(), self)
+                self.children.append(wrapper)
         return self.children
     
-    def setTemplateHandler(self, type_):
-        oldParentHandler = self.templateHandler.parentHandler
-        self.templateHandler = type_(self, self.distributedObjects)
-        self.templateHandler.parentHandler = oldParentHandler 
-        self.templateHandler.setDirty()
-
+#    def setTemplateHandler(self, type_):
+#        oldParentHandler = self.templateHandler.parentHandler
+#        self.templateHandler = type_(self, self.distributedObjects)
+#        self.templateHandler.parentHandler = oldParentHandler 
+#        self.templateHandler.setDirty()
+#    
 #class ArrayTemplateHandler(StructVariableTemplateHandler):
 #    """ TemplateHandler for graphical representation of arrays"""
 #    

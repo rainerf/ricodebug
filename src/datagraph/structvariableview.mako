@@ -4,10 +4,10 @@
 		<td nowrap>
 			<a ondblclick="${id}.remove()">x</a>
 			<img src="qrc:icons/images/struct.png">
-			<span class="graph_typename"> ${var.getType()} </span>
-			<a ondblclick="${id}.${"close" if var.isOpen else "open"}()">
-			<span class="graph_varname"> ${var.getExp()}</span></a>
-%			if not var.isOpen:
+			<span class="graph_typename"> ${varWrapper.getType()} </span>
+			<a ondblclick="${id}.${"close" if varWrapper.isOpen else "open"}()">
+			<span class="graph_varname"> ${varWrapper.getExp()}</span></a>
+%			if not varWrapper.isOpen:
 				=
 		</td>
 		<td>
@@ -17,12 +17,12 @@
 %			endif
 		</td>
 	</tr>
-%			if var.isOpen:
+%			if varWrapper.isOpen:
 	<tr>
 		<td nowrap>
 			<table>
-%				for childVW in var.getChildren():
-				${childVW.getTemplateHandler().render(view, False, parentHandler)}
+%				for childVW in varWrapper.getChildren():
+				${childVW.render(False)}
 %				endfor
 			</table>
 		</td>
@@ -34,25 +34,25 @@
 	<tr oncontextmenu="${id}.openContextMenu(); event.stopPropagation();">
 		<td nowrap>
 			<img src="qrc:icons/images/struct.png">
-%		if var.getAccess() != None:
-			${var.getAccess()}
+%		if varWrapper.getAccess():
+			${varWrapper.getAccess()}
 %		endif
 		</td>
 		<td nowrap>
-			<span class="graph_typename"> ${var.getType()} </span>
+			<span class="graph_typename"> ${varWrapper.getType()} </span>
 		</td>
 		<td nowrap>
-			<a ondblclick="${id}.${"close" if var.isOpen else "open"}()">
-			<span class="graph_varname"> ${var.getExp()}</span></a>
+			<a ondblclick="${id}.${"close" if varWrapper.isOpen else "open"}()">
+			<span class="graph_varname"> ${varWrapper.getExp()}</span></a>
 		</td>
 		<td nowrap>
 			=
 		</td>
 		<td nowrap>
 			<table class="variablechild">
-%		if var.isOpen:
-%			for childVW in var.getChildren():
-				${childVW.getTemplateHandler().render(view, False, parentHandler)}
+%		if varWrapper.isOpen:
+%			for childVW in varWrapper.getChildren():
+				${childVW.render(False)}
 %			endfor
 %		else:
 			<tr><td>...</td></tr>

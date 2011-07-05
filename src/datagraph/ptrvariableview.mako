@@ -5,20 +5,20 @@
 			<a ondblclick="${id}.remove()">x</a>
 %		endif
 			<img src="qrc:icons/images/var.png">
-%		if var.getAccess() != None:
-			${var.getAccess()}
+%		if varWrapper.getAccess():
+			${varWrapper.getAccess()}
 %		endif
 		</td>
 		<td nowrap>
-			<span class="graph_typename"> ${var.getType()} </span>
+			<span class="graph_typename"> ${varWrapper.getType()} </span>
 		</td>
 		<td nowrap>
-			<span class="graph_varname"> ${var.getExp()} </span>
+			<span class="graph_varname"> ${varWrapper.getExp()} </span>
 		</td>
 		<td nowrap>
 			= 
 		</td>
 		<td nowrap>
-			<a ondblclick="${id}.dereference()">${var.getValue()}</a>
+			<a ondblclick="${id}.dereference()">${varWrapper.getValue()}</a>
 		</td>
 	</tr>

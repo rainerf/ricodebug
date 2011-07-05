@@ -30,26 +30,26 @@ from PyQt4 import QtCore
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Pointer-Variables """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var, distributedObjects)
+        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/ptrvariableview.mako')
     
     @QtCore.pyqtSlot()
     def dereference(self):
-        print "... dereferencing var ..."
-        dgvw = self.var.dereference()
+        print "... dereferencing varWrapper ..."
+        dgvw = self.varWrapper.dereference()
         if (dgvw != None):
             print "-> exp: " + dgvw.getExp()
             self.distributedObjects.datagraph_controller.addVar(dgvw)
-            self.distributedObjects.datagraph_controller.addPointer(self.view, dgvw.getView())
+            self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), dgvw.getView())
             self.setDirty()
         else:
             print "Null-Pointer wasn't dereferenced."
 
     def prepareContextMenu(self, menu):
-        menu.addAction("Dereference %s" % self.var.variable.exp, self.dereference)
+        menu.addAction("Dereference %s" % self.varWrapper.variable.exp, self.dereference)
         HtmlTemplateHandler.prepareContextMenu(self, menu)
 
 class PtrDataGraphVW(DataGraphVW):

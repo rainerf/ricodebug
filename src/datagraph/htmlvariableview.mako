@@ -12,11 +12,11 @@ a {border-bottom:1px dotted;}
 * {-webkit-user-select: none; user-select: none}
 </style>
 
-%	if var.getInScope() == True:
+%	if varWrapper.getInScope() == True:
 %		if top:
 <table class="variabletop" oncontextmenu="{$id}.openContextMenu();">
 %		endif
-${var.getTemplateHandler().render(view, top, parentHandler)}
+${varWrapper.render(top)}
 %		if top:
  	</table>
 %		endif
