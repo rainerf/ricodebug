@@ -43,17 +43,18 @@ class StructVariableTemplateHandler(HtmlTemplateHandler):
     @QtCore.pyqtSlot()
     def close(self):
         self.varWrapper.setOpen(False)
-#
-#    @QtCore.pyqtSlot()
-#    def graphicalView(self):
-#        self.varWrapper.setTemplateHandler(ArrayTemplateHandler)
-
+    
+    @QtCore.pyqtSlot()
+    def graphicalView(self):
+        self.varWrapper.changeTemplateHandler(ArrayTemplateHandler)
+    
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         if self.varWrapper.isOpen:
             menu.addAction("Close %s" % self.varWrapper.getExp(), self.close)
         else:
             menu.addAction("Open %s" % self.varWrapper.getExp(), self.open)
+        menu.addAction("Show %s graphically" % self.varWrapper.getExp(), self.graphicalView)
 
 class StructDataGraphVW(DataGraphVW):
     """ VariableWrapper for Struct-Variables """
@@ -84,38 +85,22 @@ class StructDataGraphVW(DataGraphVW):
                 self.children.append(wrapper)
         return self.children
     
-#    def setTemplateHandler(self, type_):
-#        oldParentHandler = self.templateHandler.parentHandler
-#        self.templateHandler = type_(self, self.distributedObjects)
-#        self.templateHandler.parentHandler = oldParentHandler 
-#        self.templateHandler.setDirty()
-#    
-#class ArrayTemplateHandler(StructVariableTemplateHandler):
-#    """ TemplateHandler for graphical representation of arrays"""
-#    
-#    def __init__(self, var, distributedObjects):
-#        """ Constructor
-#        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-#        StructVariableTemplateHandler.__init__(self, var, distributedObjects)
-#        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/arrayview.mako')
-#        self.data = []
-#        
-#        for var in self.var.children:
-#            self.connect(var, QtCore.SIGNAL('changed()'), self.setDirty)
-#        
-#    def render(self, view, top, parentHandler, **kwargs):
-#        data= [var.variable.value for var in self.var.children]
-#        return StructVariableTemplateHandler.render(self, view, top, parentHandler, data=data)
-#    
-#    @QtCore.pyqtSlot()
-#    def stdView(self):
-#        self.var.setTemplateHandler(StructVariableTemplateHandler)
-#
-#    def prepareContextMenu(self, menu):
-#        if self.var.isOpen:
-#            menu.addAction("Change to std view for %s" % self.var.variable.exp, self.stdView)
-#        StructVariableTemplateHandler.prepareContextMenu(self, menu)
-#
-#    def setDirty(self):
-#        print "i'm dirty"
-#        StructVariableTemplateHandler.setDirty(self)
+class ArrayTemplateHandler(StructVariableTemplateHandler):
+    """ TemplateHandler for graphical representation of arrays"""
+    
+    def __init__(self, var, distributedObjects):
+        """ Constructor
+        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        StructVariableTemplateHandler.__init__(self, var, distributedObjects)
+        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/arrayview.mako')
+        
+    def render(self, top, **kwargs):
+        data = [var.getValue() for var in self.varWrapper.children]
+        return StructVariableTemplateHandler.render(self, top, data=data)
+    
+    @QtCore.pyqtSlot()
+    def stdView(self):
+        self.varWrapper.changeTemplateHandler(StructVariableTemplateHandler)
+
+    def prepareContextMenu(self, menu):
+        menu.addAction("Change to std view for %s" % self.varWrapper.getExp(), self.stdView)

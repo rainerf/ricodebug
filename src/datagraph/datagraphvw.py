@@ -41,17 +41,15 @@ class HtmlTemplateHandler(QObject):
         self.htmlTemplate = None
         self.id = None              # our unique id which we can use inside the rendered HTML/JS
     
-    def prepareRender(self):
-        assert self.htmlTemplate != None
-        assert self.varWrapper.getView()
-        if not self.id:
-            self.id = self.varWrapper.getView().getUniqueId(self)
-    
     def render(self, top, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
-        self.prepareRender()
+        assert self.htmlTemplate != None
+        assert self.varWrapper.getView()
+        
+        if not self.id:
+            self.id = self.varWrapper.getView().getUniqueId(self)
         
         return self.htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
     
@@ -105,6 +103,10 @@ class DataGraphVW(VariableWrapper):
             menu = QtGui.QMenu()
         self.templateHandler.prepareContextMenu(menu)
         self.parentWrapper.openContextMenu(menu)
+    
+    def changeTemplateHandler(self, type_):
+        self.templateHandler = type_(self, self.distributedObjects)
+        self.setDirty()
     
     @QtCore.pyqtSlot()
     def setDirty(self):

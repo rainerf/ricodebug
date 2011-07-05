@@ -1,5 +1,5 @@
 <!-- show variable if its in scope: -->
-	<tr oncontextmenu="${id}.openContextMenu(); event.stopPropagation();">
+	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')";>
 		<td nowrap>
 %		if top:
 			<a ondblclick="${id}.remove()">x</a>

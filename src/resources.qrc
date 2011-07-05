@@ -32,8 +32,11 @@
     <file>images/sc_out.png</file>
     <file>images/sc_port.png</file>
     <file>images/sc_signal.png</file>
-	<file>images/zoom-in.png</file>
+    <file>images/zoom-in.png</file>
     <file>images/zoom-out.png</file>
+  </qresource>
+  <qresource prefix="graph">
+    <file>images/background.png</file>
   </qresource>
   <qresource prefix="markers">
     <file>images/exec_pos.png</file>
