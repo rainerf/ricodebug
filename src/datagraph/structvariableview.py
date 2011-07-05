@@ -49,12 +49,11 @@ class StructVariableTemplateHandler(HtmlTemplateHandler):
 #        self.varWrapper.setTemplateHandler(ArrayTemplateHandler)
 
     def prepareContextMenu(self, menu):
-        if self.varWrapper.isOpen:
-            menu.addAction("Close %s" % self.varWrapper.variable.exp, self.close)
-        else:
-            menu.addAction("Open %s" % self.varWrapper.variable.exp, self.open)
-#        menu.addAction("Change to graphical view for %s" % self.var.variable.exp, self.graphicalView)
         HtmlTemplateHandler.prepareContextMenu(self, menu)
+        if self.varWrapper.isOpen:
+            menu.addAction("Close %s" % self.varWrapper.getExp(), self.close)
+        else:
+            menu.addAction("Open %s" % self.varWrapper.getExp(), self.open)
 
 class StructDataGraphVW(DataGraphVW):
     """ VariableWrapper for Struct-Variables """

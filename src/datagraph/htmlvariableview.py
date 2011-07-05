@@ -98,16 +98,14 @@ class HtmlVariableView(QGraphicsWebView):
     def linkClicked(self, url):
         self.handleCommand(str(url.toString()))
     
-    def prepareContextMenu(self, menu):
-        menu.addAction("Remove %s" % self.varWrapper.variable.exp)
-        menu.addAction("Show HTML for %s" % self.varWrapper.variable.exp, self.showHtml)
+    def openContextMenu(self, menu):
+        menu.addAction("Remove %s" % self.varWrapper.getExp()) # FIXME: add some function to remove the view
+        menu.addAction("Show HTML for %s" % self.varWrapper.getExp(), self.showHtml)
+        menu.exec_(QCursor.pos())
     
     @QtCore.pyqtSlot()
     def showHtml(self):
         print self.source
-    
-    def showContextMenu(self, menu):
-        menu.exec_(QCursor.pos())
     
     def contextMenuEvent(self, event):
         pass

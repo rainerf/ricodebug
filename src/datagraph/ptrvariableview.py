@@ -48,8 +48,8 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
             print "Null-Pointer wasn't dereferenced."
 
     def prepareContextMenu(self, menu):
-        menu.addAction("Dereference %s" % self.varWrapper.variable.exp, self.dereference)
         HtmlTemplateHandler.prepareContextMenu(self, menu)
+        menu.addAction("Dereference %s" % self.varWrapper.getExp(), self.dereference)
 
 class PtrDataGraphVW(DataGraphVW):
     """ VariableWrapper for Pointer-Variables """

@@ -41,26 +41,26 @@ class HtmlTemplateHandler(QObject):
         self.htmlTemplate = None
         self.id = None              # our unique id which we can use inside the rendered HTML/JS
     
+    def prepareRender(self):
+        assert self.htmlTemplate != None
+        assert self.varWrapper.getView()
+        if not self.id:
+            self.id = self.varWrapper.getView().getUniqueId(self)
+    
     def render(self, top, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
-        assert self.htmlTemplate != None
-        assert self.varWrapper.getView()
-        
-        if not self.id:
-            self.id = self.varWrapper.getView().getUniqueId(self)
+        self.prepareRender()
         
         return self.htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
     
     @QtCore.pyqtSlot()
     def openContextMenu(self):
-        menu = QtGui.QMenu()
-        self.prepareContextMenu(menu)
-        self.varWrapper.getView().showContextMenu(menu)
+        self.varWrapper.openContextMenu()
     
     def prepareContextMenu(self, menu):
-        self.parentHandler.prepareContextMenu(menu)
+        pass
     
     @QtCore.pyqtSlot()
     def remove(self):
@@ -99,6 +99,12 @@ class DataGraphVW(VariableWrapper):
         """ returns the view of the Variable
         @return    datagraph.htmlvariableview.HtmlVariableView, the view of the Variable """
         return self._view
+    
+    def openContextMenu(self, menu=None):
+        if not menu:
+            menu = QtGui.QMenu()
+        self.templateHandler.prepareContextMenu(menu)
+        self.parentWrapper.openContextMenu(menu)
     
     @QtCore.pyqtSlot()
     def setDirty(self):
