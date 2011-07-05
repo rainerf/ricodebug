@@ -44,7 +44,6 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
             print "-> exp: " + dgvw.getExp()
             self.distributedObjects.datagraph_controller.addVar(dgvw)
             self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), dgvw.getView())
-            self.setDirty()
         else:
             print "Null-Pointer wasn't dereferenced."
 
