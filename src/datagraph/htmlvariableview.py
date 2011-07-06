@@ -52,7 +52,6 @@ class HtmlVariableView(QGraphicsWebView):
         self.setResizesToContents(True)
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks);
         self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
-        self.connect(self.varWrapper, SIGNAL('changed()'), self.render)
         self.incomingPointers = []
         self.outgoingPointers = []
         
@@ -66,6 +65,8 @@ class HtmlVariableView(QGraphicsWebView):
         
         self.id = self.getUniqueId(self)
         
+        self.connect(self.distributedObjects.signal_proxy, SIGNAL("variableUpdateCompleted()"), self.render)
+        
     def getIncomingPointers(self):
         return self.incomingPointers
     
@@ -78,9 +79,10 @@ class HtmlVariableView(QGraphicsWebView):
     def addOutgoingPointer(self, pointer):
         self.outgoingPointers.append(pointer)
     
-    def setDirty(self):
+    def setDirty(self, render_immediately):
         self.dirty = True
-        self.render()   # FIXME: defer rendering until all changed()-events from variables have been processed
+        if render_immediately:
+            self.render()
     
     def render(self):
         if self.dirty:

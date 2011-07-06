@@ -105,6 +105,8 @@ class VariablePool(QObject):
                     newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
                     self.list[var.getUniqueName()] = newVar
                     var.replace(newVar)
+        
+        self.signalProxy.emitVariableUpdateCompleted()
                     
     def addLocals(self):
         """ get locals from gdb and add to pool if variable is not existing

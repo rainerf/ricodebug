@@ -72,7 +72,7 @@ class StructDataGraphVW(DataGraphVW):
     
     def setOpen(self, open):
         self.isOpen = open
-        self.setDirty()
+        self.setDirty(True)
     
     def getChildren(self):
         """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been

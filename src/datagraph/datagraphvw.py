@@ -106,13 +106,13 @@ class DataGraphVW(VariableWrapper):
     
     def changeTemplateHandler(self, type_):
         self.templateHandler = type_(self, self.distributedObjects)
-        self.setDirty()
+        self.setDirty(True)
     
     @QtCore.pyqtSlot()
-    def setDirty(self):
+    def setDirty(self, render_immediately=False):
         self.dirty = True
         if self.parentWrapper:
-            self.parentWrapper.setDirty()
+            self.parentWrapper.setDirty(render_immediately)
     
     def getXPos(self):
         return self.getView().x()
