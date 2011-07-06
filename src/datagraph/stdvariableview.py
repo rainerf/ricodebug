@@ -25,6 +25,7 @@
 from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
+from variables import filters
 
 class StdVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Standard-Variables """
@@ -34,6 +35,10 @@ class StdVariableTemplateHandler(HtmlTemplateHandler):
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/stdvariableview.mako')
+    
+    def prepareContextMenu(self, menu):
+        HtmlTemplateHandler.prepareContextMenu(self, menu)
+        filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % self.varWrapper.getExp()), self.varWrapper)
 
 class StdDataGraphVW(DataGraphVW):
     """ VariableWrapper for Standard-Variables """
