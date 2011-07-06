@@ -9,10 +9,10 @@
 <%def name="main()">
 <%
 	g = "%s/g%s%d.svg" % (str(QtCore.QDir.tempPath()), id, os.getpid())
-	fig = plt.figure()
+	fig = plt.figure(figsize=(4, 3))
 	ax = fig.add_subplot(111)
 	ax.plot(data)
-	fig.savefig(g, format='svg', transparent=True)
+	fig.savefig(g, format='svg', transparent=True, bbox_inches='tight')
 %>\
 <img src="file://${g}?${time.time()}" />
 </%def>
