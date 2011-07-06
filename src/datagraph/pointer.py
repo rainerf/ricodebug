@@ -67,6 +67,10 @@ class Pointer(QGraphicsPolygonItem):
         """ Main-Method of the Pointer-Class <br>
             calculates/renders/draws the Lines of the Arrow
         """
+        if self.fromView.collidesWithItem(self.toView):
+            self.setPolygon(QPolygonF())
+            return
+        
         points = QPolygonF()
         self.toView.x()
         pM1 = QPointF(self.fromView.x() + self.fromView.size().width()/2,
