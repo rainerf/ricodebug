@@ -29,3 +29,21 @@
 # ricodebug is a GDB frontend which focuses on visually supported
 # debugging using data structure graphs and SystemC features.
 #
+
+
+# a running package-configuration on Ubuntu is:
+# - python 2.6.6
+# - python-qt4 4.8.1
+# - python-qt4-dev 4.8.1
+# - pyqt4-dev-tools 4.8.1
+# - libqt3-mt 3.3.8
+# - libqtcore4 4.7.0
+# - libqtgui4 4.7.0
+# - libqt4-core 4.7.0
+# - libqt4-gui 4.7.0
+# - libqtwebkit4 2.0.0
+# - libqtwebkit-dev 2.0.0
+# - libqt4-qt3support 4.7.0
+# - libqscintilla2-5 2.4.4
+# - python-qscintilla2 2.4.5
+
