@@ -199,7 +199,7 @@ class VariablePool(QObject):
         """
         res = self.connector.var_assign(gdbName, str(value.toString()))
         if res.class_ == GdbOutput.ERROR:
-            print "[VarModel] got error: " + res.raw
+            logging.error("Error when assigning variable: %s", res.raw)
             raise
     
     def __createVariable(self, gdbVar, parentName=None, exp=None, access=None):          

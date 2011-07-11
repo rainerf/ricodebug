@@ -29,6 +29,7 @@
 #
 # Execute this file to run ricodebug.
 
+import logging
 import sys
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import pyqtRemoveInputHook, QDir
@@ -43,7 +44,7 @@ sys.path.append(sys.path[0] + '/variables')
 sys.path.append(sys.path[0] + '/datagraph')
 
 from mainwindow import MainWindow
-from logger import Logger
+import logview
 
 ## The main routine.
 def main():
@@ -52,9 +53,16 @@ def main():
 
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
-    window = None
-    Logger.getInstance().init("logfile", window)
+    
     window = MainWindow()
+    
+    logging.basicConfig(filename='ricodebug.log', level=logging.DEBUG)
+    logviewhandler = logview.LogViewHandler(window.ui.logView)
+    errormsghandler = logview.ErrorLabelHandler(window)
+    logger = logging.getLogger()
+    logger.addHandler(logviewhandler)
+    logger.addHandler(errormsghandler)
+    
     if (len(sys.argv) > 1):
         window.debug_controller.openExecutable(sys.argv[1])
 

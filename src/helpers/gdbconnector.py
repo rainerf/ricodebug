@@ -24,9 +24,16 @@
 
 import subprocess
 import signal
+import logging
 from gdbreader import GdbReader
 from gdboutput import GdbOutput
 from PyQt4.QtCore import QObject
+
+class GdbError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return self.msg
 
 class GdbConnector(QObject):
     def __init__(self):
@@ -38,16 +45,12 @@ class GdbConnector(QObject):
         self.reader.startReading(self.gdb.stdout)
     
     def execute(self, cmd, error_msg = None):
-        #print "[GdbConnector] running command ", cmd
+        logging.debug("Running command %s", cmd)
         self.gdb.stdin.write(cmd + "\n")
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
         
         if res.class_ == GdbOutput.ERROR:
-            print "[GdbConnector] ------- COMMAND '", cmd, "'"
-            print "[GdbConnector] ------- FAILED WITH", res.msg
-            print "[GdbConnector] -------     (raw: " + res.raw + ")"
-            if error_msg != None:
-                print "[GdbConnector]", error_msg
+            logging.debug("Command '%s' failed with %s (%s, '%s')", cmd, res.msg, res.raw, error_msg)
         
         return res
     
@@ -55,7 +58,10 @@ class GdbConnector(QObject):
         res = self.execute(cmd, error_msg)
         
         if res.class_ == GdbOutput.ERROR:
-            raise
+            logging.error(res.msg)
+            if error_msg:
+                logging.error(error_msg)
+            raise GdbError(res.msg)
         
         return res
     

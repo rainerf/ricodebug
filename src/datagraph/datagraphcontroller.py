@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+import logging
 
 """ @package datagraph.datagraphcontroller    the DataGraphController """
 
@@ -112,7 +113,7 @@ class DataGraphController(QObject):
             varWrapper.getView().render()
         except:
             from mako import exceptions
-            print exceptions.text_error_template().render()
+            logging.error("Caught exception while rendering template: %s", exceptions.text_error_template().render())
         varWrapper.setXPos(xPos)
         varWrapper.setYPos(yPos)
         self.data_graph_view.addItem(varWrapper.getView())

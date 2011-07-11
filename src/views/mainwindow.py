@@ -259,8 +259,4 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
-            
-    def addWatch(self, word):
-        word = str(word)
-        print word
         

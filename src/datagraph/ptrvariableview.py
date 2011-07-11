@@ -26,6 +26,7 @@ from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
 from PyQt4 import QtCore
+import logging
 
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Pointer-Variables """
@@ -38,14 +39,13 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
     
     @QtCore.pyqtSlot()
     def dereference(self):
-        print "... dereferencing varWrapper ..."
         dgvw = self.varWrapper.dereference()
         if (dgvw != None):
-            print "-> exp: " + dgvw.getExp()
+            logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.getExp())
             self.distributedObjects.datagraph_controller.addVar(dgvw)
             self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), dgvw.getView())
         else:
-            print "Null-Pointer wasn't dereferenced."
+            logging.error("Null-Pointer wasn't dereferenced.")
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
