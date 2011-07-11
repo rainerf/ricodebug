@@ -38,6 +38,8 @@
     <file>images/viewmagfit.png</file>
     <file>images/viewmag-.png</file>
     <file>images/viewmag+.png</file>
+    <file>images/pause.png</file>
+    <file>images/stop.png</file>
   </qresource>
   <qresource prefix="graph">
     <file>images/background.png</file>

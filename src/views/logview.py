@@ -1,5 +1,6 @@
 import logging
-from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar, QMessageBox, QApplication, QStyle, QFrame, QPalette, QBrush
+from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
+from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
 from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
 from logmodel import LogModel, FilteredLogModel
 
@@ -43,19 +44,30 @@ class ErrorLabel(QWidget):
         self.time_bar.setOrientation(Qt.Vertical)
         self.time_bar.setMaximum(self.ticks)
         self.time_bar.setTextVisible(False)
+        self.pauseButton = QPushButton(QIcon(QPixmap(":/icons/images/pause.png")), "")
+        self.pauseButton.setFixedSize(32, 32)
+        self.connect(self.pauseButton, SIGNAL('clicked()'), self.stopTimer)
+        self.stopButton = QPushButton(QIcon(QPixmap(":/icons/images/stop.png")), "")
+        self.stopButton.setFixedSize(32, 32)
+        self.connect(self.stopButton, SIGNAL('clicked()'), self.closeWidget)
         self.layout = QGridLayout(self)
-        self.layout.addWidget(self.time_bar, 0, 0)
-        self.layout.addWidget(self.icon_label, 0, 1)
-        self.layout.addWidget(self.message_edit, 0, 2)
+        self.layout.addWidget(self.time_bar, 0, 0, 2, 1)
+        self.layout.addWidget(self.icon_label, 0, 1, 2, 1)
+        self.layout.addWidget(self.message_edit, 0, 2, 2, 1)
+        self.layout.addWidget(self.pauseButton, 0, 3)
+        self.layout.addWidget(self.stopButton, 1, 3)
         self.layout.setColumnStretch(2, 1)
         self.setAutoFillBackground(True)
         self.timer = QTimer()
         self.connect(self.timer, SIGNAL("timeout()"), self.decrementTime)
 
-    def mousePressEvent(self, e):
+    def stopTimer(self):
         self.timer.stop()
-        self.hide()
-        [QMessageBox.warning, QMessageBox.critical][self.lastSeverity](self.parent(), "Error", self.message_edit.toPlainText())
+        self.pauseButton.setEnabled(False)
+    
+    def closeWidget(self):
+        self.timer.stop()
+        QWidget.hide(self)
 
     @pyqtSlot()
     def decrementTime(self):
@@ -88,6 +100,7 @@ class ErrorLabel(QWidget):
         self.elapsedTicks= 0
         self.time_bar.setValue(self.ticks)
         self.timer.start(1000)
+        self.pauseButton.setEnabled(True)
         self.show()
 
 
