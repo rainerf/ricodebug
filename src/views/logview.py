@@ -17,6 +17,9 @@ class LogViewHandler(logging.Handler):
     
     def emit(self, record):
         self.model.insertMessage(record)
+        self.updateView()
+    
+    def updateView(self):
         self.target_widget.resizeColumnsToContents()
         if self.target_widget.columnWidth(2)> 500:
             self.target_widget.setColumnWidth(2, 500)
@@ -24,6 +27,7 @@ class LogViewHandler(logging.Handler):
 
     def setFilter(self, value):
         self.filter_model.setMinimum(value*10)
+        self.updateView()
 
 
 class ErrorLabel(QWidget):
