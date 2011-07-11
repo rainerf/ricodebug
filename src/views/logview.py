@@ -25,6 +25,7 @@ class LogViewHandler(logging.Handler):
     def setFilter(self, value):
         self.filter_model.setMinimum(value*10)
 
+
 class ErrorLabel(QWidget):
     WARNING, ERROR = range(2)
     def __init__(self, parent):
@@ -118,7 +119,6 @@ class ErrorLabelHandler(logging.Handler):
             self.error_label.setErrorMessage("<b>%s</b>" % record.message)
         elif record.levelno >= logging.WARNING:
             self.error_label.setWarningMessage("<b>%s</b>" % record.message)
-
 
 
 class LogView(QTableView):
