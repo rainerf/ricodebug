@@ -97,7 +97,13 @@ class SignalProxy(QObject):
             @param regObject: object must implement saveSession(self, XmlHandler) and loadSession(self, XmlHandler)
             @param dialogItem: String which appears with a checkbox in the save session dialog 
         '''
-        self.emit(SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), regObject, dialogItem)       
+        self.emit(SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), regObject, dialogItem)
+
+    def emitVariableUpdateCompleted(self):
+        """Emitted when the variable pool has finished updating all variables
+        for this step. Use this signal instead of rerendering stuff on the
+        variable's changed() event to avoid multiple renderings."""
+        self.emit(SIGNAL("variableUpdateCompleted()"))
 
     # pass on further signals here ...
     

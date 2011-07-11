@@ -179,7 +179,7 @@ class WatchController(QObject):
         self.variableModel = VariableModel(self, self.distributedObjects)
         self.watchView = WatchView(self)
         
-        self.watchView.treeView.setModel(self.variableModel)
+        self.watchView.setModel(self.variableModel)
         self.watchVariableList = VariableList(self.vwFactory, self.distributedObjects)
         
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('AddWatch(QString)'), self.addWatch)

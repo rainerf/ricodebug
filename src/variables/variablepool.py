@@ -28,6 +28,7 @@ from stdvariable import StdVariable
 from ptrvariable import PtrVariable
 from structvariable import StructVariable
 from pendingvariable import PendingVariable
+import logging
 
 class VariablePool(QObject):
     """ Variablepool holding all variables created once from a view """
@@ -47,7 +48,7 @@ class VariablePool(QObject):
         # signalproxy
         self.signalProxy = distributedObjects.signal_proxy
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateVars)        
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateVars)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearVars)
         
     def clearVars(self):
@@ -88,14 +89,14 @@ class VariablePool(QObject):
         for changed in res:
             for var in self.list.itervalues():
                 if var.getGdbName() == changed.name:
-                    if (var.inscope != (bool(changed.in_scope == "true"))):                                                
-                        var.inscope = (bool(changed.in_scope == "true"))                                       
-                    if (hasattr(changed, "value")):    
-                        var.value = changed.value                           
+                    if (var.inscope != (bool(changed.in_scope == "true"))):
+                        var.inscope = (bool(changed.in_scope == "true"))
+                    if (hasattr(changed, "value")):
+                        var.value = changed.value
                     if isTracePoint == False:
                         var.changed()
         
-        # search for pending varialbes and replace them if
+        # search for pending variables and replace them if
         # they are in scope
         tempList = self.list.copy()
         for var in tempList.itervalues():
@@ -105,6 +106,8 @@ class VariablePool(QObject):
                     newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
                     self.list[var.getUniqueName()] = newVar
                     var.replace(newVar)
+        
+        self.signalProxy.emitVariableUpdateCompleted()
                     
     def addLocals(self):
         """ get locals from gdb and add to pool if variable is not existing
@@ -135,6 +138,7 @@ class VariablePool(QObject):
                   
             # return variable from pool if not pending      
             elif self.list[exp].getPending() == False:
+                logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
                 return self.list[exp]
             # replace pending variable
             else:
@@ -155,6 +159,8 @@ class VariablePool(QObject):
             varReplace.replace(varReturn)
             
         self.list[varReturn.getUniqueName()] = varReturn
+        
+        logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
         
         return varReturn
     
@@ -197,8 +203,12 @@ class VariablePool(QObject):
         """
         res = self.connector.var_assign(gdbName, str(value.toString()))
         if res.class_ == GdbOutput.ERROR:
-            print "[VarModel] got error: " + res.raw
+            logging.error("Error when assigning variable: %s", res.raw)
             raise
+        
+        # update _all_ vars; other expressions in the variable pool might depend
+        # on what we just changed!
+        self.updateVars()
     
     def __createVariable(self, gdbVar, parentName=None, exp=None, access=None):          
         """ create Variable with value from gdb variable

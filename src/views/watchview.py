@@ -22,35 +22,40 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget
+from PyQt4 import QtGui
+from PyQt4.QtGui import QTreeView, QMenu
 from PyQt4.QtCore import SIGNAL, QObject, Qt
+from variables import filters
+import watchcontroller
 
-class WatchView(QWidget):
+class WatchView(QTreeView):
     def __init__(self, watch_controller, parent=None):
-        QWidget.__init__(self, parent)
+        QTreeView.__init__(self, parent)
         
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
-        
-        self.treeView = QtGui.QTreeView(self)
-        self.treeView.setAlternatingRowColors(True)
-        self.treeView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
-
-        QtCore.QMetaObject.connectSlotsByName(self)
+        self.setAlternatingRowColors(True)
+        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         
         self.variableController = watch_controller
         
-        QObject.connect(self.treeView, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
-        
+        QObject.connect(self, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
+    
     def resizeColumn(self, index):
         """Resize the first column to contents when expanded."""
-        self.treeView.resizeColumnToContents(0)
+        self.resizeColumnToContents(0)
         
-    def keyPressEvent (self, event ):
+    def keyPressEvent (self, event):
         key = event.key()
         if (int(key) == Qt.Key_Delete): #0x01000007
-            selectionModel = self.treeView.selectionModel()
-            index = selectionModel.currentIndex();
+            selectionModel = self.selectionModel()
+            index = selectionModel.currentIndex()
             self.variableController.removeSelected(index.row(), index.parent())
+    
+    def contextMenuEvent(self, event):
+        QTreeView.contextMenuEvent(self, event)
+        if not event.isAccepted():
+            selectionModel = self.selectionModel()
+            wrapper = selectionModel.currentIndex().internalPointer()
+            if isinstance(wrapper, watchcontroller.WatchStdVarWrapper):
+                menu = QMenu()
+                filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
+                menu.exec_(event.globalPos())

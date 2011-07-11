@@ -80,7 +80,7 @@ class Variable(QObject):
     
     def setValue (self, value):
         self.variablepool.assignValue(self.gdbname, value)
-        self.value = value
+        self.value = value.toString()
         
     def getInScope (self):
         return self.inscope

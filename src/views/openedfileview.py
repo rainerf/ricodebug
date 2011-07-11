@@ -28,6 +28,7 @@ from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor, QMessageBox
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from math import log, ceil
 from actions import ActionEx, Actions
+import logging
 
 class OpenedFileView(QObject):
 	MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_STACK = range(5)
@@ -90,7 +91,7 @@ class OpenedFileView(QObject):
 		self.breakpoints = []
 		
 		if not (QtCore.QFile.exists(filename)):
-			print "[OpenedFileView] could not open file", filename
+			logging.error("could not open file", filename)
 		self.file_ = QtCore.QFile(filename)
 		self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
 		self.edit.read(self.file_)
@@ -120,7 +121,7 @@ class OpenedFileView(QObject):
 	
 	def saveFile(self):
 		''' Save source file '''
-		if (QtCore.QFile.exists(self.filename)):			
+		if (QtCore.QFile.exists(self.filename)):
 			f = open(self.filename, 'w')
 			f.write(self.edit.text())
 			f.close()
@@ -129,8 +130,7 @@ class OpenedFileView(QObject):
 			self.file_.close()	
 			self.__setFileModified(False)
 			
-			#TODO: find a better way to handle this:
-			QMessageBox(QMessageBox.Warning, "Recompile Executable", "Source file modified.\nRecompile executable for correct debugging.").exec_()
+			logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
 
 		
 	def __setFileModified(self, modified):

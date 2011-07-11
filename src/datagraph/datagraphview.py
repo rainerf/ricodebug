@@ -75,12 +75,17 @@ class DataGraphView(QGraphicsView):
 		self.resetTransform()
 	
 	def contextMenuEvent(self, event):
-		menu = QMenu()
-		menu.addAction(QIcon(":/icons/images/viewmag+.png"), "Zoom in", self.zoomIn)
-		menu.addAction(QIcon(":/icons/images/viewmag-.png"), "Zoom out", self.zoomOut)
-		menu.addAction(QIcon(":/icons/images/viewmagfit.png"), "Zoom to fit", self.zoomToFit)
-		menu.addAction(QIcon(":/icons/images/viewmag1.png"), "Zoom 1:1", self.zoomInitial)
-		menu.exec_(event.globalPos())
+		QGraphicsView.contextMenuEvent(self, event)
+		
+		# if some item was under the mouse and showed its context menu, the event will
+		# have been accepted
+		if not event.isAccepted():
+			menu = QMenu()
+			menu.addAction(QIcon(":/icons/images/viewmag+.png"), "Zoom in", self.zoomIn)
+			menu.addAction(QIcon(":/icons/images/viewmag-.png"), "Zoom out", self.zoomOut)
+			menu.addAction(QIcon(":/icons/images/viewmagfit.png"), "Zoom to fit", self.zoomToFit)
+			menu.addAction(QIcon(":/icons/images/viewmag1.png"), "Zoom 1:1", self.zoomInitial)
+			menu.exec_(event.globalPos())
 	
 	def wheelEvent(self, event):
 		if event.orientation() == Qt.Vertical:
