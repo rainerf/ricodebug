@@ -28,6 +28,7 @@ from stdvariable import StdVariable
 from ptrvariable import PtrVariable
 from structvariable import StructVariable
 from pendingvariable import PendingVariable
+import logging
 
 class VariablePool(QObject):
     """ Variablepool holding all variables created once from a view """
@@ -137,6 +138,7 @@ class VariablePool(QObject):
                   
             # return variable from pool if not pending      
             elif self.list[exp].getPending() == False:
+                logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
                 return self.list[exp]
             # replace pending variable
             else:
@@ -157,6 +159,8 @@ class VariablePool(QObject):
             varReplace.replace(varReturn)
             
         self.list[varReturn.getUniqueName()] = varReturn
+        
+        logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
         
         return varReturn
     
@@ -201,6 +205,10 @@ class VariablePool(QObject):
         if res.class_ == GdbOutput.ERROR:
             logging.error("Error when assigning variable: %s", res.raw)
             raise
+        
+        # update _all_ vars; other expressions in the variable pool might depend
+        # on what we just changed!
+        self.updateVars()
     
     def __createVariable(self, gdbVar, parentName=None, exp=None, access=None):          
         """ create Variable with value from gdb variable

@@ -142,7 +142,7 @@ class TreeItem(QObject):
         """ sets a TreeItems changed state
             this function is connected to the signal SignalProxy::changed()
         """
-        self.setChanged(True)            
+        self.setChanged(True)
         
 class RootVarWrapper(TreeItem):
     """ dummy wrapper for root TreeItem <br>
