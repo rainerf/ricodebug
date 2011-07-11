@@ -1,15 +1,18 @@
 import logging
 from PyQt4.QtGui import QTableView, QLabel, QWidget, QGridLayout, QProgressBar, QMessageBox, QApplication, QStyle
-from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer
-from logmodel import LogModel
+from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
+from logmodel import LogModel, FilteredLogModel
 
 class LogViewHandler(logging.Handler):
-    def __init__(self, target_widget):
+    def __init__(self, target_widget, filter_slider):
         logging.Handler.__init__(self)
         self.target_widget = target_widget
         self.model = LogModel()
-        target_widget.setModel(self.model)
+        self.filter_model = FilteredLogModel()
+        self.filter_model.setSourceModel(self.model)
+        target_widget.setModel(self.filter_model)
         self.target_widget = target_widget
+        QObject.connect(filter_slider, SIGNAL("valueChanged(int)"), self.setFilter)
     
     def emit(self, record):
         self.model.insertMessage(record)
@@ -18,6 +21,8 @@ class LogViewHandler(logging.Handler):
             self.target_widget.setColumnWidth(2, 500)
         self.target_widget.scrollToBottom()
 
+    def setFilter(self, value):
+        self.filter_model.setMinimum(value*10)
 
 class ErrorLabel(QWidget):
     WARNING, ERROR = range(2)
@@ -91,10 +96,11 @@ class ErrorLabelHandler(logging.Handler):
         self.error_label.hide()
 
     def emit(self, record):
-        if record.levelno >= logging.WARNING:
-            self.error_label.setWarningMessage("<b>%s</b>" % record.message)
-        elif record.levelno >= logging.ERROR:
+        if record.levelno >= logging.ERROR:
             self.error_label.setErrorMessage("<b>%s</b>" % record.message)
+        elif record.levelno >= logging.WARNING:
+            self.error_label.setWarningMessage("<b>%s</b>" % record.message)
+
 
 
 class LogView(QTableView):

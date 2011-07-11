@@ -1,4 +1,5 @@
 from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel
+from PyQt4.QtGui import QSortFilterProxyModel
 from operator import attrgetter
 
 class LogModel(QAbstractTableModel):
@@ -64,3 +65,17 @@ class LogModel(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), len(self.records), len(self.records))
         self.records.append(record)
         self.endInsertRows()
+    
+class FilteredLogModel(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        QSortFilterProxyModel.__init__(self, parent)
+        self.setDynamicSortFilter(True)
+        self.minimum = 0
+    
+    def filterAcceptsRow(self, sourceRow, sourceParent):
+        data = self.sourceModel().index(sourceRow, 1, sourceParent).data().toInt()[0]
+        return data >= self.minimum
+    
+    def setMinimum(self, minimum):
+        self.minimum = minimum
+        self.invalidateFilter()

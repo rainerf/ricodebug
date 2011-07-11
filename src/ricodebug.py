@@ -57,7 +57,8 @@ def main():
     window = MainWindow()
     
     logging.basicConfig(filename='ricodebug.log', level=logging.DEBUG)
-    logviewhandler = logview.LogViewHandler(window.ui.logView)
+    logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
+    window.ui.filterSlider.setValue(4)
     errormsghandler = logview.ErrorLabelHandler(window)
     logger = logging.getLogger()
     logger.addHandler(logviewhandler)
