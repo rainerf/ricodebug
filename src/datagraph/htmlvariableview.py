@@ -29,11 +29,6 @@ from mako.template import Template
 from PyQt4 import QtCore
 import sys
 
-class TestObj(QtCore.QObject):
-    @QtCore.pyqtSlot()
-    def testSlot(self):
-        print "testSlot called"
-
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
     

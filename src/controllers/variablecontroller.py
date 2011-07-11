@@ -82,12 +82,11 @@ class VariableController(QObject):
     def addWatch(self, watch):
         var = self.variableList.addVar(watch)
         QObject.connect(var, SIGNAL('changed()'), self.varChanged)
-        for item in self.variableList:
-            print item.getExp() + " " + item.getValue()
-            
-    def varChanged(self):
-        print "variable changed"
-        
+#        for item in self.variableList:
+#            print item.getExp() + " " + item.getValue()
+#            
+#    def varChanged(self):
+#        print "variable changed"
     
     def removeSelected(self, row, parent):  
         self.variableModel.removeRow(row, parent);
