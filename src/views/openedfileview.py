@@ -121,7 +121,7 @@ class OpenedFileView(QObject):
 	
 	def saveFile(self):
 		''' Save source file '''
-		if (QtCore.QFile.exists(self.filename)):			
+		if (QtCore.QFile.exists(self.filename)):
 			f = open(self.filename, 'w')
 			f.write(self.edit.text())
 			f.close()
@@ -130,8 +130,7 @@ class OpenedFileView(QObject):
 			self.file_.close()	
 			self.__setFileModified(False)
 			
-			#TODO: find a better way to handle this:
-			QMessageBox(QMessageBox.Warning, "Recompile Executable", "Source file modified.\nRecompile executable for correct debugging.").exec_()
+			logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
 
 		
 	def __setFileModified(self, modified):
