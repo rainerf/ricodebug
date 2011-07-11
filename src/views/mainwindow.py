@@ -29,6 +29,7 @@ from distributedobjects import DistributedObjects
 from recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from actions import Actions
 from pluginloader import PluginLoader
+from quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):
@@ -157,6 +158,8 @@ class MainWindow(QMainWindow):
         self.setupUi() 
         self.createInitialWindowPlacement()
         self.readSettings()
+        
+        self.quickwatch = QuickWatch(self, self.distributed_objects)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
