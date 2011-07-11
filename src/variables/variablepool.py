@@ -48,7 +48,7 @@ class VariablePool(QObject):
         # signalproxy
         self.signalProxy = distributedObjects.signal_proxy
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateVars)
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateVars)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearVars)
         
     def clearVars(self):
@@ -67,8 +67,8 @@ class VariablePool(QObject):
         self.distributedObjects.signal_proxy.emitDataForTracepointsReady()
     
     def updateVars(self):
-        """ update variables if inferiorHasStopped
-        this function is connected to the signal SignalProxy::inferiorHasStopped(PyQt_PyObject)
+        """ update variables if inferiorStoppedNormally
+        this function is connected to the signal SignalProxy::inferiorStoppedNormally(PyQt_PyObject)
         """
         self.__updateVars(False)
     

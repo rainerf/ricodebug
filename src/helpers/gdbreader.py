@@ -53,6 +53,7 @@ class GdbReader(QThread):
 		lines = []
 		while True:
 			line = self.stdout.readline()
+			print line,
 			if line.startswith("(gdb)"):
 				# Check if there is a multiple break
 				if lines[0].startswith("&\"info break "):

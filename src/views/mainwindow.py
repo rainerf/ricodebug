@@ -131,7 +131,7 @@ class MainWindow(QMainWindow):
                 
         # signal proxy
         QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
             
         QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)

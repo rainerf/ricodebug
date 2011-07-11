@@ -32,8 +32,9 @@ class EditorController(QObject):
         
         self.editor_view = EditorView(self.distributed_objects);
         
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.editor_view.targetStopped, Qt.QueuedConnection)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited, Qt.QueuedConnection)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('saveFile()'), self.saveCurrentFile)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified) 
         

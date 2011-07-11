@@ -40,7 +40,7 @@ class StackController(QObject):
         
         self.stackView.stackView.setModel(self.stackModel)
         
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.stackModel.update)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.stackModel.update)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.stackModel.clear)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('executableOpened()'), self.stackModel.clear)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.removeStackMarkers)

@@ -1,5 +1,5 @@
 import logging
-from PyQt4.QtGui import QTableView, QLabel, QWidget, QGridLayout, QProgressBar, QMessageBox, QApplication, QStyle
+from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar, QMessageBox, QApplication, QStyle, QFrame, QPalette, QBrush
 from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
 from logmodel import LogModel, FilteredLogModel
 
@@ -33,7 +33,12 @@ class ErrorLabel(QWidget):
         self.lastSeverity = None
         self.icon_label = QLabel()
         self.icon_label.setGeometry(0, 0, 48, 48)
-        self.message_label = QLabel()
+        self.message_edit = QTextEdit()
+        self.message_edit.setReadOnly(True)
+        self.message_edit.setFrameStyle(QFrame.NoFrame)
+        palette = self.message_edit.palette()
+        palette.setBrush(QPalette.Base, QBrush())
+        self.message_edit.setPalette(palette)
         self.time_bar = QProgressBar()
         self.time_bar.setOrientation(Qt.Vertical)
         self.time_bar.setMaximum(self.ticks)
@@ -41,7 +46,7 @@ class ErrorLabel(QWidget):
         self.layout = QGridLayout(self)
         self.layout.addWidget(self.time_bar, 0, 0)
         self.layout.addWidget(self.icon_label, 0, 1)
-        self.layout.addWidget(self.message_label, 0, 2)
+        self.layout.addWidget(self.message_edit, 0, 2)
         self.layout.setColumnStretch(2, 1)
         self.setAutoFillBackground(True)
         self.timer = QTimer()
@@ -50,7 +55,7 @@ class ErrorLabel(QWidget):
     def mousePressEvent(self, e):
         self.timer.stop()
         self.hide()
-        [QMessageBox.warning, QMessageBox.critical][self.lastSeverity](self.parent(), "Error", self.message_label.text())
+        [QMessageBox.warning, QMessageBox.critical][self.lastSeverity](self.parent(), "Error", self.message_edit.toPlainText())
 
     @pyqtSlot()
     def decrementTime(self):
@@ -78,7 +83,7 @@ class ErrorLabel(QWidget):
         self._setMessage(msg)
         
     def _setMessage(self, msg):
-        self.message_label.setText(msg)
+        self.message_edit.setText(msg)
         self.updatePosition()
         self.elapsedTicks= 0
         self.time_bar.setValue(self.ticks)

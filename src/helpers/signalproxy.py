@@ -61,8 +61,11 @@ class SignalProxy(QObject):
     def emitInferiorIsRunning(self, rec):
         self.emit(SIGNAL('inferiorIsRunning(PyQt_PyObject)'), rec)
     
-    def emitInferiorHasStopped(self, rec):
-        self.emit(SIGNAL('inferiorHasStopped(PyQt_PyObject)'), rec)
+    def emitInferiorStoppedNormally(self, rec):
+        self.emit(SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), rec)
+    
+    def emitInferiorReceivedSignal(self, rec):
+        self.emit(SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), rec)
         
     def emitInferiorHasExited(self, rec):
         self.emit(SIGNAL('inferiorHasExited(PyQt_PyObject)'), rec)

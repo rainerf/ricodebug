@@ -172,7 +172,7 @@ class VariableModel(QAbstractItemModel):
         """ Constructor <br>
             Create a VariableModel derived from an QAbstractItemModel to display the <br>
             GDB variables in a treeview.<br>
-            Listens to the following Signals: SignalProxy::inferiorHasStopped(PyQt_PyObject) <br>
+            Listens to the following Signals: SignalProxy::inferiorStoppedNormally(PyQt_PyObject) <br>
                                               SignalProxy::inferiorHasExited(PyQt_PyObject) and <br>
                                               SignalProxy::executableOpened()
         @param controller            controllers.WatchController, Reference to the WatchController
@@ -197,7 +197,7 @@ class VariableModel(QAbstractItemModel):
         self.imgOutOfScope = QPixmap(":/icons/images/outofscope.png")
         #connects
         
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.update)
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('executableOpened()'), self.clear)
         
@@ -379,7 +379,7 @@ class VariableModel(QAbstractItemModel):
         """ Clear all TreeItems.
             clears highlighted TreeItems changed at previous stop<br>
             update TreeItems value and highlight state
-            this function is connected to the signal SignalProxy::inferiorHasStopped(PyQt_PyObject)
+            this function is connected to the signal SignalProxy::inferiorStoppedNormally(PyQt_PyObject)
         """
         self.emit(SIGNAL('layoutAboutToBeChanged()'))   
         self.setUnmarked(self.root) 

@@ -58,7 +58,7 @@ class TracepointController(QObject):
         
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         QObject.connect(self.tracepointView.tracepointView, SIGNAL('clicked(QModelIndex)'), self.updateWaveforms)  
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.updateWaveforms)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateWaveforms)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('cleanupModels()'), self.tracepointModel.clearTracepoints)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('runClicked()'), self.tracepointModel.clearTracepointData)
         

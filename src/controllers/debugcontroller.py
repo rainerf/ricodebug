@@ -26,6 +26,7 @@ import os
 from PyQt4.QtCore import QObject, SIGNAL, Qt, QSettings
 from ptyhandler import PtyHandler
 from gdboutput import GdbOutput
+import logging
 
 class DebugController(QObject):
     
@@ -112,6 +113,12 @@ class DebugController(QObject):
                 reason = r.src
             if r.dest == 'frame':
                 frame = r.src
+            if r.dest == 'signal-name':
+                signal_name = r.src
+            if r.dest == 'signal-meaning':
+                signal_meaning = r.src
+            if r.dest == 'frame':
+                frame = r.src
                 
         if reason in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
@@ -120,14 +127,17 @@ class DebugController(QObject):
                 tp = self.distributed_objects.tracepoint_controller.tracepointModel.getTracepointIfAvailable(frame)
                 
                 if self.distributed_objects.breakpoint_controller.breakpointModel.isBreakpoint(frame) or self.lastCmdWasStep:
-                    self.signalProxy.emitInferiorHasStopped(rec)
+                    self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False
                 if tp != None:
                     tp.tracePointOccurred(stop)
                     self.distributed_objects.signal_proxy.emitTracepointOccurred()
+        elif reason == "signal-received":
+            logging.warning("Signal received: %s (%s) in %s:%s", signal_name, signal_meaning, frame.file, frame.line)
+            self.signalProxy.emitInferiorReceivedSignal(rec)
         else:
-            self.signalProxy.emitInferiorHasStopped(rec)
+            self.signalProxy.emitInferiorStoppedNormally(rec)
 
     def executePythonCode(self, code):
         exec(code)

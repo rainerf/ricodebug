@@ -112,7 +112,7 @@ class LocalsController(QObject):
         self.localsView.treeView.setModel(self.localsModel)
         self.localsVariableList = VariableList(self.vwFactory, self.distributedObjects)
         
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.getLocals)
+        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.getLocals)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearLocals)
         

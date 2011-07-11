@@ -24,14 +24,14 @@
 
 import re, cgi
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor, QMessageBox
+from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from math import log, ceil
 from actions import ActionEx, Actions
 import logging
 
 class OpenedFileView(QObject):
-	MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_STACK = range(5)
+	MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
 
 	def __init__(self, distributed_objects, filename):
 		QObject.__init__(self)
@@ -46,6 +46,7 @@ class OpenedFileView(QObject):
 		self.markerBp = QPixmap(":/markers/images/bp.png")
 		self.markerTp = QPixmap(":/markers/images/tp.png")
 		self.markerExec = QPixmap(":/markers/images/exec_pos.png")
+		self.markerExecSignal = QPixmap(":/markers/images/exec_pos_signal.png")
 		self.imgWatch = QPixmap(":/markers/images/watch.png")
 		self.shown = False
 		self.expToWatch = False
@@ -73,6 +74,7 @@ class OpenedFileView(QObject):
 		self.edit.markerDefine(self.markerBp, self.MARGIN_MARKER_BP)
 		self.edit.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
 		self.edit.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
+		self.edit.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
 		self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARGIN_MARKER_STACK)
 		# define width and mask to show margin
 		self.edit.setMarginWidth(self.MARGIN_MARKER_BP, 10)
@@ -80,7 +82,7 @@ class OpenedFileView(QObject):
 		self.edit.setMarginWidth(self.MARGIN_MARKER_TP, 10)
 		self.edit.setMarginMarkerMask(self.MARGIN_MARKER_TP, 1<<self.MARGIN_MARKER_TP)
 		self.edit.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
-		self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC, 1<<self.MARGIN_MARKER_EXEC)
+		self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC, 1<<self.MARGIN_MARKER_EXEC | 1<<self.MARGIN_MARKER_EXEC_SIGNAL)
 		self.edit.setMarginWidth(self.MARGIN_MARKER_STACK, 0)
 		self.edit.setMarkerBackgroundColor(QColor(Qt.yellow), self.MARGIN_MARKER_STACK)
 		self.edit.setMarginMarkerMask(self.MARGIN_MARKER_STACK, 1<<self.MARGIN_MARKER_STACK)
@@ -245,6 +247,10 @@ class OpenedFileView(QObject):
 	
 	def showExecutionPosition(self, line):
 		self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC)
+		self.showLine(line)
+	
+	def showSignalPosition(self, line):
+		self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC_SIGNAL)
 		self.showLine(line)
 	
 	def showLine(self, line):

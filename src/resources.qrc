@@ -44,6 +44,7 @@
   </qresource>
   <qresource prefix="markers">
     <file>images/exec_pos.png</file>
+	<file>images/exec_pos_signal.png</file>
     <file>images/bp.png</file>
     <file>images/tp.png</file>
   </qresource>
