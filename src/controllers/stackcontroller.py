@@ -56,7 +56,9 @@ class StackController(QObject):
         
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
+        self.distributed_objects.gdb_connector.selectStackFrame(item.level)
         self.distributed_objects.signal_proxy.openFile(item.fullname, item.line)
+        # FIXME: make locals view etc change their view too!
         
     def insertStackMarkers(self):
         if self.stackView.showStackTrace.checkState() == Qt.Checked:
