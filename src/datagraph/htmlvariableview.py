@@ -28,6 +28,7 @@ from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
 from PyQt4 import QtCore
 import sys
+import logging
 
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
@@ -81,13 +82,17 @@ class HtmlVariableView(QGraphicsWebView):
     
     def render(self):
         if self.dirty:
-            self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
             # the page's viewport will not shrink if new content is set, so set it to it's minimum
             self.page().setViewportSize(QSize(0, 0))
+            try:
+                self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
+                self.setHtml(self.source)
+                
+                for template, id in self.uniqueIds.iteritems():
+                    self.page().mainFrame().addToJavaScriptWindowObject(id, template)
+            except Exception as e:
+                logging.error("Rendering failed: %s", str(e))
             
-            self.setHtml(self.source)
-            for template, id in self.uniqueIds.iteritems():
-                self.page().mainFrame().addToJavaScriptWindowObject(id, template)
             self.dirty = False
         
         return self.source
