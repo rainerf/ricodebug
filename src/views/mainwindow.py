@@ -29,6 +29,7 @@ from distributedobjects import DistributedObjects
 from recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from actions import Actions
 from pluginloader import PluginLoader
+from quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):
@@ -131,7 +132,8 @@ class MainWindow(QMainWindow):
                 
         # signal proxy
         QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
             
         QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
@@ -156,6 +158,8 @@ class MainWindow(QMainWindow):
         self.setupUi() 
         self.createInitialWindowPlacement()
         self.readSettings()
+        
+        self.quickwatch = QuickWatch(self, self.distributed_objects)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -259,8 +263,4 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
-            
-    def addWatch(self, word):
-        word = str(word)
-        print word
         

@@ -26,6 +26,7 @@ from PyQt4.QtCore import QThread, QMutex, QSemaphore, SIGNAL
 from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
 from collections import deque
+import logging
 
 class GdbReader(QThread):
 	def __init__(self, connector, parent=None):
@@ -52,15 +53,13 @@ class GdbReader(QThread):
 		lines = []
 		while True:
 			line = self.stdout.readline()
+			print line,
 			if line.startswith("(gdb)"):
-				#print "[Listener] got result: ", lines
-				
 				# Check if there is a multiple break
 				if lines[0].startswith("&\"info break "):
 					asString = "<Multiple Break>"
 					for line in lines:
 						asString += line
-						print line
 					self.forwardMultipleBreakPointInfo(asString)
 				results = GdbResultParser.parse(lines)
 				lines = []

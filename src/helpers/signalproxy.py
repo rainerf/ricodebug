@@ -61,8 +61,11 @@ class SignalProxy(QObject):
     def emitInferiorIsRunning(self, rec):
         self.emit(SIGNAL('inferiorIsRunning(PyQt_PyObject)'), rec)
     
-    def emitInferiorHasStopped(self, rec):
-        self.emit(SIGNAL('inferiorHasStopped(PyQt_PyObject)'), rec)
+    def emitInferiorStoppedNormally(self, rec):
+        self.emit(SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), rec)
+    
+    def emitInferiorReceivedSignal(self, rec):
+        self.emit(SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), rec)
         
     def emitInferiorHasExited(self, rec):
         self.emit(SIGNAL('inferiorHasExited(PyQt_PyObject)'), rec)
@@ -97,7 +100,13 @@ class SignalProxy(QObject):
             @param regObject: object must implement saveSession(self, XmlHandler) and loadSession(self, XmlHandler)
             @param dialogItem: String which appears with a checkbox in the save session dialog 
         '''
-        self.emit(SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), regObject, dialogItem)       
+        self.emit(SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), regObject, dialogItem)
+
+    def emitVariableUpdateCompleted(self):
+        """Emitted when the variable pool has finished updating all variables
+        for this step. Use this signal instead of rerendering stuff on the
+        variable's changed() event to avoid multiple renderings."""
+        self.emit(SIGNAL("variableUpdateCompleted()"))
 
     # pass on further signals here ...
     

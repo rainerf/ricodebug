@@ -25,34 +25,31 @@
 from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
+from PyQt4 import QtCore
+import logging
 
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Pointer-Variables """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, var)
-        self.distributedObjects = distributedObjects
+        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/ptrvariableview.mako')
     
-    def execLinkCommand(self, commandStr, mainView):
-        """ handles the given Command
-        @param commandStr  String, the Command to handle
-        @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
-        if (commandStr == "close"):
-            print "... closing ptrvariableview ..."
-            self.distributedObjects.datagraph_controller.removeVar(self.var)
-        if (commandStr == "dereference"):
-            print "... dereferencing var ..."
-            dgvw = self.var.dereference()
-            if (dgvw != None):
-                print "-> exp: " + dgvw.getExp()
-                self.distributedObjects.datagraph_controller.addVar(dgvw)
-                self.distributedObjects.datagraph_controller.addPointer(mainView, dgvw.getView())
-            else:
-                print "Null-Pointer wasn't dereferenced."
+    @QtCore.pyqtSlot()
+    def dereference(self):
+        dgvw = self.varWrapper.dereference()
+        if (dgvw != None):
+            logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.getExp())
+            self.distributedObjects.datagraph_controller.addVar(dgvw)
+            self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), dgvw.getView())
+        else:
+            logging.error("Null-Pointer wasn't dereferenced.")
 
+    def prepareContextMenu(self, menu):
+        HtmlTemplateHandler.prepareContextMenu(self, menu)
+        menu.addAction("Dereference %s" % self.varWrapper.getExp(), self.dereference)
 
 class PtrDataGraphVW(DataGraphVW):
     """ VariableWrapper for Pointer-Variables """
@@ -64,14 +61,7 @@ class PtrDataGraphVW(DataGraphVW):
         """
         DataGraphVW.__init__(self, variable, distributedObjects)
         self.factory = vwFactory
-    
-    def getTemplateHandler(self):
-        """ returns the TemplateHandler for the html-Template
-        @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
-        """
-        if (self.templateHandler == None):
-            self.templateHandler = PtrVariableTemplateHandler(self, self.distributedObjects)
-        return self.templateHandler
+        self.templateHandler = PtrVariableTemplateHandler(self, self.distributedObjects)
     
     def dereference(self):
         """ dereferences the Variable

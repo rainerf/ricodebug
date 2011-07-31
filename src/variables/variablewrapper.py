@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL
+import filters
 
 class VariableWrapper(QObject):
     """ Parent of all Variable-Wrapper-Classes """
@@ -35,6 +36,8 @@ class VariableWrapper(QObject):
         self.variable = variable
         self.connect(self.variable, SIGNAL('changed()'), self.varChanged)
         self.connect(self.variable, SIGNAL('replace(PyQt_PyObject)'), self.varReplace)
+    
+        self.filter = filters.Empty
     
     def varChanged(self):
         self.emit(SIGNAL('changed()'))
@@ -61,7 +64,7 @@ class VariableWrapper(QObject):
         self.variable.setType(type)
         
     def getValue (self):
-        return self.variable.getValue()
+        return self.filter.toDisplay(self.variable.getValue())
     
     def setValue (self, value):
         self.variable.setValue(value)
@@ -77,3 +80,9 @@ class VariableWrapper(QObject):
     
     def setAccess(self, access):
         self.variable.setAccess(access)
+
+    def setFilter(self, f):
+        self.filter = f
+    
+    def getFilter(self):
+        return self.filter

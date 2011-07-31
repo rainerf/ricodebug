@@ -23,23 +23,23 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import SIGNAL, QSize, QSizeF, Qt
-from PyQt4.QtGui import QGraphicsItem
+from PyQt4.QtGui import QGraphicsItem, QCursor
 from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
+from PyQt4 import QtCore
 import sys
 
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
     
-    def __init__(self, var, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects):
         """ Constructor
-        @param var                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
+        @param varWrapper                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
         @param distributedObjects distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         QGraphicsWebView.__init__(self, None)
-        self.var = var
+        self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
-        self.templateHandlers = []
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0,0))
@@ -47,11 +47,20 @@ class HtmlVariableView(QGraphicsWebView):
         self.setResizesToContents(True)
         self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks);
         self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
-        self.connect(self.var, SIGNAL('changed()'), self.render)
         self.incomingPointers = []
         self.outgoingPointers = []
         
-        self.render()
+        self.source = None
+        
+        # ids for ourself and the template handlers we will eventually render
+        self.lastId = -1
+        self.uniqueIds = {}
+        
+        self.dirty = True
+        
+        self.id = self.getUniqueId(self)
+        
+        self.connect(self.distributedObjects.signal_proxy, SIGNAL("variableUpdateCompleted()"), self.render)
         
     def getIncomingPointers(self):
         return self.incomingPointers
@@ -65,34 +74,50 @@ class HtmlVariableView(QGraphicsWebView):
     def addOutgoingPointer(self, pointer):
         self.outgoingPointers.append(pointer)
     
+    def setDirty(self, render_immediately):
+        self.dirty = True
+        if render_immediately:
+            self.render()
+    
     def render(self):
-        self.templateHandlers = []
-        self.html = self.htmlTemplate.render(var=self.var, handlers=self.templateHandlers)
-        # the page's viewport will not shrink if new content is set, so set it to it's minimum
-        self.page().setViewportSize(QSize(0, 0)) 
-        self.setHtml(self.html)
-        return self.html
+        if self.dirty:
+            self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
+            # the page's viewport will not shrink if new content is set, so set it to it's minimum
+            self.page().setViewportSize(QSize(0, 0))
+            
+            self.setHtml(self.source)
+            for template, id in self.uniqueIds.iteritems():
+                self.page().mainFrame().addToJavaScriptWindowObject(id, template)
+            self.dirty = False
+        
+        return self.source
     
     def linkClicked(self, url):
-        urlStr = str(url.toString())
-        print "htmlvarview: link clicked: " + urlStr
-        urlStrParts = urlStr.split(';')
-        assert(len(urlStrParts) >= 2)
-        varStr = urlStrParts[0]
-        #commandStr = urlStrParts[1]
-        
-        # find handler to handle link
-        for handler in self.templateHandlers:
-            if (varStr == str(handler.var)):
-                handler.linkClicked(url, self)
-        self.render()
+        self.handleCommand(str(url.toString()))
+    
+    def openContextMenu(self, menu):
+        menu.addAction("Remove %s" % self.varWrapper.getExp()) # FIXME: add some function to remove the view
+        menu.addAction("Show HTML for %s" % self.varWrapper.getExp(), self.showHtml)
+        menu.exec_(QCursor.pos())
+    
+    @QtCore.pyqtSlot()
+    def showHtml(self):
+        print self.source
+    
+    def contextMenuEvent(self, event):
+        pass
     
     def onDelete(self):
         self.emit(SIGNAL('deleting()'))
 
-    def paint(self, painter, option, widget):
-        #from PyQt4.QtGui import QColor
-        #painter.setPen(QColor(Qt.red))
-        #painter.drawRoundedRect(self.boundingRect(), 5, 5)
-        QGraphicsWebView.paint(self, painter, option, widget)
+    def getUniqueId(self, template):
+        if not template in self.uniqueIds:
+            self.lastId += 1
+            self.uniqueIds[template] = "tmpl%d" % self.lastId
+        return self.uniqueIds[template]
 
+# def paint(self, painter, option, widget):
+#    from PyQt4.QtGui import QColor
+#    painter.setPen(QColor(Qt.red))
+#    painter.drawRoundedRect(self.boundingRect(), 5, 5)
+#    QGraphicsWebView.paint(self, painter, option, widget)

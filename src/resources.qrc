@@ -32,11 +32,21 @@
     <file>images/sc_out.png</file>
     <file>images/sc_port.png</file>
     <file>images/sc_signal.png</file>
-	<file>images/zoom-in.png</file>
+    <file>images/zoom-in.png</file>
     <file>images/zoom-out.png</file>
+    <file>images/viewmag1.png</file>
+    <file>images/viewmagfit.png</file>
+    <file>images/viewmag-.png</file>
+    <file>images/viewmag+.png</file>
+    <file>images/pause.png</file>
+    <file>images/stop.png</file>
+  </qresource>
+  <qresource prefix="graph">
+    <file>images/background.png</file>
   </qresource>
   <qresource prefix="markers">
     <file>images/exec_pos.png</file>
+	<file>images/exec_pos_signal.png</file>
     <file>images/bp.png</file>
     <file>images/tp.png</file>
   </qresource>

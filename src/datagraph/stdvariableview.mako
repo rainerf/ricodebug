@@ -1,31 +1,24 @@
 <!-- show variable if its in scope: -->
-%	if var.getInScope() == True:
-%		if top:
-<table class="variabletop">
-%		endif
-	<tr>
+	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')";>
 		<td nowrap>
 %		if top:
-			<a href="${str(var)};close">x</a>
+			<a ondblclick="${id}.remove()">x</a>
 %		endif
-%		if var.getAccess() != None:
-				${var.getAccess()}
+			<img src="qrc:icons/images/var.png">
+%		if varWrapper.getAccess():
+			${varWrapper.getAccess()}
 %		endif
-			</td>
-			<td nowrap>
-				<span class="graph_typename"> ${var.getType()} </span>
-			</td>
-			<td nowrap>
-				<span class="graph_varname"> ${var.getExp()} </span>
-			</td>
-			<td nowrap>
-				= 
-			</td>
-			<td nowrap>
-				${var.getValue()}
-			</td>
-		</tr>
-%		if top:
- 	</table>
-%		endif
-%	endif
+		</td>
+		<td nowrap>
+			<span class="graph_typename"> ${varWrapper.getType()} </span>
+		</td>
+		<td nowrap>
+			<span class="graph_varname"> ${varWrapper.getExp()} </span>
+		</td>
+		<td nowrap>
+			= 
+		</td>
+		<td nowrap>
+			${varWrapper.getValue()}
+		</td>
+	</tr>

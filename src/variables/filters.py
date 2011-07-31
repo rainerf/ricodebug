@@ -22,28 +22,50 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-## \mainpage ricodebug - A GDB frontend 
-#
-# \section sec_intro Introduction 
-#
-# ricodebug is a GDB frontend which focuses on visually supported
-# debugging using data structure graphs and SystemC features.
-#
+
+def _get_available_filtes():
+    return [Empty, Hex, Bin]
 
 
-# a running package-configuration on Ubuntu is:
-# - python 2.6.6
-# - python-qt4 4.8.1
-# - python-qt4-dev 4.8.1
-# - pyqt4-dev-tools 4.8.1
-# - libqt3-mt 3.3.8
-# - libqtcore4 4.7.0
-# - libqtgui4 4.7.0
-# - libqt4-core 4.7.0
-# - libqt4-gui 4.7.0
-# - libqtwebkit4 2.0.0
-# - libqtwebkit-dev 2.0.0
-# - libqt4-qt3support 4.7.0
-# - libqscintilla2-5 2.4.4
-# - python-qscintilla2 2.4.5
+def add_actions_for_all_filters(menu, varWrapper):
+    def setFilter(varWrapper, filter_):
+        def f():
+            varWrapper.setFilter(filter_)
+        return f
 
+    for cls in _get_available_filtes():
+        name = cls.__doc__
+        menu.addAction(name, setFilter(varWrapper, cls))
+
+
+class Empty:
+    """None (remove filter)"""
+    @staticmethod
+    def toDisplay(val):
+        return val
+
+    @staticmethod
+    def fromDisplay(val):
+        return val, 16
+
+
+class Hex(Empty):
+    """Hex"""
+    @staticmethod
+    def toDisplay(val):
+        return hex(int(val))
+
+    @staticmethod
+    def fromDisplay(val):
+        return int(val, 16)
+
+
+class Bin(Empty):
+    """Bin"""
+    @staticmethod
+    def toDisplay(val):
+        return bin(int(val))
+
+    @staticmethod
+    def fromDisplay(val):
+        return int(val, 2)

@@ -40,7 +40,7 @@ class StackController(QObject):
         
         self.stackView.stackView.setModel(self.stackModel)
         
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.stackModel.update)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.stackModel.update)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.stackModel.clear)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('executableOpened()'), self.stackModel.clear)
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.removeStackMarkers)
@@ -56,7 +56,9 @@ class StackController(QObject):
         
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
+        self.distributed_objects.gdb_connector.selectStackFrame(item.level)
         self.distributed_objects.signal_proxy.openFile(item.fullname, item.line)
+        # FIXME: make locals view etc change their view too!
         
     def insertStackMarkers(self):
         if self.stackView.showStackTrace.checkState() == Qt.Checked:

@@ -29,6 +29,7 @@ from gdboutput import GdbOutput
 import re
 from tools import unBackslashify
 from PyQt4.QtCore import QDir
+import logging
 
 reserved = {
 	"done" : "DONE",
@@ -257,11 +258,9 @@ def p_value_list(p):
 
 def p_error(p):
 	if p:
-		print "Syntax error in input, line %d, col %d:" % (p.lineno, p.lexpos)
-		print "  " + str(p.lexer.lexdata)
-		print "  " + (" " * (p.lexpos-1)) + "^" 
+		logging.error("Syntax error in input, line %d, col %d: %s", p.lineno, p.lexpos)
 	else:
-		print "Syntax error in input!"
+		logging.error("Syntax error in input!")
 	
 	raise "SYNTAX ERROR"
 

@@ -82,7 +82,7 @@ class SysCModulesPlugin():
 
         self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
         
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasStopped(PyQt_PyObject)'), self.update)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
         QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
         QObject.connect(self.view, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
         

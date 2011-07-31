@@ -22,8 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QGraphicsView, QGraphicsScene
+from PyQt4.QtCore import Qt, pyqtSlot
+from PyQt4.QtGui import QGraphicsView, QGraphicsScene, QMenu, QIcon
 
 class DataGraphView(QGraphicsView):
 	""" the View that shows the DataGraph <br>
@@ -58,11 +58,34 @@ class DataGraphView(QGraphicsView):
 		if var in self.scene().items():
 			self.scene().removeItem(var)
 	
+	@pyqtSlot()
 	def zoomIn(self):
 		self.scale(1.2, 1.2)
-
+	
+	@pyqtSlot()
 	def zoomOut(self):
 		self.scale(1/1.2, 1/1.2)
+		
+	@pyqtSlot()
+	def zoomToFit(self):
+		self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+	
+	@pyqtSlot()
+	def zoomInitial(self):
+		self.resetTransform()
+	
+	def contextMenuEvent(self, event):
+		QGraphicsView.contextMenuEvent(self, event)
+		
+		# if some item was under the mouse and showed its context menu, the event will
+		# have been accepted
+		if not event.isAccepted():
+			menu = QMenu()
+			menu.addAction(QIcon(":/icons/images/viewmag+.png"), "Zoom in", self.zoomIn)
+			menu.addAction(QIcon(":/icons/images/viewmag-.png"), "Zoom out", self.zoomOut)
+			menu.addAction(QIcon(":/icons/images/viewmagfit.png"), "Zoom to fit", self.zoomToFit)
+			menu.addAction(QIcon(":/icons/images/viewmag1.png"), "Zoom 1:1", self.zoomInitial)
+			menu.exec_(event.globalPos())
 	
 	def wheelEvent(self, event):
 		if event.orientation() == Qt.Vertical:
