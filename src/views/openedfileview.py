@@ -142,7 +142,7 @@ class OpenedFileView(QObject):
 	def dwellStart(self, pos, x, y):
 		if self.edit.frameGeometry().contains(x, y):
 			name = self.getWordOrSelectionFromPosition(pos)
-			val = self.debug_controller.evaluateExpression(name)
+			val = self.debug_controller.evaluateExpression(name.strip())
 			if val != None:
 				name = cgi.escape(name)
 				val = cgi.escape(val)

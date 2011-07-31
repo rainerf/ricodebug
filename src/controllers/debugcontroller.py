@@ -95,6 +95,7 @@ class DebugController(QObject):
     def evaluateExpression(self, exp):
         if exp == "":
             return None
+        exp = exp.replace('"', '\"')
         return self.connector.evaluate("\"" + exp + "\"")
     
     def executeCliCommand(self, cmd):
