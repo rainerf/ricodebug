@@ -6,7 +6,7 @@ span.graph_varname { font-weight: bold; }
 span.gdbconsole_output_ok { color: green; }
 span.gdbconsole_output_error { color: red; }
 table { border-spacing: 0 }
-table.variabletop {border: 1pt solid blue; background-image: url('qrc:graph/images/background.png'); position: absolute; left:0px; top:0px; }
+table.variabletop {border: 1pt solid blue; background: rgba(228, 228, 255, 0.9); position: absolute; left:0px; top:0px; }
 table.variablechild {border: 1pt solid blue;}
 tr.header {background-color: #ffffff; border: 0;} 
 a {border-bottom:1px dotted;}

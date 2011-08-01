@@ -42,9 +42,6 @@
     <file>images/pause.png</file>
     <file>images/stop.png</file>
   </qresource>
-  <qresource prefix="graph">
-    <file>images/background.png</file>
-  </qresource>
   <qresource prefix="markers">
     <file>images/exec_pos.png</file>
 	<file>images/exec_pos_signal.png</file>
