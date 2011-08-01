@@ -33,13 +33,8 @@
 	* BreakpointModel: the model for breakpoints
 """
 
-from PyQt4.QtCore import QAbstractTableModel, SIGNAL, Qt, QModelIndex, QVariant, QObject
+from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
 from operator import attrgetter
-
-class BpInfo():
-	def __init__(self):
-		self.fullname = "empty"
-		self.line = -1
 
 class ExtendedBreakpoint(QObject):
 	"""This class provides all members for basic gdb Breakpoint and extends it with
@@ -174,30 +169,30 @@ class BreakpointModel(QAbstractTableModel):
 		@param fullname: (string), fullname of file
 		@param line: (int), linenumber where the breakpoint should be toggled
 		"""
-		if self.exists(fullname, line):
+		if self.isBreakpointByLocation(fullname, line):
 			self.deleteBreakpoint(fullname, line)
 			return -1
 		else:
 			return self.insertBreakpoint(fullname, line)
 	
-	def exists(self, fullname, line):
+	def isBreakpointByLocation(self, fullname, line):
 		""" search for breakpoint in file fullname on linenumber line
 		@param fullname: (string), name of file
 		@param line: (int), number of line
-		@return: (bool), True if can find breakpoint in list, False else
+		@return: (bool), True if breakpoint found in list, False else
 		"""
-		bpInfo = BpInfo()
-		bpInfo.fullname = fullname
-		bpInfo.line = line
-		return self.isBreakpoint(bpInfo)
+		for bp in self.breakpoints:
+			if int(bp.line) == line and bp.fullname == fullname:
+				return True
+		return False
 	
-	def isBreakpoint(self, bpInfo):
+	def isBreakpointByNumber(self, number):
 		""" search for breakpoint in file bpInfo.fullname on line bpInfo.line
-		@param bpInfo: (BpInfo), class with 2 members: fullname and line
+		@param number: (int), gdb's internal breakpoint number
 		@return: (bool), True if can find breakpoint in list, False else
 		"""
 		for bp in self.breakpoints:
-			if bp.fullname == bpInfo.fullname and int(bp.line) == int(bpInfo.line):
+			if int(bp.number) == number:
 				return True
 		return False
 

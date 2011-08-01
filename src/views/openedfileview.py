@@ -271,7 +271,7 @@ class OpenedFileView(QObject):
 			self.toggleTracepointWithLine(line)
 	
 	def toggleBreakpointWithLine(self, line):
-		bpLine = self.breakpoint_controller.breakpointModel.toggleBreakpoint(self.filename, line+1)-1
+		bpLine = self.breakpoint_controller.toggleBreakpoint(self.filename, line+1)-1
 		if bpLine < 0:
 			self.edit.markerDelete(line, self.MARGIN_MARKER_BP)
 		else:

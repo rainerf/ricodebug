@@ -120,14 +120,16 @@ class DebugController(QObject):
                 signal_meaning = r.src
             if r.dest == 'frame':
                 frame = r.src
-                
+            if r.dest == "bkptno":
+                bkptno = int(r.src)
+        
         if reason in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
         elif reason == 'breakpoint-hit':
                 stop = False
                 tp = self.distributed_objects.tracepoint_controller.tracepointModel.getTracepointIfAvailable(frame)
                 
-                if self.distributed_objects.breakpoint_controller.breakpointModel.isBreakpoint(frame) or self.lastCmdWasStep:
+                if self.distributed_objects.breakpoint_controller.breakpointModel.isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
                     self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False

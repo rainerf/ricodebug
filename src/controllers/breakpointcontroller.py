@@ -81,6 +81,13 @@ class BreakpointController(QObject):
         """
         self.breakpointModel.deleteBreakpoint(file_, line)
         
+    def toggleBreakpoint(self, file_, line):
+        """ toggles the breakpoint in file file_ with linenumber line
+        @param file_: (string), fullname of file
+        @param line: (int), linenumber where the breakpoint should be toggled
+        """
+        return self.breakpointModel.toggleBreakpoint(file_, line)
+        
     def getBreakpointsFromModel(self):
         """returns a list of all breakpoints in model
         @return breakpoints: (List<ExtendedBreakpoint>), a list of breakpoints
@@ -104,11 +111,4 @@ class BreakpointController(QObject):
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
                 self.breakpointModel.insertBreakpoint(attr["file"], attr["line"])
-            
 
-            
-            
-            
-            
-            
-            

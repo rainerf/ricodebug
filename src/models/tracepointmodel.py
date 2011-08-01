@@ -22,11 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject, SIGNAL, QString
-from PyQt4.QtGui import QPushButton, QItemDelegate, QPixmap
+from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject, SIGNAL
+from PyQt4.QtGui import QItemDelegate
 from operator import attrgetter
-from breakpointmodel import ExtendedBreakpoint, BpInfo  
+from breakpointmodel import ExtendedBreakpoint
 from variables.variablelist import VariableList
 from varwrapperfactory import VarWrapperFactory
 from stdvariablewrapper import StdVariableWrapper
@@ -220,7 +219,7 @@ class TracepointModel(QAbstractTableModel):
         @param fullname: (str) full name of file
         @param line: (int) line number of tracepoint
         """
-        if self.exists(fullname, line):
+        if self.isTracepointByLocation(fullname, line):
             self.deleteTracepoint(fullname, line)
             return -1
         else:
@@ -246,21 +245,14 @@ class TracepointModel(QAbstractTableModel):
             if tp.fullname == bpInfo.fullname and int(tp.line) == int(bpInfo.line):
                 tp.tracePointOccured()
     
-    def exists(self, fullname, line):
-        """proof if tp with name fullname on line line exists
-        @return: returns True if found, False else
-        """
-        tpInfo = BpInfo()
-        tpInfo.fullname = fullname
-        tpInfo.line = line
-        return self.isTracepoint(tpInfo)
-    
-    def isTracepoint(self, tpInfo):
-        """proof if tp with name fullname on line line exists
-        @return: returns True if found, False else
+    def isTracepointByLocation(self, fullname, line):
+        """ search for tracepoint in file fullname on linenumber line
+        @param fullname: (string), name of file
+        @param line: (int), number of line
+        @return: (bool), True if tracepoint found in list, False else
         """
         for tp in self.tracepoints:
-            if tp.fullname == tpInfo.fullname and int(tp.line) == int(tpInfo.line):
+            if tp.fullname == fullname and int(tp.line) == int(line):
                 return True
         return False
     
