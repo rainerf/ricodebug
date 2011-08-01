@@ -14,7 +14,7 @@ class QuickWatch(QToolBar):
         self.addAction(QIcon(":/icons/images/datagraph.png"), "Add to Data Graph", self.addToDG)
     
     def addToWatch(self):
-        self.distributed_objects.watch_controller.addWatch(self.watchedit.toPlainText())
+        self.distributed_objects.watch_controller.addWatch(self.watchedit.text())
 
     def addToDG(self):
-        self.distributed_objects.datagraph_controller.addWatch(self.watchedit.toPlainText())
+        self.distributed_objects.datagraph_controller.addWatch(self.watchedit.text())
