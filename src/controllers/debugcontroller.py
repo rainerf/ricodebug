@@ -143,7 +143,7 @@ class DebugController(QObject):
             self.signalProxy.emitInferiorStoppedNormally(rec)
 
     def executePythonCode(self, code):
-        exec(code)
+        exec(code, {'do': self.distributed_objects})
     
     def inferiorUntil(self):
         current_opened_file = self.editor_controller.editor_view.getCurrentOpenedFile()
