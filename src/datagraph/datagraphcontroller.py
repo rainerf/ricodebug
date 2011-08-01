@@ -99,6 +99,7 @@ class DataGraphController(QObject):
         """
         varWrapper = self.variableList.addVarByName(watch)
         self.addVar(varWrapper, xPos, yPos, False)
+        return varWrapper
     
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -

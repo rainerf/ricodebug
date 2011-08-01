@@ -26,6 +26,7 @@ from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 import sys
 from PyQt4 import QtCore
+from PyQt4.QtGui import QWidgetAction, QLineEdit
 import logging
 
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
@@ -47,9 +48,25 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
         else:
             logging.error("Null-Pointer wasn't dereferenced.")
 
+    @QtCore.pyqtSlot()
+    def showCustom(self):
+        vw = self.distributedObjects.datagraph_controller.addWatch(self.showCustomEdit.text())
+        self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), vw.getView())
+        self.showCustomEdit.parent().hide()
+
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         menu.addAction("Dereference %s" % self.varWrapper.getExp(), self.dereference)
+        submenu = menu.addMenu("Show custom...")
+        
+        # we cannot construct the lineedit in our ctor since it will be automatically deleted once the menu is closed
+        self.showCustomEdit = QLineEdit()
+        self.showCustomEdit.returnPressed.connect(self.showCustom)
+        self.showCustomEdit.setText("*(%s)" % self.varWrapper.getExp())
+        we = QWidgetAction(menu)
+        we.setDefaultWidget(self.showCustomEdit)
+        submenu.addAction(we)
+
 
 class PtrDataGraphVW(DataGraphVW):
     """ VariableWrapper for Pointer-Variables """
