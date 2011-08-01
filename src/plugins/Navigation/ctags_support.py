@@ -1,5 +1,6 @@
 import ctags
 from PyQt4.QtGui import QApplication, QStandardItemModel, QStandardItem, QPixmap, QIcon
+from PyQt4.QtCore import Qt
 
 class EntryList:
     def __init__(self, filename=None):
@@ -72,14 +73,27 @@ class EntryList:
         if add:
             n.addToParent()
 
+class EntryItem(QStandardItem):
+    ENTRYROLE = Qt.UserRole + 1
+    def __init__(self, entry):
+        QStandardItem.__init__(self)
+        self.entry = entry
+    
+    def data(self, role):
+        ret = QStandardItem.data(self, role)
+        if role == self.ENTRYROLE:
+            return self.entry
+        else:
+            return ret
+
 class Entry:
     def __init__(self, entrylist):
         self.entrylist = entrylist
         self.scope = None
         self.name = None
-        self.file = None
+        self.file_ = None
         self.lineNumber = None
-        self.items = [QStandardItem(), QStandardItem(), QStandardItem(), QStandardItem()]
+        self.items = [EntryItem(self), EntryItem(self), EntryItem(self), EntryItem(self)]
         
     def setValues(self, name, file_, lineNumber, scope):
         self.name = name

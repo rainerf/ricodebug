@@ -43,11 +43,10 @@ class OpenedFileView(QObject):
 		self.signalProxy = self.distributed_objects.signal_proxy
 		self.filename = filename
 		self.lastContexMenuLine = 0
-		self.markerBp = QPixmap(":/markers/images/bp.png")
-		self.markerTp = QPixmap(":/markers/images/tp.png")
-		self.markerExec = QPixmap(":/markers/images/exec_pos.png")
-		self.markerExecSignal = QPixmap(":/markers/images/exec_pos_signal.png")
-		self.imgWatch = QPixmap(":/markers/images/watch.png")
+		self.markerBp = QPixmap(":/markers/bp.png")
+		self.markerTp = QPixmap(":/markers/tp.png")
+		self.markerExec = QPixmap(":/markers/exec_pos.png")
+		self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
 		self.shown = False
 		self.expToWatch = False
 
