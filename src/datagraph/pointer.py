@@ -22,13 +22,14 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QGraphicsPolygonItem, QColor, QPolygonF, QBrush, QPen
-from PyQt4.QtCore import QObject, QPointF, SIGNAL
+from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem
+from PyQt4.QtCore import QObject, QPointF, SIGNAL, QLineF, QRectF, QSizeF
+import math
 
-class Pointer(QGraphicsPolygonItem):
+class Pointer(QGraphicsLineItem):
     """ QGraphicsPolygonItem to model a Pointer as an Arrow from a Pointer-Variable to its Content. """
     fgcolor = QColor(0,0,0)
-    bgcolor = QColor(255,255,255)
+    bgcolor = QColor(0,0,0)
 
     def __init__(self, parent, fromView, toView, distributedObjects):
         """ Constructor
@@ -38,40 +39,50 @@ class Pointer(QGraphicsPolygonItem):
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         fromView and toView are QGraphicsWebViews
         """
-        QGraphicsPolygonItem.__init__(self, parent)
+        QGraphicsLineItem.__init__(self, parent)
         self.fromView = fromView
         fromView.addOutgoingPointer(self)
         self.toView = toView
         toView.addIncomingPointer(self)
-        self.distributedObjects = distributedObjects
-        self.setBrush( QBrush( self.bgcolor  ) )
+        #self.setBrush( QBrush( self.bgcolor  ) )
         self.setPen( QPen(self.fgcolor,1) )
-        QObject.connect(self.fromView, SIGNAL('geometryChanged()'), self.render)
-        QObject.connect(self.toView, SIGNAL('geometryChanged()'), self.render)
-        QObject.connect(self.fromView, SIGNAL('xChanged()'), self.render)
-        QObject.connect(self.fromView, SIGNAL('yChanged()'), self.render)
-        QObject.connect(self.toView, SIGNAL('xChanged()'), self.render)
-        QObject.connect(self.toView, SIGNAL('yChanged()'), self.render)
+        
+        self.distributedObjects= distributedObjects
+        
+        QObject.connect(self.fromView, SIGNAL('geometryChanged()'), self.updatePosition)
+        QObject.connect(self.toView, SIGNAL('geometryChanged()'), self.updatePosition)
+        QObject.connect(self.fromView, SIGNAL('xChanged()'), self.updatePosition)
+        QObject.connect(self.fromView, SIGNAL('yChanged()'), self.updatePosition)
+        QObject.connect(self.toView, SIGNAL('xChanged()'), self.updatePosition)
+        QObject.connect(self.toView, SIGNAL('yChanged()'), self.updatePosition)
         QObject.connect(self.fromView, SIGNAL('deleting()'), self.delete)
         QObject.connect(self.toView, SIGNAL('deleting()'), self.delete)
         
-        self.render()
-        
-    def getFromView(self):
-        return self.fromView
+        self.arrowhead = QPolygonF()
+        self.arrowSize = 20
+        self.setZValue(-1)  # paint the arrows behind (lower z-value) everything else
+
+    def boundingRect(self):
+        extra = (self.pen().width() + 20) / 2
+        return QRectF(self.line().p1(), QSizeF(self.line().p2().x() - self.line().p1().x(),
+                                               self.line().p2().y() - self.line().p1().y())).normalized().adjusted(-extra, -extra, extra, extra)        
     
-    def getToView(self):
-        return self.toView
-    
-    def render(self):
+    def shape(self):
+        path = QGraphicsLineItem.shape(self)
+        path.addPolygon(self.arrowhead)
+        return path
+
+    def updatePosition(self):
+        line = QLineF(self.mapFromItem(self.fromView, 0, 0), self.mapFromItem(self.toView, 0, 0))
+        self.setLine(line)
+
+    def paint(self, painter, _1, _2):
         """ Main-Method of the Pointer-Class <br>
             calculates/renders/draws the Lines of the Arrow
         """
         if self.fromView.collidesWithItem(self.toView):
-            self.setPolygon(QPolygonF())
             return
         
-        points = QPolygonF()
         self.toView.x()
         pM1 = QPointF(self.fromView.x() + self.fromView.size().width()/2,
                       self.fromView.y() + self.fromView.size().height()/2)
@@ -162,23 +173,24 @@ class Pointer(QGraphicsPolygonItem):
                     pEnd = QPointF(pM2.x() + (self.toView.size().height()/2)*(deltaX/deltaY),
                                    pM2.y() + self.toView.size().height()/2)
         
-        #pStart = QPointF(self.fromView.x() + self.fromView.size().width(),
-        #                 self.fromView.y() + self.fromView.size().height()/2)
-        #pEnd = QPointF(self.toView.x(), self.toView.y() + self.toView.size().height()/2)
-        p1 = pStart
-        p2 = QPointF(pEnd.x()-(pEnd.x()-pStart.x())/7, pEnd.y()-(pEnd.y()-pStart.y())/7)
-        p3 = QPointF(p2.x()-(p2.y()-p1.y())/20, p2.y()+(p2.x()-p1.x())/20)
-        p4 = pEnd
-        p5 = QPointF(p2.x()+(p2.y()-p1.y())/20, p2.y()-(p2.x()-p1.x())/20)
-        p6 = p2
-        points.append(p1)
-        points.append(p2)
-        points.append(p3)
-        points.append(p4)
-        points.append(p5)
-        points.append(p6)
-        self.setPolygon(points)
-    
+        self.setLine(QLineF(pStart, pEnd))
+        
+        if self.line().length() != 0:
+            angle = math.acos(self.line().dx() / self.line().length())
+            if self.line().dy() >= 0:
+                angle = math.pi*2 - angle
+            
+            arrowP1 = self.line().p1() + QPointF(math.sin(angle+math.pi/2.5) * self.arrowSize, math.cos(angle+math.pi/2.5) * self.arrowSize)
+            arrowP2 = self.line().p1() + QPointF(math.sin(angle+math.pi - math.pi/2.5) * self.arrowSize, math.cos(angle+math.pi - math.pi/2.5) * self.arrowSize)
+            self.arrowhead.clear()
+            self.arrowhead.append(self.line().p1())
+            self.arrowhead.append(arrowP1)
+            self.arrowhead.append(arrowP2)
+            painter.setBrush(QBrush(self.bgcolor))
+            painter.drawLine(self.line())
+            painter.drawPolygon(self.arrowhead)
+        
+
     def delete(self):
         """ removes the pointer from the DataGraph """
         self.toView.incomingPointers.remove(self)
