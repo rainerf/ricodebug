@@ -26,6 +26,7 @@ from PyQt4.QtCore import QObject, SIGNAL
 from variables.variablewrapper import VariableWrapper
 from htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import QWidgetAction, QLabel, QPalette
 
 class HtmlTemplateHandler(QObject):
     """ Parent of all TemplateHandler-Classes. <br>
@@ -58,7 +59,17 @@ class HtmlTemplateHandler(QObject):
         self.varWrapper.openContextMenu()
     
     def prepareContextMenu(self, menu):
+        menu.addSeparator()
+        self.addContextMenuLabel(menu)
         pass
+    
+    # insert a "header" into the menu for the current element
+    def addContextMenuLabel(self, menu):
+        label = QLabel("Actions for %s" % (self.varWrapper.getExp()))
+        label.setStyleSheet("color:palette(light); background-color:palette(dark); margin-top:2px; margin-bottom:2px; margin-left:2px; margin-right:2px;");
+        we = QWidgetAction(menu)
+        we.setDefaultWidget(label)
+        menu.addAction(we)
     
     @QtCore.pyqtSlot()
     def remove(self):
