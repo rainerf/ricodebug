@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem
+from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem, QPainter
 from PyQt4.QtCore import QObject, QPointF, SIGNAL, QLineF, QRectF, QSizeF
 import math
 
@@ -82,6 +82,9 @@ class Pointer(QGraphicsLineItem):
         """
         if self.fromView.collidesWithItem(self.toView):
             return
+        
+        # antialiasing makes things look nicer :)
+        painter.setRenderHint(QPainter.Antialiasing)
         
         self.toView.x()
         pM1 = QPointF(self.fromView.x() + self.fromView.size().width()/2,
@@ -173,7 +176,7 @@ class Pointer(QGraphicsLineItem):
                     pEnd = QPointF(pM2.x() + (self.toView.size().height()/2)*(deltaX/deltaY),
                                    pM2.y() + self.toView.size().height()/2)
         
-        self.setLine(QLineF(pStart, pEnd))
+        self.setLine(QLineF(pEnd, pStart))
         
         if self.line().length() != 0:
             angle = math.acos(self.line().dx() / self.line().length())
