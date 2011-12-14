@@ -61,7 +61,6 @@ class HtmlTemplateHandler(QObject):
     def prepareContextMenu(self, menu):
         menu.addSeparator()
         self.addContextMenuLabel(menu)
-        pass
     
     # insert a "header" into the menu for the current element
     def addContextMenuLabel(self, menu):
