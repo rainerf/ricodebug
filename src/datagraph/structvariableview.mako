@@ -35,7 +35,7 @@
 		<td nowrap>
 			<img src="qrc:icons/images/struct.png">
 %		if varWrapper.getAccess():
-			${varWrapper.getAccess()}
+			<span class="graph_access"> ${varWrapper.getAccess()} </span>
 %		endif
 		</td>
 		<td nowrap>
