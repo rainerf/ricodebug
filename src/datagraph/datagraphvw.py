@@ -22,37 +22,47 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from mako.template import Template
+from mako.lookup import TemplateLookup
+import sys
 from PyQt4.QtCore import QObject, SIGNAL
 from variables.variablewrapper import VariableWrapper
 from htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidgetAction, QLabel, QPalette
+from PyQt4.QtGui import QWidgetAction, QLabel
 
 class HtmlTemplateHandler(QObject):
     """ Parent of all TemplateHandler-Classes. <br>
     renders the htmlTemplate and handles linkClicked-Events
     """
     
-    def __init__(self, varWrapper, distributedObjects):
+    def __init__(self, varWrapper, distributedObjects, template):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         QObject.__init__(self)
         self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
-        self.htmlTemplate = None
         self.id = None              # our unique id which we can use inside the rendered HTML/JS
+        
+        self._templateLookup = TemplateLookup(directories=[sys.path[0] + "/datagraph/templates/"])
+        
+        self._htmlTemplate = None
+        self.setTemplate(template)
+    
+    def setTemplate(self, template):
+        self._htmlTemplate = Template(filename=sys.path[0] + "/datagraph/templates/" + template, lookup=self._templateLookup)
     
     def render(self, top, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
-        assert self.htmlTemplate != None
+        assert self._htmlTemplate != None
         assert self.varWrapper.getView()
         
         if not self.id:
             self.id = self.varWrapper.getView().getUniqueId(self)
         
-        return self.htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
+        return self._htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
     
     @QtCore.pyqtSlot()
     def openContextMenu(self):
@@ -73,6 +83,25 @@ class HtmlTemplateHandler(QObject):
     @QtCore.pyqtSlot()
     def remove(self):
         self.distributedObjects.datagraph_controller.removeVar(self.varWrapper)
+
+class ComplexTemplateHandler(HtmlTemplateHandler):
+    def __init__(self, varWrapper, distributedObjects, template):
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, template)
+    
+    @QtCore.pyqtSlot()
+    def open_(self):
+        self.varWrapper.setOpen(True)
+    
+    @QtCore.pyqtSlot()
+    def close(self):
+        self.varWrapper.setOpen(False)
+        
+    def prepareContextMenu(self, menu):
+        HtmlTemplateHandler.prepareContextMenu(self, menu)
+        if self.varWrapper.isOpen:
+            menu.addAction("Close %s" % self.varWrapper.getExp(), self.close)
+        else:
+            menu.addAction("Open %s" % self.varWrapper.getExp(), self.open)
 
 class DataGraphVW(VariableWrapper):
     """ Parent of all VariableWrappers for the DataGraph. <br>
@@ -152,3 +181,30 @@ class DataGraphVW(VariableWrapper):
     def setFilter(self, f):
         VariableWrapper.setFilter(self, f)
         self.setDirty(True)
+
+class ComplexDataGraphVW(DataGraphVW):
+    def __init__(self, variable, distributedObjects, vwFactory, templateHandler):
+        """ Constructor
+        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
+        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
+        """
+        DataGraphVW.__init__(self, variable, distributedObjects)
+        self.isOpen = True
+        self.vwFactory = vwFactory
+        self.children = None        # will be lazily evaluated once we need them
+        self.templateHandler = templateHandler
+    
+    def setOpen(self, open_):
+        self.isOpen = open_
+        self.setDirty(True)
+    
+    def getChildren(self):
+        """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been
+        @return    list of datagraph.datagraphvw.DataGraphVW """
+        if not self.children:
+            self.children = []
+            for childVar in self.variable.getChildren():
+                wrapper = childVar.makeWrapper(self.vwFactory)
+                wrapper.setExistingView(self.getView(), self)
+                self.children.append(wrapper)
+        return self.children

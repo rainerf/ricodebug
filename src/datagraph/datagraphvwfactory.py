@@ -26,6 +26,7 @@ from varwrapperfactory import VarWrapperFactory
 from stdvariableview import StdDataGraphVW
 from ptrvariableview import PtrDataGraphVW
 from structvariableview import StructDataGraphVW
+from arrayvariableview import ArrayDataGraphVW
 from pendingvariableview import PendingDataGraphVW
 
 class DataGraphVWFactory(VarWrapperFactory):
@@ -46,6 +47,9 @@ class DataGraphVWFactory(VarWrapperFactory):
     
     def makeStructVarWrapper(self, var):
         return StructDataGraphVW(var, self.distributedObjects, self)
+    
+    def makeArrayVarWrapper(self, var):
+        return ArrayDataGraphVW(var, self.distributedObjects, self)
     
     def makePendingVarWrapper(self, var):
         return PendingDataGraphVW(var, self.distributedObjects)

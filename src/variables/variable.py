@@ -30,7 +30,7 @@ class Variable(QObject):
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None, pending=False):
+    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None, pending=False, childformat = None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
@@ -48,7 +48,19 @@ class Variable(QObject):
         self.haschildren = haschildren
         self.access = access
         self.pending = pending
+        self.childformat = childformat
         self.childItems = []
+    
+    def __str__(self):
+        return "%s [%s]" % (self.__class__.__name__, " ".join([
+                self.gdbname,
+                self.type,
+                str(self.value),
+                "in scope" if self.inscope else "",
+                "has children" if self.haschildren else "",
+                self.access if self.access else "",
+                "pending" if self.pending else "",
+                str(len(self.childItems))]))
         
         
     def getExp (self):
@@ -97,13 +109,13 @@ class Variable(QObject):
     def getPending(self):
         return False
     
-    def _getChildItems (self):
+    def _getChildItems(self):
         """ Returns a list of childs as Variables.
             This is a pure private Method!
         @return    List of Variables, children of the variable.
         """
         if self.haschildren == True and self.childItems.__len__() == 0:
-            self.variablepool.getChildren(self.gdbname, self.childItems, self.access, self.uniquename)
+            self.variablepool.getChildren(self.gdbname, self.childItems, self.access, self.uniquename, self.childformat)
         return self.childItems
     
     def makeWrapper(self, vwFactory):
@@ -119,4 +131,3 @@ class Variable(QObject):
         
     def replace(self, var):
         self.emit(SIGNAL('replace(PyQt_PyObject)'), var)
-

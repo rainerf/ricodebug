@@ -45,6 +45,7 @@ class GdbConnector(QObject):
         self.reader.startReading(self.gdb.stdout)
     
     def execute(self, cmd, error_msg = None):
+        print "Running command %s" % cmd
         logging.debug("Running command %s", cmd)
         self.gdb.stdin.write(cmd + "\n")
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)

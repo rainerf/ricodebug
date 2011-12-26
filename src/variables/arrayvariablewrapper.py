@@ -22,26 +22,22 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from variables.variable import Variable
+from variables.variablewrapper import VariableWrapper
 
-class StructVariable(Variable) :
-    """ Class holding a Struct-Variable. """
-
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None, pending=None):
-        """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
-        """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type, value, inscope, haschildren, access, pending, "%(parent)s.%(child)s")
+class ArrayVariableWrapper(VariableWrapper):
+    """ VariableWrapper for Arrays. <br>
+        This is only an Example of a Wrapper! <br>
+        You can use it directly, but normally you will need to write your own Wrapper for your own Needs.
+    """
     
+    def __init__(self, variable):
+        """ Constructor
+        @param variable    variables.variable.Variable, the variable to wrap
+        """
+        VariableWrapper.__init__(self, variable)
+
     def getChildren(self):
         """ Returns a List with all Members of the struct.
         @return    List of Variables, Members of the struct. """
-        return self._getChildItems()
-    
-    def makeWrapper(self, vwFactory):
-        """ Returns a VariableWrapper for the Variable. <br>
-            The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper 
-        @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
-        """
-        return vwFactory.makeStructVarWrapper(self)
+        return self.variable.getChildren()
+

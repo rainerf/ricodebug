@@ -42,6 +42,8 @@
     <file>images/pause.png</file>
     <file>images/stop.png</file>
     <file>images/bp.png</file>
+    <file>images/opened.png</file>
+    <file>images/closed.png</file>
   </qresource>
   <qresource prefix="markers">
     <file alias="exec_pos.png">images/markers/exec_pos.png</file>

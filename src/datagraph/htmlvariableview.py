@@ -42,7 +42,7 @@ class HtmlVariableView(QGraphicsWebView):
         self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
         self.setFlags(QGraphicsItem.ItemIsMovable)
-        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/htmlvariableview.mako')
+        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/templates/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0,0))
         self.setPreferredSize(QSizeF(0, 0))
         self.setResizesToContents(True)
@@ -88,10 +88,16 @@ class HtmlVariableView(QGraphicsWebView):
                 self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
                 self.setHtml(self.source)
                 
-                for template, id in self.uniqueIds.iteritems():
-                    self.page().mainFrame().addToJavaScriptWindowObject(id, template)
+                for template, id_ in self.uniqueIds.iteritems():
+                    self.page().mainFrame().addToJavaScriptWindowObject(id_, template)
             except Exception as e:
                 logging.error("Rendering failed: %s", str(e))
+                self.setHtml(str(e))
+            
+            # force an update of the scene that contains us, since sometimes setHtml
+            # will not cause the view to be redrawn immediately
+            if self.scene():
+                self.scene().update()
             
             self.dirty = False
         
@@ -121,8 +127,9 @@ class HtmlVariableView(QGraphicsWebView):
             self.uniqueIds[template] = "tmpl%d" % self.lastId
         return self.uniqueIds[template]
 
-# def paint(self, painter, option, widget):
-#    from PyQt4.QtGui import QColor
-#    painter.setPen(QColor(Qt.red))
-#    painter.drawRoundedRect(self.boundingRect(), 5, 5)
-#    QGraphicsWebView.paint(self, painter, option, widget)
+#    def paint(self, painter, option, widget):
+#        from PyQt4.QtGui import QColor
+#        painter.setPen(QColor(Qt.red))
+#        painter.drawRoundedRect(self.boundingRect(), 5, 5)
+#        QGraphicsWebView.paint(self, painter, option, widget)
+

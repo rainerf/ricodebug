@@ -152,7 +152,6 @@ class MainWindow(QMainWindow):
         
         # get filelist dockwidget
         self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView");
-        QObject.connect(self.debug_controller, SIGNAL('executableOpened'), self.filelist_dockwidget.raise_)
        
         self.setWindowFilePath("<none>")
         self.setupUi() 

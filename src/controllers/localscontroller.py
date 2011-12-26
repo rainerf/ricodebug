@@ -63,7 +63,7 @@ class LocalsStructVarWrapper(VariableWrapper, TreeItem):
         VariableWrapper.__init__(self, variable)
         TreeItem.__init__(self)
         self.valueChanged = False
-        self.visible = True        
+        self.visible = True
 
     def getChildren(self, factory):
         if (self.childItems.__len__() == 0):
@@ -72,8 +72,24 @@ class LocalsStructVarWrapper(VariableWrapper, TreeItem):
                 vwChild.parent = self
                 self.addChild(vwChild)
                            
-        return self.childItems;
+        return self.childItems
     
+class LocalsArrayVarWrapper(VariableWrapper, TreeItem):
+    def __init__(self, variable):
+        VariableWrapper.__init__(self, variable)
+        TreeItem.__init__(self)
+        self.valueChanged = False
+        self.visible = True
+
+    def getChildren(self, factory):
+        if (self.childItems.__len__() == 0):
+            for child in self.variable.getChildren():
+                vwChild = child.makeWrapper(factory)
+                vwChild.parent = self
+                self.addChild(vwChild)
+                           
+        return self.childItems
+
 class LocalsStdVarWrapper(VariableWrapper, TreeItem):
     def __init__(self, variable):
         VariableWrapper.__init__(self, variable)
@@ -93,6 +109,9 @@ class LocalsVWFactory(VarWrapperFactory):
     
     def makePtrVarWrapper(self, var):
         return LocalsPtrVarWrapper(var)
+    
+    def makeArrayVarWrapper(self, var):
+        return LocalsArrayVarWrapper(var)
     
     def makeStructVarWrapper(self, var):
         return LocalsStructVarWrapper(var)

@@ -27,4 +27,3 @@ from variablemodel import VariableModel
 class LocalsModel(VariableModel):
     def __init__(self, controller, distributed_objects, parent = None):
         VariableModel.__init__(self, controller, distributed_objects, parent)
-    

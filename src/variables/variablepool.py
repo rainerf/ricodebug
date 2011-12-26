@@ -27,6 +27,7 @@ from gdboutput import GdbOutput
 from stdvariable import StdVariable
 from ptrvariable import PtrVariable
 from structvariable import StructVariable
+from arrayvariable import ArrayVariable
 from pendingvariable import PendingVariable
 import logging
 
@@ -129,24 +130,13 @@ class VariablePool(QObject):
         varReplace = None
         
         # variable existing in pool and in current scope
-        if (self.list.has_key(exp) == True):            
-            # if variable went out of scope but also exists in current scope
-            # delete it and recreate on gdb
-            if (self.list[exp].getInScope() == False and isLocal == True):
-                varReplace = self.list[exp]                
-                del self.list[exp] 
-                  
-            # return variable from pool if not pending      
-            elif self.list[exp].getPending() == False:
+        if exp in self.list: #self.list.has_key(exp):
+            if not self.list[exp].getPending() and self.list[exp].getInScope():
                 logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
                 return self.list[exp]
-            # replace pending variable
-            else:
-                varReplace = self.list[exp]
-                del self.list[exp] 
 
         # get variable from gdb (fixed)
-        gdbVar = self.connector.var_create("- * " + str(exp))            
+        gdbVar = self.connector.var_create("- * " + str(exp))
         
         # successful result
         if (gdbVar.class_ == GdbOutput.ERROR):
@@ -164,33 +154,34 @@ class VariablePool(QObject):
         
         return varReturn
     
-    def getChildren(self, name, childList, access, parentName):
+    def getChildren(self, name, childList, access, parentName, childformat):
         """
         Appends the children of the variable with name to childList (and to internal list).
         These children are Variables.  
         @param name         string, name of the variable to get children from
         @param childList    Variable[], list of children for variable
         @param access       string, variable is private, protected or public (read from gdb)
-        @param parentName   unique name for parent item of children (e.g mystruct.value)   
+        @param parentName   unique name for parent item of children (e.g mystruct.value)
+        @param childformat  string, template for forming a child's expression
         """
         gdbChildren = self.connector.var_list_children(name)
         if (hasattr(gdbChildren, "children") == True):
             for child in gdbChildren.children:
                 assert (child.dest == "child")
             
-                if ((hasattr(child.src, "type") == False) or    # public, private, protected
-                        child.src.exp == child.src.type):       # base classes
+                
+                if not hasattr(child.src, "type"): # public, private, protected
                     access = child.src.exp
-                    #parentName = parentName + "." + access
-                    self.getChildren(child.src.name, childList, access, parentName)
-                # add variable to childList
+                    self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
+                elif child.src.exp == child.src.type: # base classes
+                    self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
                     # variable existing in pool and in current scope
-                    uniqueName = str(parentName + "." + child.src.exp)
+                    uniqueName = childformat % {"parent": parentName, "child": child.src.exp} # str(parentName + "." + child.src.exp)
                     if (self.list.has_key(uniqueName) == True):     
                         var =  self.list[uniqueName]
                     else:
-                        var = self.__createVariable(child.src, parentName, None, access)
+                        var = self.__createVariable(child.src, parentName, None, access, childformat)
                     self.list[var.getUniqueName()] = var
                     childList.append(var) 
                     
@@ -210,7 +201,7 @@ class VariablePool(QObject):
         # on what we just changed!
         self.updateVars()
     
-    def __createVariable(self, gdbVar, parentName=None, exp=None, access=None):          
+    def __createVariable(self, gdbVar, parentName=None, exp=None, access=None, childformat=None):
         """ create Variable with value from gdb variable
         @param gdbVar        variable read from gdb
         @param parentName    string, name of the parent item
@@ -232,7 +223,7 @@ class VariablePool(QObject):
         if gdbVar == None:
             uniqueName = exp
             inscope = False
-            varReturn = PendingVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)            
+            varReturn = PendingVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
         else:
             if hasattr(gdbVar, "exp"):
                 exp = gdbVar.exp
@@ -240,22 +231,30 @@ class VariablePool(QObject):
             if parentName == None:
                 uniqueName = exp
             else:
-                uniqueName = "(" + parentName + ")." + exp
+                uniqueName = childformat % {"parent": parentName, "child": exp} #"(" + parentName + ")." + exp
             type = gdbVar.type
             value = gdbVar.value
             inscope = True
             haschildren = (int(gdbVar.numchild) > 0)
             access = access
                 
-            # PtrVariable
-            if type.find("*") >= 0:
+            # FIXME: the check below should probably be less hackish ;)
+            # PtrVariable: everything that contains a star and exactly one
+            # element as a child is a pointer; if there are more childs, it's an
+            # array of pointers!
+            if type.find("*") >= 0 and int(gdbVar.numchild) == 1:
                 varReturn = PtrVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
+            elif type.endswith("]") and int(gdbVar.numchild) >= 1:
+                varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
             # StructVariable
             elif haschildren == True:
                 varReturn = StructVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
-            #StdVariable      
+            #StdVariabe
             else:
                 varReturn = StdVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
                 
         return varReturn
 
+    def dump(self):
+        for exp, var in self.list.items():
+            print exp, var

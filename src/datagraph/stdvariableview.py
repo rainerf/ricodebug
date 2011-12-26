@@ -22,9 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
-import sys
 from variables import filters
 
 class StdVariableTemplateHandler(HtmlTemplateHandler):
@@ -33,8 +31,7 @@ class StdVariableTemplateHandler(HtmlTemplateHandler):
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
-        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/stdvariableview.mako')
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'stdvariableview.mako')
     
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)

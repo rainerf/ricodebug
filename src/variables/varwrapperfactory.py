@@ -26,6 +26,7 @@ from PyQt4.QtCore import QObject
 from stdvariablewrapper import StdVariableWrapper
 from ptrvariablewrapper import PtrVariableWrapper
 from structvariablewrapper import StructVariableWrapper
+from arrayvariablewrapper import ArrayVariableWrapper
 from pendingvariablewrapper import PendingVariableWrapper
 
 class VarWrapperFactory(QObject):
@@ -57,6 +58,13 @@ class VarWrapperFactory(QObject):
         @return        variables.structvariablewrapper.StructVariableWrapper, StructVariableWrapper for the given Variable
         """
         return StructVariableWrapper(var)
+    
+    def makeArrayVarWrapper(self, var):
+        """ creates an ArrayVariableWrapper for the given Variable
+        @param var     the Variable to create a ArrayVariableWrapper for
+        @return        variables.arrayvariablewrapper.ArrayVariableWrapper, ArrayVariableWrapper for the given Variable
+        """
+        return ArrayVariableWrapper(var)
     
     def makePendingVarWrapper(self, var):
         """ creates a PendingVariableWrapper for the given Variable

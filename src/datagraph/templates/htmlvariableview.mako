@@ -10,6 +10,8 @@ table { border-spacing: 0pt; }
 td {padding: 2pt}
 table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; }
 table.variablechild {border: 1pt solid rgba(200, 200, 200, 1);}
+div.removediv {position:absolute; left:2px; top:2px; z-index:1; opacity:0.2}
+div.removediv:hover {opacity:1;}
 tr.header {background-color: rgba(240, 240, 240, 1); border: 0;}
 a {border-bottom:1px dotted;}
 * {-webkit-user-select: none; user-select: none; font-family: sans-serif;}
@@ -24,9 +26,12 @@ function contextmenu(obj, id) {
 </script>
 <% assert(top) %>\
 %	if varWrapper.getInScope() == True:
-<table id="${id}" class="variabletop" oncontextmenu="contextmenu(${id}, '${id}')">
-${varWrapper.render(top)}
+<table class="variabletop">
+${varWrapper.render(True)}
 </table>
+<div class="removediv">
+<img onclick="${id}.remove()" src="qrc:icons/images/exit.png" width="16px" height="16px">
+</div>
 %	endif
 </body>
 </html>

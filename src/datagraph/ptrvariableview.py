@@ -22,9 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from mako.template import Template
 from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
-import sys
 from PyQt4 import QtCore
 from PyQt4.QtGui import QWidgetAction, QLineEdit
 import logging
@@ -35,8 +33,7 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects)
-        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/ptrvariableview.mako')
+        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'ptrvariableview.mako')
     
     @QtCore.pyqtSlot()
     def dereference(self):

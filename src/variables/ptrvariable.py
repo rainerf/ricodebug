@@ -31,7 +31,7 @@ class PtrVariable(Variable) :
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type, value, inscope, haschildren, access, pending)
+        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type, value, inscope, haschildren, access, pending, "*%(parent)s")
         
     def dereference(self):
         """ Dereferences the Variable, if possible.
