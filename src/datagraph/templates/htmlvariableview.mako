@@ -1,3 +1,6 @@
+<%!
+	from datagraphvw import Role
+%>\
 <html>
 <body>
 <style>
@@ -7,7 +10,8 @@ span.graph_access { color: rgb(90, 90, 90); }
 span.gdbconsole_output_ok { color: green; }
 span.gdbconsole_output_error { color: red; }
 table { border-spacing: 0pt; }
-td {padding: 2pt}
+td {padding: 2pt; vertical-align:top;}
+td.withborder { border-left: 1pt solid; border-left-color: rgba(200, 200, 200, 1)}
 table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; }
 table.variablechild {border: 1pt solid rgba(200, 200, 200, 1);}
 div.removediv {position:absolute; left:2px; top:2px; z-index:1; opacity:0.2}
@@ -27,7 +31,7 @@ function contextmenu(obj, id) {
 <% assert(top) %>\
 %	if varWrapper.getInScope() == True:
 <table class="variabletop">
-${varWrapper.render(True)}
+${varWrapper.render(Role.INCLUDE_HEADER)}
 </table>
 <div class="removediv">
 <img onclick="${id}.remove()" src="qrc:icons/images/exit.png" width="16px" height="16px">

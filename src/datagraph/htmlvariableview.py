@@ -93,6 +93,7 @@ class HtmlVariableView(QGraphicsWebView):
             except Exception as e:
                 logging.error("Rendering failed: %s", str(e))
                 self.setHtml(str(e))
+                raise
             
             # force an update of the scene that contains us, since sometimes setHtml
             # will not cause the view to be redrawn immediately

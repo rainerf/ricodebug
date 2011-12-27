@@ -31,6 +31,9 @@ from htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidgetAction, QLabel
 
+class Role:
+    NORMAL, INCLUDE_HEADER, VALUE_ONLY= range(3)
+
 class HtmlTemplateHandler(QObject):
     """ Parent of all TemplateHandler-Classes. <br>
     renders the htmlTemplate and handles linkClicked-Events
@@ -52,7 +55,7 @@ class HtmlTemplateHandler(QObject):
     def setTemplate(self, template):
         self._htmlTemplate = Template(filename=sys.path[0] + "/datagraph/templates/" + template, lookup=self._templateLookup)
     
-    def render(self, top, **kwargs):
+    def render(self, role, **kwargs):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
@@ -62,7 +65,7 @@ class HtmlTemplateHandler(QObject):
         if not self.id:
             self.id = self.varWrapper.getView().getUniqueId(self)
         
-        return self._htmlTemplate.render(varWrapper=self.varWrapper, top=top, id=self.id, **kwargs)
+        return self._htmlTemplate.render(varWrapper=self.varWrapper, role=role, id=self.id, **kwargs)
     
     @QtCore.pyqtSlot()
     def openContextMenu(self):
@@ -87,6 +90,7 @@ class HtmlTemplateHandler(QObject):
 class ComplexTemplateHandler(HtmlTemplateHandler):
     def __init__(self, varWrapper, distributedObjects, template):
         HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, template)
+        self.vertical = True
     
     @QtCore.pyqtSlot()
     def open_(self):
@@ -95,13 +99,30 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
     @QtCore.pyqtSlot()
     def close(self):
         self.varWrapper.setOpen(False)
+    
+    @QtCore.pyqtSlot()
+    def toggleVertical(self):
+        self.vertical = not self.vertical
         
+        # the way our children will be rendered will change too (include/skip
+        # <tr> etc), so mark them as dirty, but do not force immediate rerendering;
+        # this will be done when we mark ourselves as dirty
+        for child in self.varWrapper.getChildren():
+            child.setDirty(False)
+        self.varWrapper.setDirty(True)
+    
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         if self.varWrapper.isOpen:
             menu.addAction("Close %s" % self.varWrapper.getExp(), self.close)
+            action = menu.addAction("Vertical view for %s" % self.varWrapper.getExp(), self.toggleVertical)
+            action.setCheckable(True)
+            action.setChecked(self.vertical)
         else:
             menu.addAction("Open %s" % self.varWrapper.getExp(), self.open)
+    
+    def render(self, role, **kwargs):
+        return HtmlTemplateHandler.render(self, role, vertical=self.vertical, **kwargs)
 
 class DataGraphVW(VariableWrapper):
     """ Parent of all VariableWrappers for the DataGraph. <br>
@@ -165,13 +186,13 @@ class DataGraphVW(VariableWrapper):
     def setYPos(self, yPos):
         self.getView().setY(yPos)
     
-    def render(self, top, **kwargs):
+    def render(self, role, **kwargs):
         """ returns the TemplateHandler for the html-Template
         @return    datagraph.htmlvariableview.HtmlTemplateHandler, the TemplateHandler for the html-Template
         """
         if self.dirty:
             self.dirty = False
-            self.source = self.templateHandler.render(top, **kwargs)
+            self.source = self.templateHandler.render(role, **kwargs)
         return self.source
     
     def destroy(self):

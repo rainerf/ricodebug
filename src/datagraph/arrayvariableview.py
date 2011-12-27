@@ -49,12 +49,12 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
     
-    def render(self, top, **kwargs):
+    def render(self, role, **kwargs):
         if self.graphicalView:
             data = [var.getValue() for var in self.varWrapper.children]
-            return ComplexTemplateHandler.render(self, top, data=data)
+            return ComplexTemplateHandler.render(self, role, data=data, **kwargs)
         else:
-            return ComplexTemplateHandler.render(self, top)
+            return ComplexTemplateHandler.render(self, role, **kwargs)
     
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
