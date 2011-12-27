@@ -25,6 +25,7 @@
 from datagraph.datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 from stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
+from PyQt4.QtGui import QIcon
 import matplotlib
 matplotlib.use('Agg')
 
@@ -59,13 +60,13 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
         if self.graphicalView:
-            menu.addAction("Change to standard view for %s" % self.varWrapper.getExp(), self.setStdView)
+            menu.addAction(QIcon(":/icons/images/table.png"), "Change to standard view for %s" % self.varWrapper.getExp(), self.setStdView)
         else:
             # we only allow the graphical view if all contained elements are standard variables
             graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
             
             if graphicalViewPossible:
-                menu.addAction("Change to graphical view for %s" % self.varWrapper.getExp(), self.setGraphicalView)
+                menu.addAction(QIcon(":/icons/images/graph.png"), "Change to graphical view for %s" % self.varWrapper.getExp(), self.setGraphicalView)
 
 
 class ArrayDataGraphVW(ComplexDataGraphVW):
