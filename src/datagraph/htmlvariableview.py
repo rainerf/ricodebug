@@ -27,7 +27,6 @@ from PyQt4.QtGui import QGraphicsItem, QCursor, QFileDialog, QIcon
 from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
 from PyQt4 import QtCore
-import StringIO
 import sys
 import logging
 

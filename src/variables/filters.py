@@ -46,7 +46,7 @@ class Empty:
 
     @staticmethod
     def fromDisplay(val):
-        return val, 16
+        return val
 
 
 class Hex(Empty):
