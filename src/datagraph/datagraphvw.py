@@ -193,10 +193,6 @@ class DataGraphVW(VariableWrapper):
             self.source = self.templateHandler.render(role, **kwargs)
         return self.source
     
-    def destroy(self):
-        """ removes itself from the DataGraph """
-        self.distributedObjects.datagraph_controller.removeVar(self)
-
     def setFilter(self, f):
         VariableWrapper.setFilter(self, f)
         self.setDirty(True)

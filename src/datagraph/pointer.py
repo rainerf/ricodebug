@@ -55,8 +55,8 @@ class Pointer(QGraphicsLineItem):
         QObject.connect(self.fromView, SIGNAL('yChanged()'), self.updatePosition)
         QObject.connect(self.toView, SIGNAL('xChanged()'), self.updatePosition)
         QObject.connect(self.toView, SIGNAL('yChanged()'), self.updatePosition)
-        QObject.connect(self.fromView, SIGNAL('deleting()'), self.delete)
-        QObject.connect(self.toView, SIGNAL('deleting()'), self.delete)
+        QObject.connect(self.fromView, SIGNAL('removing()'), self.delete)
+        QObject.connect(self.toView, SIGNAL('removing()'), self.delete)
         
         self.arrowhead = QPolygonF()
         self.arrowSize = 20

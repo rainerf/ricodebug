@@ -109,7 +109,7 @@ class HtmlVariableView(QGraphicsWebView):
         self.handleCommand(str(url.toString()))
     
     def openContextMenu(self, menu):
-        menu.addAction("Remove %s" % self.varWrapper.getExp()) # FIXME: add some function to remove the view
+        menu.addAction(QIcon(":/icons/images/minus.png"), "Remove %s" % self.varWrapper.getExp(), self.remove)
         menu.addAction(QIcon(":/icons/images/save-html.png"), "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
         menu.exec_(QCursor.pos())
     
@@ -123,10 +123,13 @@ class HtmlVariableView(QGraphicsWebView):
     
     def contextMenuEvent(self, event):
         pass
-    
-    def onDelete(self):
-        self.emit(SIGNAL('deleting()'))
 
+    @QtCore.pyqtSlot()
+    def remove(self):
+        """remove the varWrapper from the datagraph"""
+        self.emit(SIGNAL('removing()'))
+        self.distributedObjects.datagraph_controller.removeVar(self.varWrapper)
+    
     def getUniqueId(self, template):
         if not template in self.uniqueIds:
             self.lastId += 1

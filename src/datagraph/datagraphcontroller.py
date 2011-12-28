@@ -139,7 +139,6 @@ class DataGraphController(QObject):
         """ removes the given varWrapper from the DataGraphView and the PointerList
         @param varWrapper    variables.variablewrapper.VariableWrapper, the VariableWrapper to remove
         """
-        varWrapper.getView().onDelete()
         self.variableList.removeVar(varWrapper)
         self.data_graph_view.removeItem(varWrapper.getView())
     
