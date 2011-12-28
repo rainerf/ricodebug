@@ -7,7 +7,7 @@
     <file>images/watch.png</file>
     <file>images/datagraph.png</file>
     <file>images/graph.png</file>
-    <file>images/table.png</file>
+    <file>images/vertical.png</file>
     <file>images/var.png</file>
     <file>images/fake_entry.png</file>
     <file>images/struct.png</file>
@@ -46,6 +46,9 @@
     <file>images/bp.png</file>
     <file>images/opened.png</file>
     <file>images/closed.png</file>
+    <file>images/collapse.png</file>
+    <file>images/filter.png</file>
+    <file>images/save-html.png</file>
   </qresource>
   <qresource prefix="markers">
     <file alias="exec_pos.png">images/markers/exec_pos.png</file>

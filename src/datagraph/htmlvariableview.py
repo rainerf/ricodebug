@@ -23,10 +23,11 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import SIGNAL, QSize, QSizeF, Qt
-from PyQt4.QtGui import QGraphicsItem, QCursor
+from PyQt4.QtGui import QGraphicsItem, QCursor, QFileDialog, QIcon
 from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
 from mako.template import Template
 from PyQt4 import QtCore
+import StringIO
 import sys
 import logging
 
@@ -109,12 +110,16 @@ class HtmlVariableView(QGraphicsWebView):
     
     def openContextMenu(self, menu):
         menu.addAction("Remove %s" % self.varWrapper.getExp()) # FIXME: add some function to remove the view
-        menu.addAction("Show HTML for %s" % self.varWrapper.getExp(), self.showHtml)
+        menu.addAction(QIcon(":/icons/images/save-html.png"), "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
         menu.exec_(QCursor.pos())
     
     @QtCore.pyqtSlot()
-    def showHtml(self):
-        print self.source
+    def saveHtml(self):
+        name = QFileDialog.getSaveFileName(filter="HTML (*.html)")
+        if name != "":
+            out = file(name, 'w')
+            out.write(self.source)
+            out.close()
     
     def contextMenuEvent(self, event):
         pass

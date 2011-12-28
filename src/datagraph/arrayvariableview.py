@@ -60,8 +60,8 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
         if self.graphicalView:
-            menu.addAction(QIcon(":/icons/images/table.png"), "Change to standard view for %s" % self.varWrapper.getExp(), self.setStdView)
-        else:
+            menu.addAction(QIcon(":/icons/images/datagraph.png"), "Change to standard view for %s" % self.varWrapper.getExp(), self.setStdView)
+        elif self.varWrapper.isOpen:    # do not show the menu if the variable view is collapsed
             # we only allow the graphical view if all contained elements are standard variables
             graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
             

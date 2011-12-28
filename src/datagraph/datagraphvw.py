@@ -29,7 +29,7 @@ from PyQt4.QtCore import QObject, SIGNAL
 from variables.variablewrapper import VariableWrapper
 from htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidgetAction, QLabel
+from PyQt4.QtGui import QWidgetAction, QLabel, QIcon
 
 class Role:
     NORMAL, INCLUDE_HEADER, VALUE_ONLY= range(3)
@@ -93,12 +93,8 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
         self.vertical = True
     
     @QtCore.pyqtSlot()
-    def open_(self):
-        self.varWrapper.setOpen(True)
-    
-    @QtCore.pyqtSlot()
-    def close(self):
-        self.varWrapper.setOpen(False)
+    def toggleCollapsed(self):
+        self.varWrapper.setOpen(not self.varWrapper.isOpen)
     
     @QtCore.pyqtSlot()
     def toggleVertical(self):
@@ -113,13 +109,15 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
     
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
+        
+        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.varWrapper.getExp(), self.toggleCollapsed)
+        action.setCheckable(True)
+        action.setChecked(not self.varWrapper.isOpen)
+        
         if self.varWrapper.isOpen:
-            menu.addAction("Close %s" % self.varWrapper.getExp(), self.close)
-            action = menu.addAction("Vertical view for %s" % self.varWrapper.getExp(), self.toggleVertical)
+            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.varWrapper.getExp(), self.toggleVertical)
             action.setCheckable(True)
             action.setChecked(self.vertical)
-        else:
-            menu.addAction("Open %s" % self.varWrapper.getExp(), self.open)
     
     def render(self, role, **kwargs):
         return HtmlTemplateHandler.render(self, role, vertical=self.vertical, **kwargs)

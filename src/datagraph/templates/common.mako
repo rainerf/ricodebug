@@ -6,9 +6,9 @@
 ##
 <%def name="open_close_entry(id_, varWrapper)">
 %	if varWrapper.isOpen:
-		<img onclick="${id_}.close()" src="qrc:icons/images/opened.png">
+		<img onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png">
 %	else:
-		<img onclick="${id_}.open_()" src="qrc:icons/images/closed.png">
+		<img onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png">
 %	endif
 </%def>
 ##
