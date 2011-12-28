@@ -47,24 +47,18 @@ class VariableWrapper(QObject):
     
     def getExp (self):
         return self.variable.getExp()
-    
-    def setExp (self, exp):
-        self.variable.setExp(exp)
-        
+
     def getName (self):
         return self.variable.getName()
     
-    def setName (self, name):
-        self.variable.setName(name)
-        
     def getType (self):
         return self.variable.getType()
     
-    def setType (self, type):
-        self.variable.setType(type)
-        
+    def getUnfilteredValue(self):
+        return self.variable.getValue()
+    
     def getValue (self):
-        return self.filter.toDisplay(self.variable.getValue())
+        return self.filter.toDisplay(self.getUnfilteredValue())
     
     def setValue (self, value):
         self.variable.setValue(value)
@@ -72,14 +66,8 @@ class VariableWrapper(QObject):
     def getInScope (self):
         return self.variable.getInScope()
     
-    def setInScope (self, inscope):
-        self.variable.setInScope(inscope)
-        
     def getAccess(self):
         return self.variable.getAccess()
-    
-    def setAccess(self, access):
-        self.variable.setAccess(access)
 
     def setFilter(self, f):
         self.filter = f

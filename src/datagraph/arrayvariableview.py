@@ -39,34 +39,33 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         self.graphicalView = False
     
     @QtCore.pyqtSlot()
-    def setStdView(self):
-        self.graphicalView = False
-        self.setTemplate('structvariableview.mako')
-        self.varWrapper.setDirty(True)
-    
-    @QtCore.pyqtSlot()
-    def setGraphicalView(self):
-        self.graphicalView = True
-        self.setTemplate('arrayview.mako')
+    def toggleGraphicalView(self):
+        if self.graphicalView:
+            self.graphicalView = False
+            self.setTemplate('structvariableview.mako')
+        else:
+            self.graphicalView = True
+            self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
     
     def render(self, role, **kwargs):
         if self.graphicalView:
-            data = [var.getValue() for var in self.varWrapper.children]
+            data = [var.getUnfilteredValue() for var in self.varWrapper.children]
             return ComplexTemplateHandler.render(self, role, data=data, **kwargs)
         else:
             return ComplexTemplateHandler.render(self, role, **kwargs)
     
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
-        if self.graphicalView:
-            menu.addAction(QIcon(":/icons/images/datagraph.png"), "Change to standard view for %s" % self.varWrapper.getExp(), self.setStdView)
-        elif self.varWrapper.isOpen:    # do not show the menu if the variable view is collapsed
-            # we only allow the graphical view if all contained elements are standard variables
-            graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
-            
-            if graphicalViewPossible:
-                menu.addAction(QIcon(":/icons/images/graph.png"), "Change to graphical view for %s" % self.varWrapper.getExp(), self.setGraphicalView)
+        
+        graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
+        
+        # we only allow the graphical view if all contained elements are standard variables; also,
+        # do not show the menu if the variable view is collapsed
+        if self.varWrapper.isOpen and graphicalViewPossible:
+            action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.getExp(), self.toggleGraphicalView)
+            action.setCheckable(True)
+            action.setChecked(self.graphicalView)
 
 
 class ArrayDataGraphVW(ComplexDataGraphVW):

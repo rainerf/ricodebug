@@ -61,31 +61,18 @@ class Variable(QObject):
                 self.access if self.access else "",
                 "pending" if self.pending else "",
                 str(len(self.childItems))]))
-        
-        
+    
     def getExp (self):
         return self.exp
     
-    def setExp (self, exp):
-        self.exp = exp
-        
     def getGdbName (self):
         return self.gdbname
-    
-    def setGdbName (self, gdbname):
-        self.gdbname = gdbname
         
     def getUniqueName (self):
         return self.uniquename
     
-    def setUniqueName (self, uniquename):
-        self.uniquename = uniquename       
-        
     def getType (self):
         return self.type
-    
-    def setType (self, type):
-        self.type = type        
         
     def getValue (self):
         return self.value
@@ -97,14 +84,8 @@ class Variable(QObject):
     def getInScope (self):
         return self.inscope
     
-    def setInScope (self, inscope):
-        self.inscope = inscope 
-        
     def getAccess(self):
         return self.access
-    
-    def setAccess(self, access):
-        self.access = access
     
     def getPending(self):
         return False
