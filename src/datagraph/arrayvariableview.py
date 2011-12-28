@@ -26,17 +26,22 @@ from datagraph.datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 from stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
 from PyQt4.QtGui import QIcon
+
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 class ArrayVariableTemplateHandler(ComplexTemplateHandler):
     """ TemplateHandler for Arrays """
+    
+    BARCHART, LINES, STEPS = range(3)
     
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         ComplexTemplateHandler.__init__(self, varWrapper, distributedObjects, 'structvariableview.mako')
         self.graphicalView = False
+        self.style = self.BARCHART
     
     @QtCore.pyqtSlot()
     def toggleGraphicalView(self):
@@ -47,13 +52,6 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
             self.graphicalView = True
             self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
-    
-    def render(self, role, **kwargs):
-        if self.graphicalView:
-            data = [var.getUnfilteredValue() for var in self.varWrapper.children]
-            return ComplexTemplateHandler.render(self, role, data=data, **kwargs)
-        else:
-            return ComplexTemplateHandler.render(self, role, **kwargs)
     
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
@@ -66,6 +64,58 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
             action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.getExp(), self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)
+            
+            if self.graphicalView:
+                submenu = menu.addMenu("Set plot type")
+                submenu.addAction("Bar chart", self.setPlotStyleBar)
+                submenu.addAction("Lines plot", self.setPlotStyleLines)
+                submenu.addAction("Steps plot", self.setPlotStyleSteps)
+    
+    @QtCore.pyqtSlot()
+    def setPlotStyleBar(self):
+        self.style = self.BARCHART
+        self.varWrapper.setDirty(True)
+
+    @QtCore.pyqtSlot()
+    def setPlotStyleLines(self):
+        self.style = self.LINES
+        self.varWrapper.setDirty(True)
+
+    @QtCore.pyqtSlot()
+    def setPlotStyleSteps(self):
+        self.style = self.STEPS
+        self.varWrapper.setDirty(True)
+    
+    def plot(self, output):
+        data = [float(var.getUnfilteredValue()) for var in self.varWrapper.children]
+        ind = range(len(data))
+        
+        fig = plt.figure(figsize=(4, 3)) 
+        ax = fig.add_subplot(111)
+
+        if self.style == self.BARCHART:
+            ind = range(len(data))
+            width = 0.75
+            
+            ax.bar(ind, data, width)
+            ax.set_xticks([i + width/2 for i in ind])
+            ax.set_xticklabels(ind)
+            ax.set_xlim(0, len(data)-1+width)
+        elif self.style == self.LINES:
+            ax.plot(data)
+            ax.set_xticks(range(len(data)))
+            ax.set_xticks([i for i in ind])
+            ax.set_xlim(0, len(data)-1)
+        elif self.style == self.STEPS:
+            ax.plot(data, drawstyle='steps-post')
+            ax.set_xticks(range(len(data)))
+            ax.set_xticks([i + 0.5 for i in ind])
+            ax.set_xticklabels(ind)
+            ax.set_xlim(0, len(data))
+        else:
+            raise "Illegal style."
+        
+        fig.savefig(output, format='svg', transparent=True, bbox_inches='tight')
 
 
 class ArrayDataGraphVW(ComplexDataGraphVW):
