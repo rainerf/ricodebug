@@ -127,8 +127,6 @@ class VariablePool(QObject):
         @param exp       string, expression from variable to return
         @param isLocal   bool, replace pending variables from pool if variable is local variable
         """
-        varReplace = None
-        
         # variable existing in pool and in current scope
         if exp in self.list: #self.list.has_key(exp):
             if not self.list[exp].getPending() and self.list[exp].getInScope():
@@ -145,9 +143,6 @@ class VariablePool(QObject):
         # create variable
         varReturn = self.__createVariable(gdbVar, None, exp, None) 
         
-        if varReplace != None:
-            varReplace.replace(varReturn)
-            
         self.list[varReturn.getUniqueName()] = varReturn
         
         logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)

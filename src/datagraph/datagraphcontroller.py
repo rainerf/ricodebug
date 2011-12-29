@@ -31,7 +31,6 @@ from datagraphvwfactory import DataGraphVWFactory
 from datagraphview import DataGraphView
 from variables.variablelist import VariableList
 from pointer import Pointer
-from htmlvariableview import HtmlVariableView
 
 
 class DataGraphController(QObject):

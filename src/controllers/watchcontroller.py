@@ -24,144 +24,15 @@
 
 """ @package controllers.watchcontroller    the WatchController """
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
-from PyQt4.QtGui import QDockWidget
+from PyQt4.QtCore import QObject, SIGNAL
 from variablemodel import VariableModel
 from watchview import WatchView
-from variablemodel import TreeItem
-from varwrapperfactory import VarWrapperFactory
-from variables.variablelist import VariableList
-from variables.variablewrapper import VariableWrapper
-        
-#####################################################################################
-## WRAPPER CLASSES
-#####################################################################################
-
-class WatchPtrVarWrapper(VariableWrapper, TreeItem):
-    """ VariableWrapper for Pointer-Variables """
-    
-    def __init__(self, variable):
-        """ Constructor
-        @param variable   Variable, varible to wrap 
-        """
-        VariableWrapper.__init__(self, variable)
-        TreeItem.__init__(self)
-        self.valueChanged = False
-        self.visible = True
-        
-    def getChildren(self, factory):
-        """ Get children for WatchPtrVarWrapper <br>
-            dereference PtrVariable and get Children from VariableList
-        @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
-        """
-        if (self.getChildCount() == 0):
-            variable = self.variable.dereference()
-            if variable != None:
-                children = variable._getChildItems();
-                if (len(children) == 0):
-                    vwChild = variable.makeWrapper(factory)
-                    vwChild.parent = self
-                    QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
-                    self.addChild(vwChild)
-                else:
-                    for child in children:
-                        vwChild = child.makeWrapper(factory)
-                        vwChild.parent = self         
-                        QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)               
-                        self.addChild(vwChild)
-        return self.childItems
-    
-    def hasChanged(self):
-        """ overrides method from TreeItem <br>
-            remove all children from pointer if value has changed
-            this function is connected to the signal SignalProxy::changed()
-        """
-        self.removeChildren()
-        self.setChanged(True)        
-    
-class WatchStructVarWrapper(VariableWrapper, TreeItem):
-    """ VariableWrapper for Struct-Variables """
-    
-    def __init__(self, variable):
-        """ Constructor
-        @param variable   Variable, varible to wrap 
-        """
-        VariableWrapper.__init__(self, variable)
-        TreeItem.__init__(self)
-        self.valueChanged = False
-        self.visible = True        
-
-    def getChildren(self, factory):        
-        """ Get children for WatchPtrVarWrapper <br>
-            Get Children from VariableList for StructVariable
-        @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
-        """
-        if (self.childItems.__len__() == 0):
-            for child in self.variable.getChildren():
-                vwChild = child.makeWrapper(factory)
-                vwChild.parent = self
-                QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
-                self.addChild(vwChild)
-                           
-        return self.childItems;
-    
-class WatchStdVarWrapper(VariableWrapper, TreeItem):
-    """ VariableWrapper for Standard-Variables """
-    
-    def __init__(self, variable):
-        """ Constructor
-        @param variable   Variable, varible to wrap 
-        """
-        VariableWrapper.__init__(self, variable)
-        TreeItem.__init__(self)
-        self.valueChanged = False
-        self.visible = True
-        
-class WatchPendingVarWrapper(VariableWrapper, TreeItem):
-    """ VariableWrapper for Pending-Variables """
-    def __init__(self, variable):
-        """ Constructor
-        @param variable   Variable, varible to wrap 
-        """
-        VariableWrapper.__init__(self, variable)
-        TreeItem.__init__(self)
-        self.valueChanged = False
-        self.visible = True
-        
-#####################################################################################
-## FACTORY
-#####################################################################################
-class WatchVWFactory(VarWrapperFactory):
-    def __init__(self):
-        """ Constructor <br>
-            create new WatchVWFactory
-        """
-        VarWrapperFactory.__init__(self)
-        
-    def makeStdVarWrapper(self, var):
-        """ create StdVarWrapper
-        """
-        return WatchStdVarWrapper(var)
-    
-    def makePtrVarWrapper(self, var):
-        """ create PtrVarWrapper
-        """
-        return WatchPtrVarWrapper(var)
-    
-    def makeStructVarWrapper(self, var):
-        """ create StructVarWrapper
-        """
-        return WatchStructVarWrapper(var)
-    
-    def makePendingVarWrapper(self, var):
-        """ create PendingVarWrapper
-        """
-        return WatchPendingVarWrapper(var)
+from treeitemcontroller import TreeItemController
 
 #####################################################################################
 ## CONTROLLER
 #####################################################################################
-class WatchController(QObject):
+class WatchController(TreeItemController):
     """ the Controller for the WatchView """
     
     def __init__(self, distributedObjects):
@@ -170,38 +41,8 @@ class WatchController(QObject):
             Listens to the following Signals: SignalProxy::AddWatch(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
-        QObject.__init__(self)
-        self.distributedObjects = distributedObjects
-        #self.root = RootVarWrapper()
-        
-        self.vwFactory = WatchVWFactory()
-        
-        self.variableModel = VariableModel(self, self.distributedObjects)
-        self.watchView = WatchView(self)
-        
-        self.watchView.setModel(self.variableModel)
-        self.watchVariableList = VariableList(self.vwFactory, self.distributedObjects)
-        
+        TreeItemController.__init__(self, distributedObjects, "Watch", WatchView, VariableModel)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('AddWatch(QString)'), self.addWatch)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearVars)
-        
-    def clearVars(self):
-        """ clears the WatchView and the VariableList <br>
-            this function is connected to the signal SignalProxy::cleanupModels()
-        """
-        # clear lists
-        del self.watchVariableList.list[:]
-        self.variableModel.clear()     
-        
-    def insertDockWidgets(self):
-        """ adds the Watch-DockWidget to the GUI <br>
-            this function is connected to the signal SignalProxy::insertDockWidgets() """
-
-        self.watchDock = QDockWidget("Watch")
-        self.watchDock.setObjectName("WatchView")
-        self.watchDock.setWidget(self.watchView)
-        self.distributedObjects.signal_proxy.addDockWidget(Qt.BottomDockWidgetArea, self.watchDock, True)
         
     def removeSelected(self, row, parent): 
         """ remove selected variable from WatchView
@@ -215,26 +56,21 @@ class WatchController(QObject):
             this function is connected to the signal SignalProxy::AddWatch(QString)
         @param watch    Variable, the Variable to add to watch
         """
-        vw = self.watchVariableList.addVarByName(watch)
+        vw = self.variableList.addVarByName(watch)
         # connect changed and replace signal from wrapper
         QObject.connect(vw, SIGNAL('changed()'), vw.hasChanged)  
         QObject.connect(vw, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)  
         
-        # set parent for root variable
-        vw.setParent(self.variableModel.root)
-        
-        # add variable to root children
-        self.variableModel.root.addChild(vw)
-        self.variableModel.addVar(vw)
+        self.add(vw)
         
     def replaceVariable(self, pendingVar, newVar):
         """ replaces a variable in the variablelist
         @param pendingVar    variables.variablewrapper.VariableWrapper, VariableWrapper to replace in the list
         @param newVar        variables.Variable, new Variable which replaces existing VariableWrapper in List
         """
-        vwOld = self.watchVariableList.getVariableWrapper(pendingVar)
+        vwOld = self.variableList.getVariableWrapper(pendingVar)
         
-        vwNew = self.watchVariableList.replaceVar(pendingVar, newVar)
+        vwNew = self.variableList.replaceVar(pendingVar, newVar)
         QObject.connect(vwNew, SIGNAL('changed()'), vwNew.hasChanged)  
         QObject.connect(vwNew, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)  
         
@@ -265,6 +101,4 @@ class WatchController(QObject):
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
                 self.addWatch(attr["exp"])
-                
-                
-    
+

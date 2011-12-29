@@ -22,25 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget
-from PyQt4.QtCore import QObject, SIGNAL
+from watchview import TreeItemView
 
-class LocalsView(QWidget):
-    def __init__(self, parent = None):
-        QWidget.__init__(self, parent)
-        
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
-        
-        self.treeView = QtGui.QTreeView(self)
-        self.treeView.setAlternatingRowColors(True)
-        self.treeView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
-        QtCore.QMetaObject.connectSlotsByName(self)
-        
-        QObject.connect(self.treeView, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
-
-    def resizeColumn(self, index):
-        """Resize the first column to contents when expanded."""
-        self.treeView.resizeColumnToContents(0)
+class LocalsView(TreeItemView):
+    pass

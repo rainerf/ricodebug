@@ -25,24 +25,27 @@
 from PyQt4 import QtGui
 from PyQt4.QtGui import QTreeView, QMenu
 from PyQt4.QtCore import SIGNAL, QObject, Qt
-from variables import filters
-import watchcontroller
+import filters
+from treeitemcontroller import TreeStdVarWrapper
 
-class WatchView(QTreeView):
-    def __init__(self, watch_controller, parent=None):
+
+class TreeItemView(QTreeView):
+    def __init__(self, controller, parent=None):
         QTreeView.__init__(self, parent)
-        
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        
-        self.variableController = watch_controller
-        
+        self.controller = controller
         QObject.connect(self, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
     
     def resizeColumn(self, index):
         """Resize the first column to contents when expanded."""
         self.resizeColumnToContents(0)
-        
+
+
+class WatchView(TreeItemView):
+    def __init__(self, controller, parent=None):
+        TreeItemView.__init__(self, controller, parent)
+    
     def keyPressEvent (self, event):
         key = event.key()
         if (int(key) == Qt.Key_Delete): #0x01000007
@@ -55,7 +58,7 @@ class WatchView(QTreeView):
         if not event.isAccepted():
             selectionModel = self.selectionModel()
             wrapper = selectionModel.currentIndex().internalPointer()
-            if isinstance(wrapper, watchcontroller.WatchStdVarWrapper):
+            if isinstance(wrapper, TreeStdVarWrapper):
                 menu = QMenu()
                 filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
                 menu.exec_(event.globalPos())

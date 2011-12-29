@@ -372,7 +372,6 @@ class VariableModel(QAbstractItemModel):
     def clearData(self):
         """ Clear all TreeItems
         """
-        self.controller.variableList = []
         self.root.childItems = []
 
     def update(self):
