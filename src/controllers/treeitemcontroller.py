@@ -2,8 +2,8 @@ from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
 from variablemodel import TreeItem
 from varwrapperfactory import VarWrapperFactory
-from variables.variablelist import VariableList
-from variables.variablewrapper import VariableWrapper
+from variablelist import VariableList
+from variablewrapper import VariableWrapper
 
 #####################################################################################
 ## WRAPPER CLASSES
@@ -39,7 +39,7 @@ class TreePtrVarWrapper(VariableWrapper, TreeItem):
                     for child in children:
                         vwChild = child.makeWrapper(factory)
                         vwChild.parent = self         
-                        QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)               
+                        QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
                         self.addChild(vwChild)
         return self.childItems
     
@@ -61,9 +61,9 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
         VariableWrapper.__init__(self, variable)
         TreeItem.__init__(self)
         self.valueChanged = False
-        self.visible = True        
+        self.visible = True
 
-    def getChildren(self, factory):        
+    def getChildren(self, factory):
         """ Get children for TreePtrVarWrapper <br>
             Get Children from VariableList for StructVariable
         @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
@@ -74,7 +74,7 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
                 vwChild.parent = self
                 QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
                 self.addChild(vwChild)
-                           
+        
         return self.childItems;
 
 

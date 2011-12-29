@@ -189,14 +189,6 @@ class VariableModel(QAbstractItemModel):
         #  RootVarWrapper, root item of tree 
         self.root = RootVarWrapper()
         
-        ## images: 
-        self.imgStruct = QPixmap(":/icons/images/struct.png")
-        self.imgFake = QPixmap(":/icons/images/fake_entry.png")
-        self.imgVariable = QPixmap(":/icons/images/var.png")
-        self.imgEdit = QPixmap(":/icons/images/edit.png")
-        self.imgOutOfScope = QPixmap(":/icons/images/outofscope.png")
-        #connects
-        
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
         QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('executableOpened()'), self.clear)
@@ -311,21 +303,26 @@ class VariableModel(QAbstractItemModel):
                 
         elif role == Qt.DecorationRole:
             if index.column() == 0:
+                if item.getAccess() in ['private', 'protected']:
+                    iconprefix = item.getAccess() + "_"
+                else:
+                    iconprefix = ""
+                
                 if (item.getInScope() == False):
-                    return self.imgOutOfScope
+                    return QPixmap(":/icons/images/outofscope.png")
                 elif item.getChildCount() != 0:     # child item
-                    return self.imgStruct
+                    return QPixmap(":/icons/images/" + iconprefix + "struct.png")
                 else:                               # leave item
-                    return self.imgVariable
+                    return QPixmap(":/icons/images/" + iconprefix + "var.png")
             elif index.column() == 2:
                 if (item.getInScope() == True):
-                    return self.imgEdit             # edit icon
+                    return QPixmap(":/icons/images/edit.png")
         
         elif role == Qt.ForegroundRole:
             if (item.getInScope() == False):
                 return QBrush(Qt.gray)
             
-            if index.column() == 2:                
+            if index.column() == 2:
                 if item.getMarkChanged() and item.getInScope():
                     return QBrush(Qt.green)
             
@@ -341,7 +338,6 @@ class VariableModel(QAbstractItemModel):
             return 0;        
         item = index.internalPointer()
         if (item.getInScope() == False):
-            #return Qt.NoItemFlags
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
         ret = Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -395,7 +391,7 @@ class VariableModel(QAbstractItemModel):
                 item.setChanged(False) 
             if item.getChildCount() != 0:
                 self.updateData(item)
-                            
+    
     def setUnmarked(self, parent):
         """ clears highlighted TreeItems changed at previous stop
         @param parent   TreeItem, parent item, root to update the whole model 

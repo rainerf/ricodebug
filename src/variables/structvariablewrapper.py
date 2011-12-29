@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from variables.variablewrapper import VariableWrapper
+from variablewrapper import VariableWrapper
 
 class StructVariableWrapper(VariableWrapper):
     """ VariableWrapper for Struct-Variables. <br>

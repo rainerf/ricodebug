@@ -13,6 +13,8 @@
     <file>images/private_var.png</file>
     <file>images/fake_entry.png</file>
     <file>images/struct.png</file>
+    <file>images/private_struct.png</file>
+    <file>images/protected_struct.png</file>
     <file>images/finish.png</file>
     <file>images/until.png</file>
     <file>images/continue.png</file>

@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
+from datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 from stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
 from PyQt4.QtGui import QIcon
