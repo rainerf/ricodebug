@@ -18,7 +18,12 @@
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
 		<td nowrap>
-			<img src="qrc:icons/images/${icon}">
+<%	if varWrapper.getAccess() in ['private', 'protected']:
+		iconprefix = varWrapper.getAccess() + "_"
+	else:
+		iconprefix = ""
+%>\
+			<img src="qrc:icons/images/${iconprefix}${icon}">
 %		if varWrapper.getAccess():
 			<span class="graph_access"> ${varWrapper.getAccess()}</span>
 %		endif
