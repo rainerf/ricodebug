@@ -237,7 +237,7 @@ class VariablePool(QObject):
             # PtrVariable: everything that contains a star and exactly one
             # element as a child is a pointer; if there are more childs, it's an
             # array of pointers!
-            if type.find("*") >= 0 and int(gdbVar.numchild) == 1:
+            if type.endswith("*") and int(gdbVar.numchild) >= 1:
                 varReturn = PtrVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
             elif type.endswith("]") and int(gdbVar.numchild) >= 1:
                 varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
