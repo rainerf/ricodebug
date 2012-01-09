@@ -36,7 +36,6 @@
 # - python-qt4 4.8.1
 # - python-qt4-dev 4.8.1
 # - pyqt4-dev-tools 4.8.1
-# - libqt3-mt 3.3.8
 # - libqtcore4 4.7.0
 # - libqtgui4 4.7.0
 # - libqt4-core 4.7.0
@@ -46,4 +45,8 @@
 # - libqt4-qt3support 4.7.0
 # - libqscintilla2-5 2.4.4
 # - python-qscintilla2 2.4.5
-
+# - python-ply 3.4-2
+# - python-mako 0.4.1-2
+# - python-matplotlib 1.0.1-3
+# - python-ctags 1.0.5 (installable using easy_install)
+# - exuberant-ctags 1:5.9~svn20110310-2
