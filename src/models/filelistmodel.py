@@ -215,7 +215,7 @@ class FileListModel(QAbstractItemModel):
         
         for path in data:
             name = os.path.basename(path)
-            file, ext = os.path.splitext(name)
+            _, ext = os.path.splitext(name)
             if ext == ".cpp" or ext == ".c":
                 if not self.sources in self.root.childItems: 
                     self.root.appendChild(self.sources)

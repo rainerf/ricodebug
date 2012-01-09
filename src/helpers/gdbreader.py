@@ -26,7 +26,6 @@ from PyQt4.QtCore import QThread, QMutex, QSemaphore, SIGNAL
 from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
 from collections import deque
-import logging
 
 class GdbReader(QThread):
 	def __init__(self, connector, parent=None):

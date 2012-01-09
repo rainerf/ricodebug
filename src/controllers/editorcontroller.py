@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, Qt, SIGNAL
+from PyQt4.QtCore import QObject, SIGNAL
 from editorview import EditorView
 
 class EditorController(QObject):        

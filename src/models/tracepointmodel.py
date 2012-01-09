@@ -26,7 +26,7 @@ from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
 from PyQt4.QtGui import QItemDelegate
 from operator import attrgetter
 from breakpointmodel import ExtendedBreakpoint
-from variables.variablelist import VariableList
+from variablelist import VariableList
 from varwrapperfactory import VarWrapperFactory
 from stdvariablewrapper import StdVariableWrapper
 from ptrvariablewrapper import PtrVariableWrapper
@@ -50,23 +50,23 @@ class ValueList():
     """This class provides a name and a list of
     Values
     """
-    def __init__(self, name, type):
+    def __init__(self, name, type_):
         self.name = name
         self.values = []
-        self.type = type
+        self.type = type_
         
-    def addValue(self, type, val):
-        if self.type != type:            
-            self.type = type
-        if type == "int":
-            self.values.append(int(val))   
-        elif type == "bool":
-            self.values.append(val == "true") 
-        elif type == "float" or self.type == "double":
-            self.values.append(float(val))  
+    def addValue(self, type_, val):
+        if self.type != type_:
+            self.type = type_
+        if type_ == "int":
+            self.values.append(int(val))
+        elif type_ == "bool":
+            self.values.append(val == "true")
+        elif type_ == "float" or self.type == "double":
+            self.values.append(float(val))
             
     def clear(self):
-        self.values = []  
+        self.values = []
     
 class Tracepoint(ExtendedBreakpoint):
     """This class is used as a tracepoint in tracepointmodel.

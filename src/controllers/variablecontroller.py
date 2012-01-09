@@ -29,7 +29,7 @@ from varwrapperfactory import VarWrapperFactory
 from stdvariablewrapper import StdVariableWrapper
 from ptrvariablewrapper import PtrVariableWrapper
 from structvariablewrapper import StructVariableWrapper
-from variables.variablelist import VariableList
+from variablelist import VariableList
 
 class WatchVWFactory(VarWrapperFactory):
     def __init__(self):

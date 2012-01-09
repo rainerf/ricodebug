@@ -145,8 +145,8 @@ class SignalProxy(QObject):
     def getStlVectorContent(self, vector):
         return self.distributedObjects.stlvector_parser.getContent(vector)
     
-    def openFile(self, file, line):
-        self.distributedObjects.editor_controller.jumpToLine(file, line)
+    def openFile(self, file_, line):
+        self.distributedObjects.editor_controller.jumpToLine(file_, line)
     
     # define further variable operation functions here ...
     

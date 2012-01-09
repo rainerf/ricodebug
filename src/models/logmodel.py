@@ -1,6 +1,5 @@
 from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel
 from PyQt4.QtGui import QSortFilterProxyModel
-from operator import attrgetter
 
 class LogModel(QAbstractTableModel):
     def __init__(self, parent = None):

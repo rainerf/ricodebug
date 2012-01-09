@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
-from PyQt4.QtGui import QDockWidget, QTextCursor
+from PyQt4.QtGui import QDockWidget
 from inferiorioview import InferiorIoView
 
 class InferiorIoController(QObject):

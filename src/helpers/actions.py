@@ -65,7 +65,7 @@ class Actions(QtCore.QObject):
     
     def __init__(self, parent = None):
         QtCore.QObject.__init__(self, parent)
-        self.actions = [None for i in range(self.NumActions)]
+        self.actions = [None for _ in range(self.NumActions)]
         self.initGlobalActions()
         
     def add(self, enum, action):

@@ -23,9 +23,9 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt, SIGNAL
-from tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate, TracepointWaveScene
+from tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate
 from tracepointwaveview import TracepointWaveView
-from logger import Logger
+import logging
 
 class TracepointWaveController(QObject):
     '''Controller for Tracepoint Wave widget. 
@@ -73,23 +73,16 @@ class TracepointWaveController(QObject):
         self.model.zoomOut()
         self.view.resizeColumnsToContents()
            
-    def __updateTracepointWave(self, name, type, value):
+    def __updateTracepointWave(self, name, type_, value):
         ''' Append value to tracepoint wave. Creates new wave if model does not contain wave with name and value type
             @param name: string with variable name
-            @param type: string with type of variable ("bool", "int", "float", "double" supported).
+            @param type_: string with type of variable ("bool", "int", "float", "double" supported).
             @param value: value of variable
         '''             
-        if type in self.supportedTypes:
-            self.model.updateTracepointWave(name, type, value)
-            self.view.resizeColumnsToContents()      
+        if type_ in self.supportedtypes:
+            self.model.updateTracepointWave(name, type_, value)
+            self.view.resizeColumnsToContents()
         else:
-            Logger.getInstance().addLogMessage("TracepointWaveController", "Could not update tracepoint wave. Illegal variable type.", Logger.getInstance().MSG_TYPE_ERROR)
-        
-    
-        
-        
-        
-        
-        
-        
-        
+            logging.error("Could not update tracepoint wave. Illegal variable type.")
+            
+
