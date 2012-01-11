@@ -127,9 +127,9 @@ class DebugController(QObject):
             self.signalProxy.emitInferiorHasExited(rec)
         elif reason == 'breakpoint-hit':
                 stop = False
-                tp = self.distributed_objects.tracepoint_controller.tracepointModel.getTracepointIfAvailable(frame)
+                tp = self.distributed_objects.tracepoint_controller.model().getTracepointIfAvailable(frame)
                 
-                if self.distributed_objects.breakpoint_controller.breakpointModel.isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
+                if self.distributed_objects.breakpoint_controller.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
                     self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False

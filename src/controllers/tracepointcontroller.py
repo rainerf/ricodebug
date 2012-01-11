@@ -32,8 +32,6 @@ from tracepointmodel import TracepointModel
 from tracepointview import TracepointView
 
 class TracepointController(QObject):
-    """ Class contains tracepointModel and tracepointView """
-    
     def __init__(self, distributed_objects):
         """ init tracepoint controller and members.
         @param distributed_objects: passing distributed objects
@@ -47,11 +45,11 @@ class TracepointController(QObject):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
         
-        """@var self.tracepointModel: (TracepointModel), this class provides the model for tracepointView"""
-        self.tracepointModel = TracepointModel(self.distributed_objects)
-        """@var self.tracepointView: (TracepointView), this class presents data from tracepointModel"""
+        """@var self._model: (TracepointModel), this class provides the model for tracepointView"""
+        self._model = TracepointModel(self.distributed_objects)
+        """@var self.tracepointView: (TracepointView), this class presents data from _model"""
         self.tracepointView = TracepointView()        
-        self.tracepointView.tracepointView.setModel(self.tracepointModel)
+        self.tracepointView.tracepointView.setModel(self._model)
         
         #register with session manager to save Tracepoints
         self.distributed_objects.signal_proxy.emitRegisterWithSessionManager(self, "Tracepoints")
@@ -59,14 +57,14 @@ class TracepointController(QObject):
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         QObject.connect(self.tracepointView.tracepointView, SIGNAL('clicked(QModelIndex)'), self.updateWaveforms)  
         QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateWaveforms)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('cleanupModels()'), self.tracepointModel.clearTracepoints)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('runClicked()'), self.tracepointModel.clearTracepointData)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('cleanupModels()'), self._model.clearTracepoints)
+        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('runClicked()'), self._model.clearTracepointData)
         
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
         index = self.tracepointView.getSelectedRow()
         if index != None:
-            self.tracepointModel.selectionMade(index)
+            self._model.selectionMade(index)
         
     def insertDockWidgets(self):
         """needed for plugin system"""
@@ -80,18 +78,18 @@ class TracepointController(QObject):
         @param file_: (string), fullname of file
         @param line: (int), linenumber where the breakpoint should be toggled
         """
-        return self.tracepointModel.toggleTracepoint(file_, line)
+        return self._model.toggleTracepoint(file_, line)
 
     def getTracepointsFromModel(self):
         """returns a list of tracepoints
         @return tracepoints: a list of tracepoints
         """
-        return self.tracepointModel.getTracepoints()
+        return self._model.getTracepoints()
 
     def saveSession(self, xmlHandler):
         """Insert session info to xml file"""
         tpparent = xmlHandler.createNode("Tracepoints")
-        for tp in self.tracepointModel.getTracepoints():
+        for tp in self._model.getTracepoints():
             tpnode = xmlHandler.createNode("Tracepoint", tpparent, { "file": tp.file, "line": tp.line })
             for var in tp.wave:
                 xmlHandler.createNode("TracepointVariable", tpnode, { "name": var.name })
@@ -103,10 +101,12 @@ class TracepointController(QObject):
             childnodes = tpparent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
-                self.tracepointModel.insertTracepoint(attr["file"], attr["line"])
+                self._model.insertTracepoint(attr["file"], attr["line"])
                 
                 vars = childnodes.at(i).childNodes()
                 for j in range(vars.size()):
                     attr = xmlHandler.getAttributes(vars.at(j))
-                    self.tracepointModel.getTracepoints()[i].addVar(attr["name"])
-
+                    self._model.getTracepoints()[i].addVar(attr["name"])
+    
+    def model(self):
+        return self._model

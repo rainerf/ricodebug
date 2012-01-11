@@ -119,10 +119,10 @@ class OpenedFileView(QObject):
 		self.getBreakpointsFromModel()
 		self.getTracepointsFromModel()
 		
-		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getBreakpointsFromModel)
-		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getBreakpointsFromModel)
-		self.connect(self.tracepoint_controller.tracepointModel, SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getTracepointsFromModel)
-		self.connect(self.tracepoint_controller.tracepointModel, SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getTracepointsFromModel)
+		self.connect(self.breakpoint_controller.model(), SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getBreakpointsFromModel)
+		self.connect(self.breakpoint_controller.model(), SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getBreakpointsFromModel)
+		self.connect(self.tracepoint_controller.model(), SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getTracepointsFromModel)
+		self.connect(self.tracepoint_controller.model(), SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getTracepointsFromModel)
 		
 		self.connect(self.distributed_objects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
 		self.connect(self.distributed_objects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
