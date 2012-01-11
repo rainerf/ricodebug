@@ -121,6 +121,8 @@ class OpenedFileView(QObject):
 		
 		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getBreakpointsFromModel)
 		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getBreakpointsFromModel)
+		self.connect(self.tracepoint_controller.tracepointModel, SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getTracepointsFromModel)
+		self.connect(self.tracepoint_controller.tracepointModel, SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getTracepointsFromModel)
 		
 		self.connect(self.distributed_objects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
 		self.connect(self.distributed_objects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
@@ -165,7 +167,7 @@ class OpenedFileView(QObject):
 
 		self.expToWatch = exp
 		
-		listOfTracepoints = self.tracepoint_controller.tracepointModel.getTracepoints()
+		listOfTracepoints = self.tracepoint_controller.getTracepointsFromModel()
 		
 		self.subPopupMenu = QtGui.QMenu(self.edit)
 		self.subPopupMenu.setTitle("Add variable " + exp + " to...")
@@ -276,14 +278,10 @@ class OpenedFileView(QObject):
 			self.toggleTracepointWithLine(line)
 	
 	def toggleBreakpointWithLine(self, line):
-		self.breakpoint_controller.toggleBreakpoint(self.filename, line+1)-1
+		self.breakpoint_controller.toggleBreakpoint(self.filename, line+1)
 			
 	def toggleTracepointWithLine(self, line):
-		tpLine = self.tracepoint_controller.tracepointModel.toggleTracepoint(self.filename, line+1)-1
-		if tpLine < 0:
-			self.edit.markerDelete(line, self.MARGIN_MARKER_TP)
-		else:
-			self.edit.markerAdd(tpLine, self.MARGIN_MARKER_TP)
+		self.tracepoint_controller.toggleTracepoint(self.filename, line+1)
 			
 	def toggleTracepoint(self):
 		self.toggleTracepointWithLine(self.lastContexMenuLine)

@@ -75,6 +75,13 @@ class TracepointController(QObject):
         self.tracepointDock.setWidget(self.tracepointView)
         self.distributed_objects.signal_proxy.addDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
 
+    def toggleTracepoint(self, file_, line):
+        """ toggles the breakpoint in file file_ with linenumber line
+        @param file_: (string), fullname of file
+        @param line: (int), linenumber where the breakpoint should be toggled
+        """
+        return self.tracepointModel.toggleTracepoint(file_, line)
+
     def getTracepointsFromModel(self):
         """returns a list of tracepoints
         @return tracepoints: a list of tracepoints
@@ -102,7 +109,4 @@ class TracepointController(QObject):
                 for j in range(vars.size()):
                     attr = xmlHandler.getAttributes(vars.at(j))
                     self.tracepointModel.getTracepoints()[i].addVar(attr["name"])
-                
-                
-                
-                
+
