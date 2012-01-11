@@ -79,7 +79,7 @@ class TracepointWaveController(QObject):
             @param type_: string with type of variable ("bool", "int", "float", "double" supported).
             @param value: value of variable
         '''             
-        if type_ in self.supportedtypes:
+        if type_ in self.supportedTypes:
             self.model.updateTracepointWave(name, type_, value)
             self.view.resizeColumnsToContents()
         else:
