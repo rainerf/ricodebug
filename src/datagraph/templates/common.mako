@@ -6,9 +6,9 @@
 ##
 <%def name="open_close_entry(id_, varWrapper)">
 %	if varWrapper.isOpen:
-		<img onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png">
+		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png">
 %	else:
-		<img onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png">
+		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png">
 %	endif
 </%def>
 ##
@@ -17,7 +17,7 @@
 <%def name="simple_entry(role, id_, icon, varWrapper, openclose=False)">
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
-		<td nowrap>
+		<td nowrap class="varaccess">
 <%	if varWrapper.getAccess() in ['private', 'protected']:
 		iconprefix = varWrapper.getAccess() + "_"
 	else:
@@ -25,16 +25,16 @@
 %>\
 			<img src="qrc:icons/images/${iconprefix}${icon}">
 %		if varWrapper.getAccess():
-			<span class="graph_access"> ${varWrapper.getAccess()}</span>
+			<span class="varaccess"> ${varWrapper.getAccess()}</span>
 %		endif
 		</td>
-		<td nowrap>
-			<span class="graph_typename"> ${varWrapper.getType()}</span>
+		<td nowrap class="vartype">
+			<span class="vartype"> ${varWrapper.getType()}</span>
 		</td>
-		<td nowrap>
-			<span class="graph_varname"> ${varWrapper.getExp()}</span>
+		<td nowrap class="varname">
+			<span class="varname"> ${varWrapper.getExp()}</span>
 		</td>
-		<td nowrap>
+		<td nowrap class="open_close">
 %		if openclose:
 			${open_close_entry(id_, varWrapper)}
 %		else:
@@ -57,8 +57,8 @@
 	<tr class="header" id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td nowrap>
 			<img src="qrc:icons/images/${icon}">
-			<span class="graph_typename"> ${varWrapper.getType()}</span> 
-			<span class="graph_varname"> ${varWrapper.getExp()}</span>
+			<span class="vartype"> ${varWrapper.getType()}</span> 
+			<span class="varname"> ${varWrapper.getExp()}</span>
 			${open_close_entry(id_, varWrapper)}
 		</td>
 	</tr>

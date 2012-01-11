@@ -4,13 +4,17 @@
 <html>
 <body>
 <style>
-span.graph_typename { color: rgb(0, 0, 120); }
-span.graph_varname { font-weight: bold; }
-span.graph_access { color: rgb(90, 90, 90); }
+span.vartype { color: rgb(0, 0, 120); }
+span.varname { font-weight: bold; }
+span.varaccess { color: rgb(90, 90, 90); }
 span.gdbconsole_output_ok { color: green; }
 span.gdbconsole_output_error { color: red; }
 table { border-spacing: 0pt; }
-td {padding: 2pt; vertical-align:top;}
+td {padding: 2pt; }
+td.vartype {vertical-align:top;}
+td.varname {vertical-align:top;}
+td.varaccess {vertical-align:top;}
+td.open_close {vertical-align:top;}
 td.withborder { border-left: 1pt solid; border-left-color: rgba(200, 200, 200, 1)}
 table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; }
 table.variablechild {border: 1pt solid rgba(200, 200, 200, 1);}
