@@ -79,7 +79,7 @@
 %		if varWrapper.isOpen:
 			${caller.body()}
 %		else:
-			<tr><td>...</td></tr>
+			<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')"><td>...</td></tr>
 %		endif
 			</table>
 </%call>
