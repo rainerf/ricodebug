@@ -114,8 +114,14 @@ class OpenedFileView(QObject):
 		QObject.connect(self.edit, SIGNAL("SCN_DOUBLECLICK(int, int, int)"), self.editDoubleClicked)
 		QObject.connect(self.edit, SIGNAL("SCN_DWELLSTART(int, int, int)"), self.dwellStart)
 		QObject.connect(self.edit, SIGNAL("SCN_DWELLEND(int, int, int)"), self.dwellEnd)
+		
+		# initially, read all breakpoints and tracepoints from the model
 		self.getBreakpointsFromModel()
 		self.getTracepointsFromModel()
+		
+		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getBreakpointsFromModel)
+		self.connect(self.breakpoint_controller.breakpointModel, SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getBreakpointsFromModel)
+		
 		self.connect(self.distributed_objects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
 		self.connect(self.distributed_objects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
 		self.connect(self.distributed_objects.actions.actions[Actions.AddVarToDataGraph], SIGNAL('triggered()'), self.AddVarToDataGraph)
@@ -174,11 +180,11 @@ class OpenedFileView(QObject):
 			self.subPopupMenu.addAction(self.action)
 
 		self.popupMenu = QtGui.QMenu(self.edit)
-		# add watch and tollge breakpoint to menu
+		# add watch and toggle breakpoint to menu
 		self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.AddWatch])
 		self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.ToggleTrace])
 		self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.AddVarToDataGraph])
-		# add seperator and self.subPopupMenu
+		# add separator and self.subPopupMenu
 		self.popupMenu.addSeparator()
 		self.popupMenu.addMenu(self.subPopupMenu)
 		self.popupMenu.popup(point)
@@ -270,11 +276,7 @@ class OpenedFileView(QObject):
 			self.toggleTracepointWithLine(line)
 	
 	def toggleBreakpointWithLine(self, line):
-		bpLine = self.breakpoint_controller.toggleBreakpoint(self.filename, line+1)-1
-		if bpLine < 0:
-			self.edit.markerDelete(line, self.MARGIN_MARKER_BP)
-		else:
-			self.edit.markerAdd(bpLine, self.MARGIN_MARKER_BP)
+		self.breakpoint_controller.toggleBreakpoint(self.filename, line+1)-1
 			
 	def toggleTracepointWithLine(self, line):
 		tpLine = self.tracepoint_controller.tracepointModel.toggleTracepoint(self.filename, line+1)-1
@@ -285,22 +287,20 @@ class OpenedFileView(QObject):
 			
 	def toggleTracepoint(self):
 		self.toggleTracepointWithLine(self.lastContexMenuLine)
-			
-	# Todo: An neue Breakpointlogik anpassen wenn dann soweit...
-	def getBreakpointsFromModel(self):
-		"""Get breakpoints from model every time file is reopened."""
-		self.bpLines = []
+	
+	def getBreakpointsFromModel(self, parent=None, start=None, end=None):
+		"""Get breakpoints from model."""
+		# TODO: don't reload all breakpoints, just the one referenced by parent/start/end
+		self.edit.markerDeleteAll(self.MARGIN_MARKER_BP)
 		for bp in self.breakpoint_controller.getBreakpointsFromModel():
 			if bp.fullname == self.filename:
-				self.bpLines.append(int(bp.line)-1)
 				self.edit.markerAdd(int(bp.line)-1, self.MARGIN_MARKER_BP)
 		
 	def getTracepointsFromModel(self):
-		"""Get breakpoints from model every time file is reopened."""
-		self.tpLines = []
+		"""Get tracepoints from model."""
+		self.edit.markerDeleteAll(self.MARGIN_MARKER_TP)
 		for tp in self.tracepoint_controller.getTracepointsFromModel():
 			if tp.fullname == self.filename:
-				self.tpLines.append(int(tp.line)-1)
 				self.edit.markerAdd(int(tp.line)-1, self.MARGIN_MARKER_TP)
 				
 
