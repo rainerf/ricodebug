@@ -4,14 +4,6 @@ from PyQt4 import QtCore
 from ctags_support import EntryList, EntryItem, Function
 import os
 
-# plugin requirements:
-#  - plugin must be a package inside folder "plugins"
-#  - package must contain one file ending with "Plugin.py" (e.g. SamplePlugin.py)
-#  - this file must contain a class named like the file (e.g. SamplePlugin)
-#  - this class must implement the functions initPlugin(signalproxy) and deInitPlugin() to load/unload plugin
-#
-# The variable PluginName in the __init__.py file of each package may be used to define a name for the plugin
-
 from PyQt4.QtCore import QThread
 
 class CTagsRunner(QThread):
@@ -85,10 +77,12 @@ class NavigationPlugin(QtCore.QObject):
         # add widget to mainwindow
         self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
         QtCore.QObject.connect(self.signalproxy.distributedObjects.debug_controller, QtCore.SIGNAL('executableOpened'), self.update)
-        #QtCore.QObject.connect(self.view, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.viewDoubleClicked)
         
         self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
         QtCore.QObject.connect(self.ctagsRunner, QtCore.SIGNAL("tagsFileAvailable()"), self.tagsFileReady, Qt.QueuedConnection)
+        
+        # load the tags if the plugin was loaded after the executable
+        self.update()
         
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
@@ -97,10 +91,10 @@ class NavigationPlugin(QtCore.QObject):
         
     def update(self):
         sources = self.signalproxy.distributedObjects.gdb_connector.getSources()
-        self.ctagsRunner.oneshot(sources)
+        if len(sources) > 0:
+            self.ctagsRunner.oneshot(sources)
         
     def tagsFileReady(self):
         self.entrylist.readFromFile(self.ctagsRunner.tmpFile)
-        self.view.setModel(self.entrylist.model)
         os.remove(self.ctagsRunner.tmpFile)
 
