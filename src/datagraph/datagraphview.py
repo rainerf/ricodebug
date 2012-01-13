@@ -25,7 +25,6 @@
 from PyQt4.QtCore import Qt, pyqtSlot
 from PyQt4.QtGui import QGraphicsView, QGraphicsScene, QMenu, QIcon
 import logging
-import datagraph.htmlvariableview
 import pointer
 import htmlvariableview
 
@@ -114,8 +113,7 @@ class DataGraphView(QGraphicsView):
 		g = pydot.Dot(graph_type="digraph")
 		#g.set_rankdir('LR')
 		for i in self.scene().items():
-			print type(i)
-			if type(i) is datagraph.htmlvariableview.HtmlVariableView or type(i) is htmlvariableview.HtmlVariableView:
+			if isinstance(i, htmlvariableview.HtmlVariableView):
 				n = pydot.Node(str(index))
 				items.append(i)
 				index = index + 1
@@ -129,10 +127,9 @@ class DataGraphView(QGraphicsView):
 				n.set_height(str(float(br.height())/72))
 		
 		for i in self.scene().items():
-			if type(i) is pointer.Pointer:
+			if isinstance(i, pointer.Pointer):
 				g.add_edge(pydot.Edge(nodes[i.fromView], nodes[i.toView]))
-				
-			
+		
 		g_with_pos = pydot.graph_from_dot_data(g.create_dot())
 		for n in g_with_pos.get_nodes():
 			pos = n.get_pos()
