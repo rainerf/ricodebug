@@ -47,9 +47,6 @@ class VariableWrapper(QObject):
     
     def getExp (self):
         return self.variable.getExp()
-
-    def getName (self):
-        return self.variable.getName()
     
     def getType (self):
         return self.variable.getType()
