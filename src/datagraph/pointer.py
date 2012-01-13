@@ -25,6 +25,7 @@
 from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem, QPainter
 from PyQt4.QtCore import QObject, QPointF, SIGNAL, QLineF, QRectF, QSizeF
 import math
+import logging
 
 class Pointer(QGraphicsLineItem):
     """ QGraphicsPolygonItem to model a Pointer as an Arrow from a Pointer-Variable to its Content. """
@@ -193,9 +194,14 @@ class Pointer(QGraphicsLineItem):
             painter.drawLine(self.line())
             painter.drawPolygon(self.arrowhead)
         
-
     def delete(self):
         """ removes the pointer from the DataGraph """
         self.toView.incomingPointers.remove(self)
         self.fromView.outgoingPointers.remove(self)
         self.distributedObjects.datagraph_controller.removePointer(self)
+    
+    def setX(self, _):
+        logging.error("Ignoring setting our Pointer's x position")
+
+    def setY(self, _):
+        logging.error("Ignoring setting our Pointer's y position")
