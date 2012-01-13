@@ -25,8 +25,8 @@
 """ @package controllers.watchcontroller    the WatchController """
 
 from PyQt4.QtCore import QObject, SIGNAL
-from variablemodel import VariableModel
-from watchview import WatchView
+from models.variablemodel import VariableModel
+from views.watchview import WatchView
 from treeitemcontroller import TreeItemController
 
 #####################################################################################

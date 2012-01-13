@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from varwrapperfactory import VarWrapperFactory
+from variables.varwrapperfactory import VarWrapperFactory
 from stdvariableview import StdDataGraphVW
 from ptrvariableview import PtrDataGraphVW
 from structvariableview import StructDataGraphVW

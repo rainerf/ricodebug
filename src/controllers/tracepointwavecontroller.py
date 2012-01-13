@@ -23,8 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt, SIGNAL
-from tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate
-from tracepointwaveview import TracepointWaveView
+from models.tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate
+from views.tracepointwaveview import TracepointWaveView
 import logging
 
 class TracepointWaveController(QObject):

@@ -23,8 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL
-from localsmodel import LocalsModel
-from localsview import LocalsView
+from models.localsmodel import LocalsModel
+from views.localsview import LocalsView
 from treeitemcontroller import TreeItemController
 
 

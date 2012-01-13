@@ -26,11 +26,11 @@ from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
 from PyQt4.QtGui import QItemDelegate
 from operator import attrgetter
 from breakpointmodel import ExtendedBreakpoint
-from variablelist import VariableList
-from varwrapperfactory import VarWrapperFactory
-from stdvariablewrapper import StdVariableWrapper
-from ptrvariablewrapper import PtrVariableWrapper
-from structvariablewrapper import StructVariableWrapper
+from variables.variablelist import VariableList
+from variables.varwrapperfactory import VarWrapperFactory
+from variables.stdvariablewrapper import StdVariableWrapper
+from variables.ptrvariablewrapper import PtrVariableWrapper
+from variables.structvariablewrapper import StructVariableWrapper
 
 class TraceVWFactory(VarWrapperFactory):
     """ using the variable model concept. see variable model"""

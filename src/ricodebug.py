@@ -34,17 +34,8 @@ import sys
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import pyqtRemoveInputHook, QDir
 
-sys.path.append(sys.path[0] + '/models')
-sys.path.append(sys.path[0] + '/views')
-sys.path.append(sys.path[0] + '/controllers')
-sys.path.append(sys.path[0] + '/helpers')
-sys.path.append(sys.path[0] + '/tests')
-sys.path.append(sys.path[0] + '/plugins')
-sys.path.append(sys.path[0] + '/variables')
-sys.path.append(sys.path[0] + '/datagraph')
-
-from mainwindow import MainWindow
-import logview
+from views.mainwindow import MainWindow
+from views import logview
 
 ## The main routine.
 def main():

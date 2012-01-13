@@ -23,9 +23,9 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL
-from editorview import EditorView
+from views.editorview import EditorView
 
-class EditorController(QObject):        
+class EditorController(QObject):
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects

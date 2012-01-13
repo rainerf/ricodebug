@@ -2,7 +2,7 @@
 	import time
 	import os
 	from PyQt4 import QtCore
-	from datagraphvw import Role
+	from datagraph.datagraphvw import Role
 %>\
 <%namespace name="common" file="/common.mako"/>\
 <%

@@ -28,8 +28,8 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from tracepointmodel import TracepointModel
-from tracepointview import TracepointView
+from models.tracepointmodel import TracepointModel
+from views.tracepointview import TracepointView
 
 class TracepointController(QObject):
     def __init__(self, distributed_objects):

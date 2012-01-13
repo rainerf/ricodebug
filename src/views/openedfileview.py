@@ -27,7 +27,7 @@ from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from math import log, ceil
-from actions import ActionEx, Actions
+from helpers.actions import ActionEx, Actions
 import logging
 
 class OpenedFileView(QObject):

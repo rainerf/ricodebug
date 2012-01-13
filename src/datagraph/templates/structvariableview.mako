@@ -1,5 +1,5 @@
 <%!
-	from datagraphvw import Role
+	from datagraph.datagraphvw import Role
 %>\
 <%namespace name="common" file="/common.mako"/>\
 <%call expr="common.complex_entry(role, id, 'struct.png', varWrapper)">

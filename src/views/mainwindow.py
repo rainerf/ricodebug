@@ -25,11 +25,11 @@
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from ui_mainwindow import Ui_MainWindow
-from distributedobjects import DistributedObjects
-from recentfilehandler import OpenRecentFileAction, RecentFileHandler
-from actions import Actions
-from pluginloader import PluginLoader
-from quickwatch import QuickWatch
+from helpers.distributedobjects import DistributedObjects
+from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
+from helpers.actions import Actions
+from helpers.pluginloader import PluginLoader
+from controllers.quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):

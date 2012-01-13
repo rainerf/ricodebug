@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL
-from gdboutput import GdbOutput
+from helpers.gdboutput import GdbOutput
 from stdvariable import StdVariable
 from ptrvariable import PtrVariable
 from structvariable import StructVariable

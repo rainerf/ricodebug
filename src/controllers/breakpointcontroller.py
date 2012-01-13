@@ -28,8 +28,8 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from breakpointmodel import BreakpointModel
-from breakpointview import BreakpointView
+from models.breakpointmodel import BreakpointModel
+from views.breakpointview import BreakpointView
 
 
 

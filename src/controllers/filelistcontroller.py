@@ -24,11 +24,10 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from filelistmodel import FileListModel
-from filelistview import FileListView
+from models.filelistmodel import FileListModel
+from views.filelistview import FileListView
 
 class FileListController(QObject):
-    
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects

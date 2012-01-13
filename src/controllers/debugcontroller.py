@@ -24,8 +24,8 @@
 
 import os
 from PyQt4.QtCore import QObject, SIGNAL, Qt, QSettings
-from ptyhandler import PtyHandler
-from gdboutput import GdbOutput
+from helpers.ptyhandler import PtyHandler
+from helpers.gdboutput import GdbOutput
 import logging
 
 class DebugController(QObject):

@@ -1,5 +1,5 @@
 <%!
-	from datagraphvw import Role
+	from datagraph.datagraphvw import Role
 %>\
 ##
 ###############################################################################

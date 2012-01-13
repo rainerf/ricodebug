@@ -25,8 +25,8 @@
 from PyQt4 import QtGui
 from PyQt4.QtGui import QTreeView, QMenu
 from PyQt4.QtCore import SIGNAL, QObject, Qt
-import filters
-from treeitemcontroller import TreeStdVarWrapper
+from variables import filters
+from controllers.treeitemcontroller import TreeStdVarWrapper
 
 
 class TreeItemView(QTreeView):

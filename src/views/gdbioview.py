@@ -26,8 +26,8 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from stylesheets import STYLESHEET
-from tools import unBackslashify
-from gdboutput import GdbOutput
+from helpers.tools import unBackslashify
+from helpers.gdboutput import GdbOutput
 
 class GdbIoView(QWidget):
     def __init__(self, debug_controller, parent = None):

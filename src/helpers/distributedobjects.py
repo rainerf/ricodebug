@@ -22,24 +22,24 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from debugcontroller import DebugController
+from controllers.debugcontroller import DebugController
 from signalproxy import SignalProxy 
-from editorcontroller import EditorController
+from controllers.editorcontroller import EditorController
 from gdbconnector import GdbConnector
-from filelistcontroller import FileListController
-from stackcontroller import StackController
-from localscontroller import LocalsController
-from breakpointcontroller import BreakpointController
-from tracepointcontroller import TracepointController
-from watchcontroller import WatchController
-from pyiocontroller import PyIoController
-from inferioriocontroller import InferiorIoController
-from gdbiocontroller import GdbIoController
-from datagraphcontroller import DataGraphController
-from variablepool import VariablePool
+from controllers.filelistcontroller import FileListController
+from controllers.stackcontroller import StackController
+from controllers.localscontroller import LocalsController
+from controllers.breakpointcontroller import BreakpointController
+from controllers.tracepointcontroller import TracepointController
+from controllers.watchcontroller import WatchController
+from controllers.pyiocontroller import PyIoController
+from controllers.inferioriocontroller import InferiorIoController
+from controllers.gdbiocontroller import GdbIoController
+from datagraph.datagraphcontroller import DataGraphController
+from variables.variablepool import VariablePool
 from actions import Actions
 from stlvectorparser import StlVectorParser
-from tracepointwavecontroller import TracepointWaveController
+from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
 
 class DistributedObjects:

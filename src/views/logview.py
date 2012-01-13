@@ -2,7 +2,7 @@ import logging
 from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
 from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
 from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
-from logmodel import LogModel, FilteredLogModel
+from models.logmodel import LogModel, FilteredLogModel
 
 class LogViewHandler(logging.Handler):
     def __init__(self, target_widget, filter_slider):

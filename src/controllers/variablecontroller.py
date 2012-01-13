@@ -23,13 +23,13 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, SIGNAL
-from signalproxy import SignalProxy
+from helpers.signalproxy import SignalProxy
 from debugcontroller import DebugController
-from varwrapperfactory import VarWrapperFactory
-from stdvariablewrapper import StdVariableWrapper
-from ptrvariablewrapper import PtrVariableWrapper
-from structvariablewrapper import StructVariableWrapper
-from variablelist import VariableList
+from variables.varwrapperfactory import VarWrapperFactory
+from variables.stdvariablewrapper import StdVariableWrapper
+from variables.ptrvariablewrapper import PtrVariableWrapper
+from variables.structvariablewrapper import StructVariableWrapper
+from variables.variablelist import VariableList
 
 class WatchVWFactory(VarWrapperFactory):
     def __init__(self):

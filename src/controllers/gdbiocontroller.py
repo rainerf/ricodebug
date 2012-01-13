@@ -24,10 +24,9 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from gdbioview import GdbIoView
+from views.gdbioview import GdbIoView
 
 class GdbIoController(QObject):
-    
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects

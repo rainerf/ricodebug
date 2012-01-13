@@ -24,10 +24,9 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from inferiorioview import InferiorIoView
+from views.inferiorioview import InferiorIoView
 
 class InferiorIoController(QObject):
-    
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects

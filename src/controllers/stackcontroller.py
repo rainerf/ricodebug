@@ -24,11 +24,10 @@
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
-from stackmodel import StackModel
-from stackview import StackView
+from models.stackmodel import StackModel
+from views.stackview import StackView
 
 class StackController(QObject):
-    
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
