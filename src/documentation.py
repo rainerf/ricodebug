@@ -50,3 +50,4 @@
 # - python-matplotlib 1.0.1-3
 # - python-ctags 1.0.5 (installable using easy_install)
 # - exuberant-ctags 1:5.9~svn20110310-2
+# - pyqt4-dev-tools (for building resources and UI files)
