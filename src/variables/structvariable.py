@@ -24,24 +24,25 @@
 
 from variables.variable import Variable
 
-class StructVariable(Variable) :
+
+class StructVariable(Variable):
     """ Class holding a Struct-Variable. """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None, pending=None):
+    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type_=None, value=None, inscope=None, haschildren=None, access=None, pending=None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type, value, inscope, haschildren, access, pending, "%(parent)s.%(child)s")
-    
+        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_, value, inscope, haschildren, access, pending, "%(parent)s.%(child)s")
+
     def getChildren(self):
         """ Returns a List with all Members of the struct.
         @return    List of Variables, Members of the struct. """
         return self._getChildItems()
-    
+
     def makeWrapper(self, vwFactory):
         """ Returns a VariableWrapper for the Variable. <br>
             The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper 
+        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
         @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
         """
         return vwFactory.makeStructVarWrapper(self)

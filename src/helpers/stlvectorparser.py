@@ -24,32 +24,33 @@
 
 from PyQt4.QtCore import QObject
 
+
 class StlVectorParser(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
-        self.signalProxy = distributedObjects.signal_proxy
+        self.signalProxy = distributedObjects.signalProxy
 
     def getSize(self, vector):
         size = None
-        size_var = self.signalProxy.gdbEvaluateExpression("(" + vector + ").size()");
-        
+        size_var = self.signalProxy.gdbEvaluateExpression("(" + vector + ").size()")
+
         if size_var is not None:
             size = int(size_var)
-        
+
         return size
-        
+
     def getContent(self, vector):
         size = self.getSize(vector)
-        
+
         if size is None:
             return None
-        
+
         content = []
-        
+
         for i in range(0, size):
-            res = self.signalProxy.gdbEvaluateExpression("(" + vector + ").begin()._M_current+" + str(i));
+            res = self.signalProxy.gdbEvaluateExpression("(" + vector + ").begin()._M_current+" + str(i))
             if res is not None:
                 content.append(res)
-                
+
         return content

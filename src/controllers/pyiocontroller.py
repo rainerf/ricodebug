@@ -26,19 +26,18 @@ from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
 from views.pyioview import PyIoView
 
+
 class PyIoController(QObject):
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
-        
-        self.pyioView = PyIoView(self.distributed_objects.debug_controller)
-        
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        
+
+        self.pyioView = PyIoView(self.distributed_objects.debugController)
+
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+
     def insertDockWidgets(self):
         self.pyioDock = QDockWidget("Python Console")
         self.pyioDock.setObjectName("PyIoView")
         self.pyioDock.setWidget(self.pyioView)
-        self.distributed_objects.signal_proxy.addDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)
-        
-        
+        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)

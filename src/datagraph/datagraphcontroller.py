@@ -43,27 +43,27 @@ class DataGraphController(QObject):
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         QObject.__init__(self)
-        
+
         # controllers
         ## @var distributedObjects
         # distributedobjects.DistributedObjects, the DistributedObjects-Instance
         self.distributedObjects = distributedObjects
         ## @var signalProxy
         # signalproxy.SignalProxy, the SignalProxy-Instance from the DistributedObjects
-        self.signalProxy = distributedObjects.signal_proxy
-        ## @var debug_controller
+        self.signalProxy = distributedObjects.signalProxy
+        ## @var debugController
         # debugcontroller.DebugController, the DebugController-Instance from the DistributedObjects
-        self.debug_controller = distributedObjects.debug_controller
+        self.debugController = distributedObjects.debugController
         ## @var variablePool
         # variables.variablepool.VariablePool, the variablePool-Instance from the DistributedObjects
-        self.variablePool = distributedObjects.variable_pool
-        
+        self.variablePool = distributedObjects.variablePool
+
         # views
         ## @var data_graph_view
         # datagraph.datagraphview.DataGraphView, private, self-created DataGraphView <br>
         # GUI-Element that shows the DataGraphView
         self.data_graph_view = DataGraphView(None, self)
-        
+
         # models
         ## @var vwFactory
         # datagraph.datagraphvwfactory.DataGraphVWFactory, private, self-created DataGraphVWFactory
@@ -71,17 +71,17 @@ class DataGraphController(QObject):
         ## @var variableList
         # variables.variablelist.VariableList, private, self-created VariableList
         self.variableList = VariableList(self.vwFactory, self.distributedObjects)
-        
+
         self.pointerList = []
-        
+
         #register with session manager to save Graph
         self.signalProxy.emitRegisterWithSessionManager(self, "Graph")
-        
+
         # connect signals
         #QObject.connect(self.variableList, SIGNAL('reset()'), self.repaintDataGraph)
         QObject.connect(self.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         QObject.connect(self.signalProxy, SIGNAL('cleanupModels()'), self.clearDataGraph)
-        
+
     def insertDockWidgets(self):
         """ adds the Datagraph-DockWidget to the GUI <br>
             this function is connected to the signal SignalProxy::insertDockWidgets() """
@@ -89,7 +89,7 @@ class DataGraphController(QObject):
         self.dataGraphDock.setObjectName("DataGraphView")
         self.dataGraphDock.setWidget(self.data_graph_view)
         self.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
-    
+
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph
         @param watch    variables.variable.Variable, the Variable to watch to add
@@ -99,7 +99,7 @@ class DataGraphController(QObject):
         varWrapper = self.variableList.addVarByName(watch)
         self.addVar(varWrapper, xPos, yPos, False)
         return varWrapper
-    
+
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
             also to the VariableList
@@ -120,7 +120,7 @@ class DataGraphController(QObject):
         if addVarToList == True:
             self.variableList.addVar(varWrapper)
         QObject.connect(varWrapper, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
-    
+
     def replaceVariable(self, pendingVar, newVar):
         """ replaces existing variable in list with new one
         @param pendingVar    variables.variable.Variable, the pending Variable to replace with newVar
@@ -133,49 +133,49 @@ class DataGraphController(QObject):
         #    self.addPointer(pointer.getFromView(), newVW.getView())
         #for pointer in pendingVar.getView().getOutgoingPointers():
         #    self.addPointer(newVW.getView(), pointer.getToView())
-    
+
     def removeVar(self, varWrapper):
         """ removes the given varWrapper from the DataGraphView and the PointerList
         @param varWrapper    variables.variablewrapper.VariableWrapper, the VariableWrapper to remove
         """
         self.variableList.removeVar(varWrapper)
         self.data_graph_view.removeItem(varWrapper.getView())
-    
+
     def addPointer(self, fromView, toView):
         """ fromView and toView are QGraphicsWebViews
-        @param fromView  datagraph.htmlvariableview.HtmlVariableView, starting point of the Pointer  
+        @param fromView  datagraph.htmlvariableview.HtmlVariableView, starting point of the Pointer
         @param toView    datagraph.htmlvariableview.HtmlVariableView, end point of the Pointer
         """
         pointer = Pointer(None, fromView, toView, self.distributedObjects)
         self.data_graph_view.addItem(pointer)
         self.pointerList.append(pointer)
-    
+
     def removePointer(self, pointer):
         """ removes the given pointer from the DataGraphView and the PointerList
         @param pointer    datagraph.pointer.Pointer, pointer to remove
         """
         self.data_graph_view.removeItem(pointer)
         self.pointerList.remove(pointer)
-    
+
     def clearDataGraph(self):
         """ clears the DataGraphView and the VariableList <br>
             this function is connected to the signal SignalProxy::cleanupModels()
         """
         self.variableList.clear()
         self.data_graph_view.clear()
-    
+
     def saveSession(self, xmlHandler):
         """ Insert session info to xml file
         @param xmlHandler    sessionmanager.XmlHandler, handler to write to the session-xml-file
         """
         dgWatches = xmlHandler.createNode("GraphWatches")
         for vw in self.variableList:
-            xmlHandler.createNode("Watch", dgWatches, { 'expression': vw.getExp(), 'xPos': vw.getXPos(), 'yPos': vw.getYPos()})
+            xmlHandler.createNode("Watch", dgWatches, {'expression': vw.getExp(), 'xPos': vw.getXPos(), 'yPos': vw.getYPos()})
         #dgPointers = xmlHandler.createNode("Pointers")
         #for pointer in self.pointerList:
         #    xmlHandler.createNode("Pointer", dgPointers, { 'expFrom': pointer.fromView.var.getExp(), 'expTo': pointer.toView.var.getExp() })
-             
-    def loadSession(self, xmlHandler): 
+
+    def loadSession(self, xmlHandler):
         """ load session info to xml file
         @param xmlHandler    sessionmanager.XmlHandler, handler to read from the session-xml-file
         """
@@ -205,7 +205,7 @@ class DataGraphController(QObject):
 #        """
 #        @param watch    string, the watch-Expression of the desired Variable
 #        @return         variables.variable.Variable, the desired Variable with var.getExp() == watch
-#        """ 
+#        """
 #        for var in self.variableList:
 #            if var.getExp() == watch:
 #                return var

@@ -22,74 +22,64 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-'''
-Created on Nov 29, 2010
-
-@author: bschen
-'''
 from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QMessageBox
 import logging
 
+
 class Logger(QObject):
-    """ Logging class implemented as singleton. 
+    """ Logging class implemented as singleton.
         Writes messages to a file and shows them in pop-ups. """
     _instance = None
 
     MSG_TYPE_INFO = 0
     MSG_TYPE_WARNING = 1
     MSG_TYPE_ERROR = 2
-    
+
     @classmethod
     def getInstance(cls):
         if not cls._instance:
             cls._instance = Logger()
         return cls._instance
-    
+
     def init(self, logFileName, popUpParent):
         """ Initializes logger class. Requires parent for popup and a log filename. """
-        #init filename        
+        #init filename
         if (len(logFileName) != 0):
             self.mainwindow = popUpParent
             self.logFilename = logFileName
             #create file
             self.logger = logging.getLogger(self.logFilename)
             self.logger.setLevel(logging.DEBUG)
-            
+
             # create file handler and set level to debug
             fhandler = logging.FileHandler(self.logFilename)
             fhandler.setLevel(logging.DEBUG)
-            
-            # create formatter 
+
+            # create formatter
             formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
             fhandler.setFormatter(formatter)
-            
+
             # add handler to logger
-            self.logger.addHandler(fhandler)   
-            self.isInitialized = True 
+            self.logger.addHandler(fhandler)
+            self.isInitialized = True
 
     def __init__(self):
         """ Constructor """
         self.isInitialized = False
-            
-    def addLogMessage(self, msgSrc, msgStr, msgType, msgPopUp = False):
+
+    def addLogMessage(self, msgSrc, msgStr, msgType, msgPopUp=False):
         """ Writes a message to the logfile. Opens a popup if msgPopUp is true. """
         if (self.isInitialized == True):
             if (msgType == self.MSG_TYPE_INFO):
                 self.logger.info(msgSrc + ": " + msgStr)
-                if (msgPopUp == True): 
+                if (msgPopUp == True):
                     QMessageBox.information(None, "Information", msgStr)
             elif (msgType == self.MSG_TYPE_WARNING):
                 self.logger.warn(msgSrc + ": " + msgStr)
-                if (msgPopUp == True): 
+                if (msgPopUp == True):
                     QMessageBox.warning(None, "Warning", msgStr)
             elif (msgType == self.MSG_TYPE_ERROR):
                 self.logger.error(msgSrc + ": " + msgStr)
-                if (msgPopUp == True): 
+                if (msgPopUp == True):
                     QMessageBox.critical(self.mainwindow, "Error", msgStr)
-            
-        
-           
-        
-
-        

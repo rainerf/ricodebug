@@ -25,9 +25,10 @@
 from PyQt4.QtCore import QObject, SIGNAL
 import filters
 
+
 class VariableWrapper(QObject):
     """ Parent of all Variable-Wrapper-Classes """
-    
+
     def __init__(self, variable):
         """ Constructor
         @param variable    variables.variable.Variable, Variable to wrap with the new DataGraphVW
@@ -36,38 +37,38 @@ class VariableWrapper(QObject):
         self.variable = variable
         self.connect(self.variable, SIGNAL('changed()'), self.varChanged)
         self.connect(self.variable, SIGNAL('replace(PyQt_PyObject)'), self.varReplace)
-    
+
         self.filter = filters.Empty
-    
+
     def varChanged(self):
         self.emit(SIGNAL('changed()'))
-        
+
     def varReplace(self, var):
         self.emit(SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self, var)
-    
-    def getExp (self):
+
+    def getExp(self):
         return self.variable.getExp()
-    
-    def getType (self):
+
+    def getType(self):
         return self.variable.getType()
-    
+
     def getUnfilteredValue(self):
         return self.variable.getValue()
-    
-    def getValue (self):
+
+    def getValue(self):
         return self.filter.toDisplay(self.getUnfilteredValue())
-    
-    def setValue (self, value):
+
+    def setValue(self, value):
         self.variable.setValue(value)
-        
-    def getInScope (self):
+
+    def getInScope(self):
         return self.variable.getInScope()
-    
+
     def getAccess(self):
         return self.variable.getAccess()
 
     def setFilter(self, f):
         self.filter = f
-    
+
     def getFilter(self):
         return self.filter

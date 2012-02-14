@@ -25,19 +25,20 @@
 from PyQt4.QtCore import QObject, SIGNAL
 from views.editorview import EditorView
 
+
 class EditorController(QObject):
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
-        
-        self.editor_view = EditorView(self.distributed_objects);
-        
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('saveFile()'), self.saveCurrentFile)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified) 
-        
+
+        self.editor_view = EditorView(self.distributed_objects)
+
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('saveFile()'), self.saveCurrentFile)
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified)
+
     def jumpToLine(self, filename, line):
         line = int(line) - 1
         self.editor_view.openFile(filename)
@@ -45,22 +46,22 @@ class EditorController(QObject):
         file_.showLine(line)
         editor = file_.edit
         editor.setSelection(line, 0, line, editor.lineLength(line))
-        
+
     def addStackMarker(self, filename, line):
         line = int(line) - 1
         self.editor_view.openFile(filename)
         file_ = self.editor_view.openedFiles[filename]
         editor = file_.edit
         editor.markerAdd(line, file_.MARGIN_MARKER_STACK)
-    
+
     def delStackMarkers(self, filename):
         self.editor_view.openFile(filename)
         file_ = self.editor_view.openedFiles[filename]
         editor = file_.edit
         editor.markerDeleteAll(file_.MARGIN_MARKER_STACK)
-            
+
     def saveCurrentFile(self):
         self.editor_view.getCurrentOpenedFile().saveFile()
-        
+
     def closeOpenedFiles(self):
         return self.editor_view.removeAllTabs()

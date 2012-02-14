@@ -24,25 +24,26 @@
 
 from PyQt4.QtCore import QObject, SIGNAL
 
+
 class Variable(QObject):
     """ Class holding a Variable. <br>
         This is the Parent of all Variable-Classes and the Core of all VariableWrappers.
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None, pending=False, childformat = None):
+    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type_=None, value=None, inscope=None, haschildren=None, access=None, pending=False, childformat=None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
         QObject.__init__(self)
-        
+
         self.variablepool = variablepool
-        
+
         # initialize all attributes with default values
         self.exp = exp
         self.gdbname = gdbname
         self.uniquename = uniquename
-        self.type = type
+        self.type = type_
         self.value = value
         self.inscope = inscope
         self.haschildren = haschildren
@@ -50,7 +51,7 @@ class Variable(QObject):
         self.pending = pending
         self.childformat = childformat
         self.childItems = []
-    
+
     def __str__(self):
         return "%s [%s]" % (self.__class__.__name__, " ".join([
                 self.gdbname,
@@ -61,35 +62,35 @@ class Variable(QObject):
                 self.access if self.access else "",
                 "pending" if self.pending else "",
                 str(len(self.childItems))]))
-    
-    def getExp (self):
+
+    def getExp(self):
         return self.exp
-    
-    def getGdbName (self):
+
+    def getGdbName(self):
         return self.gdbname
-        
-    def getUniqueName (self):
+
+    def getUniqueName(self):
         return self.uniquename
-    
-    def getType (self):
+
+    def getType(self):
         return self.type
-        
-    def getValue (self):
+
+    def getValue(self):
         return self.value
-    
-    def setValue (self, value):
+
+    def setValue(self, value):
         self.variablepool.assignValue(self.gdbname, value)
         self.value = value.toString()
-        
-    def getInScope (self):
+
+    def getInScope(self):
         return self.inscope
-    
+
     def getAccess(self):
         return self.access
-    
+
     def getPending(self):
         return False
-    
+
     def _getChildItems(self):
         """ Returns a list of childs as Variables.
             This is a pure private Method!
@@ -98,17 +99,17 @@ class Variable(QObject):
         if self.haschildren == True and self.childItems.__len__() == 0:
             self.variablepool.getChildren(self.gdbname, self.childItems, self.access, self.uniquename, self.childformat)
         return self.childItems
-    
+
     def makeWrapper(self, vwFactory):
         """ Returns a VariableWrapper for the Variable. <br>
             The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper 
+        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
         @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
         """
         raise "pure virtual Function Variable::makeWrapper() called"
-    
+
     def changed(self):
         self.emit(SIGNAL('changed()'))
-        
+
     def replace(self, var):
         self.emit(SIGNAL('replace(PyQt_PyObject)'), var)

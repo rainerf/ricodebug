@@ -28,10 +28,11 @@ from PyQt4.QtGui import QWidget, QMessageBox
 from openedfileview import OpenedFileView
 import os
 
+
 class EditorView(QWidget):
-    def __init__(self, distributed_objects, parent = None):
-        QWidget.__init__(self, parent = None)
-        
+    def __init__(self, distributed_objects, _=None):
+        QWidget.__init__(self, parent=None)
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
@@ -44,7 +45,7 @@ class EditorView(QWidget):
 
         self.tabWidget.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(self)
-        
+
         self.distributed_objects = distributed_objects
         QObject.connect(self.tabWidget, SIGNAL('tabCloseRequested(int)'), self.hideTab)
         self.openedFiles = {}
@@ -59,7 +60,7 @@ class EditorView(QWidget):
             ret = msgBox.exec_()
             if ret == QMessageBox.Save:
                 self.getCurrentOpenedFile().saveFile()
-        
+
         if ret != QMessageBox.Cancel:
             for i in self.openedFiles.values():
                 if w == i.tab:
@@ -70,38 +71,38 @@ class EditorView(QWidget):
                         del self.openedFiles[i.filename]
                     break
         return ret != QMessageBox.Cancel
-    
+
     def getCurrentOpenedFile(self):
         w = self.tabWidget.currentWidget()
         for i in self.openedFiles.values():
             if w == i.tab:
                 return i
-        
+
     def removeAllTabs(self):
-        """ Method goes through opened files and asks user to save changes. 
+        """ Method goes through opened files and asks user to save changes.
             returns false if user canceled operation
-        """   
+        """
         i = self.tabWidget.count()
         success = True
         while i > 0 and success:
-            success = self.hideTab(i-1)
-            i = i-1
+            success = self.hideTab(i - 1)
+            i = i - 1
         return success
-                
+
     def openFile(self, filename):
         if not filename in self.openedFiles:
             self.openedFiles[filename] = OpenedFileView(self.distributed_objects, filename)
             self.showFile(filename)
         self.openedFiles[filename].getBreakpointsFromModel()
         self.tabWidget.setCurrentWidget(self.openedFiles[filename].tab)
-    
+
     def showFile(self, filename):
-        opened_file = self.openedFiles[filename] 
+        opened_file = self.openedFiles[filename]
         if not opened_file.shown:
             self.tabWidget.addTab(opened_file.tab, os.path.basename(filename))
             self.tabWidget.setCurrentWidget(opened_file.tab)
             opened_file.shown = True
-            
+
     def setFileModified(self, filename, modified):
         """ Adds a '*' to name of modified file in the editors tab widget.  """
         if filename in self.openedFiles:
@@ -109,12 +110,11 @@ class EditorView(QWidget):
                 self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab), os.path.basename(filename) + '*')
             else:
                 self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab), os.path.basename(filename))
-                
+
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """
         return str(self.tabWidget.tabText(idx)).endswith('*')
-    
-    
+
     def _targetStopped(self, rec):
         # find the current execution position in the result
         file_ = None
@@ -122,7 +122,7 @@ class EditorView(QWidget):
         for res in rec.results:
             if res.dest == "frame":
                 file_ = res.src.fullname
-                line = int(res.src.line)-1
+                line = int(res.src.line) - 1
                 break
 
         if file_ == None or line == None:
@@ -132,17 +132,17 @@ class EditorView(QWidget):
         for f in self.openedFiles.values():
             f.clearExecutionPositionMarkers()
         self.openFile(file_)
-        
+
         return file_, line
-    
+
     def targetStoppedNormally(self, rec):
         file_, line = self._targetStopped(rec)
         self.openedFiles[file_].showExecutionPosition(line)
-    
+
     def targetStoppedWithSignal(self, rec):
         file_, line = self._targetStopped(rec)
         self.openedFiles[file_].showSignalPosition(line)
-    
+
     def targetExited(self):
         for f in self.openedFiles.values():
             f.clearExecutionPositionMarkers()

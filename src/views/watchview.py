@@ -36,8 +36,8 @@ class TreeItemView(QTreeView):
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.controller = controller
         QObject.connect(self, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
-    
-    def resizeColumn(self, index):
+
+    def resizeColumn(self, _):
         """Resize the first column to contents when expanded."""
         self.resizeColumnToContents(0)
 
@@ -45,14 +45,14 @@ class TreeItemView(QTreeView):
 class WatchView(TreeItemView):
     def __init__(self, controller, parent=None):
         TreeItemView.__init__(self, controller, parent)
-    
-    def keyPressEvent (self, event):
+
+    def keyPressEvent(self, event):
         key = event.key()
-        if (int(key) == Qt.Key_Delete): #0x01000007
+        if (int(key) == Qt.Key_Delete):
             selectionModel = self.selectionModel()
             index = selectionModel.currentIndex()
             self.variableController.removeSelected(index.row(), index.parent())
-    
+
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)
         if not event.isAccepted():

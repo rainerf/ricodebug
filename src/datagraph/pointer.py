@@ -27,10 +27,11 @@ from PyQt4.QtCore import QObject, QPointF, SIGNAL, QLineF, QRectF, QSizeF
 import math
 import logging
 
+
 class Pointer(QGraphicsLineItem):
     """ QGraphicsPolygonItem to model a Pointer as an Arrow from a Pointer-Variable to its Content. """
-    fgcolor = QColor(0,0,0)
-    bgcolor = QColor(0,0,0)
+    fgcolor = QColor(0, 0, 0)
+    bgcolor = QColor(0, 0, 0)
 
     def __init__(self, parent, fromView, toView, distributedObjects):
         """ Constructor
@@ -46,10 +47,10 @@ class Pointer(QGraphicsLineItem):
         self.toView = toView
         toView.addIncomingPointer(self)
         #self.setBrush( QBrush( self.bgcolor  ) )
-        self.setPen( QPen(self.fgcolor,1) )
-        
-        self.distributedObjects= distributedObjects
-        
+        self.setPen(QPen(self.fgcolor, 1))
+
+        self.distributedObjects = distributedObjects
+
         QObject.connect(self.fromView, SIGNAL('geometryChanged()'), self.updatePosition)
         QObject.connect(self.toView, SIGNAL('geometryChanged()'), self.updatePosition)
         QObject.connect(self.fromView, SIGNAL('xChanged()'), self.updatePosition)
@@ -58,7 +59,7 @@ class Pointer(QGraphicsLineItem):
         QObject.connect(self.toView, SIGNAL('yChanged()'), self.updatePosition)
         QObject.connect(self.fromView, SIGNAL('removing()'), self.delete)
         QObject.connect(self.toView, SIGNAL('removing()'), self.delete)
-        
+
         self.arrowhead = QPolygonF()
         self.arrowSize = 20
         self.setZValue(-1)  # paint the arrows behind (lower z-value) everything else
@@ -66,8 +67,8 @@ class Pointer(QGraphicsLineItem):
     def boundingRect(self):
         extra = (self.pen().width() + 20) / 2
         return QRectF(self.line().p1(), QSizeF(self.line().p2().x() - self.line().p1().x(),
-                                               self.line().p2().y() - self.line().p1().y())).normalized().adjusted(-extra, -extra, extra, extra)        
-    
+                                               self.line().p2().y() - self.line().p1().y())).normalized().adjusted(-extra, -extra, extra, extra)
+
     def shape(self):
         path = QGraphicsLineItem.shape(self)
         path.addPolygon(self.arrowhead)
@@ -83,109 +84,109 @@ class Pointer(QGraphicsLineItem):
         """
         if self.fromView.collidesWithItem(self.toView):
             return
-        
+
         # antialiasing makes things look nicer :)
         painter.setRenderHint(QPainter.Antialiasing)
-        
+
         self.toView.x()
-        pM1 = QPointF(self.fromView.x() + self.fromView.size().width()/2,
-                      self.fromView.y() + self.fromView.size().height()/2)
-        pM2 = QPointF(self.toView.x() + self.toView.size().width()/2,
-                      self.toView.y() + self.toView.size().height()/2)
-        deltaX = pM2.x()-pM1.x()
-        deltaY = pM2.y()-pM1.y()
+        pM1 = QPointF(self.fromView.x() + self.fromView.size().width() / 2,
+                      self.fromView.y() + self.fromView.size().height() / 2)
+        pM2 = QPointF(self.toView.x() + self.toView.size().width() / 2,
+                      self.toView.y() + self.toView.size().height() / 2)
+        deltaX = pM2.x() - pM1.x()
+        deltaY = pM2.y() - pM1.y()
         if deltaX == 0:
-            deltaX = 0.01 
+            deltaX = 0.01
         if deltaY == 0:
             deltaY = 0.01
         if deltaX >= 0:
             if deltaY >= 0:
                 # rechts unten
-                if deltaX/deltaY >= self.fromView.size().width()/self.fromView.size().height():
+                if deltaX / deltaY >= self.fromView.size().width() / self.fromView.size().height():
                     # Start von rechter Seite
-                    pStart = QPointF(pM1.x() + self.fromView.size().width()/2,
-                                     pM1.y() + (self.fromView.size().width()/2)*(deltaY/deltaX))
+                    pStart = QPointF(pM1.x() + self.fromView.size().width() / 2,
+                                     pM1.y() + (self.fromView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Start von unterer Seite
-                    pStart = QPointF(pM1.x() + (self.fromView.size().height()/2)*(deltaX/deltaY),
-                                     pM1.y() + self.fromView.size().height()/2)
-                
-                if deltaX/deltaY >= self.toView.size().width()/self.toView.size().height():
+                    pStart = QPointF(pM1.x() + (self.fromView.size().height() / 2) * (deltaX / deltaY),
+                                     pM1.y() + self.fromView.size().height() / 2)
+
+                if deltaX / deltaY >= self.toView.size().width() / self.toView.size().height():
                     # Ende bei linker Seite
-                    pEnd = QPointF(pM2.x() - self.toView.size().width()/2,
-                                   pM2.y() - (self.toView.size().width()/2)*(deltaY/deltaX))
+                    pEnd = QPointF(pM2.x() - self.toView.size().width() / 2,
+                                   pM2.y() - (self.toView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Ende bei oberer Seite
-                    pEnd = QPointF(pM2.x() - (self.toView.size().height()/2)*(deltaX/deltaY),
-                                   pM2.y() - self.toView.size().height()/2)
+                    pEnd = QPointF(pM2.x() - (self.toView.size().height() / 2) * (deltaX / deltaY),
+                                   pM2.y() - self.toView.size().height() / 2)
             else:
                 # rechts oben
-                if deltaX/deltaY*-1 >= self.fromView.size().width()/self.fromView.size().height():
+                if deltaX / deltaY * -1 >= self.fromView.size().width() / self.fromView.size().height():
                     # Start von rechter Seite
-                    pStart = QPointF(pM1.x() + self.fromView.size().width()/2,
-                                     pM1.y() + (self.fromView.size().width()/2)*(deltaY/deltaX))
+                    pStart = QPointF(pM1.x() + self.fromView.size().width() / 2,
+                                     pM1.y() + (self.fromView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Start von oberer Seite
-                    pStart = QPointF(pM1.x() - (self.fromView.size().height()/2)*(deltaX/deltaY),
-                                     pM1.y() - self.fromView.size().height()/2)
-                
-                if deltaX/deltaY*-1 >= self.toView.size().width()/self.toView.size().height():
+                    pStart = QPointF(pM1.x() - (self.fromView.size().height() / 2) * (deltaX / deltaY),
+                                     pM1.y() - self.fromView.size().height() / 2)
+
+                if deltaX / deltaY * -1 >= self.toView.size().width() / self.toView.size().height():
                     # Ende bei linker Seite
-                    pEnd = QPointF(pM2.x() - self.toView.size().width()/2,
-                                   pM2.y() - (self.toView.size().width()/2)*(deltaY/deltaX))
+                    pEnd = QPointF(pM2.x() - self.toView.size().width() / 2,
+                                   pM2.y() - (self.toView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Ende bei unterer Seite
-                    pEnd = QPointF(pM2.x() + (self.toView.size().height()/2)*(deltaX/deltaY),
-                                   pM2.y() + self.toView.size().height()/2)
+                    pEnd = QPointF(pM2.x() + (self.toView.size().height() / 2) * (deltaX / deltaY),
+                                   pM2.y() + self.toView.size().height() / 2)
         else:
             if deltaY >= 0:
                 # links unten
-                if deltaX/deltaY*-1 >= self.fromView.size().width()/self.fromView.size().height():
+                if deltaX / deltaY * -1 >= self.fromView.size().width() / self.fromView.size().height():
                     # Start von linker Seite
-                    pStart = QPointF(pM1.x() - self.fromView.size().width()/2,
-                                     pM1.y() - (self.fromView.size().width()/2)*(deltaY/deltaX))
+                    pStart = QPointF(pM1.x() - self.fromView.size().width() / 2,
+                                     pM1.y() - (self.fromView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Start von unterer Seite
-                    pStart = QPointF(pM1.x() + (self.fromView.size().height()/2)*(deltaX/deltaY),
-                                     pM1.y() + self.fromView.size().height()/2)
-                
-                if deltaX/deltaY*-1 >= self.toView.size().width()/self.toView.size().height():
+                    pStart = QPointF(pM1.x() + (self.fromView.size().height() / 2) * (deltaX / deltaY),
+                                     pM1.y() + self.fromView.size().height() / 2)
+
+                if deltaX / deltaY * -1 >= self.toView.size().width() / self.toView.size().height():
                     # Ende bei rechten Seite
-                    pEnd = QPointF(pM2.x() + self.toView.size().width()/2,
-                                   pM2.y() + (self.toView.size().width()/2)*(deltaY/deltaX))
+                    pEnd = QPointF(pM2.x() + self.toView.size().width() / 2,
+                                   pM2.y() + (self.toView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Ende bei oberer Seite
-                    pEnd = QPointF(pM2.x() - (self.toView.size().height()/2)*(deltaX/deltaY),
-                                   pM2.y() - self.toView.size().height()/2)
+                    pEnd = QPointF(pM2.x() - (self.toView.size().height() / 2) * (deltaX / deltaY),
+                                   pM2.y() - self.toView.size().height() / 2)
             else:
                 # links oben
-                if deltaX/deltaY >= self.fromView.size().width()/self.fromView.size().height():
+                if deltaX / deltaY >= self.fromView.size().width() / self.fromView.size().height():
                     # Start von linker Seite
-                    pStart = QPointF(pM1.x() - self.fromView.size().width()/2,
-                                     pM1.y() - (self.fromView.size().width()/2)*(deltaY/deltaX))
+                    pStart = QPointF(pM1.x() - self.fromView.size().width() / 2,
+                                     pM1.y() - (self.fromView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Start von oberer Seite
-                    pStart = QPointF(pM1.x() - (self.fromView.size().height()/2)*(deltaX/deltaY),
-                                     pM1.y() - self.fromView.size().height()/2)
-                
-                if deltaX/deltaY >= self.toView.size().width()/self.toView.size().height():
+                    pStart = QPointF(pM1.x() - (self.fromView.size().height() / 2) * (deltaX / deltaY),
+                                     pM1.y() - self.fromView.size().height() / 2)
+
+                if deltaX / deltaY >= self.toView.size().width() / self.toView.size().height():
                     # Ende bei rechter Seite
-                    pEnd = QPointF(pM2.x() + self.toView.size().width()/2,
-                                   pM2.y() + (self.toView.size().width()/2)*(deltaY/deltaX))
+                    pEnd = QPointF(pM2.x() + self.toView.size().width() / 2,
+                                   pM2.y() + (self.toView.size().width() / 2) * (deltaY / deltaX))
                 else:
                     # Ende bei unterer Seite
-                    pEnd = QPointF(pM2.x() + (self.toView.size().height()/2)*(deltaX/deltaY),
-                                   pM2.y() + self.toView.size().height()/2)
-        
+                    pEnd = QPointF(pM2.x() + (self.toView.size().height() / 2) * (deltaX / deltaY),
+                                   pM2.y() + self.toView.size().height() / 2)
+
         self.setLine(QLineF(pEnd, pStart))
-        
+
         if self.line().length() != 0:
             angle = math.acos(self.line().dx() / self.line().length())
             if self.line().dy() >= 0:
-                angle = math.pi*2 - angle
-            
-            arrowP1 = self.line().p1() + QPointF(math.sin(angle+math.pi/2.5) * self.arrowSize, math.cos(angle+math.pi/2.5) * self.arrowSize)
-            arrowP2 = self.line().p1() + QPointF(math.sin(angle+math.pi - math.pi/2.5) * self.arrowSize, math.cos(angle+math.pi - math.pi/2.5) * self.arrowSize)
+                angle = math.pi * 2 - angle
+
+            arrowP1 = self.line().p1() + QPointF(math.sin(angle + math.pi / 2.5) * self.arrowSize, math.cos(angle + math.pi / 2.5) * self.arrowSize)
+            arrowP2 = self.line().p1() + QPointF(math.sin(angle + math.pi - math.pi / 2.5) * self.arrowSize, math.cos(angle + math.pi - math.pi / 2.5) * self.arrowSize)
             self.arrowhead.clear()
             self.arrowhead.append(self.line().p1())
             self.arrowhead.append(arrowP1)
@@ -193,13 +194,13 @@ class Pointer(QGraphicsLineItem):
             painter.setBrush(QBrush(self.bgcolor))
             painter.drawLine(self.line())
             painter.drawPolygon(self.arrowhead)
-        
+
     def delete(self):
         """ removes the pointer from the DataGraph """
         self.toView.incomingPointers.remove(self)
         self.fromView.outgoingPointers.remove(self)
-        self.distributedObjects.datagraph_controller.removePointer(self)
-    
+        self.distributedObjects.datagraphController.removePointer(self)
+
     def setX(self, _):
         logging.error("Ignoring setting our Pointer's x position")
 

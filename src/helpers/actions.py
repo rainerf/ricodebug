@@ -27,7 +27,7 @@ from PyQt4.QtCore import SIGNAL, QObject
 
 """
 general information:
- * to add a action write a enum-Key-word into list below class declaration and raise range 
+ * to add a action write a enum-Key-word into list below class declaration and raise range
    in both, range after list AND range for self.actions = rang(N)
    dont forget "\" if line is ending
  * then create the action using createAction function in initActions from Actions class:
@@ -39,14 +39,14 @@ general information:
  * connect your actions via connectAction or connectActionEx or your own Implementation
 """
 
+
 class ActionEx(QtGui.QAction):
-    
-    def __init__(self, parameter, parent = None):
+    def __init__(self, parameter, parent=None):
         QtGui.QAction.__init__(self, parent)
         self.parameter = parameter
         QObject.connect(self, SIGNAL("triggered()"), self.commit)
         self.parent = parent
-        
+
     def commit(self):
         print "---------------------------- commit ActionEx success."
         if self.parameter == None:
@@ -54,25 +54,25 @@ class ActionEx(QtGui.QAction):
         else:
             print "------------------------ parameter ok."
             self.emit(QtCore.SIGNAL("triggered(PyQt_PyObject)"), self.parameter)
-        
+
 
 class Actions(QtCore.QObject):
     NumActions = 17
-    Open, Exit, SaveFile,\
-    Run, Continue, Interrupt, Next, Step, Finish, RunToCursor,\
+    Open, Exit, SaveFile, \
+    Run, Continue, Interrupt, Next, Step, Finish, RunToCursor, \
     ToggleBreak, ToggleTrace, AddTraceVar, DelTraveVar, \
     AddWatch, AddVarToDataGraph, DelWatch = range(NumActions)
-    
-    def __init__(self, parent = None):
+
+    def __init__(self, parent=None):
         QtCore.QObject.__init__(self, parent)
         self.actions = [None for _ in range(self.NumActions)]
         self.initGlobalActions()
-        
+
     def add(self, enum, action):
         """dont use this function outside of class!!!"""
         self.actions[enum] = action
-        
-    def createAction(self, icon, text, shortcut, statustip, enum, parameter = None):
+
+    def createAction(self, icon, text, shortcut, statustip, enum, parameter=None):
         """dont use this function outside of class!!!"""
         if parameter == None:
             newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
@@ -82,9 +82,9 @@ class Actions(QtCore.QObject):
             newAction.setShortcut(shortcut)
         newAction.setStatusTip(statustip)
         self.add(enum, newAction)
-        
+
     def initGlobalActions(self):
-        
+
         ###############################################
         ## file/program control
         ###############################################
@@ -94,7 +94,7 @@ class Actions(QtCore.QObject):
         self.createAction(":/icons/images/exit.png", "Exit", "Ctrl+Q", "Close Program", self.Exit)
         #save source file
         self.createAction(":/icons/images/save.png", "Save File", "Ctrl+S", "Save source file", self.SaveFile)
-        
+
         ###############################################
         ## file control
         ###############################################
@@ -112,7 +112,7 @@ class Actions(QtCore.QObject):
         self.createAction(":/icons/images/finish.png", "Finish", None, "Finish executable", self.Finish)
         #run to cursor
         self.createAction(":/icons/images/until.png", "Run to Cursor", None, "Run executable to cursor position", self.RunToCursor)
-        
+
         ###############################################
         ## watch/break/trace points
         ###############################################
@@ -130,17 +130,7 @@ class Actions(QtCore.QObject):
         self.createAction(":/icons/images/watch_plus.png", "Add var to DataGraph", "+", "Add selected variable to datagraph-window", self.AddVarToDataGraph)
         #DelWatch
         self.createAction(":/icons/images/watch_minus.png", "Del var from Watch", "+", "Remove selected variable from watchview-window", self.DelWatch)
- 
+
         ###############################################
         ## <your description>
         ###############################################
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

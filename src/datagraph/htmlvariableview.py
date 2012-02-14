@@ -30,9 +30,10 @@ from PyQt4 import QtCore
 import sys
 import logging
 
+
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
-    
+
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
@@ -43,43 +44,43 @@ class HtmlVariableView(QGraphicsWebView):
         self.distributedObjects = distributedObjects
         self.setFlags(QGraphicsItem.ItemIsMovable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/templates/htmlvariableview.mako')
-        self.page().setPreferredContentsSize(QSize(0,0))
+        self.page().setPreferredContentsSize(QSize(0, 0))
         self.setPreferredSize(QSizeF(0, 0))
         self.setResizesToContents(True)
-        self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks);
+        self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
         self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
         self.incomingPointers = []
         self.outgoingPointers = []
-        
+
         self.source = None
-        
+
         # ids for ourself and the template handlers we will eventually render
         self.lastId = -1
         self.uniqueIds = {}
-        
+
         self.dirty = True
-        
+
         self.id = self.getUniqueId(self)
-        
-        self.connect(self.distributedObjects.signal_proxy, SIGNAL("variableUpdateCompleted()"), self.render)
-        
+
+        self.connect(self.distributedObjects.signalProxy, SIGNAL("variableUpdateCompleted()"), self.render)
+
     def getIncomingPointers(self):
         return self.incomingPointers
-    
+
     def getOutgoingPointers(self):
         return self.outgoingPointers
-        
+
     def addIncomingPointer(self, pointer):
         self.incomingPointers.append(pointer)
-        
+
     def addOutgoingPointer(self, pointer):
         self.outgoingPointers.append(pointer)
-    
+
     def setDirty(self, render_immediately):
         self.dirty = True
         if render_immediately:
             self.render()
-    
+
     def render(self):
         if self.dirty:
             # the page's viewport will not shrink if new content is set, so set it to it's minimum
@@ -87,31 +88,31 @@ class HtmlVariableView(QGraphicsWebView):
             try:
                 self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
                 self.setHtml(self.source)
-                
+
                 for template, id_ in self.uniqueIds.iteritems():
                     self.page().mainFrame().addToJavaScriptWindowObject(id_, template)
             except Exception as e:
                 logging.error("Rendering failed: %s", str(e))
                 self.setHtml(str(e))
                 raise
-            
+
             # force an update of the scene that contains us, since sometimes setHtml
             # will not cause the view to be redrawn immediately
             if self.scene():
                 self.scene().update()
-            
+
             self.dirty = False
-        
+
         return self.source
-    
+
     def linkClicked(self, url):
         self.handleCommand(str(url.toString()))
-    
+
     def openContextMenu(self, menu):
         menu.addAction(QIcon(":/icons/images/minus.png"), "Remove %s" % self.varWrapper.getExp(), self.remove)
         menu.addAction(QIcon(":/icons/images/save-html.png"), "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
         menu.exec_(QCursor.pos())
-    
+
     @QtCore.pyqtSlot()
     def saveHtml(self):
         name = QFileDialog.getSaveFileName(filter="HTML (*.html)")
@@ -119,7 +120,7 @@ class HtmlVariableView(QGraphicsWebView):
             out = file(name, 'w')
             out.write(self.source)
             out.close()
-    
+
     def contextMenuEvent(self, event):
         pass
 
@@ -127,8 +128,8 @@ class HtmlVariableView(QGraphicsWebView):
     def remove(self):
         """remove the varWrapper from the datagraph"""
         self.emit(SIGNAL('removing()'))
-        self.distributedObjects.datagraph_controller.removeVar(self.varWrapper)
-    
+        self.distributedObjects.datagraphController.removeVar(self.varWrapper)
+
     def getUniqueId(self, template):
         if not template in self.uniqueIds:
             self.lastId += 1
@@ -140,4 +141,3 @@ class HtmlVariableView(QGraphicsWebView):
 #        painter.setPen(QColor(Qt.red))
 #        painter.drawRoundedRect(self.boundingRect(), 5, 5)
 #        QGraphicsWebView.paint(self, painter, option, widget)
-

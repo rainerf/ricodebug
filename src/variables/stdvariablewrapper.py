@@ -24,16 +24,16 @@
 
 from variablewrapper import VariableWrapper
 
+
 class StdVariableWrapper(VariableWrapper):
     """ VariableWrapper for Standard-Variables. <br>
         This is only an Example of a Wrapper! <br>
         You can use it directly, but normally you will need to write your own Wrapper for your own Needs. <br>
-        inherits 
+        inherits
     """
-    
+
     def __init__(self, variable):
         """ Constructor
         @param variable    variables.variable.Variable, the variable to wrap
         """
         VariableWrapper.__init__(self, variable)
-

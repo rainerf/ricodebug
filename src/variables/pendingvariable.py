@@ -24,30 +24,30 @@
 
 from variables.variable import Variable
 
+
 class PendingVariable(Variable):
     """ Variable-Class holding a pending Variable """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type=None, value=None, inscope=None, haschildren=None, access=None):
+    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type_=None, value=None, inscope=None, haschildren=None, access=None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type, value, inscope, haschildren, access)
-    
+        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_, value, inscope, haschildren, access)
+
     def getPending(self):
         return True
-    
+
     def makeWrapper(self, vwFactory):
         """ Returns a VariableWrapper for the Variable. <br>
             The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper 
+        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
         @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
         """
         return vwFactory.makePendingVarWrapper(self)
-    
+
     def dereference(self):
         """ Dereferences the Variable, if possible.
         @return    dereferenced Variable if the Variable can be dereferenced,
                    None in this Case.
         """
         return None
-

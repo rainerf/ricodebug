@@ -32,38 +32,38 @@ from PyQt4.QtCore import QDir
 import logging
 
 reserved = {
-	"done" : "DONE",
-	"running" : "RUNNING",
-	"connected" : "CONNECTED",
-	"error" : "ERROR",
-	"exit" : "EXIT",
-	"stopped" : "STOPPED",
-	"thread-created" : "THREAD_CREATED",
-	"thread-group-created" : "THREAD_GROUP_CREATED",
-	"thread-group-added" : "THREAD_GROUP_ADDED",
-	"thread-group-started" : "THREAD_GROUP_STARTED",
-	"thread-exited" : "THREAD_EXITED",
-	"thread-group-exited" : "THREAD_GROUP_EXITED",
-	"thread-selected" : "THREAD_SELECTED",
-	"library-loaded" : "LIBRARY_LOADED",
-	"library-unloaded" : "LIBRARY_UNLOADED"
+    "done": "DONE",
+    "running": "RUNNING",
+    "connected": "CONNECTED",
+    "error": "ERROR",
+    "exit": "EXIT",
+    "stopped": "STOPPED",
+    "thread-created": "THREAD_CREATED",
+    "thread-group-created": "THREAD_GROUP_CREATED",
+    "thread-group-added": "THREAD_GROUP_ADDED",
+    "thread-group-started": "THREAD_GROUP_STARTED",
+    "thread-exited": "THREAD_EXITED",
+    "thread-group-exited": "THREAD_GROUP_EXITED",
+    "thread-selected": "THREAD_SELECTED",
+    "library-loaded": "LIBRARY_LOADED",
+    "library-unloaded": "LIBRARY_UNLOADED"
 }
 
 tokens = [
-	"ASSIGN",
-	"COMMA",
-	"LBRACE",
-	"RBRACE",
-	"LBRACKET",
-	"RBRACKET",
-	"HAT",
-	"STAR",
-	"PLUS",
-	"TILDE",
-	"AT",
-	"AMP",
-	"C_STRING",
-	"STRING",
+    "ASSIGN",
+    "COMMA",
+    "LBRACE",
+    "RBRACE",
+    "LBRACKET",
+    "RBRACKET",
+    "HAT",
+    "STAR",
+    "PLUS",
+    "TILDE",
+    "AT",
+    "AMP",
+    "C_STRING",
+    "STRING",
 ] + list(reserved.values())
 
 t_ASSIGN = r'='
@@ -79,228 +79,244 @@ t_TILDE = r'~'
 t_AT = r'@'
 t_AMP = r'&'
 
+
 def t_STRING(t):
-	r'[\w\d_-]+'
-	t.type = reserved.get(t.value, "STRING")
-#	print t.type, "                                      ", t
-	return t
+    r'[\w\d_-]+'
+    t.type = reserved.get(t.value, "STRING")
+#    print t.type, "                                      ", t
+    return t
+
 
 def t_C_STRING(t):
-	#r'".*?[^\\|^\\\\]?"(?=(,|\}|\]|$))'
-	r'".*?(?<!\\)"(?=(,|\}|\]|$))'
-	t.value = unBackslashify(t.value)
-	t.value = t.value[1:-1] # strip the "
-	#print "...", t
-	return t
+    #r'".*?[^\\|^\\\\]?"(?=(,|\}|\]|$))'
+    r'".*?(?<!\\)"(?=(,|\}|\]|$))'
+    t.value = unBackslashify(t.value)
+    t.value = t.value[1:-1]  # strip the "
+    #print "...", t
+    return t
+
 
 def t_error(t):
-	raise TypeError("Unknown text '%s'" % (t.value,))
+    raise TypeError("Unknown text '%s'" % (t.value,))
+
 
 class Result:
-	pass
+    pass
 
-	def __str__(self):
-		return "RESULT(" + self.__dict__.__str__() + ")"
+    def __str__(self):
+        return "RESULT(" + self.__dict__.__str__() + ")"
+
 
 class Assignment:
-	def __init__(self, dest, src):
-		self.dest = dest
-		self.src = src
-	
-	def __str__(self):
-		return "ASSIGN(" + self.dest.__str__() + "," + self.src.__str__() + ")"
+    def __init__(self, dest, src):
+        self.dest = dest
+        self.src = src
+
+    def __str__(self):
+        return "ASSIGN(" + self.dest.__str__() + "," + self.src.__str__() + ")"
+
 
 def p_result_record(p):
-	'''result_record : result_class
-	                 | result_class COMMA result_list'''
-	p[0] = GdbOutput()
+    '''result_record : result_class
+                     | result_class COMMA result_list'''
+    p[0] = GdbOutput()
 
-	p[0].class_ = p[1]
-#	print "////////////////////", len(p)
-	if len(p) == 4:
-		for a in p[3]:
-#			print "##################################setting ", a.dest, "to", a.src
-			setattr(p[0], a.dest, a.src)
-#	print "result_record                               ", p[0]
-	
+    p[0].class_ = p[1]
+    if len(p) == 4:
+        for a in p[3]:
+            setattr(p[0], a.dest, a.src)
+
 
 def p_async_output(p):
-	'''async_output : async_class
-	                | async_class COMMA result_list'''
-	p[0] = GdbOutput()
-	p[0].class_ = p[1]
-	
-	if len(p) == 4:
-		p[0].results = p[3]
-#	print "async_output                                ", p[0]
+    '''async_output : async_class
+                    | async_class COMMA result_list'''
+    p[0] = GdbOutput()
+    p[0].class_ = p[1]
+
+    if len(p) == 4:
+        p[0].results = p[3]
+#    print "async_output                                ", p[0]
+
 
 def p_result_class(p):
-	'''result_class : DONE
-	                | RUNNING
-	                | CONNECTED
-	                | ERROR
-	                | EXIT'''
-	if p[1] == "done":
-		p[0] = GdbOutput.DONE
-	elif p[1] == "running":
-		p[0] = GdbOutput.RUNNING
-	elif p[1] == "connected":
-		p[0] = GdbOutput.CONNECTED
-	elif p[1] == "error":
-		p[0] = GdbOutput.ERROR
-	elif p[1] == "exit":
-		p[0] = GdbOutput.EXIT
-#	print "result_class                                ", p[0]
+    '''result_class : DONE
+                    | RUNNING
+                    | CONNECTED
+                    | ERROR
+                    | EXIT'''
+    if p[1] == "done":
+        p[0] = GdbOutput.DONE
+    elif p[1] == "running":
+        p[0] = GdbOutput.RUNNING
+    elif p[1] == "connected":
+        p[0] = GdbOutput.CONNECTED
+    elif p[1] == "error":
+        p[0] = GdbOutput.ERROR
+    elif p[1] == "exit":
+        p[0] = GdbOutput.EXIT
+#    print "result_class                                ", p[0]
+
 
 def p_async_class(p):
-	'''async_class : STOPPED
-	               | RUNNING
-	               | THREAD_CREATED
-	               | THREAD_GROUP_CREATED
-	               | THREAD_GROUP_ADDED
-	               | THREAD_GROUP_STARTED
-	               | THREAD_EXITED
-	               | THREAD_GROUP_EXITED
-	               | THREAD_SELECTED
-	               | LIBRARY_LOADED
-	               | LIBRARY_UNLOADED'''
-	if p[1] == "stopped":
-		p[0] = GdbOutput.STOPPED
-	elif p[1] == "running":
-		p[0] = GdbOutput.RUNNING
-	elif p[1] == "thread-created":
-		p[0] = GdbOutput.THREAD_CREATED
-	elif p[1] == "thread-group-created":
-		p[0] = GdbOutput.THREAD_GROUP_CREATED
-	elif p[1] == "thread-group-added":
-		p[0] = GdbOutput.THREAD_GROUP_ADDED
-	elif p[1] == "thread-group-started":
-		p[0] = GdbOutput.THREAD_GROUP_STARTED
-	elif p[1] == "thread-exited":
-		p[0] = GdbOutput.THREAD_EXITED
-	elif p[1] == "thread-group-exited":
-		p[0] = GdbOutput.THREAD_GROUP_EXITED
-	elif p[1] == "thread-selected":
-		p[0] = GdbOutput.THREAD_SELECTED
-	elif p[1] == "library-loaded":
-		p[0] = GdbOutput.LIBRARY_LOADED
-	elif p[1] == "library-unloaded":
-		p[0] = GdbOutput.LIBRARY_UNLOADED
-	else:
-		print "Got", p[1], "which cannot occur here!"
-		raise
+    '''async_class : STOPPED
+                   | RUNNING
+                   | THREAD_CREATED
+                   | THREAD_GROUP_CREATED
+                   | THREAD_GROUP_ADDED
+                   | THREAD_GROUP_STARTED
+                   | THREAD_EXITED
+                   | THREAD_GROUP_EXITED
+                   | THREAD_SELECTED
+                   | LIBRARY_LOADED
+                   | LIBRARY_UNLOADED'''
+    if p[1] == "stopped":
+        p[0] = GdbOutput.STOPPED
+    elif p[1] == "running":
+        p[0] = GdbOutput.RUNNING
+    elif p[1] == "thread-created":
+        p[0] = GdbOutput.THREAD_CREATED
+    elif p[1] == "thread-group-created":
+        p[0] = GdbOutput.THREAD_GROUP_CREATED
+    elif p[1] == "thread-group-added":
+        p[0] = GdbOutput.THREAD_GROUP_ADDED
+    elif p[1] == "thread-group-started":
+        p[0] = GdbOutput.THREAD_GROUP_STARTED
+    elif p[1] == "thread-exited":
+        p[0] = GdbOutput.THREAD_EXITED
+    elif p[1] == "thread-group-exited":
+        p[0] = GdbOutput.THREAD_GROUP_EXITED
+    elif p[1] == "thread-selected":
+        p[0] = GdbOutput.THREAD_SELECTED
+    elif p[1] == "library-loaded":
+        p[0] = GdbOutput.LIBRARY_LOADED
+    elif p[1] == "library-unloaded":
+        p[0] = GdbOutput.LIBRARY_UNLOADED
+    else:
+        print "Got", p[1], "which cannot occur here!"
+        raise
+
 
 def p_result(p):
-	'''result : variable ASSIGN value'''
-	p[0] = Assignment(p[1],  p[3])
-#	print "result                                      ", p[0]
+    '''result : variable ASSIGN value'''
+    p[0] = Assignment(p[1], p[3])
+#    print "result                                      ", p[0]
+
 
 def p_variable(p):
-	'''variable : STRING'''
-	p[0] = p[1]
-#	print "variable                                    ", p[0]
+    '''variable : STRING'''
+    p[0] = p[1]
+#    print "variable                                    ", p[0]
+
 
 def p_value(p):
-	'''value : const
-	         | tuple_
-	         | list_'''
-	p[0] = p[1]
-#	print "value                                       ", p[0]
+    '''value : const
+             | tuple_
+             | list_'''
+    p[0] = p[1]
+#    print "value                                       ", p[0]
+
 
 def p_const(p):
-	'''const : C_STRING'''
-	p[0] = p[1]
-#	print "const                                       ", p[0]
+    '''const : C_STRING'''
+    p[0] = p[1]
+#    print "const                                       ", p[0]
+
 
 def p_tuple_(p):
-	'''tuple_ : LBRACE RBRACE
-	          | LBRACE result_list RBRACE'''
-	if len(p) > 3:
-		p[0] = Result()
-		for a in p[2]:
-			setattr(p[0], a.dest, a.src)
-	else:
-		p[0] = []
-#	print "tuple                                       ", p[0]
+    '''tuple_ : LBRACE RBRACE
+              | LBRACE result_list RBRACE'''
+    if len(p) > 3:
+        p[0] = Result()
+        for a in p[2]:
+            setattr(p[0], a.dest, a.src)
+    else:
+        p[0] = []
+#    print "tuple                                       ", p[0]
+
 
 def p_list_(p):
-	'''list_ : LBRACKET RBRACKET
-	         | LBRACKET value_list RBRACKET
-	         | LBRACKET result_list RBRACKET'''
-	if len(p) > 3:
-		p[0] = p[2]
-	else:
-		p[0] = []
-#	print "list                                        ", p[0]
+    '''list_ : LBRACKET RBRACKET
+             | LBRACKET value_list RBRACKET
+             | LBRACKET result_list RBRACKET'''
+    if len(p) > 3:
+        p[0] = p[2]
+    else:
+        p[0] = []
+#    print "list                                        ", p[0]
+
 
 def p_stream_output(p):
-	'''stream_output : C_STRING'''
-	p[0] = GdbOutput()
-	p[0].string = p[1]
+    '''stream_output : C_STRING'''
+    p[0] = GdbOutput()
+    p[0].string = p[1]
+
 
 def p_result_list(p):
-	'''result_list : result
-	               | result COMMA result_list'''
-	if len(p) > 2:
-		p[0] = [p[1]] + p[3]
-	else:
-		p[0] = [p[1]]
-#	print "result_list                                 ", p[0]
+    '''result_list : result
+                   | result COMMA result_list'''
+    if len(p) > 2:
+        p[0] = [p[1]] + p[3]
+    else:
+        p[0] = [p[1]]
+#    print "result_list                                 ", p[0]
+
 
 def p_value_list(p):
-	'''value_list : value
-	              | value COMMA value_list'''
-	if len(p) > 2:
-		p[0] = [p[1]] + p[3]
-	else:
-		p[0] = [p[1]]
-#	print "value_list                                  ", p[0]
+    '''value_list : value
+                  | value COMMA value_list'''
+    if len(p) > 2:
+        p[0] = [p[1]] + p[3]
+    else:
+        p[0] = [p[1]]
+#    print "value_list                                  ", p[0]
+
 
 def p_error(p):
-	if p:
-		logging.error("Syntax error in input, line %d, col %d: %s", p.lineno, p.lexpos)
-	else:
-		logging.error("Syntax error in input!")
-	
-	raise "SYNTAX ERROR"
+    if p:
+        logging.error("Syntax error in input, line %d, col %d: %s", p.lineno, p.lexpos)
+    else:
+        logging.error("Syntax error in input!")
+
+    raise "SYNTAX ERROR"
+
 
 def p_top(p):
-	'''top : HAT result_record
-	       | STAR async_output
-	       | PLUS async_output
-	       | ASSIGN async_output
-	       | TILDE stream_output
-	       | AT stream_output
-	       | AMP stream_output'''
-	
-	p[0] = p[2]
-	if p[1] == '^':
-		p[0].type_ = GdbOutput.RESULT_RECORD
-	elif p[1] == '*':
-		p[0].type_ = GdbOutput.EXEC_ASYN
-	elif p[1] == '+':
-		p[0].type_ = GdbOutput.STATUS_ASYN
-	elif p[1] == '=':
-		p[0].type_ = GdbOutput.NOTIFY_ASYN
-	elif p[1] == '~':
-		p[0].type_ = GdbOutput.CONSOLE_STREAM
-	elif p[1] == '@':
-		p[0].type_ = GdbOutput.TARGET_STREAM
-	elif p[1] == '&':
-		p[0].type_ = GdbOutput.LOG_STREAM
+    '''top : HAT result_record
+           | STAR async_output
+           | PLUS async_output
+           | ASSIGN async_output
+           | TILDE stream_output
+           | AT stream_output
+           | AMP stream_output'''
+
+    p[0] = p[2]
+    if p[1] == '^':
+        p[0].type_ = GdbOutput.RESULT_RECORD
+    elif p[1] == '*':
+        p[0].type_ = GdbOutput.EXEC_ASYN
+    elif p[1] == '+':
+        p[0].type_ = GdbOutput.STATUS_ASYN
+    elif p[1] == '=':
+        p[0].type_ = GdbOutput.NOTIFY_ASYN
+    elif p[1] == '~':
+        p[0].type_ = GdbOutput.CONSOLE_STREAM
+    elif p[1] == '@':
+        p[0].type_ = GdbOutput.TARGET_STREAM
+    elif p[1] == '&':
+        p[0].type_ = GdbOutput.LOG_STREAM
 
 
 class GdbResultParser:
-	@classmethod
-	def parse(cls, lines):
-		""" this function-call is required to get the yacc running! """
-		lex.lex(reflags=re.DOTALL)
-		
-		parser = yacc.yacc(start='top',debug=0,outputdir=str(QDir.homePath())+"/.ricodebug")
-		r = []
-		for line in lines:
-			line = line.strip()
-			r.append(parser.parse(line))
-			r[-1].raw = line
-		
-		return r
+    @classmethod
+    def parse(cls, lines):
+        """ this function-call is required to get the yacc running! """
+        lex.lex(reflags=re.DOTALL)
+
+        parser = yacc.yacc(start='top', debug=0, outputdir=str(QDir.homePath()) + "/.ricodebug")
+        r = []
+        for line in lines:
+            line = line.strip()
+            r.append(parser.parse(line))
+            r[-1].raw = line
+
+        return r

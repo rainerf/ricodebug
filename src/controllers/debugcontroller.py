@@ -28,35 +28,35 @@ from helpers.ptyhandler import PtyHandler
 from helpers.gdboutput import GdbOutput
 import logging
 
+
 class DebugController(QObject):
-    
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.settings = QSettings("fh-hagenberg", "SysCDbg")
         self.ptyhandler = PtyHandler()
-        
+
         self.distributed_objects = distributed_objects
-        
+
         self.connector = self.distributed_objects.gdb_connector
-        self.editor_controller = self.distributed_objects.editor_controller
-        self.breakpoint_controller = self.distributed_objects.breakpoint_controller
-        self.signalProxy = self.distributed_objects.signal_proxy
-        
+        self.editorController = self.distributed_objects.editorController
+        self.breakpointController = self.distributed_objects.breakpointController
+        self.signalProxy = self.distributed_objects.signalProxy
+
         self.executableName = None
         self.lastCmdWasStep = False
-        
+
         self.ptyhandler.start()
         self.connector.start()
 
         QObject.connect(self.connector.reader, SIGNAL('asyncRecordReceived(PyQt_PyObject)'), self.handleAsyncRecord, Qt.QueuedConnection)
-    
+
     def openExecutable(self, filename):
-        if (self.editor_controller.closeOpenedFiles() == True): #closing source files may be canceled by user
-            
+        if (self.editorController.closeOpenedFiles() == True):  # closing source files may be canceled by user
+
             if self.executableName != None:
                 #clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
-                                     
+
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
             self.emit(SIGNAL('executableOpened'), filename)
@@ -65,39 +65,39 @@ class DebugController(QObject):
     def run(self):
         self.connector.setTty(self.ptyhandler.ptyname)
         self.connector.run()
-        self.lastCmdWasStep = False 
+        self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
-    
+
     def next_(self):
         self.connector.next_()
         self.lastCmdWasStep = True
-    
+
     def step(self):
         self.connector.step()
         self.lastCmdWasStep = True
-    
+
     def cont(self):
         self.connector.cont()
         self.lastCmdWasStep = False
-    
+
     def interrupt(self):
         self.connector.interrupt()
         self.lastCmdWasStep = False
-    
+
     def finish(self):
         self.connector.finish()
         self.lastCmdWasStep = False
-    
+
     def until(self, file_, line):
         self.connector.until(file_, line)
         self.lastCmdWasStep = False
-    
+
     def evaluateExpression(self, exp):
         if exp == "":
             return None
         exp = exp.replace('"', '\"')
         return self.connector.evaluate("\"" + exp + "\"")
-    
+
     def executeCliCommand(self, cmd):
         return self.connector.executeCliCommand(cmd)
 
@@ -122,20 +122,20 @@ class DebugController(QObject):
                 frame = r.src
             if r.dest == "bkptno":
                 bkptno = int(r.src)
-        
+
         if reason in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
         elif reason == 'breakpoint-hit':
                 stop = False
-                tp = self.distributed_objects.tracepoint_controller.model().getTracepointIfAvailable(frame)
-                
-                if self.distributed_objects.breakpoint_controller.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
+                tp = self.distributed_objects.tracepointController.model().getTracepointIfAvailable(frame)
+
+                if self.distributed_objects.breakpointController.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
                     self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False
                 if tp != None:
                     tp.tracePointOccurred(stop)
-                    self.distributed_objects.signal_proxy.emitTracepointOccurred()
+                    self.distributed_objects.signalProxy.emitTracepointOccurred()
         elif reason == "signal-received":
             logging.warning("Signal received: %s (%s) in %s:%s", signal_name, signal_meaning, frame.file, frame.line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
@@ -144,19 +144,17 @@ class DebugController(QObject):
 
     def executePythonCode(self, code):
         exec(code, {'do': self.distributed_objects})
-    
+
     def inferiorUntil(self):
-        current_opened_file = self.editor_controller.editor_view.getCurrentOpenedFile()
+        current_opened_file = self.editorController.editor_view.getCurrentOpenedFile()
         line, _ = current_opened_file.edit.getCursorPosition()
-        self.until(current_opened_file.filename, line+1)
-    
+        self.until(current_opened_file.filename, line + 1)
+
     def getExecutableName(self):
         return self.executableName
-    
+
     def getStackDepth(self):
         return self.connector.getStackDepth()
-    
+
     def selectStackFrame(self, exp):
         return self.connector.selectStackFrame(exp)
-        
-

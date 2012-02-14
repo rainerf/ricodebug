@@ -45,7 +45,7 @@ class NavigationView(QtGui.QTreeView):
             return f
         
         menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/icons/images/bp.png"), "Break on %s (%s:%s)" % (x.name, x.file_, x.lineNumber), addBreakpoint(self.signalproxy.distributedObjects.breakpoint_controller, x.file_, x.lineNumber))
+        menu.addAction(QtGui.QIcon(":/icons/images/bp.png"), "Break on %s (%s:%s)" % (x.name, x.file_, x.lineNumber), addBreakpoint(self.signalproxy.distributedObjects.breakpointController, x.file_, x.lineNumber))
         menu.exec_(self.viewport().mapToGlobal(e.pos()))
         e.accept()
 
@@ -76,7 +76,7 @@ class NavigationPlugin(QtCore.QObject):
         
         # add widget to mainwindow
         self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
-        QtCore.QObject.connect(self.signalproxy.distributedObjects.debug_controller, QtCore.SIGNAL('executableOpened'), self.update)
+        QtCore.QObject.connect(self.signalproxy.distributedObjects.debugController, QtCore.SIGNAL('executableOpened'), self.update)
         
         self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
         QtCore.QObject.connect(self.ctagsRunner, QtCore.SIGNAL("tagsFileAvailable()"), self.tagsFileReady, Qt.QueuedConnection)

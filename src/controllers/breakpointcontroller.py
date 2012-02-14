@@ -23,14 +23,13 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 """@package breakpointcontroller
-    the breakpoint controller 
+    the breakpoint controller
 """
 
 from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
-
 
 
 class BreakpointController(QObject):
@@ -43,25 +42,25 @@ class BreakpointController(QObject):
         """
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
-        
+
         self._model = BreakpointModel(self.distributed_objects.gdb_connector)
         self.breakpointView = BreakpointView()
-        
+
         self.breakpointView.breakpointView.setModel(self._model)
-        
+
         #register with session manager to save breakpoints
-        self.distributed_objects.signal_proxy.emitRegisterWithSessionManager(self, "Breakpoints")
-        
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL("insertDockWidgets()"), self.insertDockWidgets)
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL("cleanupModels()"), self._model.clearBreakpoints)
-        
+        self.distributed_objects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
+
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL("insertDockWidgets()"), self.insertDockWidgets)
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL("cleanupModels()"), self._model.clearBreakpoints)
+
     def insertDockWidgets(self):
         """ needed for plugin system"""
         self.breakpointDock = QDockWidget("Breakpoints")
         self.breakpointDock.setObjectName("BreakpointView")
         self.breakpointDock.setWidget(self.breakpointView)
-        self.distributed_objects.signal_proxy.addDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
-        
+        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
+
     def insertBreakpoint(self, file_, line):
         """insert a breakpoint in specified file on specified line
         @param file: (string), full name (incl. path) of file where breakpoint should be inserted
@@ -71,45 +70,44 @@ class BreakpointController(QObject):
         empty or has no effect. therefore it is necessary to observe the real line number of inserted breakpoint
         """
         return self._model.insertBreakpoint(file_, line)
-    
+
     def deleteBreakpoint(self, file_, line):
         """deletes a breakpoint in specified file on specified line
         @param file: (string), full name (incl. path) of file
         @param line: (int), line number where breakpoint should be deleted
         """
         self._model.deleteBreakpoint(file_, line)
-        
+
     def toggleBreakpoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line
         @param file_: (string), fullname of file
         @param line: (int), linenumber where the breakpoint should be toggled
         """
         return self._model.toggleBreakpoint(file_, line)
-        
+
     def getBreakpointsFromModel(self):
         """returns a list of all breakpoints in model
         @return breakpoints: (List<ExtendedBreakpoint>), a list of breakpoints
         """
         return self._model.getBreakpoints()
-        
+
     def setBreakpointsForModel(self, bpList):
         self._model.setBreakpoints(bpList)
-            
+
     def saveSession(self, xmlHandler):
         """Insert session info to xml file"""
         bpparent = xmlHandler.createNode("Breakpoints")
         for bp in self._model.getBreakpoints():
-            xmlHandler.createNode("Breakpoint", bpparent, { "file": bp.file, "line": bp.line })
-             
-    def loadSession(self, xmlHandler): 
-        """load session info to xml file"""      
+            xmlHandler.createNode("Breakpoint", bpparent, {"file": bp.file, "line": bp.line})
+
+    def loadSession(self, xmlHandler):
+        """load session info to xml file"""
         bpparent = xmlHandler.getNode("Breakpoints")
         if bpparent != None:
             childnodes = bpparent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
                 self._model.insertBreakpoint(attr["file"], attr["line"])
-    
+
     def model(self):
         return self._model
-

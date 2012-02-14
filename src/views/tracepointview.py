@@ -25,10 +25,11 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
 
+
 class TracepointView(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
@@ -47,7 +48,7 @@ class TracepointView(QWidget):
         self.gridLayout.addWidget(self.tracepointView, 0, 0, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(self)
-        
+
     def getSelectedRow(self):
         if len(self.tracepointView.selectionModel().selectedIndexes()) > 0:
             return self.tracepointView.selectionModel().selectedIndexes()[0]

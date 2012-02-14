@@ -29,26 +29,27 @@ A model that provides data about the GDB's call stack.
 from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel, SIGNAL
 from operator import attrgetter
 
+
 class StackModel(QAbstractTableModel):
-    def __init__(self, controller, debugger, connector, parent = None):
+    def __init__(self, controller, debugger, connector, parent=None):
         QAbstractTableModel.__init__(self, parent)
         self.connector = connector
-        self.debug_controller = debugger
+        self.debugController = debugger
         self.controller = controller
         self.stack = []
         self.sortColumn = 0
         self.sortOrder = Qt.DescendingOrder
-        
+
     def rowCount(self, parent):
         return len(self.stack)
-    
+
     def columnCount(self, parent):
         return 4
 
     def data(self, index, role):
         assert(index.row() < len(self.stack))
         l = self.stack[index.row()]
-        
+
         ret = None
 
         if role == Qt.DisplayRole:
@@ -66,10 +67,10 @@ class StackModel(QAbstractTableModel):
                     ret = l.line
 
         return ret
-    
+
     def headerData(self, section, orientation, role):
         ret = None
-        
+
         if orientation == Qt.Horizontal:
             if role == Qt.DisplayRole:
                 if section == 0:
@@ -82,7 +83,7 @@ class StackModel(QAbstractTableModel):
                     ret = "Line"
 
         return ret
-    
+
     def sort(self, column, order):
         self.sortColumn = column
         self.sortOrder = order
@@ -101,23 +102,23 @@ class StackModel(QAbstractTableModel):
         self.emit(SIGNAL('layoutAboutToBeChanged()'))
         self.stack.sort(key=attrgetter(key), reverse=rev)
         self.emit(SIGNAL('layoutChanged()'))
-        
+
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
-            return QModelIndex();
-        
+            return QModelIndex()
+
         ret = self.stack[row]
-            
+
         return self.createIndex(row, column, ret)
-    
+
     def flags(self, index):
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled
-    
+
     def clear(self):
         self.emit(SIGNAL('layoutAboutToBeChanged()'))
         self.stack = []
         self.emit(SIGNAL('layoutChanged()'))
-        
+
         self.controller.removeStackMarkers()
 
     def update(self, rec):
@@ -126,8 +127,7 @@ class StackModel(QAbstractTableModel):
         for s in self.stack:
             s.level = int(s.level)
         self.emit(SIGNAL('layoutChanged()'))
-        
-        self.sort(self.sortColumn, self.sortOrder)
-        
-        self.controller.insertStackMarkers()
 
+        self.sort(self.sortColumn, self.sortOrder)
+
+        self.controller.insertStackMarkers()

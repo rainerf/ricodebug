@@ -1,8 +1,33 @@
+# ricodebug - A GDB frontend which focuses on visually supported
+# debugging using data structure graphs and SystemC features.
+#
+# Copyright (C) 2011  The ricodebug project team at the
+# Upper Austrian University Of Applied Sciences Hagenberg,
+# Department Embedded Systems Design
+#
+# This file is part of ricodebug.
+#
+# ricodebug is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further information see <http://syscdbg.hagenberg.servus.at/>.
+
 import logging
 from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
 from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
 from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
 from models.logmodel import LogModel, FilteredLogModel
+
 
 class LogViewHandler(logging.Handler):
     def __init__(self, target_widget, filter_slider):
@@ -14,28 +39,29 @@ class LogViewHandler(logging.Handler):
         target_widget.setModel(self.filter_model)
         self.target_widget = target_widget
         QObject.connect(filter_slider, SIGNAL("valueChanged(int)"), self.setFilter)
-    
+
     def emit(self, record):
         self.model.insertMessage(record)
         self.updateView()
-    
+
     def updateView(self):
         self.target_widget.resizeColumnsToContents()
-        if self.target_widget.columnWidth(2)> 500:
+        if self.target_widget.columnWidth(2) > 500:
             self.target_widget.setColumnWidth(2, 500)
         self.target_widget.scrollToBottom()
 
     def setFilter(self, value):
-        self.filter_model.setMinimum(value*10)
+        self.filter_model.setMinimum(value * 10)
         self.updateView()
 
 
 class ErrorLabel(QWidget):
     WARNING, ERROR = range(2)
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
         self.ticks = 5
-        self.elapsedTicks= 0
+        self.elapsedTicks = 0
         self.lastSeverity = None
         self.icon_label = QLabel()
         self.icon_label.setGeometry(0, 0, 48, 48)
@@ -69,7 +95,7 @@ class ErrorLabel(QWidget):
     def stopTimer(self):
         self.timer.stop()
         self.pauseButton.setEnabled(False)
-    
+
     def closeWidget(self):
         self.timer.stop()
         QWidget.hide(self)
@@ -84,11 +110,11 @@ class ErrorLabel(QWidget):
             self.time_bar.setValue(self.ticks - self.elapsedTicks)
 
     def updatePosition(self):
-        self.setGeometry(0, self.parent().height()-self.height(), self.width(), self.height())
-    
+        self.setGeometry(0, self.parent().height() - self.height(), self.width(), self.height())
+
     def setSize(self, w, h):
-        self.setGeometry(0, self.parent().height()-h, w, h)
-    
+        self.setGeometry(0, self.parent().height() - h, w, h)
+
     def setErrorMessage(self, msg):
         self.lastSeverity = self.ERROR
         self.icon_label.setPixmap(QApplication.style().standardIcon(QStyle.SP_MessageBoxCritical).pixmap(48, 48))
@@ -98,11 +124,11 @@ class ErrorLabel(QWidget):
         self.lastSeverity = self.WARNING
         self.icon_label.setPixmap(QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(48, 48))
         self._setMessage(msg)
-        
+
     def _setMessage(self, msg):
         self.message_edit.setText(msg)
         self.updatePosition()
-        self.elapsedTicks= 0
+        self.elapsedTicks = 0
         self.time_bar.setValue(self.ticks)
         self.timer.start(1000)
         self.pauseButton.setEnabled(True)
@@ -113,7 +139,7 @@ class ErrorLabelHandler(logging.Handler):
     def __init__(self, main_window):
         logging.Handler.__init__(self)
         self.main_window = main_window
-        
+
         self.error_label = ErrorLabel(main_window)
         self.error_label.setSize(500, 100)
         self.error_label.hide()
@@ -126,5 +152,5 @@ class ErrorLabelHandler(logging.Handler):
 
 
 class LogView(QTableView):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QTableView.__init__(self, parent)

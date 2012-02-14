@@ -30,17 +30,18 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import QObject, SIGNAL
 
+
 class FileListView(QWidget):
     """ Class that displays the content of the file list model in a tree view. """
 
-    def __init__(self, filelist_controller, parent = None):
+    def __init__(self, filelist_controller, parent=None):
         """ The constructor.
         @param filelist_controller The file list controller.
-        @param parent The parent item. 
+        @param parent The parent item.
         """
 
         QWidget.__init__(self, parent)
-        
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
@@ -49,13 +50,12 @@ class FileListView(QWidget):
         self.treeView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
         QtCore.QMetaObject.connectSlotsByName(self)
-        
+
         QObject.connect(self.treeView, SIGNAL('activated(QModelIndex)'), filelist_controller.fileInFileListViewActivated)
         QObject.connect(self.treeView, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
-        
+
     def resizeColumn(self, index):
-        """ Resize the first column to contents when expanded. 
+        """ Resize the first column to contents when expanded.
         @param index The index of the column (ignored).
         """
         self.treeView.resizeColumnToContents(0)
-        

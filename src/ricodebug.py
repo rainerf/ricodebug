@@ -56,7 +56,7 @@ def main():
     logger.addHandler(errormsghandler)
     
     if (len(sys.argv) > 1):
-        window.debug_controller.openExecutable(sys.argv[1])
+        window.debugController.openExecutable(sys.argv[1])
 
     window.show()
     sys.exit(app.exec_())

@@ -31,7 +31,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def _get_available_filtes():
+
+def _getAvailableFiltes():
     return [Bar, Lines, Steps]
 
 
@@ -41,9 +42,10 @@ def add_actions_for_all_styles(menu, handler):
             handler.setPlotStyle(style)
         return f
 
-    for cls in _get_available_filtes():
+    for cls in _getAvailableFiltes():
         name = cls.__doc__
         menu.addAction(name, setPlotStyle(handler, cls))
+
 
 class Bar:
     "Bar chart"
@@ -51,11 +53,11 @@ class Bar:
     def plot(ax, data):
         ind = range(len(data))
         width = 0.75
-        
+
         ax.bar(ind, data, width)
-        ax.set_xticks([i + width/2 for i in ind])
+        ax.set_xticks([i + width / 2 for i in ind])
         ax.set_xticklabels(ind)
-        ax.set_xlim(0, len(data)-1+width)
+        ax.set_xlim(0, len(data) - 1 + width)
 
 
 class Lines:
@@ -66,7 +68,7 @@ class Lines:
         ind = range(len(data))
         ax.set_xticks(range(len(data)))
         ax.set_xticks([i for i in ind])
-        ax.set_xlim(0, len(data)-1)
+        ax.set_xlim(0, len(data) - 1)
 
 
 class Steps:
@@ -89,7 +91,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         ComplexTemplateHandler.__init__(self, varWrapper, distributedObjects, 'structvariableview.mako')
         self.graphicalView = False
         self.style = Bar
-    
+
     @QtCore.pyqtSlot()
     def toggleGraphicalView(self):
         if self.graphicalView:
@@ -99,31 +101,31 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
             self.graphicalView = True
             self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
-    
+
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
-        
+
         graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
-        
+
         # we only allow the graphical view if all contained elements are standard variables; also,
         # do not show the menu if the variable view is collapsed
         if self.varWrapper.isOpen and graphicalViewPossible:
             action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.getExp(), self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)
-            
+
             if self.graphicalView:
                 submenu = menu.addMenu("Set plot type")
                 add_actions_for_all_styles(submenu, self)
-    
+
     def setPlotStyle(self, style):
         self.style = style
         self.varWrapper.setDirty(True)
-    
+
     def plot(self, output):
         data = [float(var.getUnfilteredValue()) for var in self.varWrapper.children]
-        
-        fig = plt.figure(figsize=(4, 3)) 
+
+        fig = plt.figure(figsize=(4, 3))
         ax = fig.add_subplot(111)
         self.style.plot(ax, data)
         fig.savefig(output, format='svg', transparent=True, bbox_inches='tight')
@@ -131,7 +133,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
 
 class ArrayDataGraphVW(ComplexDataGraphVW):
     """ VariableWrapper for Arrays """
-    
+
     def __init__(self, variable, distributedObjects, vwFactory):
         """ Constructor
         @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW

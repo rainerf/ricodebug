@@ -25,10 +25,11 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
 
+
 class BreakpointView(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
@@ -46,4 +47,3 @@ class BreakpointView(QWidget):
         self.gridLayout.addWidget(self.breakpointView, 0, 0, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(self)
-        

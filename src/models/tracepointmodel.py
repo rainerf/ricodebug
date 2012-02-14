@@ -93,7 +93,7 @@ class Tracepoint(ExtendedBreakpoint):
         self.counter = 0
         self.hitted = False
         self.stop = False
-        self.connect(self.distObjects.signal_proxy, SIGNAL('dataForTracepointsReady()'), self.readDataFromVarModel)
+        self.connect(self.distObjects.signalProxy, SIGNAL('dataForTracepointsReady()'), self.readDataFromVarModel)
         self.wave = []
 
     def addVar(self, variableToTrace):
@@ -433,7 +433,7 @@ class TracepointModel(QAbstractTableModel):
         @param index: index of row that was clicked
         """
         tp = self.tracepoints[index.row()]
-        self.distObjects.tracepointwave_controller.updateTracepointWaveView(tp.wave)
+        self.distObjects.tracepointwaveController.updateTracepointWaveView(tp.wave)
         
     
     

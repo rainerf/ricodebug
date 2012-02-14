@@ -24,9 +24,10 @@
 
 from datagraph.datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 
+
 class StructVariableTemplateHandler(ComplexTemplateHandler):
     """ TemplateHandler for Struct-Variables """
-    
+
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
@@ -35,7 +36,7 @@ class StructVariableTemplateHandler(ComplexTemplateHandler):
 
 class StructDataGraphVW(ComplexDataGraphVW):
     """ VariableWrapper for Structs """
-    
+
     def __init__(self, variable, distributedObjects, vwFactory):
         """ Constructor
         @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW

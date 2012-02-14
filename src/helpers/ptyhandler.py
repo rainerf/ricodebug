@@ -27,21 +27,22 @@ import os
 import select
 from PyQt4.QtCore import QThread, SIGNAL
 
+
 class PtyHandler(QThread):
-	def __init__(self, parent=None):
-		super(PtyHandler, self).__init__(parent)
-		self.master, self.slave = pty.openpty()
-		self.ptyname = os.ttyname(self.slave)
-		self.stop = False
-		
-	def run(self):
-		self.listener()
-	
-	def listener(self):
-		while not self.stop:
-			if select.select([self.master], [], [], 0.2) != ([], [], []):
-				ret = os.read(self.master, 100)
-				self.emit(SIGNAL('dataAvailable(QString)'), ret)
-	
-	def write(self, s):
-		self.master.write(s)
+    def __init__(self, parent=None):
+        super(PtyHandler, self).__init__(parent)
+        self.master, self.slave = pty.openpty()
+        self.ptyname = os.ttyname(self.slave)
+        self.stop = False
+
+    def run(self):
+        self.listener()
+
+    def listener(self):
+        while not self.stop:
+            if select.select([self.master], [], [], 0.2) != ([], [], []):
+                ret = os.read(self.master, 100)
+                self.emit(SIGNAL('dataAvailable(QString)'), ret)
+
+    def write(self, s):
+        self.master.write(s)

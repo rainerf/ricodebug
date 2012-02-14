@@ -31,59 +31,60 @@ from arrayvariable import ArrayVariable
 from pendingvariable import PendingVariable
 import logging
 
+
 class VariablePool(QObject):
     """ Variablepool holding all variables created once from a view """
-    
+
     def __init__(self, distributedObjects):
         """ Constructor
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         QObject.__init__(self)
-        
+
         self.distributedObjects = distributedObjects
-        self.debugcontroller = distributedObjects.debug_controller
+        self.debugcontroller = distributedObjects.debugController
         self.connector = distributedObjects.gdb_connector
         self.list = {}
         self.pending = []
-        
+
         # signalproxy
-        self.signalProxy = distributedObjects.signal_proxy
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateVars)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('cleanupModels()'), self.clearVars)
-        
+        self.signalProxy = distributedObjects.signalProxy
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateVars)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self.clearVars)
+
     def clearVars(self):
-        """ delete all variables stored in pool 
+        """ delete all variables stored in pool
             this function is connected to the signal SignalProxy::cleanupModels()
         """
-        
+
         self.list = {}
-    
+
     def justUpdateValues(self):
         """ just update variables for tracepoints, dont signal changes to connected views
         this function is connected to the signal SignalProxy::tracepointOccured()
         """
         self.__updateVars(True)
         # signal TracepointController about finished update
-        self.distributedObjects.signal_proxy.emitDataForTracepointsReady()
-    
+        self.distributedObjects.signalProxy.emitDataForTracepointsReady()
+
     def updateVars(self):
         """ update variables if inferiorStoppedNormally
         this function is connected to the signal SignalProxy::inferiorStoppedNormally(PyQt_PyObject)
         """
         self.__updateVars(False)
-    
+
     def __updateVars(self, isTracePoint=None):
         """ get updates for variables from gdb
         @param isTracePoint   bool, if method is called from Tracepoint<br>
-                              changed signal is not emitted 
+                              changed signal is not emitted
         """
-        
+
         res = self.connector.var_update("*")
         if not hasattr(res, "changelist"):
             return
         res = res.changelist
-         
+
         # update the variable
         # dont use setter method to apply changes because this will cause update to gdb
         # just update value in pool
@@ -96,7 +97,7 @@ class VariablePool(QObject):
                         var.value = changed.value
                     if isTracePoint == False:
                         var.changed()
-        
+
         # search for pending variables and replace them if
         # they are in scope
         tempList = self.list.copy()
@@ -107,19 +108,19 @@ class VariablePool(QObject):
                     newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
                     self.list[var.getUniqueName()] = newVar
                     var.replace(newVar)
-        
+
         self.signalProxy.emitVariableUpdateCompleted()
-                    
+
     def addLocals(self):
         """ get locals from gdb and add to pool if variable is not existing
         """
         ret = []
         res = self.connector.getLocals()
-        
-        for x in reversed(res):         
+
+        for x in reversed(res):
             var = self.getVar(x.name, True)
             ret.append(var)
-        return ret        
+        return ret
 
     def getVar(self, exp, isLocal=False):
         """ return variable from pool if already existing <br>
@@ -128,31 +129,31 @@ class VariablePool(QObject):
         @param isLocal   bool, replace pending variables from pool if variable is local variable
         """
         # variable existing in pool and in current scope
-        if exp in self.list: #self.list.has_key(exp):
+        if exp in self.list:
             if not self.list[exp].getPending() and self.list[exp].getInScope():
                 logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
                 return self.list[exp]
 
         # get variable from gdb (fixed)
         gdbVar = self.connector.var_create("- * " + str(exp))
-        
+
         # successful result
         if (gdbVar.class_ == GdbOutput.ERROR):
             gdbVar = None
-        
+
         # create variable
-        varReturn = self.__createVariable(gdbVar, None, exp, None) 
-        
+        varReturn = self.__createVariable(gdbVar, None, exp, None)
+
         self.list[varReturn.getUniqueName()] = varReturn
-        
+
         logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
-        
+
         return varReturn
-    
+
     def getChildren(self, name, childList, access, parentName, childformat):
         """
         Appends the children of the variable with name to childList (and to internal list).
-        These children are Variables.  
+        These children are Variables.
         @param name         string, name of the variable to get children from
         @param childList    Variable[], list of children for variable
         @param access       string, variable is private, protected or public (read from gdb)
@@ -163,23 +164,22 @@ class VariablePool(QObject):
         if (hasattr(gdbChildren, "children") == True):
             for child in gdbChildren.children:
                 assert (child.dest == "child")
-            
-                
-                if not hasattr(child.src, "type"): # public, private, protected
+
+                if not hasattr(child.src, "type"):  # public, private, protected
                     access = child.src.exp
                     self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
-                elif child.src.exp == child.src.type: # base classes
+                elif child.src.exp == child.src.type:   # base classes
                     self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
                     # variable existing in pool and in current scope
-                    uniqueName = childformat % {"parent": parentName, "child": child.src.exp} # str(parentName + "." + child.src.exp)
-                    if (self.list.has_key(uniqueName) == True):     
-                        var =  self.list[uniqueName]
+                    uniqueName = childformat % {"parent": parentName, "child": child.src.exp}
+                    if (uniqueName in self.list):
+                        var = self.list[uniqueName]
                     else:
                         var = self.__createVariable(child.src, parentName, None, access, childformat)
                     self.list[var.getUniqueName()] = var
-                    childList.append(var) 
-                    
+                    childList.append(var)
+
     def assignValue(self, gdbName, value):
         """
         Assigns the value from the variable to the gdbvariable
@@ -191,11 +191,11 @@ class VariablePool(QObject):
         if res.class_ == GdbOutput.ERROR:
             logging.error("Error when assigning variable: %s", res.raw)
             raise
-        
+
         # update _all_ vars; other expressions in the variable pool might depend
         # on what we just changed!
         self.updateVars()
-    
+
     def __createVariable(self, gdbVar, parentName=None, exp=None, access=None, childformat=None):
         """ create Variable with value from gdb variable
         @param gdbVar        variable read from gdb
@@ -205,20 +205,20 @@ class VariablePool(QObject):
         """
         # variable to create
         varReturn = None
-        
+
         # initialize values
         gdbName = None
         uniqueName = None
-        type = None
+        type_ = None
         value = None
         inscope = None
         haschildren = None
-        
+
         # PendingVariable
         if gdbVar == None:
             uniqueName = exp
             inscope = False
-            varReturn = PendingVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
+            varReturn = PendingVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
         else:
             if hasattr(gdbVar, "exp"):
                 exp = gdbVar.exp
@@ -226,28 +226,28 @@ class VariablePool(QObject):
             if parentName == None:
                 uniqueName = exp
             else:
-                uniqueName = childformat % {"parent": parentName, "child": exp} #"(" + parentName + ")." + exp
-            type = gdbVar.type
+                uniqueName = childformat % {"parent": parentName, "child": exp}
+            type_ = gdbVar.type
             value = gdbVar.value
             inscope = True
             haschildren = (int(gdbVar.numchild) > 0)
             access = access
-                
+
             # FIXME: the check below should probably be less hackish ;)
             # PtrVariable: everything that contains a star and exactly one
             # element as a child is a pointer; if there are more childs, it's an
             # array of pointers!
-            if type.endswith("*") and int(gdbVar.numchild) >= 1:
-                varReturn = PtrVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
-            elif type.endswith("]") and int(gdbVar.numchild) >= 1:
-                varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
+            if type_.endswith("*") and int(gdbVar.numchild) >= 1:
+                varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            elif type_.endswith("]") and int(gdbVar.numchild) >= 1:
+                varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
             # StructVariable
             elif haschildren == True:
-                varReturn = StructVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
+                varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
             #StdVariabe
             else:
-                varReturn = StdVariable(self, exp, gdbName, uniqueName, type, value, inscope, haschildren, access)
-                
+                varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+
         return varReturn
 
     def dump(self):

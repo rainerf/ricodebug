@@ -31,11 +31,11 @@ from treeitemcontroller import TreeItemController
 class LocalsController(TreeItemController):
     def __init__(self, distributedObjects):
         TreeItemController.__init__(self, distributedObjects, "Locals", LocalsView, LocalsModel)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.getLocals)
-        
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.getLocals)
+
     def getLocals(self):
         self.clear()
         self.variableList.addLocals()
-        
+
         for vw in self.variableList.list:
             self.add(vw)

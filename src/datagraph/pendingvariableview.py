@@ -24,20 +24,21 @@
 
 from datagraphvw import DataGraphVW, HtmlTemplateHandler
 
+
 class PendingVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for pending Variables """
-    
+
     def __init__(self, var, distributedObjects):
         """ Constructor
         @param var    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         HtmlTemplateHandler.__init__(self, var, distributedObjects)
-    
+
     def execLinkCommand(self, commandStr, mainView):
         """ handles the given Command
         @param commandStr  String, the Command to handle
         @param mainView    datagraph.datagraphvw.HtmlVariableView, the View of the top-level-Variable """
         pass
-    
+
     def render(self, handlers, view):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
@@ -45,11 +46,11 @@ class PendingVariableTemplateHandler(HtmlTemplateHandler):
         # do not render anything for PendingVar
         #return "pending: " + self.var.getExp()
         return ""
-    
+
 
 class PendingDataGraphVW(DataGraphVW):
     """ VariableWrapper for pending Variables """
-    
+
     def __init__(self, variable, distributedObjects):
         """ Constructor
         @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW

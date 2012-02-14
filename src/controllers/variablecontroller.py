@@ -31,62 +31,63 @@ from variables.ptrvariablewrapper import PtrVariableWrapper
 from variables.structvariablewrapper import StructVariableWrapper
 from variables.variablelist import VariableList
 
+
 class WatchVWFactory(VarWrapperFactory):
     def __init__(self):
         VarWrapperFactory.__init__(self)
+
     def makeStdVarWrapper(self, var):
         return StdVariableWrapper(var)
-    
+
     def makePtrVarWrapper(self, var):
         return PtrVariableWrapper(var)
-    
+
     def makeStructVarWrapper(self, var):
         return StructVariableWrapper(var)
 
 
-
 class VariableController(QObject):
     _instance = None
-    
+
     @classmethod
     def CreateInstance(cls, watchview):
         if not cls._instance:
             cls._instance = cls(watchview)
-    
+
     @classmethod
     def getInstance(cls):
         if not cls._instance:
             raise "VariableController has no Instance!"
         return cls._instance
-    
+
     def __init__(self, watchview):
         QObject.__init__(self)
-        
+
         #signalproxy
         self.signalProxy = SignalProxy.getInstance()
         QObject.connect(self.signalProxy, SIGNAL('AddWatch(QString)'), self.addWatch)
-        
+
         # views
         self.watchview = watchview
-        
+
         # controllers
         self.debugController = DebugController.getInstance()
-        
+
         # factory
         self.vwFactory = WatchVWFactory()
         self.variableList = VariableList(self.vwFactory)
-        
+
         # models
-        self.variableModel = self.debugController.variableModel;
-     
+        self.variableModel = self.debugController.variableModel
+
     def addWatch(self, watch):
         var = self.variableList.addVar(watch)
         QObject.connect(var, SIGNAL('changed()'), self.varChanged)
 #        for item in self.variableList:
 #            print item.getExp() + " " + item.getValue()
-#            
+#
 #    def varChanged(self):
 #        print "variable changed"
-    
-    def removeSelected(self, row, parent):  
-        self.variableModel.removeRow(row, parent);
+
+    def removeSelected(self, row, parent):
+        self.variableModel.removeRow(row, parent)

@@ -24,12 +24,13 @@
 
 from variables.variablewrapper import VariableWrapper
 
+
 class ArrayVariableWrapper(VariableWrapper):
     """ VariableWrapper for Arrays. <br>
         This is only an Example of a Wrapper! <br>
         You can use it directly, but normally you will need to write your own Wrapper for your own Needs.
     """
-    
+
     def __init__(self, variable):
         """ Constructor
         @param variable    variables.variable.Variable, the variable to wrap
@@ -40,4 +41,3 @@ class ArrayVariableWrapper(VariableWrapper):
         """ Returns a List with all Members of the struct.
         @return    List of Variables, Members of the struct. """
         return self.variable.getChildren()
-

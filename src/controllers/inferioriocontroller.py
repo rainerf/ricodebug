@@ -26,18 +26,18 @@ from PyQt4.QtCore import QObject, SIGNAL, Qt
 from PyQt4.QtGui import QDockWidget
 from views.inferiorioview import InferiorIoView
 
+
 class InferiorIoController(QObject):
     def __init__(self, distributed_objects):
         QObject.__init__(self)
         self.distributed_objects = distributed_objects
-        
-        self.inferiorioView = InferiorIoView(self.distributed_objects.debug_controller)
-        
-        QObject.connect(self.distributed_objects.signal_proxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        
+
+        self.inferiorioView = InferiorIoView(self.distributed_objects.debugController)
+
+        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+
     def insertDockWidgets(self):
         self.inferiorioDock = QDockWidget("Output")
         self.inferiorioDock.setObjectName("InferiorIoView")
         self.inferiorioDock.setWidget(self.inferiorioView)
-        self.distributed_objects.signal_proxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)
-        
+        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)

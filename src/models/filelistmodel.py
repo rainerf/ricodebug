@@ -31,10 +31,11 @@ from operator import attrgetter
 from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex, QObject, SIGNAL
 from PyQt4.QtGui import QPixmap
 
+
 class FileListItem():
     """ Class that represents a source file in the file list view. """
 
-    def __init__(self, data, imageIndex, parent = None):
+    def __init__(self, data, imageIndex, parent=None):
         """ The constructor.
         @param data The item's data.
         @param imageIndex The index of the item's icon.
@@ -45,13 +46,13 @@ class FileListItem():
         self.itemData = data
         self.parentItem = parent
         self.imageIndex = imageIndex
-        
+
     def appendChild(self, child):
-        """ Append child to current item. 
+        """ Append child to current item.
         @param child Child object.
         """
         self.childItems.append(child)
-        
+
     def clearChildren(self):
         """ Clear children of current item. """
         self.childItems = []
@@ -61,53 +62,54 @@ class FileListItem():
         @param row Row index of the child.
         """
         return self.childItems[row]
-    
+
     def childCount(self):
         """ Get number of children. """
         return len(self.childItems)
-    
+
     def columnCount(self):
         """ Get number of data columns. """
         return len(self.itemData)
-    
+
     def data(self, column):
-        """ Get data. 
-        @param column The data column. 
+        """ Get data.
+        @param column The data column.
         """
         return self.itemData[column]
-    
+
     def row(self):
         """ Get row index. """
         if self.parentItem is None:
-            return self.parentItem.childItems.index(self);
-        
-        return 0;
-    
+            return self.parentItem.childItems.index(self)
+
+        return 0
+
     def parent(self):
         """ Get parent. """
         return self.parentItem
 
+
 class FileListModel(QAbstractItemModel):
     """ Class that represents a tree model for the program's source files. """
 
-    def __init__(self, debugger, connector, parent = None):
+    def __init__(self, debugger, connector, parent=None):
         """ The constructor.
         @param debugger The debug controller.
         @param connector The GDB connector.
         @param parent The parent item.
         """
- 
+
         QAbstractItemModel.__init__(self, parent)
         self.connector = connector
-        self.debug_controller = debugger
+        self.debugController = debugger
         self.imgs = [QPixmap(":/icons/images/folder.png"), QPixmap(":/icons/images/file.png")]
         self.root = FileListItem(["Name", "Path"], 0)
         self.sources = FileListItem(["Sources", ""], 0, self.root)
         self.headers = FileListItem(["Headers", ""], 0, self.root)
         self.others = FileListItem(["Others", ""], 0, self.root)
-        
-        QObject.connect(self.debug_controller, SIGNAL('executableOpened'), self.update)
-       
+
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.update)
+
     def data(self, index, role):
         """ Required function for Qt Model/View concepts.
         Please see Qt documentation for further information.
@@ -115,16 +117,16 @@ class FileListModel(QAbstractItemModel):
 
         if not index.isValid():
             return None
-        
+
         item = index.internalPointer()
-        
+
         ret = None
         if role == Qt.DisplayRole:
             ret = item.data(index.column())
         elif role == Qt.DecorationRole:
             if index.column() == 0:
                 ret = self.imgs[item.imageIndex]
-            
+
         return ret
 
     def flags(self, index):
@@ -133,7 +135,7 @@ class FileListModel(QAbstractItemModel):
         """
 
         if not index.isValid():
-            return 0;
+            return 0
 
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
@@ -153,13 +155,13 @@ class FileListModel(QAbstractItemModel):
         """
 
         if not self.hasIndex(row, column, parent):
-            return QModelIndex();
-        
+            return QModelIndex()
+
         if not parent.isValid():
             parentItem = self.root
         else:
             parentItem = parent.internalPointer()
-            
+
         childItem = parentItem.child(row)
         if childItem is not None:
             return self.createIndex(row, column, childItem)
@@ -173,13 +175,13 @@ class FileListModel(QAbstractItemModel):
 
         if not index.isValid():
             return QModelIndex()
-        
+
         childItem = index.internalPointer()
         parentItem = childItem.parent()
-        
+
         if parentItem == self.root:
             return QModelIndex()
-        
+
         return self.createIndex(parentItem.row(), 0, parentItem)
 
     def rowCount(self, parent):
@@ -189,14 +191,14 @@ class FileListModel(QAbstractItemModel):
 
         if parent.column() > 0:
             return 0
-        
+
         if not parent.isValid():
             parentItem = self.root
         else:
             parentItem = parent.internalPointer()
-            
-        return parentItem.childCount();
-    
+
+        return parentItem.childCount()
+
     def columnCount(self, parent):
         """ Required function for Qt Model/View concepts.
         Please see Qt documentation for further information.
@@ -205,37 +207,37 @@ class FileListModel(QAbstractItemModel):
         if parent.isValid():
             return parent.internalPointer().columnCount()
         else:
-            return self.root.columnCount();
-        
+            return self.root.columnCount()
+
     def updateData(self):
         """ Builds the tree model. """
 
         data = self.connector.getSources()
         self.clearData()
-        
+
         for path in data:
             name = os.path.basename(path)
             _, ext = os.path.splitext(name)
             if ext == ".cpp" or ext == ".c":
-                if not self.sources in self.root.childItems: 
+                if not self.sources in self.root.childItems:
                     self.root.appendChild(self.sources)
                 item = FileListItem([name, path], 1, self.sources)
                 self.sources.appendChild(item)
             elif ext == ".hpp" or ext == ".h":
-                if not self.headers in self.root.childItems: 
+                if not self.headers in self.root.childItems:
                     self.root.appendChild(self.headers)
                 item = FileListItem([name, path], 1, self.headers)
                 self.headers.appendChild(item)
             else:
-                if not self.others in self.root.childItems: 
+                if not self.others in self.root.childItems:
                     self.root.appendChild(self.others)
                 item = FileListItem([name, path], 1, self.others)
                 self.others.appendChild(item)
-                
+
         self.sources.childItems.sort(key=attrgetter("itemData"), reverse=False)
         self.headers.childItems.sort(key=attrgetter("itemData"), reverse=False)
         self.others.childItems.sort(key=attrgetter("itemData"), reverse=False)
-       
+
     def clearData(self):
         """ Clears all data in the tree model. """
 
@@ -261,4 +263,3 @@ class FileListModel(QAbstractItemModel):
         self.beginResetModel()
         self.updateData()
         self.endResetModel()
-        

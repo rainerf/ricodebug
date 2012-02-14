@@ -27,85 +27,86 @@ from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
 from collections import deque
 
+
 class GdbReader(QThread):
-	def __init__(self, connector, parent=None):
-		QThread.__init__(self, parent)
+    def __init__(self, connector, parent=None):
+        QThread.__init__(self, parent)
 
-		self.resultRecordQueue = deque()
-		self.resultRecordMutex = QMutex()
-		self.resultRecordSem = QSemaphore(0)
-		self.asynQueue = deque()
-		self.asynMutex = QMutex()
-		self.asynSem = QSemaphore(0)
-		self.streamQueue = deque()
-		self.streamMutex = QMutex()
-		self.streamSem = QSemaphore(0)
+        self.resultRecordQueue = deque()
+        self.resultRecordMutex = QMutex()
+        self.resultRecordSem = QSemaphore(0)
+        self.asynQueue = deque()
+        self.asynMutex = QMutex()
+        self.asynSem = QSemaphore(0)
+        self.streamQueue = deque()
+        self.streamMutex = QMutex()
+        self.streamSem = QSemaphore(0)
 
-	def startReading(self, stdout):
-		self.stdout = stdout
-		self.start()
+    def startReading(self, stdout):
+        self.stdout = stdout
+        self.start()
 
-	def run(self):
-		self.listener()
+    def run(self):
+        self.listener()
 
-	def listener(self):
-		lines = []
-		while True:
-			line = self.stdout.readline()
-			print line,
-			if line.startswith("(gdb)"):
-				# Check if there is a multiple break
-				if lines[0].startswith("&\"info break "):
-					asString = "<Multiple Break>"
-					for line in lines:
-						asString += line
-					self.forwardMultipleBreakPointInfo(asString)
-				results = GdbResultParser.parse(lines)
-				lines = []
-				for res in results:
-					self.forwardResult(res)
-			else:
-				lines.append(line)
+    def listener(self):
+        lines = []
+        while True:
+            line = self.stdout.readline()
+            print line,
+            if line.startswith("(gdb)"):
+                # Check if there is a multiple break
+                if lines[0].startswith("&\"info break "):
+                    asString = "<Multiple Break>"
+                    for line in lines:
+                        asString += line
+                    self.forwardMultipleBreakPointInfo(asString)
+                results = GdbResultParser.parse(lines)
+                lines = []
+                for res in results:
+                    self.forwardResult(res)
+            else:
+                lines.append(line)
 
-	def forwardMultipleBreakPointInfo(self, lines):
-		self.emit(SIGNAL("forwardMultipleBreakpointInfo(PyQt_PyObject)"), lines)
+    def forwardMultipleBreakPointInfo(self, lines):
+        self.emit(SIGNAL("forwardMultipleBreakpointInfo(PyQt_PyObject)"), lines)
 
-	def forwardResult(self, res):
-		type_ = res.type_
-		if type_ == GdbOutput.RESULT_RECORD:
-			self.enqueueResult(res)
-		elif type_ == GdbOutput.EXEC_ASYN or \
-			 type_ == GdbOutput.STATUS_ASYN or \
-			 type_ == GdbOutput.NOTIFY_ASYN:
-			self.emit(SIGNAL("asyncRecordReceived(PyQt_PyObject)"), res)
-		elif type_ == GdbOutput.CONSOLE_STREAM or \
-			 type_ == GdbOutput.TARGET_STREAM or \
-			 type_ == GdbOutput.LOG_STREAM:
-			self.emit(SIGNAL("consoleRecordReceived(PyQt_PyObject)"), res)
-		else:
-			raise "Illegal type_!"
+    def forwardResult(self, res):
+        type_ = res.type_
+        if type_ == GdbOutput.RESULT_RECORD:
+            self.enqueueResult(res)
+        elif type_ == GdbOutput.EXEC_ASYN or \
+             type_ == GdbOutput.STATUS_ASYN or \
+             type_ == GdbOutput.NOTIFY_ASYN:
+            self.emit(SIGNAL("asyncRecordReceived(PyQt_PyObject)"), res)
+        elif type_ == GdbOutput.CONSOLE_STREAM or \
+             type_ == GdbOutput.TARGET_STREAM or \
+             type_ == GdbOutput.LOG_STREAM:
+            self.emit(SIGNAL("consoleRecordReceived(PyQt_PyObject)"), res)
+        else:
+            raise "Illegal type_!"
 
-	def enqueueResult(self, gdbresult):
-		# enqueueResult will be deprecated for other types
-		assert(gdbresult.type_ == GdbOutput.RESULT_RECORD)
-		q = self.resultRecordQueue
-		m = self.resultRecordMutex
-		s = self.resultRecordSem
+    def enqueueResult(self, gdbresult):
+        # enqueueResult will be deprecated for other types
+        assert(gdbresult.type_ == GdbOutput.RESULT_RECORD)
+        q = self.resultRecordQueue
+        m = self.resultRecordMutex
+        s = self.resultRecordSem
 
-		m.lock()
-		q.append(gdbresult)
-		m.unlock()
-		s.release()
-	
-	def getResult(self, type_):
-		# getResult will be deprecated for other types
-		assert(type_ == GdbOutput.RESULT_RECORD)
-		q = self.resultRecordQueue
-		m = self.resultRecordMutex
-		s = self.resultRecordSem
+        m.lock()
+        q.append(gdbresult)
+        m.unlock()
+        s.release()
 
-		s.acquire()
-		m.lock()
-		res = q.popleft()
-		m.unlock()
-		return res
+    def getResult(self, type_):
+        # getResult will be deprecated for other types
+        assert(type_ == GdbOutput.RESULT_RECORD)
+        q = self.resultRecordQueue
+        m = self.resultRecordMutex
+        s = self.resultRecordSem
+
+        s.acquire()
+        m.lock()
+        res = q.popleft()
+        m.unlock()
+        return res

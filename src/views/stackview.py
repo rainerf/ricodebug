@@ -26,10 +26,11 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import QObject, SIGNAL
 
+
 class StackView(QWidget):
-    def __init__(self, stack_controller, parent = None):
+    def __init__(self, stack_controller, parent=None):
         QWidget.__init__(self, parent)
-        
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
@@ -45,11 +46,10 @@ class StackView(QWidget):
         self.stackView.verticalHeader().setDefaultSectionSize(20)
         self.stackView.horizontalHeader().setStretchLastSection(True)
         self.gridLayout.addWidget(self.stackView, 0, 0, 1, 1)
-        
+
         self.showStackTrace = QtGui.QCheckBox("Highlight stack trace", self)
         self.gridLayout.addWidget(self.showStackTrace, 1, 0, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(self)
-        
+
         QObject.connect(self.stackView, SIGNAL('activated(QModelIndex)'), stack_controller.stackInStackViewActivated)
-        

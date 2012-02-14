@@ -26,21 +26,22 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
 from PyQt4.QtCore import QObject, SIGNAL
 
+
 class PyIoView(QWidget):
-    def __init__(self, debug_controller, parent = None):
+    def __init__(self, debug_controller, parent=None):
         QWidget.__init__(self, parent)
-        
+
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)
 
         self.pyIoEdit = QtGui.QTextEdit(self)
         self.pyIoEdit.setReadOnly(True)
         self.gridLayout.addWidget(self.pyIoEdit, 0, 0, 1, 2)
-        
+
         self.pyInputEdit = QtGui.QComboBox(self)
         self.pyInputEdit.setEditable(True)
         self.gridLayout.addWidget(self.pyInputEdit, 1, 0, 1, 1)
-        
+
         self.pySendButton = QtGui.QPushButton(self)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -51,19 +52,19 @@ class PyIoView(QWidget):
         self.gridLayout.addWidget(self.pySendButton, 1, 1, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(self)
-        
-        self.debug_controller = debug_controller
-        
+
+        self.debugController = debug_controller
+
         QObject.connect(self.pyInputEdit.lineEdit(), SIGNAL('returnPressed()'), self.pySendButton.click)
         QObject.connect(self.pySendButton, SIGNAL('clicked()'), self.executePythonCode)
-        
+
     def executePythonCode(self):
         cmd = str(self.pyInputEdit.lineEdit().text())
         self.pyInputEdit.lineEdit().setText("")
-        self.debug_controller.executePythonCode(cmd)
+        self.debugController.executePythonCode(cmd)
 
         # print the command in the IO edit
-        s = "<font color=\"green\">"+cmd+"</font><br>\n"
+        s = "<font color=\"green\">" + cmd + "</font><br>\n"
         self.pyIoEdit.moveCursor(QTextCursor.End)
         self.pyIoEdit.insertHtml(s)
         self.pyIoEdit.moveCursor(QTextCursor.End)

@@ -27,35 +27,36 @@ from PyQt4 import QtCore
 from PyQt4.QtGui import QWidgetAction, QLineEdit
 import logging
 
+
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Pointer-Variables """
-    
+
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'ptrvariableview.mako')
-    
+
     @QtCore.pyqtSlot()
     def dereference(self):
         dgvw = self.varWrapper.dereference()
         if (dgvw != None):
             logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.getExp())
-            self.distributedObjects.datagraph_controller.addVar(dgvw)
-            self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), dgvw.getView())
+            self.distributedObjects.datagraphController.addVar(dgvw)
+            self.distributedObjects.datagraphController.addPointer(self.varWrapper.getView(), dgvw.getView())
         else:
             logging.error("Null-Pointer wasn't dereferenced.")
 
     @QtCore.pyqtSlot()
     def showCustom(self):
-        vw = self.distributedObjects.datagraph_controller.addWatch(self.showCustomEdit.text())
-        self.distributedObjects.datagraph_controller.addPointer(self.varWrapper.getView(), vw.getView())
+        vw = self.distributedObjects.datagraphController.addWatch(self.showCustomEdit.text())
+        self.distributedObjects.datagraphController.addPointer(self.varWrapper.getView(), vw.getView())
         self.showCustomEdit.parent().hide()
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         menu.addAction("Dereference %s" % self.varWrapper.getExp(), self.dereference)
         submenu = menu.addMenu("Show custom...")
-        
+
         # we cannot construct the lineedit in our ctor since it will be automatically deleted once the menu is closed
         self.showCustomEdit = QLineEdit()
         self.showCustomEdit.returnPressed.connect(self.showCustom)
@@ -67,7 +68,7 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
 
 class PtrDataGraphVW(DataGraphVW):
     """ VariableWrapper for Pointer-Variables """
-    
+
     def __init__(self, variable, distributedObjects, vwFactory):
         """ Constructor
         @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
@@ -76,7 +77,7 @@ class PtrDataGraphVW(DataGraphVW):
         DataGraphVW.__init__(self, variable, distributedObjects)
         self.factory = vwFactory
         self.templateHandler = PtrVariableTemplateHandler(self, self.distributedObjects)
-    
+
     def dereference(self):
         """ dereferences the Variable
         @return     datagraph.datagraphvw.DataGraphVW or None,

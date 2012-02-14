@@ -26,21 +26,23 @@ from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
 from variables import filters
 from PyQt4.QtGui import QIcon
 
+
 class StdVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Standard-Variables """
-    
+
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
         @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
         HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'stdvariableview.mako')
-    
+
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.varWrapper.getExp()), self.varWrapper)
 
+
 class StdDataGraphVW(DataGraphVW):
     """ VariableWrapper for Standard-Variables """
-    
+
     def __init__(self, variable, distributedObjects):
         """ Constructor
         @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW

@@ -24,5 +24,6 @@
 
 from variablemodel import VariableModel
 
+
 class LocalsModel(VariableModel):
     pass

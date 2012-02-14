@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+
 def unBackslashify(s):
-	s = s.replace("\\\\", "\\")
-	s = s.replace("\\n", "\n")
-	s = s.replace("\\t", "\t")
-	s = s.replace("\\\"", "\"")
-	return s
+    s = s.replace("\\\\", "\\")
+    s = s.replace("\\n", "\n")
+    s = s.replace("\\t", "\t")
+    s = s.replace("\\\"", "\"")
+    return s

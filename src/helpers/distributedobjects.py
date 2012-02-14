@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from controllers.debugcontroller import DebugController
-from signalproxy import SignalProxy 
+from signalproxy import SignalProxy
 from controllers.editorcontroller import EditorController
 from gdbconnector import GdbConnector
 from controllers.filelistcontroller import FileListController
@@ -42,24 +42,25 @@ from stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
 
+
 class DistributedObjects:
     def __init__(self):
         self.gdb_connector = GdbConnector()
         self.actions = Actions()
-        self.signal_proxy = SignalProxy(self)
-        self.session_manager = SessionManager(self)
-        self.editor_controller = EditorController(self)
-        self.breakpoint_controller = BreakpointController(self)
-        self.debug_controller = DebugController(self)
-        self.variable_pool = VariablePool(self)
-        self.filelist_controller = FileListController(self)
-        self.stack_controller = StackController(self)
-        self.watch_controller = WatchController(self)
-        self.locals_controller = LocalsController(self)
-        self.tracepoint_controller = TracepointController(self)
-        self.pyio_controller = PyIoController(self)
-        self.inferiorio_controller = InferiorIoController(self)
-        self.gdbio_controller = GdbIoController(self)
-        self.datagraph_controller = DataGraphController(self)
-        self.stlvector_parser = StlVectorParser(self)
-        self.tracepointwave_controller = TracepointWaveController(self)
+        self.signalProxy = SignalProxy(self)
+        self.sessionManager = SessionManager(self)
+        self.editorController = EditorController(self)
+        self.breakpointController = BreakpointController(self)
+        self.debugController = DebugController(self)
+        self.variablePool = VariablePool(self)
+        self.filelistController = FileListController(self)
+        self.stackController = StackController(self)
+        self.watchController = WatchController(self)
+        self.localsController = LocalsController(self)
+        self.tracepointController = TracepointController(self)
+        self.pyioController = PyIoController(self)
+        self.inferiorioController = InferiorIoController(self)
+        self.gdbioController = GdbIoController(self)
+        self.datagraphController = DataGraphController(self)
+        self.stlvectorParser = StlVectorParser(self)
+        self.tracepointwaveController = TracepointWaveController(self)

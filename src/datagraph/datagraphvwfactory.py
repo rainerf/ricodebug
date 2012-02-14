@@ -29,27 +29,28 @@ from structvariableview import StructDataGraphVW
 from arrayvariableview import ArrayDataGraphVW
 from pendingvariableview import PendingDataGraphVW
 
+
 class DataGraphVWFactory(VarWrapperFactory):
     """ VarWrapperFactory for the DataGraph-Module """
-    
+
     def __init__(self, distributedObjects):
         """ Constructor
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         VarWrapperFactory.__init__(self)
         self.distributedObjects = distributedObjects
-    
+
     def makeStdVarWrapper(self, var):
         return StdDataGraphVW(var, self.distributedObjects)
-    
+
     def makePtrVarWrapper(self, var):
         return PtrDataGraphVW(var, self.distributedObjects, self)
-    
+
     def makeStructVarWrapper(self, var):
         return StructDataGraphVW(var, self.distributedObjects, self)
-    
+
     def makeArrayVarWrapper(self, var):
         return ArrayDataGraphVW(var, self.distributedObjects, self)
-    
+
     def makePendingVarWrapper(self, var):
         return PendingDataGraphVW(var, self.distributedObjects)

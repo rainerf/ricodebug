@@ -24,5 +24,6 @@
 
 from watchview import TreeItemView
 
+
 class LocalsView(TreeItemView):
     pass

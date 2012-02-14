@@ -32,9 +32,11 @@ from treeitemcontroller import TreeItemController
 #####################################################################################
 ## CONTROLLER
 #####################################################################################
+
+
 class WatchController(TreeItemController):
     """ the Controller for the WatchView """
-    
+
     def __init__(self, distributedObjects):
         """ Constructor <br>
             Create a WatchView, a WatchVWFactory and a VariableList <br>
@@ -42,15 +44,15 @@ class WatchController(TreeItemController):
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         TreeItemController.__init__(self, distributedObjects, "Watch", WatchView, VariableModel)
-        QObject.connect(self.distributedObjects.signal_proxy, SIGNAL('AddWatch(QString)'), self.addWatch)
-        
-    def removeSelected(self, row, parent): 
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('AddWatch(QString)'), self.addWatch)
+
+    def removeSelected(self, row, parent):
         """ remove selected variable from WatchView
         @param row     int, selected row
         @param parent  TreeItem, parent item from selectected item
-        """ 
+        """
         self.variableModel.removeRow(row, parent)
-    
+
     def addWatch(self, watch):
         """ adds the Variable watch to the VariableList and its wrapper to the WatchView
             this function is connected to the signal SignalProxy::AddWatch(QString)
@@ -58,47 +60,46 @@ class WatchController(TreeItemController):
         """
         vw = self.variableList.addVarByName(watch)
         # connect changed and replace signal from wrapper
-        QObject.connect(vw, SIGNAL('changed()'), vw.hasChanged)  
-        QObject.connect(vw, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)  
-        
+        QObject.connect(vw, SIGNAL('changed()'), vw.hasChanged)
+        QObject.connect(vw, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+
         self.add(vw)
-        
+
     def replaceVariable(self, pendingVar, newVar):
         """ replaces a variable in the variablelist
         @param pendingVar    variables.variablewrapper.VariableWrapper, VariableWrapper to replace in the list
         @param newVar        variables.Variable, new Variable which replaces existing VariableWrapper in List
         """
         vwOld = self.variableList.getVariableWrapper(pendingVar)
-        
+
         vwNew = self.variableList.replaceVar(pendingVar, newVar)
-        QObject.connect(vwNew, SIGNAL('changed()'), vwNew.hasChanged)  
-        QObject.connect(vwNew, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)  
-        
+        QObject.connect(vwNew, SIGNAL('changed()'), vwNew.hasChanged)
+        QObject.connect(vwNew, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+
         # set parent for root variable
         vwNew.setParent(self.variableModel.root)
-        
+
         # add variable to root children
         self.variableModel.root.replaceChild(vwOld, vwNew)
-        
+
         vwNew.setChanged(True)
         self.variableModel.update()
-        
+
     def saveSession(self, xmlHandler):
         """ Insert session info to xml file
         @param xmlHandler    sessionmanager.XmlHandler, handler to write to the session-xml-file
         """
         watchParent = xmlHandler.createNode("Watches")
         for var in self.variableModel.getVariables():
-            xmlHandler.createNode("Watch", watchParent, { 'exp': var.getExp()})
-             
-    def loadSession(self, xmlHandler): 
+            xmlHandler.createNode("Watch", watchParent, {'exp': var.getExp()})
+
+    def loadSession(self, xmlHandler):
         """ load session info to xml file
         @param xmlHandler    sessionmanager.XmlHandler, handler to read from the session-xml-file
-        """   
+        """
         watchParent = xmlHandler.getNode("Watches")
         if watchParent != None:
             childnodes = watchParent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
                 self.addWatch(attr["exp"])
-

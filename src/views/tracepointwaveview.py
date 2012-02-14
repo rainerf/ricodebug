@@ -22,17 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-'''
-Created on May 25, 2011
-
-@author: root
-'''
-
 from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 
 
-class TracepointWaveView(QtGui.QTableView):    
+class TracepointWaveView(QtGui.QTableView):
     ''' TableView for TracepointWaveModel '''
     def __init__(self):
         QtGui.QTableView.__init__(self)
@@ -42,7 +36,7 @@ class TracepointWaveView(QtGui.QTableView):
         self.setShowGrid(False)
         self.dockwidget = QtGui.QDockWidget(None)
         self.dockwidget.setObjectName("Tracepoint Waveform")
-        self.dockwidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Tracepoint Waveform", None, QtGui.QApplication.UnicodeUTF8))     
+        self.dockwidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Tracepoint Waveform", None, QtGui.QApplication.UnicodeUTF8))
         self.qwidget = QtGui.QWidget()
         self.iconlayout = QtGui.QHBoxLayout()
         self.iconlayout.setAlignment(Qt.AlignLeft)
@@ -58,16 +52,13 @@ class TracepointWaveView(QtGui.QTableView):
         self.layout.addWidget(self)
         self.layout.addItem(self.iconlayout)
         self.qwidget.setLayout(self.layout)
-        self.dockwidget.setWidget(self.qwidget)  
-                        
+        self.dockwidget.setWidget(self.qwidget)
+
     def getZoomInButton(self):
         return self.zoomInButton
-    
+
     def getZoomOutButton(self):
-        return self.zoomOutButton     
-        
+        return self.zoomOutButton
+
     def getDockWidget(self):
-        return self.dockwidget        
-            
-            
-            
+        return self.dockwidget
