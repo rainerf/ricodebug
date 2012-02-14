@@ -45,7 +45,7 @@ class PluginAction(QAction):
         
         #import name of plugin from __init__.py
         try :
-            d = __import__(self.dirname)
+            d = __import__('plugins.' + self.dirname)
             self.setText(d.PluginName)
         except ImportError:
             Logger.getInstance().addLogMessage("PluginAction", "No module named " + self.dirname + " found", Logger.MSG_TYPE_ERROR) 
@@ -76,7 +76,6 @@ class PluginLoader(QObject):
         """CTOR of pluginloader."""
         QObject.__init__(self)
         self.plugin_dir = os.path.dirname(__file__) + '/../plugins'
-        sys.path.append(sys.path[0] + self.plugin_dir)
         
         #contains loaded plugin modules 
         self.plugins = {}         
@@ -97,13 +96,10 @@ class PluginLoader(QObject):
         for root, _, files in os.walk(self.plugin_dir):
             for f in files:
                 if root != self.plugin_dir and (f.endswith('Plugin.py') or f.endswith('plugin.py')): 
-                                        
-                    #append plugin directory to path
-                    sys.path.append(root)
 
                     #create action and add it to mainwindow
                     path = os.path.join(root, f)
-                    pAction = PluginAction(self, path) 
+                    pAction = PluginAction(self, path)
                     self.pluginActions.append(pAction)
                     self.emit(SIGNAL('insertPluginAction(PyQt_PyObject)'), pAction)
                     
@@ -118,7 +114,7 @@ class PluginLoader(QObject):
                 #print path
                 name = os.path.basename(path)[:-3]
                 try:             
-                    self.plugins[path] = getattr(__import__(name),name)() 
+                    self.plugins[path] = getattr(__import__('plugins.' + name),name)() 
                 except AttributeError:
                     Logger.getInstance().addLogMessage("PluginLoader", "Error while loading plugin " + name + ". Class " + name + " not found", Logger.MSG_TYPE_ERROR, True) 
                 try:
