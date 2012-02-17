@@ -54,10 +54,10 @@ class EditorController(QObject):
         editor.markerAdd(line, file_.MARGIN_MARKER_STACK)
     
     def delStackMarkers(self, filename):
-        self.editor_view.openFile(filename)
-        file_ = self.editor_view.openedFiles[filename]
-        editor = file_.edit
-        editor.markerDeleteAll(file_.MARGIN_MARKER_STACK)
+        if self.editor_view.isOpen(filename):
+            file_ = self.editor_view.openedFiles[filename]
+            editor = file_.edit
+            editor.markerDeleteAll(file_.MARGIN_MARKER_STACK)
             
     def saveCurrentFile(self):
         self.editor_view.getCurrentOpenedFile().saveFile()
