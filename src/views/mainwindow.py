@@ -104,8 +104,8 @@ class MainWindow(QMainWindow):
         self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), self.debugController.finish)
         self.connect(self.act.actions[Actions.RunToCursor], SIGNAL('activated()'), self.debugController.inferiorUntil)
 
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), self.distributed_objects.sessionManager.showRestoreSessionDialog)
-        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), self.distributed_objects.sessionManager.showSaveSessionDialog)
+        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showRestoreSessionDialog)
+        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showSaveSessionDialog)
 
     def __init__(self, parent=None):
         """ init UI """
@@ -115,12 +115,12 @@ class MainWindow(QMainWindow):
 
         self.ui.actionSaveSession.setEnabled(False)
 
-        self.distributed_objects = DistributedObjects()
+        self.distributedObjects = DistributedObjects()
 
-        self.debugController = self.distributed_objects.debugController
+        self.debugController = self.distributedObjects.debugController
         self.settings = self.debugController.settings
-        self.signalproxy = self.distributed_objects.signalProxy
-        self.pluginloader = PluginLoader(self.distributed_objects)
+        self.signalproxy = self.distributedObjects.signalProxy
+        self.pluginloader = PluginLoader(self.distributedObjects)
 
         #init RecentFileHandler
         nrRecentFiles = 5
@@ -141,12 +141,12 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionLoadPlugins, SIGNAL('activated()'), self.showLoadPluginsDialog)
 
         # Add editor to main window.
-        self.ui.gridLayout.addWidget(self.distributed_objects.editorController.editor_view, 0, 0, 1, 1)
+        self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
 
         self.pluginloader.addAvailablePlugins()
 
         # Tell everyone to insert their dock widgets into the main window
-        self.distributed_objects.signalProxy.insertDockWidgets()
+        self.distributedObjects.signalProxy.insertDockWidgets()
 
         # get filelist dockwidget
         self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView")
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
         self.createInitialWindowPlacement()
         self.readSettings()
 
-        self.quickwatch = QuickWatch(self, self.distributed_objects)
+        self.quickwatch = QuickWatch(self, self.distributedObjects)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -203,9 +203,9 @@ class MainWindow(QMainWindow):
             recentFileActions[i] = OpenRecentFileAction(self)
             recentFileActions[i].setVisible(False)
             self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), self.distributed_objects.debugController.openExecutable)
+            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), self.distributedObjects.debugController.openExecutable)
 
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, nrRecentFiles, self.distributed_objects)
+        self.RecentFileHandler = RecentFileHandler(recentFileActions, nrRecentFiles, self.distributedObjects)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
@@ -249,7 +249,7 @@ class MainWindow(QMainWindow):
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
 
     def closeEvent(self, event):
-        if self.distributed_objects.editorController.closeOpenedFiles() == False:
+        if self.distributedObjects.editorController.closeOpenedFiles() == False:
             event.ignore()  # closing source files may be canceled by user
         else:
             self.settings.setValue("geometry", self.saveGeometry())

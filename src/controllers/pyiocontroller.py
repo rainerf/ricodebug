@@ -28,16 +28,16 @@ from views.pyioview import PyIoView
 
 
 class PyIoController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self.pyioView = PyIoView(self.distributed_objects.debugController)
+        self.pyioView = PyIoView(self.distributedObjects.debugController)
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
 
     def insertDockWidgets(self):
         self.pyioDock = QDockWidget("Python Console")
         self.pyioDock.setObjectName("PyIoView")
         self.pyioDock.setWidget(self.pyioView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)

@@ -81,7 +81,7 @@ class PluginLoader(QObject):
         SamplePlugin provides a sample for such plugins.
     '''
 
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         """CTOR of pluginloader."""
         QObject.__init__(self)
         self.plugin_dir = os.path.dirname(__file__) + '/../plugins'
@@ -93,7 +93,7 @@ class PluginLoader(QObject):
         self.pluginActions = {}
 
         # signalproxy for communication with plugins
-        self.signalproxy = distributed_objects.signalProxy
+        self.signalproxy = distributedObjects.signalProxy
 
         # xml file for plugin info
         self.xmlFile = self.plugin_dir + '/plugins.xml'

@@ -33,33 +33,33 @@ from views.breakpointview import BreakpointView
 
 
 class BreakpointController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         """ init breakpoint controller and members.
-        @param distributed_objects: passing distributed objects
+        @param distributedObjects: passing distributed objects
         @note There are following signals: \n
             * insertDockWidgets() : necessary for plugin system\n
             * cleanupModels(): clear Breakpoints\n
         """
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self._model = BreakpointModel(self.distributed_objects.gdb_connector)
+        self._model = BreakpointModel(self.distributedObjects.gdb_connector)
         self.breakpointView = BreakpointView()
 
         self.breakpointView.breakpointView.setModel(self._model)
 
         #register with session manager to save breakpoints
-        self.distributed_objects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
+        self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL("insertDockWidgets()"), self.insertDockWidgets)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL("cleanupModels()"), self._model.clearBreakpoints)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL("insertDockWidgets()"), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL("cleanupModels()"), self._model.clearBreakpoints)
 
     def insertDockWidgets(self):
         """ needed for plugin system"""
         self.breakpointDock = QDockWidget("Breakpoints")
         self.breakpointDock.setObjectName("BreakpointView")
         self.breakpointDock.setWidget(self.breakpointView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
 
     def insertBreakpoint(self, file_, line):
         """insert a breakpoint in specified file on specified line

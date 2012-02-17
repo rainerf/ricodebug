@@ -29,25 +29,25 @@ from views.filelistview import FileListView
 
 
 class FileListController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self.fileListModel = FileListModel(self.distributed_objects.debugController, self.distributed_objects.gdb_connector)
+        self.fileListModel = FileListModel(self.distributedObjects.debugController, self.distributedObjects.gdb_connector)
         self.fileListView = FileListView(self)
 
         self.fileListView.treeView.setModel(self.fileListModel)
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
 
     def insertDockWidgets(self):
         self.fileListDock = QDockWidget("Files")
         self.fileListDock.setObjectName("FileListView")
         self.fileListDock.setWidget(self.fileListView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.fileListDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.fileListDock, True)
 
     def fileInFileListViewActivated(self, index):
         item = index.internalPointer()
         filename = item.data(1)
         if len(filename) > 0:
-            self.distributed_objects.signalProxy.openFile(filename, 0)
+            self.distributedObjects.signalProxy.openFile(filename, 0)

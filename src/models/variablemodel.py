@@ -171,7 +171,7 @@ class RootVarWrapper(TreeItem):
 
 class VariableModel(QAbstractItemModel):
     """Class for a model representing GDB's variables."""
-    def __init__(self, controller, distributed_objects, parent=None):
+    def __init__(self, controller, distributedObjects, parent=None):
         """ Constructor <br>
             Create a VariableModel derived from an QAbstractItemModel to display the <br>
             GDB variables in a treeview.<br>
@@ -185,7 +185,7 @@ class VariableModel(QAbstractItemModel):
 
         QAbstractItemModel.__init__(self, parent)
 
-        self.distributedObjects = distributed_objects
+        self.distributedObjects = distributedObjects
         self.controller = controller
 
         ## @var root

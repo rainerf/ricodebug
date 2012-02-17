@@ -30,17 +30,17 @@ import logging
 
 
 class DebugController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
         self.settings = QSettings("fh-hagenberg", "SysCDbg")
         self.ptyhandler = PtyHandler()
 
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self.connector = self.distributed_objects.gdb_connector
-        self.editorController = self.distributed_objects.editorController
-        self.breakpointController = self.distributed_objects.breakpointController
-        self.signalProxy = self.distributed_objects.signalProxy
+        self.connector = self.distributedObjects.gdb_connector
+        self.editorController = self.distributedObjects.editorController
+        self.breakpointController = self.distributedObjects.breakpointController
+        self.signalProxy = self.distributedObjects.signalProxy
 
         self.executableName = None
         self.lastCmdWasStep = False
@@ -127,15 +127,15 @@ class DebugController(QObject):
             self.signalProxy.emitInferiorHasExited(rec)
         elif reason == 'breakpoint-hit':
                 stop = False
-                tp = self.distributed_objects.tracepointController.model().getTracepointIfAvailable(frame)
+                tp = self.distributedObjects.tracepointController.model().getTracepointIfAvailable(frame)
 
-                if self.distributed_objects.breakpointController.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
+                if self.distributedObjects.breakpointController.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
                     self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False
                 if tp != None:
                     tp.tracePointOccurred(stop)
-                    self.distributed_objects.signalProxy.emitTracepointOccurred()
+                    self.distributedObjects.signalProxy.emitTracepointOccurred()
         elif reason == "signal-received":
             logging.warning("Signal received: %s (%s) in %s:%s", signal_name, signal_meaning, frame.file, frame.line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
@@ -143,7 +143,7 @@ class DebugController(QObject):
             self.signalProxy.emitInferiorStoppedNormally(rec)
 
     def executePythonCode(self, code):
-        exec(code, {'do': self.distributed_objects})
+        exec(code, {'do': self.distributedObjects})
 
     def inferiorUntil(self):
         current_opened_file = self.editorController.editor_view.getCurrentOpenedFile()

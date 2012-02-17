@@ -35,14 +35,14 @@ import logging
 class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
 
-    def __init__(self, distributed_objects, filename):
+    def __init__(self, distributedObjects, filename):
         QObject.__init__(self)
         filename = str(filename)
-        self.distributed_objects = distributed_objects
-        self.debugController = self.distributed_objects.debugController
-        self.breakpointController = self.distributed_objects.breakpointController
-        self.tracepointController = self.distributed_objects.tracepointController
-        self.signalProxy = self.distributed_objects.signalProxy
+        self.distributedObjects = distributedObjects
+        self.debugController = self.distributedObjects.debugController
+        self.breakpointController = self.distributedObjects.breakpointController
+        self.tracepointController = self.distributedObjects.tracepointController
+        self.signalProxy = self.distributedObjects.signalProxy
         self.filename = filename
         self.lastContexMenuLine = 0
         self.markerBp = QPixmap(":/markers/bp.png")
@@ -125,9 +125,9 @@ class OpenedFileView(QObject):
         self.connect(self.tracepointController.model(), SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getTracepointsFromModel)
         self.connect(self.tracepointController.model(), SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getTracepointsFromModel)
 
-        self.connect(self.distributed_objects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
-        self.connect(self.distributed_objects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
-        self.connect(self.distributed_objects.actions.actions[Actions.AddVarToDataGraph], SIGNAL('triggered()'), self.AddVarToDataGraph)
+        self.connect(self.distributedObjects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
+        self.connect(self.distributedObjects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
+        self.connect(self.distributedObjects.actions.actions[Actions.AddVarToDataGraph], SIGNAL('triggered()'), self.AddVarToDataGraph)
 
     def saveFile(self):
         ''' Save source file '''
@@ -144,7 +144,7 @@ class OpenedFileView(QObject):
 
     def __setFileModified(self, modified):
         ''' Method called whenever current file is marked as modified '''
-        self.distributed_objects.signalProxy.emitFileModified(self.filename, modified)
+        self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
 
     def dwellStart(self, pos, x, y):
         if self.edit.frameGeometry().contains(x, y):
@@ -183,9 +183,9 @@ class OpenedFileView(QObject):
 
         self.popupMenu = QtGui.QMenu(self.edit)
         # add watch and toggle breakpoint to menu
-        self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.AddWatch])
-        self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.ToggleTrace])
-        self.popupMenu.addAction(self.distributed_objects.actions.actions[Actions.AddVarToDataGraph])
+        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.AddWatch])
+        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.ToggleTrace])
+        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.AddVarToDataGraph])
         # add separator and self.subPopupMenu
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)
@@ -199,9 +199,9 @@ class OpenedFileView(QObject):
 
     def AddVarToDataGraph(self, watch=None):
         if watch:
-            self.distributed_objects.datagraphController.addWatch(watch)
+            self.distributedObjects.datagraphController.addWatch(watch)
         elif self.expToWatch:
-            self.distributed_objects.datagraphController.addWatch(self.expToWatch)
+            self.distributedObjects.datagraphController.addWatch(self.expToWatch)
 
     def addWatchFloating(self, watch=None):
         if watch:

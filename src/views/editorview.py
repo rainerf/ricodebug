@@ -30,7 +30,7 @@ import os
 
 
 class EditorView(QWidget):
-    def __init__(self, distributed_objects, _=None):
+    def __init__(self, distributedObjects, _=None):
         QWidget.__init__(self, parent=None)
 
         self.gridLayout = QtGui.QGridLayout(self)
@@ -46,7 +46,7 @@ class EditorView(QWidget):
         self.tabWidget.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
         QObject.connect(self.tabWidget, SIGNAL('tabCloseRequested(int)'), self.hideTab)
         self.openedFiles = {}
 
@@ -91,7 +91,7 @@ class EditorView(QWidget):
 
     def openFile(self, filename):
         if not filename in self.openedFiles:
-            self.openedFiles[filename] = OpenedFileView(self.distributed_objects, filename)
+            self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename)
             self.showFile(filename)
         self.openedFiles[filename].getBreakpointsFromModel()
         self.tabWidget.setCurrentWidget(self.openedFiles[filename].tab)

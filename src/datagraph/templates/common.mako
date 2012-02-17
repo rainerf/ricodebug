@@ -41,8 +41,8 @@
 			=
 %		endif
 		</td>
-		<td nowrap>
-			${caller.body()}
+		<td nowrap class="varvalue" id="${id_}value">
+			${caller.body()}\
 		</td>
 	</tr>
 %	else:

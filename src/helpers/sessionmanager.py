@@ -35,18 +35,18 @@ class SessionManager(QObject):
         Registered Objects must implement a loadSession(self, XmlHandler) and saveSession(self, XmlHandler) method.
         In these mehods they have r/w access to xml file to save their debug info.
     """
-    def __init__(self, distributed_objects, parent=None):
+    def __init__(self, distributedObjects, parent=None):
         """Init Session Manager"""
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
         self.sessionRootName = "ricodebugSession"
 
         ## XmlHandler, used for saving session info to xml
-        self.xmlHandler = XmlHandler(self.distributed_objects, self.sessionRootName)
+        self.xmlHandler = XmlHandler(self.distributedObjects, self.sessionRootName)
 
         self.registeredObjects = {}
         self.saveSessionDlg = SaveSessionDialog(parent, self)
-        QObject.connect(distributed_objects.signalProxy, SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), self.register)
+        QObject.connect(distributedObjects.signalProxy, SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), self.register)
 
     def register(self, regObject, dialogItem=None):
         if dialogItem == None:
@@ -67,7 +67,7 @@ class SessionManager(QObject):
         ''' Save breakpoints, watches and tracepoints of session '''
         #create node for executable
         self.xmlHandler.clear()
-        self.xmlHandler.createNode("executable", None, {"name": self.distributed_objects.debugController.getExecutableName()})
+        self.xmlHandler.createNode("executable", None, {"name": self.distributedObjects.debugController.getExecutableName()})
 
         # tell registered controllers to save session info
         for cb in cbContainer:
@@ -92,7 +92,7 @@ class SessionManager(QObject):
                 exeName = self.xmlHandler.getAttributes(exeNode)['name']
 
                 if (exists(exeName)):
-                    self.distributed_objects.debugController.openExecutable(exeName)
+                    self.distributedObjects.debugController.openExecutable(exeName)
 
                     for dialogItem, regObject in self.registeredObjects.iteritems():
                         if self.xmlHandler.getNode("save" + dialogItem) != None:
@@ -147,7 +147,7 @@ class RestoreSessionDialog(QObject):
 
 class XmlHandler():
     ''' Handler used to save session info to an xml file. '''
-    def __init__(self, distributed_objects, rootname):
+    def __init__(self, distributedObjects, rootname):
         self.Xml = QDomDocument("xmldoc")
         self.rootname = rootname
         self.rootNode = QDomElement()

@@ -27,19 +27,19 @@ from PyQt4.QtCore import QObject
 
 
 class QuickWatch(QToolBar):
-    def __init__(self, parent, distributed_objects):
+    def __init__(self, parent, distributedObjects):
         QObject.__init__(self, "QuickWatch")
         self.setObjectName("QuickWatch")
         parent.addToolBar(self)
         self.watchedit = QLineEdit()
         self.watchedit.setFixedHeight(28)
         self.addWidget(self.watchedit)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
         self.addAction(QIcon(":/icons/images/watch.png"), "Add to Watch", self.addToWatch)
         self.addAction(QIcon(":/icons/images/datagraph.png"), "Add to Data Graph", self.addToDG)
 
     def addToWatch(self):
-        self.distributed_objects.watchController.addWatch(self.watchedit.text())
+        self.distributedObjects.watchController.addWatch(self.watchedit.text())
 
     def addToDG(self):
-        self.distributed_objects.datagraphController.addWatch(self.watchedit.text())
+        self.distributedObjects.datagraphController.addWatch(self.watchedit.text())

@@ -39,16 +39,16 @@ class OpenRecentFileAction(QAction):
 
 
 class RecentFileHandler():
-    def __init__(self, recentFileActionCont, nrRecentFileActions, distributed_objects):
+    def __init__(self, recentFileActionCont, nrRecentFileActions, distributedObjects):
         """Load recently used file names to menu actions.
             @param recentFileActionCont: list[sessionmanager.OpenRecentFileAction], actions of items in menu
             @param nrRecentFileActions: integer, number of recently used files listed in menu
-            @param distributed_objects: distributedobjects.DistributedObjects, the DistributedObjects-Instance
+            @param distributedObjects: distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
-        self.distributed_objects = distributed_objects
-        self.debugController = distributed_objects.debugController
-        self.breakpointController = distributed_objects.breakpointController
-        self.watchController = distributed_objects.watchController
+        self.distributedObjects = distributedObjects
+        self.debugController = distributedObjects.debugController
+        self.breakpointController = distributedObjects.breakpointController
+        self.watchController = distributedObjects.watchController
         self.settings = self.debugController.settings
         self.nrRecentFiles = nrRecentFileActions
 

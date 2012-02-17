@@ -27,17 +27,17 @@ from views.editorview import EditorView
 
 
 class EditorController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self.editor_view = EditorView(self.distributed_objects)
+        self.editor_view = EditorView(self.distributedObjects)
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('saveFile()'), self.saveCurrentFile)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('saveFile()'), self.saveCurrentFile)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified)
 
     def jumpToLine(self, filename, line):
         line = int(line) - 1

@@ -28,35 +28,35 @@ from models.stackmodel import StackModel
 from views.stackview import StackView
 
 class StackController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
         
-        self.editorController = distributed_objects.editorController
+        self.editorController = distributedObjects.editorController
         
-        self.stackModel = StackModel(self, self.distributed_objects.debugController, self.distributed_objects.gdb_connector)
+        self.stackModel = StackModel(self, self.distributedObjects.debugController, self.distributedObjects.gdb_connector)
         self.stackView = StackView(self)
         
         self.stackView.stackView.setModel(self.stackModel)
         
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.stackModel.update)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.stackModel.clear)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('executableOpened()'), self.stackModel.clear)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.removeStackMarkers)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.stackModel.update)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.stackModel.clear)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('executableOpened()'), self.stackModel.clear)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.removeStackMarkers)
         QObject.connect(self.stackView.showStackTrace, SIGNAL('stateChanged(int)'), self.showStackTraceChanged)
         
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         
     def insertDockWidgets(self):
         self.stackDock = QDockWidget("Stack")
         self.stackDock.setObjectName("StackView")
         self.stackDock.setWidget(self.stackView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.stackDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.stackDock, True)
         
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
-        self.distributed_objects.gdb_connector.selectStackFrame(item.level)
-        self.distributed_objects.signalProxy.openFile(item.fullname, item.line)
+        self.distributedObjects.gdb_connector.selectStackFrame(item.level)
+        self.distributedObjects.signalProxy.openFile(item.fullname, item.line)
         # FIXME: make locals view etc change their view too!
         
     def insertStackMarkers(self):

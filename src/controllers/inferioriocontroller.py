@@ -28,16 +28,16 @@ from views.inferiorioview import InferiorIoView
 
 
 class InferiorIoController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
-        self.inferiorioView = InferiorIoView(self.distributed_objects.debugController)
+        self.inferiorioView = InferiorIoView(self.distributedObjects.debugController)
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
 
     def insertDockWidgets(self):
         self.inferiorioDock = QDockWidget("Output")
         self.inferiorioDock.setObjectName("InferiorIoView")
         self.inferiorioDock.setWidget(self.inferiorioView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)

@@ -33,9 +33,9 @@ from views.tracepointview import TracepointView
 
 
 class TracepointController(QObject):
-    def __init__(self, distributed_objects):
+    def __init__(self, distributedObjects):
         """ init tracepoint controller and members.
-        @param distributed_objects: passing distributed objects
+        @param distributedObjects: passing distributed objects
         @note There are following signals: \n
             * insertDockWidgets() : necessary for plugin system\n
             * clicked(QModelIndex): if a row in tracepointView is clicked\n
@@ -44,22 +44,22 @@ class TracepointController(QObject):
         """
 
         QObject.__init__(self)
-        self.distributed_objects = distributed_objects
+        self.distributedObjects = distributedObjects
 
         """@var self._model: (TracepointModel), this class provides the model for tracepointView"""
-        self._model = TracepointModel(self.distributed_objects)
+        self._model = TracepointModel(self.distributedObjects)
         """@var self.tracepointView: (TracepointView), this class presents data from _model"""
         self.tracepointView = TracepointView()
         self.tracepointView.tracepointView.setModel(self._model)
 
         #register with session manager to save Tracepoints
-        self.distributed_objects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
+        self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
 
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
         QObject.connect(self.tracepointView.tracepointView, SIGNAL('clicked(QModelIndex)'), self.updateWaveforms)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateWaveforms)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('cleanupModels()'), self._model.clearTracepoints)
-        QObject.connect(self.distributed_objects.signalProxy, SIGNAL('runClicked()'), self._model.clearTracepointData)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateWaveforms)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self._model.clearTracepoints)
+        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('runClicked()'), self._model.clearTracepointData)
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
@@ -72,7 +72,7 @@ class TracepointController(QObject):
         self.tracepointDock = QDockWidget("Tracepoints")
         self.tracepointDock.setObjectName("TracepointView")
         self.tracepointDock.setWidget(self.tracepointView)
-        self.distributed_objects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
+        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
 
     def toggleTracepoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line

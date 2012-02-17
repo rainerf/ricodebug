@@ -37,16 +37,16 @@ from PyQt4.QtCore import pyqtRemoveInputHook, QDir
 from views.mainwindow import MainWindow
 from views import logview
 
-## The main routine.
+
 def main():
     pyqtRemoveInputHook()
     QDir(QDir.homePath()).mkdir(".ricodebug")
 
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
-    
+
     window = MainWindow()
-    
+
     logging.basicConfig(filename='ricodebug.log', level=logging.DEBUG)
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
     window.ui.filterSlider.setValue(3)
@@ -54,7 +54,7 @@ def main():
     logger = logging.getLogger()
     logger.addHandler(logviewhandler)
     logger.addHandler(errormsghandler)
-    
+
     if (len(sys.argv) > 1):
         window.debugController.openExecutable(sys.argv[1])
 
@@ -63,4 +63,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
