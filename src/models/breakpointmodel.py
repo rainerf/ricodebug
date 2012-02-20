@@ -352,7 +352,7 @@ class BreakpointModel(QAbstractTableModel):
         elif index.column() == 4:
             if role == Qt.CheckStateRole:
                 # breakpoint is active, set inactive
-                if QVariant(value).toBool() == False:
+                if not QVariant(value).toBool():
                     bp.enabled = 'n'
                     self.disableBreakpoint(bp.number)
                 # breakpoint is inactive, set active

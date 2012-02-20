@@ -117,7 +117,7 @@ class TracepointWaveScene(QtGui.QGraphicsScene):
             @param duration: integer, defines duration(length) of value in wave
         '''
         drawEdge = len(self.values) > 0 and self.values[len(self.values) - 1] != value
-        if drawEdge == True:
+        if drawEdge:
             self.__drawEdge()
 
         self.values.append(value)
@@ -142,12 +142,12 @@ class TracepointWaveScene(QtGui.QGraphicsScene):
         tmp = self.curPos
         self.curPos = QPointF(self.curPos.x() + duration, self.curPos.y())
         if self.type == "bool":
-            if value == True:
+            if value:
                 self.addItem(QtGui.QGraphicsLineItem(QLineF(tmp, self.curPos)))
             else:
                 self.addItem(QtGui.QGraphicsLineItem(tmp.x(), tmp.y() + self.vSpace, self.curPos.x(), self.curPos.y() + self.vSpace))
         elif self.type in self.supportedTypes:
-            if printvalue == True:
+            if printvalue:
                 text = QtGui.QGraphicsTextItem(str(value))
                 text.setFont(self.valFont)
                 text.setDefaultTextColor(self.valFontColor)

@@ -117,7 +117,7 @@ class DataGraphController(QObject):
         varWrapper.setXPos(xPos)
         varWrapper.setYPos(yPos)
         self.data_graph_view.addItem(varWrapper.getView())
-        if addVarToList == True:
+        if addVarToList:
             self.variableList.addVar(varWrapper)
         QObject.connect(varWrapper, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
 

@@ -62,7 +62,7 @@ class PluginAction(QAction):
 
     def __togglePlugin(self, checked):
         ''' Load/Unload Plugin by toggling menu entries '''
-        if checked == True:
+        if checked:
             try:
                 self.pluginldr.loadPlugin(self)
             except:

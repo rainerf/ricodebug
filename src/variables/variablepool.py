@@ -93,18 +93,18 @@ class VariablePool(QObject):
                 if var.getGdbName() == changed.name:
                     if (var.inscope != (bool(changed.in_scope == "true"))):
                         var.inscope = (bool(changed.in_scope == "true"))
-                    if (hasattr(changed, "value")):
+                    if hasattr(changed, "value"):
                         var.value = changed.value
-                    if isTracePoint == False:
+                    if not isTracePoint:
                         var.changed()
 
         # search for pending variables and replace them if
         # they are in scope
         tempList = self.list.copy()
         for var in tempList.itervalues():
-            if var.getPending() == True:
+            if var.getPending():
                 gdbVar = self.connector.var_create("- * " + var.getExp())
-                if (gdbVar.class_ != GdbOutput.ERROR):
+                if gdbVar.class_ != GdbOutput.ERROR:
                     newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
                     self.list[var.getUniqueName()] = newVar
                     var.replace(newVar)
@@ -138,7 +138,7 @@ class VariablePool(QObject):
         gdbVar = self.connector.var_create("- * " + str(exp))
 
         # successful result
-        if (gdbVar.class_ == GdbOutput.ERROR):
+        if gdbVar.class_ == GdbOutput.ERROR:
             gdbVar = None
 
         # create variable
@@ -161,7 +161,7 @@ class VariablePool(QObject):
         @param childformat  string, template for forming a child's expression
         """
         gdbChildren = self.connector.var_list_children(name)
-        if (hasattr(gdbChildren, "children") == True):
+        if hasattr(gdbChildren, "children"):
             for child in gdbChildren.children:
                 assert (child.dest == "child")
 
@@ -173,7 +173,7 @@ class VariablePool(QObject):
                 else:
                     # variable existing in pool and in current scope
                     uniqueName = childformat % {"parent": parentName, "child": child.src.exp}
-                    if (uniqueName in self.list):
+                    if uniqueName in self.list:
                         var = self.list[uniqueName]
                     else:
                         var = self.__createVariable(child.src, parentName, None, access, childformat)
@@ -242,7 +242,7 @@ class VariablePool(QObject):
             elif type_.endswith("]") and int(gdbVar.numchild) >= 1:
                 varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
             # StructVariable
-            elif haschildren == True:
+            elif haschildren:
                 varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
             #StdVariabe
             else:

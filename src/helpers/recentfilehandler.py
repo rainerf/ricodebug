@@ -63,11 +63,11 @@ class RecentFileHandler():
         included = False
         for i in range(size):
             self.settings.setArrayIndex(i)
-            if (included == False):
+            if not included:
                 included = self.settings.value("Filename") == filename
         self.settings.endArray()
 
-        if (included == False):
+        if not included:
             self.settings.beginWriteArray("RecentlyUsedFiles")
             #increase index with every entry
             index = self.settings.value("RecentlyUsedFileIndex").toInt()[0]

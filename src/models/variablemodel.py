@@ -311,18 +311,18 @@ class VariableModel(QAbstractItemModel):
                 else:
                     iconprefix = ""
 
-                if (item.getInScope() == False):
+                if not item.getInScope():
                     return QPixmap(":/icons/images/outofscope.png")
                 elif item.getChildCount() != 0:     # child item
                     return QPixmap(":/icons/images/" + iconprefix + "struct.png")
                 else:                               # leave item
                     return QPixmap(":/icons/images/" + iconprefix + "var.png")
             elif index.column() == 2:
-                if (item.getInScope() == True):
+                if item.getInScope():
                     return QPixmap(":/icons/images/edit.png")
 
         elif role == Qt.ForegroundRole:
-            if (item.getInScope() == False):
+            if not item.getInScope():
                 return QBrush(Qt.gray)
 
             if index.column() == 2:
@@ -340,7 +340,7 @@ class VariableModel(QAbstractItemModel):
         if not index.isValid():
             return 0
         item = index.internalPointer()
-        if (item.getInScope() == False):
+        if not item.getInScope():
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
         ret = Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -389,7 +389,7 @@ class VariableModel(QAbstractItemModel):
         @param parent   TreeItem, parent item, root to update the whole model
         """
         for item in parent.getChildren(self.controller.vwFactory):
-            if item.getChanged() == True:
+            if item.getChanged():
                 item.setMarkChanged(True)
                 item.setChanged(False)
             if item.getChildCount() != 0:
@@ -400,7 +400,7 @@ class VariableModel(QAbstractItemModel):
         @param parent   TreeItem, parent item, root to update the whole model
         """
         for item in parent.getChildren(self.controller.vwFactory):
-            if item.getMarkChanged() == True:
+            if item.getMarkChanged():
                 item.setMarkChanged(False)
             if item.getChildCount() != 0:
                 self.setUnmarked(item)
@@ -420,7 +420,7 @@ class VariableModel(QAbstractItemModel):
             only children of root can be deleted
         @param index   QModelIndex, index of item
         """
-        if (index.isValid()):
+        if index.isValid():
             print "only toplevel items can be deleted!"
             return None
         else:

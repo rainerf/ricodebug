@@ -85,7 +85,7 @@ class SessionManager(QObject):
 
     def restoreSession(self, filename):
         ''' Load breakpoints, watches and tracepoints of session '''
-        if self.xmlHandler.load(filename) == True:
+        if self.xmlHandler.load(filename):
             if self.xmlHandler.getNode(self.sessionRootName) != None:
 
                 exeNode = self.xmlHandler.getNode("executable")
@@ -179,7 +179,7 @@ class XmlHandler():
         ''' Get first xml node by name
             @return QDomElement '''
         if isinstance(nodeName, str) and len(nodeName) != 0:
-            if parent == None or isinstance(parent, QDomNode) == False:
+            if parent == None or not isinstance(parent, QDomNode):
                 return self.rootNode.firstChildElement(nodeName)
             else:
                 return parent.firstChildElement(nodeName)
@@ -198,11 +198,11 @@ class XmlHandler():
 
     def save(self, filename):
         """Writes session info to xml file. Overwrites existing files"""
-        if filename.endswith(".xml") == False:
+        if not filename.endswith(".xml"):
             filename = filename + ".xml"
 
         file_object = QFile(filename)
-        if (file_object.open(QIODevice.WriteOnly) == False):
+        if not file_object.open(QIODevice.WriteOnly):
             Logger.getInstance().addLogMessage("xmlHandler", "File " + filename + " could not be opened.", Logger.MSG_TYPE_ERROR, True)
         else:
             file_object.writeData(self.Xml.toString())
@@ -216,17 +216,17 @@ class XmlHandler():
 
     def load(self, filename):
         """Loads session info from xml file. Returns false if loading fails, true otherwise."""
-        if (exists(filename) == False):
+        if not exists(filename):
             Logger.getInstance().addLogMessage("xmlHandler", "Cannot restore session - File " + filename + " not found.", Logger.MSG_TYPE_ERROR, True)
             return False
 
         file_object = QFile(filename)
         self.Xml.clear()
-        if (file_object.open(QIODevice.ReadOnly) == False):
+        if not file_object.open(QIODevice.ReadOnly):
             Logger.getInstance().addLogMessage("xmlHandler", "File " + filename + " could not be opened.", Logger.MSG_TYPE_ERROR, True)
             return False
         else:
-            if (self.Xml.setContent(file_object.readAll()) == False):
+            if not self.Xml.setContent(file_object.readAll()):
                 Logger.getInstance().addLogMessage("xmlHandler", "self.Xml.setContent() failed.", Logger.MSG_TYPE_ERROR, True)
                 file_object.close()
                 return False

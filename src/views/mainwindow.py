@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
-        if addToggleViewAction == True:
+        if addToggleViewAction:
             self.ui.menuShow_View.addAction(widget.toggleViewAction())
 
     def addPluginAction(self, Action):
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
         """ Saves the window and widget placement after first start of program. """
         #check if settings do not exist
         initExists = self.settings.contains("InitialWindowPlacement/geometry")
-        if initExists == False:
+        if not initExists:
             self.breakpointWidget = self.findChild(QDockWidget, "BreakpointView")
             self.fileListWidget = self.findChild(QDockWidget, "FileListView")
             self.dataGraphWidget = self.findChild(QDockWidget, "DataGraphView")
@@ -249,7 +249,7 @@ class MainWindow(QMainWindow):
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
 
     def closeEvent(self, event):
-        if self.distributedObjects.editorController.closeOpenedFiles() == False:
+        if not self.distributedObjects.editorController.closeOpenedFiles():
             event.ignore()  # closing source files may be canceled by user
         else:
             self.settings.setValue("geometry", self.saveGeometry())
