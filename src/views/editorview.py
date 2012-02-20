@@ -89,8 +89,11 @@ class EditorView(QWidget):
             i = i - 1
         return success
 
+    def isOpen(self, filename):
+        return filename in self.openedFiles
+
     def openFile(self, filename):
-        if not filename in self.openedFiles:
+        if not self.isOpen(filename):
             self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename)
             self.showFile(filename)
         self.openedFiles[filename].getBreakpointsFromModel()

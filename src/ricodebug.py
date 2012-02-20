@@ -47,7 +47,7 @@ def main():
 
     window = MainWindow()
 
-    logging.basicConfig(filename='ricodebug.log', level=logging.DEBUG)
+    logging.basicConfig(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()), level=logging.DEBUG)
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
     window.ui.filterSlider.setValue(3)
     errormsghandler = logview.ErrorLabelHandler(window)
