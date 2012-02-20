@@ -26,7 +26,7 @@ from PyQt4.QtCore import SIGNAL, QObject, QIODevice, QFile, QString
 from PyQt4.QtGui import QDialog, QGridLayout, QCheckBox, QPushButton, QFileDialog
 from os.path import exists
 from PyQt4.QtXml import QDomDocument, QDomElement, QDomNode
-from logger import Logger
+import logging
 
 
 class SessionManager(QObject):
@@ -79,7 +79,7 @@ class SessionManager(QObject):
                     try:
                         self.registeredObjects[key].saveSession(self.xmlHandler)
                     except:
-                        self.Logger.addLogMessage("SessionManager", "Could not save session. Registered object " + key + " does not implement a valid saveSession() method.", Logger.MSG_TYPE_ERROR)
+                        logging.error("Could not save session. Registered object %s does not implement a valid saveSession() method.", key)
 
         self.xmlHandler.save(filename)
 
@@ -99,10 +99,10 @@ class SessionManager(QObject):
                             try:
                                 regObject.loadSession(self.xmlHandler)
                             except:
-                                self.Logger.addLogMessage("SessionManager", "Could not load session. Registered object " + dialogItem + " does not implement a valid loadSession() method.", Logger.MSG_TYPE_ERROR)
+                                logging.error("Could not load session. Registered object %s does not implement a valid loadSession() method.", dialogItem)
 
                 else:
-                    self.Logger.addLogMessage("xmlHandler", "Cannot restore session - Executable " + exeName + " specified in XML file does not exist.", Logger.MSG_TYPE_ERROR, True)
+                    logging.error("Cannot restore session - Executable %s specified in XML file does not exist.", exeName)
 
 
 class SaveSessionDialog(QDialog):
@@ -203,7 +203,7 @@ class XmlHandler():
 
         file_object = QFile(filename)
         if not file_object.open(QIODevice.WriteOnly):
-            Logger.getInstance().addLogMessage("xmlHandler", "File " + filename + " could not be opened.", Logger.MSG_TYPE_ERROR, True)
+            logging.error("File %s could not be opened.", filename)
         else:
             file_object.writeData(self.Xml.toString())
             file_object.close()
@@ -217,17 +217,17 @@ class XmlHandler():
     def load(self, filename):
         """Loads session info from xml file. Returns false if loading fails, true otherwise."""
         if not exists(filename):
-            Logger.getInstance().addLogMessage("xmlHandler", "Cannot restore session - File " + filename + " not found.", Logger.MSG_TYPE_ERROR, True)
+            logging.error("Cannot restore session - File %s not found.", filename)
             return False
 
         file_object = QFile(filename)
         self.Xml.clear()
         if not file_object.open(QIODevice.ReadOnly):
-            Logger.getInstance().addLogMessage("xmlHandler", "File " + filename + " could not be opened.", Logger.MSG_TYPE_ERROR, True)
+            logging.error("File %s could not be opened.", filename)
             return False
         else:
             if not self.Xml.setContent(file_object.readAll()):
-                Logger.getInstance().addLogMessage("xmlHandler", "self.Xml.setContent() failed.", Logger.MSG_TYPE_ERROR, True)
+                logging.error("self.Xml.setContent() failed.")
                 file_object.close()
                 return False
 
