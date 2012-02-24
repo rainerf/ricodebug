@@ -53,11 +53,11 @@ class DebugController(QObject):
     def openExecutable(self, filename):
         # die if the file does not exist or has been provided without at least a
         # relative path; files without a path work with pythons os.* functions
-		# but fail in gdb, so do an extra check for those
-        if not (os.path.exists(filename) or os.path.dirname(filename) == ""):
+        # but fail in gdb, so do an extra check for those
+        if not os.path.exists(filename) or os.path.dirname(filename) == "":
             logging.error("File %s was not found." % filename)
             return
-        
+
         if (self.editorController.closeOpenedFiles() == True): #closing source files may be canceled by user
             if self.executableName != None:
                 #clear variables, tracepoints, watches,... by connecting to this signal
