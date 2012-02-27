@@ -409,7 +409,7 @@ class VariableModel(QAbstractItemModel):
         """ QAbstractItemModel flags function
         """
         if index.isValid() and role == Qt.EditRole:
-            index.internalPointer().variable.setValue(value)
+            index.internalPointer().variable.setValue(value.toString())
             self.emit(SIGNAL('dataChanged(QModelIndex, QModelIndex)'), index, index)
             return True
         return False

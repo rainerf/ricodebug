@@ -73,6 +73,10 @@ class HtmlTemplateHandler(QObject):
     def openContextMenu(self):
         self.varWrapper.openContextMenu()
 
+    @QtCore.pyqtSlot(str)
+    def setValue(self, value):
+        self.varWrapper.variable.setValue(value)
+
     def prepareContextMenu(self, menu):
         menu.addSeparator()
         self.addContextMenuLabel(menu)

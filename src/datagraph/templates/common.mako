@@ -41,7 +41,7 @@
 			=
 %		endif
 		</td>
-		<td nowrap class="varvalue" id="${id_}value">
+		<td nowrap class="varvalue" id="${id_}value" ondblclick="showChangeInput('${id_}', '${id_}value')">
 			${caller.body()}\
 		</td>
 	</tr>

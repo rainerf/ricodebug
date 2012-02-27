@@ -23,6 +23,8 @@ div.removediv:hover {opacity:1;}
 tr.header {background-color: rgba(240, 240, 240, 1); border: 0;}
 a {border-bottom:1px dotted;}
 * {-webkit-user-select: none; user-select: none; font-family: sans-serif;}
+input {-webkit-user-select: text; user-select: text; border: 1px solid rgba(200, 200, 200, 1); }
+form {margin: 0px; }
 </style>
 <script type="text/javascript">
 function contextmenu(obj, id) {
@@ -30,6 +32,14 @@ function contextmenu(obj, id) {
 	obj.openContextMenu();
 	event.stopPropagation();
 	document.getElementById(id).style.background = '';
+}
+function showChangeInput(obj, td) {
+	document.getElementById(td).innerHTML="<form onsubmit='setValue(" + obj + ", \"" + td + "\"); return false;'><input type='text' id='valueinput' value=" + document.getElementById(td).innerHTML + "></form>";
+	document.getElementById(td).ondblclick = null;
+}
+function setValue(obj, td) {
+	value = document.getElementById("valueinput").value;
+	obj.setValue(value);
 }
 </script>
 <% assert(top) %>\
