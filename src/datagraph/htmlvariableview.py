@@ -42,13 +42,11 @@ class HtmlVariableView(QGraphicsWebView):
         QGraphicsWebView.__init__(self, None)
         self.varWrapper = varWrapper
         self.distributedObjects = distributedObjects
-        self.setFlags(QGraphicsItem.ItemIsMovable)
+        self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsFocusable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/templates/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0, 0))
         self.setPreferredSize(QSizeF(0, 0))
         self.setResizesToContents(True)
-        self.page().setLinkDelegationPolicy(QWebPage.DelegateAllLinks)
-        self.connect(self.page(), SIGNAL('linkClicked(QUrl)'), self.linkClicked, Qt.DirectConnection)
         self.incomingPointers = []
         self.outgoingPointers = []
 
@@ -104,9 +102,6 @@ class HtmlVariableView(QGraphicsWebView):
             self.dirty = False
 
         return self.source
-
-    def linkClicked(self, url):
-        self.handleCommand(str(url.toString()))
 
     def openContextMenu(self, menu):
         menu.addAction(QIcon(":/icons/images/minus.png"), "Remove %s" % self.varWrapper.getExp(), self.remove)

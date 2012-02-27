@@ -25,14 +25,14 @@
 %>\
 			<img src="qrc:icons/images/${iconprefix}${icon}">
 %		if varWrapper.getAccess():
-			<span class="varaccess"> ${varWrapper.getAccess()}</span>
+			<span class="varaccess"> ${varWrapper.getAccess() | h}</span>
 %		endif
 		</td>
 		<td nowrap class="vartype">
-			<span class="vartype"> ${varWrapper.getType()}</span>
+			<span class="vartype"> ${varWrapper.getType() | h}</span>
 		</td>
 		<td nowrap class="varname">
-			<span class="varname"> ${varWrapper.getExp()}</span>
+			<span class="varname"> ${varWrapper.getExp() | h}</span>
 		</td>
 		<td nowrap class="open_close">
 %		if openclose:
@@ -41,7 +41,7 @@
 			=
 %		endif
 		</td>
-		<td nowrap class="varvalue" id="${id_}value">
+		<td nowrap class="varvalue" id="${id_}value" ondblclick="showChangeInput('${id_}', '${id_}value')">
 			${caller.body()}\
 		</td>
 	</tr>
@@ -57,8 +57,8 @@
 	<tr class="header" id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td nowrap>
 			<img src="qrc:icons/images/${icon}">
-			<span class="vartype"> ${varWrapper.getType()}</span> 
-			<span class="varname"> ${varWrapper.getExp()}</span>
+			<span class="vartype"> ${varWrapper.getType() | h}</span> 
+			<span class="varname"> ${varWrapper.getExp() | h}</span>
 			${open_close_entry(id_, varWrapper)}
 		</td>
 	</tr>

@@ -27,6 +27,8 @@ from PyQt4.QtCore import QObject, SIGNAL
 from PyQt4.QtGui import QWidget, QMessageBox
 from openedfileview import OpenedFileView
 import os
+import logging
+import helpers.excep
 
 
 class EditorView(QWidget):
@@ -124,12 +126,13 @@ class EditorView(QWidget):
         line = None
         for res in rec.results:
             if res.dest == "frame":
-                file_ = res.src.fullname
+                try:
+                    file_ = res.src.fullname
+                except AttributeError:
+                    logging.warning("No source for %s found.", res.src.file)
+                    raise helpers.excep.SourceFileNotFound(res.src.file)
                 line = int(res.src.line) - 1
                 break
-
-        if file_ == None or line == None:
-            raise "could not interpret stopped message"
 
         # update the ui
         for f in self.openedFiles.values():

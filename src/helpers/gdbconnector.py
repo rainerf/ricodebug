@@ -28,14 +28,7 @@ import logging
 from gdbreader import GdbReader
 from gdboutput import GdbOutput
 from PyQt4.QtCore import QObject
-
-
-class GdbError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
+import helpers
 
 
 class GdbConnector(QObject):
@@ -65,7 +58,7 @@ class GdbConnector(QObject):
             logging.error(res.msg)
             if error_msg:
                 logging.error(error_msg)
-            raise GdbError(res.msg)
+            raise helpers.excep.GdbError(res.msg)
 
         return res
 
