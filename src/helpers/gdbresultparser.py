@@ -25,7 +25,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
-
+import helpers.excep as exc
 import re
 from tools import unBackslashify
 from PyQt4.QtCore import QDir
@@ -192,8 +192,7 @@ def p_async_class(p):
     elif p[1] == "library-unloaded":
         p[0] = GdbOutput.LIBRARY_UNLOADED
     else:
-        print "Got", p[1], "which cannot occur here!"
-        raise
+        raise exc.GdbError("Got " + p[1] + " which cannot occur here!")
 
 
 def p_result(p):
@@ -273,12 +272,12 @@ def p_value_list(p):
 
 def p_error(p):
     if p:
-        logging.error("Syntax error in input, line %d, col %d: %s", 
+        logging.error("Syntax error in input, line %d, col %d: %s", \
             p.lineno, p.lexpos, p.type)
     else:
         logging.error("Syntax error in input!")
-
-    raise "SYNTAX ERROR"
+    
+    raise exc.GdbError("SYNTAX ERROR")
 
 
 def p_top(p):
@@ -321,3 +320,4 @@ class GdbResultParser:
             r[-1].raw = line
 
         return r
+
