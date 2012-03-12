@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # ricodebug - A GDB frontend which focuses on visually supported
 # debugging using data structure graphs and SystemC features.
@@ -32,22 +32,22 @@
 import logging
 import sys
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import pyqtRemoveInputHook, QDir
+from PyQt4.QtCore import pyqtRemoveInputHook
 
 from views.mainwindow import MainWindow
 from views import logview
 
+from config import *
 
 def main():
     pyqtRemoveInputHook()
-    QDir(QDir.homePath()).mkdir(".ricodebug")
-
+    
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
 
     window = MainWindow()
 
-    logging.basicConfig(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()), level=logging.DEBUG)
+    logging.basicConfig(filename=RICO_PATH+'/ricodebug.log', level=logging.DEBUG)
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
     window.ui.filterSlider.setValue(3)
     errormsghandler = logview.ErrorLabelHandler(window)
