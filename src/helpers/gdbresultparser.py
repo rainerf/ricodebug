@@ -25,7 +25,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
-#import logging
+
 import re
 from tools import unBackslashify
 from PyQt4.QtCore import QDir
@@ -273,7 +273,8 @@ def p_value_list(p):
 
 def p_error(p):
     if p:
-        logging.error("Syntax error in input, line %d, col %d: %s", p.lineno, p.lexpos)
+        logging.error("Syntax error in input, line %d, col %d: %s", 
+            p.lineno, p.lexpos, p.type)
     else:
         logging.error("Syntax error in input!")
 
