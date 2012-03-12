@@ -101,8 +101,6 @@ def t_error(t):
 
 
 class Result:
-    pass
-
     def __str__(self):
         return "RESULT(" + self.__dict__.__str__() + ")"
 
