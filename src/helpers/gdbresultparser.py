@@ -25,7 +25,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
-import helpers.excep as exc
+import helpers.excep
 import re
 from tools import unBackslashify
 from PyQt4.QtCore import QDir
@@ -196,7 +196,7 @@ def p_async_class(p):
     elif p[1] == "breakpoint-modified":
         p[0] = GdbOutput.BREAKPOINT_MODIFIED
     else:
-        raise exc.GdbError("Got " + p[1] + " which cannot occur here!")
+        raise helpers.excep.GdbError("Got " + p[1] + " which cannot occur here!")
 
 
 def p_result(p):
@@ -281,7 +281,7 @@ def p_error(p):
     else:
         logging.error("Syntax error in input!")
     
-    raise exc.GdbError("SYNTAX ERROR")
+    raise helpers.excep.GdbError("SYNTAX ERROR")
 
 
 def p_top(p):

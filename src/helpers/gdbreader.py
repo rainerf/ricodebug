@@ -26,7 +26,7 @@ from PyQt4.QtCore import QThread, QMutex, QSemaphore, SIGNAL
 from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
 from collections import deque
-import helpers.excep as exc
+import helpers.excep
 
 
 class GdbReader(QThread):
@@ -85,7 +85,7 @@ class GdbReader(QThread):
              type_ == GdbOutput.LOG_STREAM:
             self.emit(SIGNAL("consoleRecordReceived(PyQt_PyObject)"), res)
         else:
-            raise exc.GdbError("Illegal type_!")
+            raise helpers.excep.GdbError("Illegal type_!")
 
     def enqueueResult(self, gdbresult):
         # enqueueResult will be deprecated for other types
