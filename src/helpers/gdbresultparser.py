@@ -29,7 +29,7 @@ from gdboutput import GdbOutput
 import re
 from tools import unBackslashify
 import logging
-from conifg import *
+from config import *
 
 reserved = {
     "done": "DONE",
