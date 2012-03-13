@@ -25,7 +25,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
-#import logging
+import helpers.excep
 import re
 from tools import unBackslashify
 from PyQt4.QtCore import QDir
@@ -46,7 +46,8 @@ reserved = {
     "thread-group-exited": "THREAD_GROUP_EXITED",
     "thread-selected": "THREAD_SELECTED",
     "library-loaded": "LIBRARY_LOADED",
-    "library-unloaded": "LIBRARY_UNLOADED"
+    "library-unloaded": "LIBRARY_UNLOADED",
+    "breakpoint-modified": "BREAKPOINT_MODIFIED"
 }
 
 tokens = [
@@ -168,7 +169,8 @@ def p_async_class(p):
                    | THREAD_GROUP_EXITED
                    | THREAD_SELECTED
                    | LIBRARY_LOADED
-                   | LIBRARY_UNLOADED'''
+                   | LIBRARY_UNLOADED
+                   | BREAKPOINT_MODIFIED'''
     if p[1] == "stopped":
         p[0] = GdbOutput.STOPPED
     elif p[1] == "running":
@@ -191,9 +193,10 @@ def p_async_class(p):
         p[0] = GdbOutput.LIBRARY_LOADED
     elif p[1] == "library-unloaded":
         p[0] = GdbOutput.LIBRARY_UNLOADED
+    elif p[1] == "breakpoint-modified":
+        p[0] = GdbOutput.BREAKPOINT_MODIFIED
     else:
-        print "Got", p[1], "which cannot occur here!"
-        raise
+        raise helpers.excep.GdbError("Got " + p[1] + " which cannot occur here!")
 
 
 def p_result(p):
@@ -273,11 +276,12 @@ def p_value_list(p):
 
 def p_error(p):
     if p:
-        logging.error("Syntax error in input, line %d, col %d: %s", p.lineno, p.lexpos)
+        logging.error("Syntax error in input, line %d, col %d: %s", \
+            p.lineno, p.lexpos, p.type)
     else:
         logging.error("Syntax error in input!")
-
-    raise "SYNTAX ERROR"
+    
+    raise helpers.excep.GdbError("SYNTAX ERROR")
 
 
 def p_top(p):
@@ -320,3 +324,4 @@ class GdbResultParser:
             r[-1].raw = line
 
         return r
+
