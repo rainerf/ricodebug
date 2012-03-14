@@ -14,7 +14,7 @@
 ##
 ###############################################################################
 ##
-<%def name="simple_entry(role, id_, icon, varWrapper, openclose=False)">
+<%def name="simple_entry(role, id_, icon, varWrapper, openclose=False, allowEdit=True)">
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
 		<td nowrap class="varaccess">
@@ -41,7 +41,11 @@
 			=
 %		endif
 		</td>
-		<td nowrap class="varvalue" id="${id_}value" ondblclick="showChangeInput('${id_}', '${id_}value')">
+		<td nowrap class="varvalue" id="${id_}value" \
+%		if allowEdit:
+ondblclick="showChangeInput('${id_}', '${id_}value')" \
+%		endif
+>
 			${caller.body()}\
 		</td>
 	</tr>
