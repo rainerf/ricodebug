@@ -72,6 +72,9 @@ class DataGraphView(QGraphicsView):
 
     @pyqtSlot()
     def zoomToFit(self):
+        # make sure the sceneRect is only as large as it needs to be, since
+        # it does not automatically shrink
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
         self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
 
     @pyqtSlot()
