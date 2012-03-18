@@ -72,6 +72,9 @@ class DataGraphView(QGraphicsView):
 
     @pyqtSlot()
     def zoomToFit(self):
+        # make sure the sceneRect is only as large as it needs to be, since
+        # it does not automatically shrink
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
         self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
 
     @pyqtSlot()
@@ -112,7 +115,7 @@ class DataGraphView(QGraphicsView):
         nodes = {}
 
         g = pydot.Dot(graph_type="digraph")
-        #g.set_rankdir('LR')
+        g.set_rankdir("BT")
         for i in self.scene().items():
             if isinstance(i, htmlvariableview.HtmlVariableView):
                 n = pydot.Node(str(index))
@@ -138,5 +141,5 @@ class DataGraphView(QGraphicsView):
                 x, y = pos.strip('"').split(",")
                 x, y = float(x), float(y)
                 index = int(n.get_name())
-                items[index].setX(x)
-                items[index].setY(y)
+                items[index].setX(x - items[index].boundingRect().width() / 2)
+                items[index].setY(y - items[index].boundingRect().height() / 2)

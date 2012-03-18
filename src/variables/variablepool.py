@@ -44,7 +44,8 @@ class VariablePool(QObject):
         self.distributedObjects = distributedObjects
         self.debugcontroller = distributedObjects.debugController
         self.connector = distributedObjects.gdb_connector
-        self.list = {}
+        #self.list = {}
+        self.variables = {}
         self.pending = []
 
         # signalproxy
@@ -58,7 +59,7 @@ class VariablePool(QObject):
             this function is connected to the signal SignalProxy::cleanupModels()
         """
 
-        self.list = {}
+        self.variables = {}
 
     def justUpdateValues(self):
         """ just update variables for tracepoints, dont signal changes to connected views
@@ -89,25 +90,23 @@ class VariablePool(QObject):
         # dont use setter method to apply changes because this will cause update to gdb
         # just update value in pool
         for changed in res:
-            for var in self.list.itervalues():
-                if var.getGdbName() == changed.name:
-                    if (var.inscope != (bool(changed.in_scope == "true"))):
-                        var.inscope = (bool(changed.in_scope == "true"))
-                    if hasattr(changed, "value"):
-                        var.value = changed.value
-                    if not isTracePoint:
-                        var.changed()
+            var = self.variables[changed.name]
+            var.inscope = (changed.in_scope == "true")
+            if hasattr(changed, "value"):
+                var.value = changed.value
+            if not isTracePoint:
+                var.changed()
 
         # search for pending variables and replace them if
         # they are in scope
-        tempList = self.list.copy()
-        for var in tempList.itervalues():
-            if var.getPending():
-                gdbVar = self.connector.var_create("- * " + var.getExp())
-                if gdbVar.class_ != GdbOutput.ERROR:
-                    newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
-                    self.list[var.getUniqueName()] = newVar
-                    var.replace(newVar)
+        #tempList = self.list.copy()
+        #for var in tempList.itervalues():
+        #    if var.getPending():
+        #        gdbVar = self.connector.var_create("- * " + var.getExp())
+        #        if gdbVar.class_ != GdbOutput.ERROR:
+        #            newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
+        #            self.list[var.getUniqueName()] = newVar
+        #            var.replace(newVar)
 
         self.signalProxy.emitVariableUpdateCompleted()
 
@@ -129,10 +128,10 @@ class VariablePool(QObject):
         @param isLocal   bool, replace pending variables from pool if variable is local variable
         """
         # variable existing in pool and in current scope
-        if exp in self.list:
-            if not self.list[exp].getPending() and self.list[exp].getInScope():
-                logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
-                return self.list[exp]
+        #if exp in self.list:
+        #    if not self.list[exp].getPending() and self.list[exp].getInScope():
+        #        logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
+        #        return self.list[exp]
 
         # get variable from gdb (fixed)
         gdbVar = self.connector.var_create("- * " + str(exp))
@@ -144,7 +143,7 @@ class VariablePool(QObject):
         # create variable
         varReturn = self.__createVariable(gdbVar, None, exp, None)
 
-        self.list[varReturn.getUniqueName()] = varReturn
+        self.variables[varReturn.gdbname] = varReturn
 
         logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
 
@@ -171,13 +170,8 @@ class VariablePool(QObject):
                 elif child.src.exp == child.src.type:   # base classes
                     self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
-                    # variable existing in pool and in current scope
-                    uniqueName = childformat % {"parent": parentName, "child": child.src.exp}
-                    if uniqueName in self.list:
-                        var = self.list[uniqueName]
-                    else:
-                        var = self.__createVariable(child.src, parentName, None, access, childformat)
-                    self.list[var.getUniqueName()] = var
+                    var = self.__createVariable(child.src, parentName, None, access, childformat)
+                    self.variables[var.gdbname] = var
                     childList.append(var)
 
     def assignValue(self, gdbName, value):
@@ -187,10 +181,9 @@ class VariablePool(QObject):
         @param gdbName     string, GDB name of value
         @param value       new value for variable
         """
-        res = self.connector.var_assign(gdbName, str(value.toString()))
+        res = self.connector.var_assign(gdbName, str(value))
         if res.class_ == GdbOutput.ERROR:
             logging.error("Error when assigning variable: %s", res.raw)
-            raise
 
         # update _all_ vars; other expressions in the variable pool might depend
         # on what we just changed!
@@ -250,6 +243,6 @@ class VariablePool(QObject):
 
         return varReturn
 
-    def dump(self):
-        for exp, var in self.list.items():
-            print exp, var
+    #def dump(self):
+    #    for exp, var in self.list.items():
+    #        print exp, var
