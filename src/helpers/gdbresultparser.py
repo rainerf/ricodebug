@@ -22,6 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""Lexical parser for the gdb output
+
+For futher information see the ply python module documentation.
+"""
+
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
@@ -311,7 +316,10 @@ def p_top(p):
 class GdbResultParser:
     @classmethod
     def parse(cls, lines):
-        """ this function-call is required to get the yacc running! """
+        """Parse the lines with the above defined lexical rules
+        
+        this function-call is required to get the yacc running!
+        """
         lex.lex(reflags=re.DOTALL)
 
         # FIXME: should not use a static path by default, because it is just a helper
