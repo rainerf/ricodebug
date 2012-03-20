@@ -22,6 +22,12 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""Linux pseudo terminal handler
+
+Not portable!
+"""
+
+
 import pty
 import os
 import select
@@ -30,19 +36,27 @@ from PyQt4.QtCore import QThread, SIGNAL
 
 class PtyHandler(QThread):
     def __init__(self, parent=None):
+        """Initialise Linux pseudo terminal
+        """
         QThread.__init__(self, parent)
         self.master, self.slave = pty.openpty()
         self.ptyname = os.ttyname(self.slave)
         self.stop = False
 
     def run(self):
+        """Predifined method by QThread after that is called after start()
+        """
         self.listener()
 
     def listener(self):
+        """Listens to the pseudo terminal for new output
+        """
         while not self.stop:
             if select.select([self.master], [], [], 0.2) != ([], [], []):
                 ret = os.read(self.master, 100)
                 self.emit(SIGNAL('dataAvailable(QString)'), ret)
 
     def write(self, s):
+        """Writes to the pseudo terminal
+        """
         self.master.write(s)
