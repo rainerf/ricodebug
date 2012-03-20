@@ -30,7 +30,7 @@ from PyQt4.QtCore import QThread, SIGNAL
 
 class PtyHandler(QThread):
     def __init__(self, parent=None):
-        super(PtyHandler, self).__init__(parent)
+        QThread.__init__(self, parent)
         self.master, self.slave = pty.openpty()
         self.ptyname = os.ttyname(self.slave)
         self.stop = False
