@@ -30,6 +30,7 @@ from structvariable import StructVariable
 from arrayvariable import ArrayVariable
 from pendingvariable import PendingVariable
 import logging
+import re
 
 
 class VariablePool(QObject):
@@ -226,19 +227,25 @@ class VariablePool(QObject):
             haschildren = (int(gdbVar.numchild) > 0)
             access = access
 
-            # FIXME: the check below should probably be less hackish ;)
-            # PtrVariable: everything that contains a star and exactly one
-            # element as a child is a pointer; if there are more childs, it's an
-            # array of pointers!
-            if type_.endswith("*") and int(gdbVar.numchild) >= 1:
+            # We use some heuristics to find out whether a type is a pointer, an
+            # array, or a structure:
+            # * Pointers will have addresses as their values, ie. their value will
+            # start with "0x"
+            # * Arrays will have their size as their value as reported by gdb.
+            # Therefore, if the value looks like a size, treat it as an array.
+            # * Everything else with children is a structure.
+            # * Again, everything else is a normal variable.
+            if gdbVar.value.startswith('0x') and int(gdbVar.numchild) >= 1:
+                logging.debug("Creating a pointer variable for '%s'", exp)
                 varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            elif type_.endswith("]") and int(gdbVar.numchild) >= 1:
+            elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
+                logging.debug("Creating a array variable for '%s'", exp)
                 varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            # StructVariable
             elif haschildren:
+                logging.debug("Creating a struct variable for '%s'", exp)
                 varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            #StdVariabe
             else:
+                logging.debug("Creating a normal variable for '%s'", exp)
                 varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
 
         return varReturn
