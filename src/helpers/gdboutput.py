@@ -56,3 +56,4 @@ class GdbOutput:
         self.class_ = None     # done, running,...
         self.string = None     # the string of a stream output
         self.type_ = None     # the type of a async response
+

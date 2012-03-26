@@ -222,3 +222,4 @@ class GdbConnector(QObject):
 
     def selectStackFrame(self, exp):
         return self.executeAndRaiseIfFailed("-stack-select-frame " + str(exp))
+

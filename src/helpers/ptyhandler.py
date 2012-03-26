@@ -60,3 +60,4 @@ class PtyHandler(QThread):
         """Writes to the pseudo terminal
         """
         self.master.write(s)
+
