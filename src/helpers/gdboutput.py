@@ -22,6 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""
+Predefined constanst for the gdb output
+"""
 
 class GdbOutput:
     RESULT_RECORD, \
