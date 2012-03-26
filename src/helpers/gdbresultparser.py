@@ -33,8 +33,8 @@ from gdboutput import GdbOutput
 import helpers.excep
 import re
 from tools import unBackslashify
+from PyQt4.QtCore import QDir
 import logging
-from config import *
 
 reserved = {
     "done": "DONE",
@@ -322,9 +322,7 @@ class GdbResultParser:
         """
         lex.lex(reflags=re.DOTALL)
 
-        # FIXME: should not use a static path by default, because it is just a helper
-        # function. Maybe add a path parameter
-        parser = yacc.yacc(start='top', debug=0, outputdir=RICO_PATH)
+        parser = yacc.yacc(start='top', debug=0, outputdir=str(QDir.homePath()) + "/.ricodebug")
         r = []
         for line in lines:
             line = line.strip()
