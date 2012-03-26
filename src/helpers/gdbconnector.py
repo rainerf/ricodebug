@@ -183,26 +183,27 @@ class GdbConnector(QObject):
 
         Records the call stack and gdb executions for reverse debugging
         """
-        return self.executeAndRaiseIfFailed("-exec-record", \
+        # FIXME: find the real mi command!
+        return self.executeAndRaiseIfFailed("-interpreter-exec console rec", \
                 "Could not record the process.")
 
     def next_(self):
         return self.executeAndRaiseIfFailed("-exec-next")
 
     def reverse_next(self):
-        return self.executeAndRaiseIfFailed("-exec-reverse-next")
+        return self.executeAndRaiseIfFailed("-exec-next --reverse")
 
     def step(self):
         return self.executeAndRaiseIfFailed("-exec-step")
 
     def reverse_step(self):
-        return self.executeAndRaiseIfFailed("-exec-reverse-step")
+        return self.executeAndRaiseIfFailed("-exec-step --reverse")
 
     def cont(self):
         return self.executeAndRaiseIfFailed("-exec-continue")
 
     def reverse_cont(self):
-        return self.executeAndRaiseIfFailed("-exec-reverse-continue")
+        return self.executeAndRaiseIfFailed("-exec-continue --reverse")
 
     def interrupt(self):
         # TODO: check if it also works in windows
