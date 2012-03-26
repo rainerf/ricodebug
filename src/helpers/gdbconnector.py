@@ -178,14 +178,31 @@ class GdbConnector(QObject):
         return self.executeAndRaiseIfFailed("-exec-run", \
                 "Could not run the program.")
 
+    def record(self):
+        """Record
+
+        Records the call stack and gdb executions for reverse debugging
+        """
+        return self.executeAndRaiseIfFailed("-exec-record", \
+                "Could not record the process.")
+
     def next_(self):
         return self.executeAndRaiseIfFailed("-exec-next")
+
+    def reverse_next(self):
+        return self.executeAndRaiseIfFailed("-exec-reverse-next")
 
     def step(self):
         return self.executeAndRaiseIfFailed("-exec-step")
 
+    def reverse_step(self):
+        return self.executeAndRaiseIfFailed("-exec-reverse-step")
+
     def cont(self):
         return self.executeAndRaiseIfFailed("-exec-continue")
+
+    def reverse_cont(self):
+        return self.executeAndRaiseIfFailed("-exec-reverse-continue")
 
     def interrupt(self):
         # TODO: check if it also works in windows
