@@ -58,10 +58,10 @@ class ActionEx(QtGui.QAction):
 
 
 class Actions(QtCore.QObject):
-    NumActions = 20
+    NumActions = 21
     Open, Exit, SaveFile, \
     Run, Continue, ReverseContinue, Interrupt, Next, ReverseNext, \
-    Step, ReverseStep, Finish, RunToCursor, \
+    Step, ReverseStep, Finish, RunToCursor, Record, \
     ToggleBreak, ToggleTrace, AddTraceVar, DelTraveVar, \
     AddWatch, AddVarToDataGraph, DelWatch = range(NumActions)
 
@@ -115,12 +115,15 @@ class Actions(QtCore.QObject):
         #next
         self.createAction(":/icons/images/next.png", "Next", "F10", \
                 "Execute next line", self.Next)
-        #previous
-        self.createAction(":/icons/images/rnext.png", "Reverse Next", None, \
-                "Execute previous line", self.ReverseNext)
         #step
         self.createAction(":/icons/images/step.png", "Step", "F11", \
                 "Next Step", self.Step)
+        #record
+        self.createAction(":/icons/images/record.png", "Record", None, \
+                "Record gdb executions", self.Record)
+        #previous
+        self.createAction(":/icons/images/rnext.png", "Reverse Next", None, \
+                "Execute previous line", self.ReverseNext)
         #reverse step
         self.createAction(":/icons/images/rstep.png", "Reverse Step", None, \
                 "Previous Step", self.ReverseStep)
