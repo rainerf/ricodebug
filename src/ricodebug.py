@@ -47,11 +47,16 @@ def main():
 
     window = MainWindow()
 
-    logging.basicConfig(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()), level=logging.DEBUG)
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
+    filehandler = logging.FileHandler(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()))
     window.ui.filterSlider.setValue(3)
     errormsghandler = logview.ErrorLabelHandler(window)
     logger = logging.getLogger()
+    logger.setLevel(logging.NOTSET)
+    formatter = logging.Formatter('[%(levelname)-8s] : %(filename)15s:%(lineno)4d/%(funcName)-20s : %(message)s')
+    filehandler.setFormatter(formatter)
+    logger.removeHandler(logger.handlers[0])    # remove the default stream logger
+    logger.addHandler(filehandler)
     logger.addHandler(logviewhandler)
     logger.addHandler(errormsghandler)
 
@@ -60,6 +65,7 @@ def main():
 
     window.show()
     sys.exit(app.exec_())
+    logging.shutdown()
 
 if __name__ == "__main__":
     main()
