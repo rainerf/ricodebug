@@ -317,8 +317,6 @@ class GdbResultParser:
     @classmethod
     def parse(cls, lines):
         """Parse the lines with the above defined lexical rules
-        
-        this function-call is required to get the yacc running!
         """
         lex.lex(reflags=re.DOTALL)
 
