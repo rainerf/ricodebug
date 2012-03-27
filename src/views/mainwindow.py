@@ -112,14 +112,11 @@ class MainWindow(QMainWindow):
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
         self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
         # file actions
-        self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
-                self.act.actions[Actions.Open])
+        self.ui.menuFile.insertAction(self.ui.actionSaveSession, self.act.actions[Actions.Open])
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
 
@@ -137,8 +134,6 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
         self.ui.Main.addAction(self.act.actions[Actions.Next])
         self.ui.Main.addAction(self.act.actions[Actions.Step])
-        self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
-        self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
         self.ui.Main.addAction(self.act.actions[Actions.Finish])
         self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
         self.ui.Main.addSeparator()
@@ -148,37 +143,21 @@ class MainWindow(QMainWindow):
 
     def __connectActions(self):
         # file menu
-        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), \
-                self.showOpenExecutableDialog)
-        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
-                self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
-                self.signalproxy.emitSaveCurrentFile)
+        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), self.showOpenExecutableDialog)
+        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), self.close)
+        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'), self.signalproxy.emitSaveCurrentFile)
 
         # debug menu
-        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
-                self.debugController.run)
-        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
-                self.debugController.next_)
-        self.connect(self.act.actions[Actions.ReverseNext], \
-                SIGNAL('activated()'), self.debugController.reverse_next)
-        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
-                self.debugController.step)
-        self.connect(self.act.actions[Actions.ReverseStep], \
-                SIGNAL('activated()'), self.debugController.reverse_step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
-                self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
-                , self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
-                self.debugController.finish)
-        self.connect(self.act.actions[Actions.RunToCursor], \
-                SIGNAL('activated()'), self.debugController.inferiorUntil)
+        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), self.debugController.run)
+        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), self.debugController.next_)
+        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), self.debugController.step)
+        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'), self.debugController.cont)
+        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'), self.debugController.interrupt)
+        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), self.debugController.finish)
+        self.connect(self.act.actions[Actions.RunToCursor], SIGNAL('activated()'), self.debugController.inferiorUntil)
 
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
-                self.distributedObjects.sessionManager.showRestoreSessionDialog)
-        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
-                self.distributedObjects.sessionManager.showSaveSessionDialog)
+        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showRestoreSessionDialog)
+        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showSaveSessionDialog)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -190,9 +169,7 @@ class MainWindow(QMainWindow):
         self.ui.menuPlugins.addAction(Action)
 
     def createInitialWindowPlacement(self):
-        """
-        Saves the window and widget placement after first start of program.
-        """
+        """ Saves the window and widget placement after first start of program. """
         #check if settings do not exist
         initExists = self.settings.contains("InitialWindowPlacement/geometry")
         if not initExists:
@@ -216,39 +193,26 @@ class MainWindow(QMainWindow):
             self.tabifyDockWidget(self.gdbIoWidget, self.pyIoWidget)
             self.tabifyDockWidget(self.pyIoWidget, self.inferiorIoWidget)
 
-            self.settings.setValue("InitialWindowPlacement/geometry", \
-                    self.saveGeometry())
-            self.settings.setValue("InitialWindowPlacement/windowState", \
-                    self.saveState())
+            self.settings.setValue("InitialWindowPlacement/geometry", self.saveGeometry())
+            self.settings.setValue("InitialWindowPlacement/windowState", self.saveState())
 
     def initRecentFileHandler(self, nrRecentFiles):
-        """
-        Create menu entries for recently used files and connect them to the 
-        RecentFileHandler
-        """
+        """ Create menu entries for recently used files and connect them to the RecentFileHandler """
         # create menu entries and connect the actions to the debug controller
         recentFileActions = [0] * nrRecentFiles
         for i in range(nrRecentFiles):
             recentFileActions[i] = OpenRecentFileAction(self)
             recentFileActions[i].setVisible(False)
             self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), \
-                    self.distributedObjects.debugController.openExecutable)
+            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), self.distributedObjects.debugController.openExecutable)
 
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, \
-                nrRecentFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), \
-                self.RecentFileHandler.addToRecentFiles)
+        self.RecentFileHandler = RecentFileHandler(recentFileActions, nrRecentFiles, self.distributedObjects)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
-        """
-        Restores the window placement created by 
-        createInitialWindowPlacement().
-        """
-        self.restoreGeometry(self.settings.value(\
-                "InitialWindowPlacement/geometry").toByteArray())
-        self.restoreState(self.settings.value(\
-                "InitialWindowPlacement/windowState").toByteArray())
+        """ Restores the window placement created by createInitialWindowPlacement(). """
+        self.restoreGeometry(self.settings.value("InitialWindowPlacement/geometry").toByteArray())
+        self.restoreState(self.settings.value("InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
