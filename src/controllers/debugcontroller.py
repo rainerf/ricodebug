@@ -71,6 +71,8 @@ class DebugController(QObject):
     def run(self):
         self.connector.setTty(self.ptyhandler.ptyname)
         self.connector.run()
+        # FIXME: Add check or option in settings menu
+        self.connector.record()
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
 
@@ -78,8 +80,16 @@ class DebugController(QObject):
         self.connector.next_()
         self.lastCmdWasStep = True
 
+    def reverse_next(self):
+        self.connector.reverse_next()
+        self.lastCmdWasStep = True
+
     def step(self):
         self.connector.step()
+        self.lastCmdWasStep = True
+
+    def reverse_step(self):
+        self.connector.reverse_step()
         self.lastCmdWasStep = True
 
     def cont(self):
@@ -115,6 +125,11 @@ class DebugController(QObject):
                 self.signalProxy.emitInferiorIsRunning(rec)
 
     def handleStoppedRecord(self, rec):
+        # With reverse debugging, some stopped records might not contain a
+        # reason. Predefine it as None, since all unknown reasons will be
+        # handled as the inferior having stopped normally.
+        reason = None
+
         for r in rec.results:
             if r.dest == 'reason':
                 reason = r.src
