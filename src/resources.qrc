@@ -19,7 +19,9 @@
     <file>images/until.png</file>
     <file>images/continue.png</file>
     <file>images/next.png</file>
+    <file>images/rnext.png</file>
     <file>images/step.png</file>
+    <file>images/rstep.png</file>
     <file>images/interrupt.png</file>
     <file>images/exit.png</file>
     <file>images/save.png</file>
