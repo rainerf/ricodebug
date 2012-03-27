@@ -105,7 +105,7 @@ class GdbReader(QThread):
             raise helpers.excep.GdbError("Illegal type_!")
 
     def enqueueResult(self, gdbresult):
-        """Enques the result 
+        """Enqueues the result 
         """
         # enqueueResult will be deprecated for other types
         assert(gdbresult.type_ == GdbOutput.RESULT_RECORD)
