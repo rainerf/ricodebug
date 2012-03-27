@@ -34,8 +34,6 @@ import helpers.excep
 
 class GdbReader(QThread):
     def __init__(self, connector, parent=None):
-        """Initialise the GdbReader
-        """
         QThread.__init__(self, parent)
 
         self.resultRecordQueue = deque()
@@ -105,8 +103,6 @@ class GdbReader(QThread):
             raise helpers.excep.GdbError("Illegal type_!")
 
     def enqueueResult(self, gdbresult):
-        """Enqueues the result 
-        """
         # enqueueResult will be deprecated for other types
         assert(gdbresult.type_ == GdbOutput.RESULT_RECORD)
         q = self.resultRecordQueue
