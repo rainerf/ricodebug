@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 """
-Predefined constants for the gdb output
+Predefined constanst for the gdb output
 """
 
 class GdbOutput:
