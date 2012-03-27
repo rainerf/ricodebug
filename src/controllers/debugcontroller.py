@@ -125,6 +125,11 @@ class DebugController(QObject):
                 self.signalProxy.emitInferiorIsRunning(rec)
 
     def handleStoppedRecord(self, rec):
+        # With reverse debugging, some stopped records might not contain a
+        # reason. Predefine it as None, since all unknown reasons will be
+        # handled as the inferior having stopped normally.
+        reason = None
+
         for r in rec.results:
             if r.dest == 'reason':
                 reason = r.src
