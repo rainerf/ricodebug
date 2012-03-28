@@ -22,6 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""Lexical parser for the gdb output
+
+For futher information see the ply python module documentation.
+"""
+
 import ply.lex as lex
 import ply.yacc as yacc
 from gdboutput import GdbOutput
@@ -102,8 +107,6 @@ def t_error(t):
 
 
 class Result:
-    pass
-
     def __str__(self):
         return "RESULT(" + self.__dict__.__str__() + ")"
 
@@ -313,7 +316,8 @@ def p_top(p):
 class GdbResultParser:
     @classmethod
     def parse(cls, lines):
-        """ this function-call is required to get the yacc running! """
+        """Parse the lines with the above defined lexical rules
+        """
         lex.lex(reflags=re.DOTALL)
 
         parser = yacc.yacc(start='top', debug=0, outputdir=str(QDir.homePath()) + "/.ricodebug")

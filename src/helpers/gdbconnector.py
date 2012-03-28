@@ -230,7 +230,7 @@ class GdbConnector(QObject):
         if res.class_ == GdbOutput.ERROR:
             return None
         else:
-            return res.value if res else ""
+            return res.value
 
     def executeCliCommand(self, cmd):
         res = self.execute("-interpreter-exec console \"" + cmd + "\"")
@@ -260,7 +260,8 @@ class GdbConnector(QObject):
         if res.class_ == GdbOutput.ERROR:
             return None
         else:
-            return int(res.depth) if res else 0
+            return int(res.depth)
 
     def selectStackFrame(self, exp):
         return self.executeAndRaiseIfFailed("-stack-select-frame " + str(exp))
+

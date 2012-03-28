@@ -76,12 +76,14 @@ class Actions(QtCore.QObject):
 
     def createAction(self, icon, text, shortcut, statustip, enum, parameter=None):
         """dont use this function outside of class!!!"""
-        if parameter == None:
+        if parameter is None:
             newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
         else:
             newAction = ActionEx(parameter)
-        if shortcut != None:
+
+        if shortcut is not None:
             newAction.setShortcut(shortcut)
+
         newAction.setStatusTip(statustip)
         self.add(enum, newAction)
 
@@ -164,6 +166,4 @@ class Actions(QtCore.QObject):
                 "Del var from Watch", "+", \
                 "Remove selected variable from watchview-window", self.DelWatch)
 
-        ###############################################
-        ## <your description>
-        ###############################################
+

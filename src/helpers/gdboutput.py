@@ -22,6 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""
+Predefined constants for the gdb output
+"""
 
 class GdbOutput:
     RESULT_RECORD, \
@@ -53,3 +56,4 @@ class GdbOutput:
         self.class_ = None     # done, running,...
         self.string = None     # the string of a stream output
         self.type_ = None     # the type of a async response
+

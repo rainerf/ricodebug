@@ -33,6 +33,58 @@ from controllers.quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):
+    
+    def __init__(self, parent=None):
+        """ init UI """
+        QMainWindow.__init__(self, parent)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        self.ui.actionSaveSession.setEnabled(False)
+
+        self.distributedObjects = DistributedObjects()
+
+        self.debugController = self.distributedObjects.debugController
+        self.settings = self.debugController.settings
+        self.signalproxy = self.distributedObjects.signalProxy
+        self.pluginloader = PluginLoader(self.distributedObjects)
+
+        #init RecentFileHandler
+        nrRecentFiles = 5
+        self.initRecentFileHandler(nrRecentFiles)
+
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
+
+        # signal proxy
+        QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
+
+        QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
+        QObject.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'), self.removeDockWidget)
+        QObject.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'), self.addPluginAction)
+        QObject.connect(self.ui.actionSavePlugins, SIGNAL('activated()'), self.showSavePluginsDialog)
+        QObject.connect(self.ui.actionLoadPlugins, SIGNAL('activated()'), self.showLoadPluginsDialog)
+
+        # Add editor to main window.
+        self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
+
+        self.pluginloader.addAvailablePlugins()
+
+        # Tell everyone to insert their dock widgets into the main window
+        self.distributedObjects.signalProxy.insertDockWidgets()
+
+        # get filelist dockwidget
+        self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView")
+
+        self.setWindowFilePath("<none>")
+        self.setupUi()
+        self.createInitialWindowPlacement()
+        self.readSettings()
+
+        self.quickwatch = QuickWatch(self, self.distributedObjects)
+
     def setupUi(self):
         self.__initActions()
         self.ui.statusLabel = QLabel()
@@ -130,57 +182,6 @@ class MainWindow(QMainWindow):
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
-
-    def __init__(self, parent=None):
-        """ init UI """
-        QMainWindow.__init__(self, parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-
-        self.ui.actionSaveSession.setEnabled(False)
-
-        self.distributedObjects = DistributedObjects()
-
-        self.debugController = self.distributedObjects.debugController
-        self.settings = self.debugController.settings
-        self.signalproxy = self.distributedObjects.signalProxy
-        self.pluginloader = PluginLoader(self.distributedObjects)
-
-        #init RecentFileHandler
-        nrRecentFiles = 5
-        self.initRecentFileHandler(nrRecentFiles)
-
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
-
-        # signal proxy
-        QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
-
-        QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
-        QObject.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'), self.removeDockWidget)
-        QObject.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'), self.addPluginAction)
-        QObject.connect(self.ui.actionSavePlugins, SIGNAL('activated()'), self.showSavePluginsDialog)
-        QObject.connect(self.ui.actionLoadPlugins, SIGNAL('activated()'), self.showLoadPluginsDialog)
-
-        # Add editor to main window.
-        self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
-
-        self.pluginloader.addAvailablePlugins()
-
-        # Tell everyone to insert their dock widgets into the main window
-        self.distributedObjects.signalProxy.insertDockWidgets()
-
-        # get filelist dockwidget
-        self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView")
-
-        self.setWindowFilePath("<none>")
-        self.setupUi()
-        self.createInitialWindowPlacement()
-        self.readSettings()
-
-        self.quickwatch = QuickWatch(self, self.distributedObjects)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
