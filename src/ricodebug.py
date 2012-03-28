@@ -45,19 +45,19 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
 
+    filehandler = logging.FileHandler(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()))
+    formatter = logging.Formatter('[%(levelname)-8s] : %(filename)15s:%(lineno)4d/%(funcName)-20s : %(message)s')
+    filehandler.setFormatter(formatter)
+    logger = logging.getLogger()
+    logger.setLevel(logging.NOTSET)
+    logger.addHandler(filehandler)
+
     window = MainWindow()
 
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
-    filehandler = logging.FileHandler(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()))
     window.ui.filterSlider.setValue(3)
-    errormsghandler = logview.ErrorLabelHandler(window)
-    logger = logging.getLogger()
-    logger.setLevel(logging.NOTSET)
-    formatter = logging.Formatter('[%(levelname)-8s] : %(filename)15s:%(lineno)4d/%(funcName)-20s : %(message)s')
-    filehandler.setFormatter(formatter)
-    logger.removeHandler(logger.handlers[0])    # remove the default stream logger
-    logger.addHandler(filehandler)
     logger.addHandler(logviewhandler)
+    errormsghandler = logview.ErrorLabelHandler(window)
     logger.addHandler(errormsghandler)
 
     if (len(sys.argv) > 1):
