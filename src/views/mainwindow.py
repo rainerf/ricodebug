@@ -137,6 +137,7 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
         self.ui.Main.addAction(self.act.actions[Actions.Next])
         self.ui.Main.addAction(self.act.actions[Actions.Step])
+        self.ui.Main.addAction(self.act.actions[Actions.Record])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
         self.ui.Main.addAction(self.act.actions[Actions.Finish])
@@ -160,10 +161,12 @@ class MainWindow(QMainWindow):
                 self.debugController.run)
         self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
                 self.debugController.next_)
-        self.connect(self.act.actions[Actions.ReverseNext], \
-                SIGNAL('activated()'), self.debugController.reverse_next)
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
                 self.debugController.step)
+        self.connect(self.act.actions[Actions.Record], SIGNAL('activated()'), \
+                self.debugController.toggle_record)
+        self.connect(self.act.actions[Actions.ReverseNext], \
+                SIGNAL('activated()'), self.debugController.reverse_next)
         self.connect(self.act.actions[Actions.ReverseStep], \
                 SIGNAL('activated()'), self.debugController.reverse_step)
         self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\

@@ -178,8 +178,8 @@ class GdbConnector(QObject):
         return self.executeAndRaiseIfFailed("-exec-run", \
                 "Could not run the program.")
 
-    def record(self):
-        """Record
+    def record_start(self):
+        """Start recording
 
         Records the call stack and gdb executions for reverse debugging
         """
@@ -187,6 +187,14 @@ class GdbConnector(QObject):
         return self.executeAndRaiseIfFailed("-interpreter-exec console rec", \
                 "Could not record the process.")
     
+    def record_stop(self):
+        """Stop recording
+        """
+        # FIXME: find the real mi command!
+        return self.executeAndRaiseIfFailed(\
+                "-interpreter-exec console \"record stop\"", \
+                "Could not record the process.")
+
     def next_(self):
         return self.executeAndRaiseIfFailed("-exec-next")
 

@@ -32,6 +32,9 @@ import logging
 class DebugController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
+
+        self.isRecording = False
+
         self.settings = QSettings("fh-hagenberg", "SysCDbg")
         self.ptyhandler = PtyHandler()
 
@@ -71,10 +74,16 @@ class DebugController(QObject):
     def run(self):
         self.connector.setTty(self.ptyhandler.ptyname)
         self.connector.run()
-        # FIXME: Add check or option in settings menu
-        self.connector.record()
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
+
+    def toggle_record(self):
+        if not self.isRecording:
+            self.connector.record_start()
+            self.isRecording = True
+        else:
+            self.connector.record_stop()
+            self.isRecording = False
 
     def next_(self):
         self.connector.next_()
@@ -139,8 +148,6 @@ class DebugController(QObject):
                 signal_name = r.src
             if r.dest == 'signal-meaning':
                 signal_meaning = r.src
-            if r.dest == 'frame':
-                frame = r.src
             if r.dest == "bkptno":
                 bkptno = int(r.src)
 
