@@ -149,35 +149,19 @@ class MainWindow(QMainWindow):
 
     def __connectActions(self):
         # file menu
-        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), \
-                self.showOpenExecutableDialog)
-        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
-                self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
-                self.signalproxy.emitSaveCurrentFile)
-
+        self.act.actions[Actions.Open].triggered.connect(self.showOpenExecutableDialog)
+        self.act.actions[Actions.Exit].triggered.connect(self.close)
+        self.act.actions[Actions.SaveFile].triggered.connect(self.signalproxy.emitSaveCurrentFile) 
         # debug menu
-        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
-                self.debugController.run)
-        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
-                self.debugController.next_)
-        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
-                self.debugController.step)
-        self.connect(self.act.actions[Actions.Record], SIGNAL('activated()'), \
-                self.debugController.toggle_record)
-        self.connect(self.act.actions[Actions.ReverseNext], \
-                SIGNAL('activated()'), self.debugController.reverse_next)
-        self.connect(self.act.actions[Actions.ReverseStep], \
-                SIGNAL('activated()'), self.debugController.reverse_step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
-                self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
-                , self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
-                self.debugController.finish)
-        self.connect(self.act.actions[Actions.RunToCursor], \
-                SIGNAL('activated()'), self.debugController.inferiorUntil)
-
+        self.act.actions[Actions.Run].triggered.connect(self.debugController.run)
+        self.act.actions[Actions.Next].triggered.connnect( self.debugController.next_)
+        self.act.actions[Actions.ReverseNext].triggered.connnect(self.debugController.reverse_next)
+        self.act.actions[Actions.Step].triggered.connnect(self.debugController.step)
+        self.act.actions[Actions.ReverseStep].triggered.connect(self.debugController.reverse_step)
+        self.act.actions[Actions.Continue].triggered.connect( self.debugController.cont)
+        self.act.actions[Actions.Interrupt].triggered.connect(self.debugController.interrupt)
+        self.act.actions[Actions.Finish].triggered.connect( self.debugController.finish)
+        self.act.actions[Actions.RunToCursor].triggered.connect(self.debugController.inferiorUntil) 
         QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
