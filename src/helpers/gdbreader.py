@@ -22,6 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+"""GdbReader that listens to the gnu debugger output
+"""
+
 from PyQt4.QtCore import QThread, QMutex, QSemaphore, SIGNAL
 from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
@@ -44,13 +47,21 @@ class GdbReader(QThread):
         self.streamSem = QSemaphore(0)
 
     def startReading(self, stdout):
+        """Intialise and start the gdbreader thread
+        """
         self.stdout = stdout
+        
+        # self.start is predefined method by QThread and starts the thread.
         self.start()
 
     def run(self):
+        """Pre defined method by QThread to start the thread
+        """
         self.listener()
 
     def listener(self):
+        """Main method for listening to the gdb output
+        """
         lines = []
         while True:
             line = self.stdout.readline()
@@ -70,9 +81,13 @@ class GdbReader(QThread):
                 lines.append(line)
 
     def forwardMultipleBreakPointInfo(self, lines):
+        """Documentation Incomplete for this method!"""
+        # Can't reproduce the step to call this function
         self.emit(SIGNAL("forwardMultipleBreakpointInfo(PyQt_PyObject)"), lines)
 
     def forwardResult(self, res):
+        """Forwards the result from the gdb output according to its type
+        """
         type_ = res.type_
         if type_ == GdbOutput.RESULT_RECORD:
             self.enqueueResult(res)
@@ -100,6 +115,8 @@ class GdbReader(QThread):
         s.release()
 
     def getResult(self, type_):
+        """Get the first result in the queue
+        """
         # getResult will be deprecated for other types
         assert(type_ == GdbOutput.RESULT_RECORD)
         q = self.resultRecordQueue
@@ -111,3 +128,4 @@ class GdbReader(QThread):
         res = q.popleft()
         m.unlock()
         return res
+
