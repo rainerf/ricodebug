@@ -186,7 +186,7 @@ class GdbConnector(QObject):
         # FIXME: find the real mi command!
         return self.executeAndRaiseIfFailed("-interpreter-exec console rec", \
                 "Could not record the process.")
-
+    
     def next_(self):
         return self.executeAndRaiseIfFailed("-exec-next")
 
@@ -256,3 +256,4 @@ class GdbConnector(QObject):
 
     def selectStackFrame(self, exp):
         return self.executeAndRaiseIfFailed("-stack-select-frame " + str(exp))
+

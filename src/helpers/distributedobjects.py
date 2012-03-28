@@ -64,3 +64,4 @@ class DistributedObjects:
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
+
