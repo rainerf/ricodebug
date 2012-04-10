@@ -154,9 +154,9 @@ class MainWindow(QMainWindow):
         self.act.actions[Actions.SaveFile].triggered.connect(self.signalproxy.emitSaveCurrentFile) 
         # debug menu
         self.act.actions[Actions.Run].triggered.connect(self.debugController.run)
-        self.act.actions[Actions.Next].triggered.connnect( self.debugController.next_)
-        self.act.actions[Actions.ReverseNext].triggered.connnect(self.debugController.reverse_next)
-        self.act.actions[Actions.Step].triggered.connnect(self.debugController.step)
+        self.act.actions[Actions.Next].triggered.connect( self.debugController.next_)
+        self.act.actions[Actions.ReverseNext].triggered.connect(self.debugController.reverse_next)
+        self.act.actions[Actions.Step].triggered.connect(self.debugController.step)
         self.act.actions[Actions.ReverseStep].triggered.connect(self.debugController.reverse_step)
         self.act.actions[Actions.Continue].triggered.connect( self.debugController.cont)
         self.act.actions[Actions.Interrupt].triggered.connect(self.debugController.interrupt)
