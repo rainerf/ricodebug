@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import SIGNAL, Qt
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
@@ -32,7 +32,7 @@ from controllers.quickwatch import QuickWatch
 from helpers.actions import Actions
 
 class MainWindow(QMainWindow):
-    
+
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -52,19 +52,30 @@ class MainWindow(QMainWindow):
         nrRecentFiles = 5
         self.initRecentFileHandler(nrRecentFiles)
 
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
+        self.connect(self.debugController, SIGNAL('executableOpened'),
+                self.showExecutableName)
 
         # signal proxy
-        QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
+        self.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'),
+                self.targetStartedRunning, Qt.QueuedConnection)
+        self.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'),
+                self.targetStopped, Qt.QueuedConnection)
+        self.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'),
+                self.targetStopped, Qt.QueuedConnection)
+        self.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'),
+                self.targetExited, Qt.QueuedConnection)
 
-        QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
-        QObject.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'), self.removeDockWidget)
-        QObject.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'), self.addPluginAction)
-        QObject.connect(self.ui.actionSavePlugins, SIGNAL('activated()'), self.showSavePluginsDialog)
-        QObject.connect(self.ui.actionLoadPlugins, SIGNAL('activated()'), self.showLoadPluginsDialog)
+        self.connect(self.signalproxy,
+                SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'),
+                self.addPluginDockWidget)
+
+        self.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'),
+                self.removeDockWidget)
+        self.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'),
+                self.addPluginAction)
+
+        self.ui.actionSavePlugins.triggered.connect(self.showSavePluginsDialog)
+        self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)
 
         # Add editor to main window.
         self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
@@ -150,7 +161,7 @@ class MainWindow(QMainWindow):
         # file menu
         Actions.Open.triggered.connect(self.showOpenExecutableDialog)
         Actions.Exit.triggered.connect(self.close)
-        Actions.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile) 
+        Actions.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile)
         # debug menu
         Actions.Run.triggered.connect(self.debugController.run)
         Actions.Next.triggered.connect(self.debugController.next_)
@@ -162,10 +173,10 @@ class MainWindow(QMainWindow):
         Actions.Interrupt.triggered.connect(self.debugController.interrupt)
         Actions.Finish.triggered.connect(self.debugController.finish)
         Actions.RunToCursor.triggered.connect(self.debugController.inferiorUntil)
-        
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
+
+        self.ui.actionRestoreSession.triggered.connect(
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
-        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
+        self.ui.actionSaveSession.triggered.connect(
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
@@ -211,7 +222,7 @@ class MainWindow(QMainWindow):
 
     def initRecentFileHandler(self, nrRecentFiles):
         """
-        Create menu entries for recently used files and connect them to the 
+        Create menu entries for recently used files and connect them to the
         RecentFileHandler
         """
         # create menu entries and connect the actions to the debug controller
@@ -220,17 +231,17 @@ class MainWindow(QMainWindow):
             recentFileActions[i] = OpenRecentFileAction(self)
             recentFileActions[i].setVisible(False)
             self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), \
+            self.connect(recentFileActions[i], SIGNAL('executableOpened'), \
                     self.distributedObjects.debugController.openExecutable)
 
         self.RecentFileHandler = RecentFileHandler(recentFileActions, \
                 nrRecentFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), \
+        self.connect(self.debugController, SIGNAL('executableOpened'), \
                 self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
         """
-        Restores the window placement created by 
+        Restores the window placement created by
         createInitialWindowPlacement().
         """
         self.restoreGeometry(self.settings.value(\
