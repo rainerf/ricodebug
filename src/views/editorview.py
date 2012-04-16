@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QObject, SIGNAL
 from PyQt4.QtGui import QWidget, QMessageBox
 from openedfileview import OpenedFileView
 import os
@@ -49,7 +48,7 @@ class EditorView(QWidget):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         self.distributedObjects = distributedObjects
-        QObject.connect(self.tabWidget, SIGNAL('tabCloseRequested(int)'), self.hideTab)
+        self.tabWidget.tabCloseRequested.connect(self.hideTab)
         self.openedFiles = {}
 
     def hideTab(self, idx):
@@ -58,7 +57,10 @@ class EditorView(QWidget):
 
         ret = QMessageBox.Discard
         if self.__getFileModified(idx):
-            msgBox = QMessageBox(QMessageBox.Question, "Save Resources", "'" + self.tabWidget.tabText(idx)[:-1] + "' has been modified. Save changes?", QMessageBox.Cancel | QMessageBox.Save | QMessageBox.Discard, self)
+            msgBox = QMessageBox(QMessageBox.Question, "Save Resources", "'" +
+                    self.tabWidget.tabText(idx)[:-1] +
+                    "' has been modified. Save changes?", QMessageBox.Cancel |
+                    QMessageBox.Save | QMessageBox.Discard, self)
             ret = msgBox.exec_()
             if ret == QMessageBox.Save:
                 self.getCurrentOpenedFile().saveFile()
@@ -112,9 +114,11 @@ class EditorView(QWidget):
         """ Adds a '*' to name of modified file in the editors tab widget.  """
         if filename in self.openedFiles:
             if (modified):
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab), os.path.basename(filename) + '*')
+                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab),
+                        os.path.basename(filename) + '*')
             else:
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab), os.path.basename(filename))
+                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab),
+                        os.path.basename(filename))
 
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """

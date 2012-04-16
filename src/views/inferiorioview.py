@@ -23,16 +23,18 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QTextEdit, QTextCursor
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import SIGNAL
 
 
 class InferiorIoView(QTextEdit):
     def __init__(self, debug_controller, parent=None):
         QTextEdit.__init__(self, parent)
 
-        QObject.connect(debug_controller.ptyhandler, SIGNAL('dataAvailable(QString)'), self.outputInferiorData)
+        self.connect(debug_controller.ptyhandler, 
+                SIGNAL('dataAvailable(QString)'), self.outputInferiorData)
 
     def outputInferiorData(self, data):
         self.moveCursor(QTextCursor.End)
         self.insertPlainText(data)
         self.moveCursor(QTextCursor.End)
+
