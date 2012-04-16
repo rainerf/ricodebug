@@ -37,7 +37,6 @@ from controllers.inferioriocontroller import InferiorIoController
 from controllers.gdbiocontroller import GdbIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
-from actions import Actions
 from stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
@@ -46,7 +45,6 @@ from sessionmanager import SessionManager
 class DistributedObjects:
     def __init__(self):
         self.gdb_connector = GdbConnector()
-        self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
         self.editorController = EditorController(self)
