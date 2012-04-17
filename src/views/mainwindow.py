@@ -108,6 +108,8 @@ class MainWindow(QMainWindow):
     def __initActions(self):
         self.act = Actions(self)
         self.act.actions[Actions.Record].setCheckable(True)
+        self.act.actions[Actions.ReverseNext].setEnabled(False)
+        self.act.actions[Actions.ReverseStep].setEnabled(False)
         # debug actions
         self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
@@ -166,7 +168,7 @@ class MainWindow(QMainWindow):
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
                 self.debugController.step)
         self.connect(self.act.actions[Actions.Record], SIGNAL('toggled(bool)'), \
-                self.debugController.toggle_record)
+                self.toggleRecord)
         self.connect(self.act.actions[Actions.ReverseNext], \
                 SIGNAL('activated()'), self.debugController.reverse_next)
         self.connect(self.act.actions[Actions.ReverseStep], \
@@ -302,3 +304,13 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
+
+    def toggleRecord(self, check):
+        if check:
+            self.debugController.record_start()
+            self.act.actions[Actions.ReverseNext].setEnabled(True)
+            self.act.actions[Actions.ReverseStep].setEnabled(True)
+        else:
+            self.debugController.record_stop()
+            self.act.actions[Actions.ReverseNext].setEnabled(False)
+            self.act.actions[Actions.ReverseStep].setEnabled(False)

@@ -75,11 +75,11 @@ class DebugController(QObject):
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
 
-    def toggle_record(self, check):
-        if check:
-            self.connector.record_start()
-        else:
-            self.connector.record_stop()
+    def record_start(self):
+        self.connector.record_start()
+
+    def record_stop(self):
+        self.connector.record_stop()
 
     def next_(self):
         self.connector.next_()
