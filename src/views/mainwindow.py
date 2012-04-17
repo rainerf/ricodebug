@@ -115,12 +115,14 @@ class MainWindow(QMainWindow):
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Record])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
         self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Record])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])        
+        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
+        
+        
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
@@ -141,11 +143,12 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
         self.ui.Main.addAction(self.act.actions[Actions.Next])
         self.ui.Main.addAction(self.act.actions[Actions.Step])
+        self.ui.Main.addAction(self.act.actions[Actions.Finish])
+        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])        
         self.ui.Main.addAction(self.act.actions[Actions.Record])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
-        self.ui.Main.addAction(self.act.actions[Actions.Finish])
-        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
+       
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.actions[Actions.Exit])
         # connect actions
