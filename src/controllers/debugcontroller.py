@@ -23,13 +23,15 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from PyQt4.QtCore import QObject, SIGNAL, Qt, QSettings
 from helpers.ptyhandler import PtyHandler
+from PyQt4.QtCore import QObject, QSettings, pyqtSignal
 from helpers.gdboutput import GdbOutput
 import logging
 
 
 class DebugController(QObject):
+    executableOpened = pyqtSignal('QString')
+
     def __init__(self, distributedObjects):
         QObject.__init__(self)
 
@@ -51,7 +53,7 @@ class DebugController(QObject):
         self.ptyhandler.start()
         self.connector.start()
 
-        QObject.connect(self.connector.reader, SIGNAL('asyncRecordReceived(PyQt_PyObject)'), self.handleAsyncRecord, Qt.QueuedConnection)
+        self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord)
 
     def openExecutable(self, filename):
         # die if the file does not exist or has been provided without at least a
@@ -68,7 +70,7 @@ class DebugController(QObject):
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
-            self.emit(SIGNAL('executableOpened'), filename)
+            self.executableOpened.emit(filename)
             self.executableName = filename
 
     def run(self):

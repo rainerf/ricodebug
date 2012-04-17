@@ -28,7 +28,7 @@ A tree model that provides data for the file list view.
 
 import os
 from operator import attrgetter
-from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex, QObject, SIGNAL
+from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex 
 from PyQt4.QtGui import QPixmap
 
 
@@ -108,7 +108,7 @@ class FileListModel(QAbstractItemModel):
         self.headers = FileListItem(["Headers", ""], 0, self.root)
         self.others = FileListItem(["Others", ""], 0, self.root)
 
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.update)
+        self.debugController.executableOpened.connect(self.update)
 
     def data(self, index, role):
         """ Required function for Qt Model/View concepts.

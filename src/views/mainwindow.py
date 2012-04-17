@@ -52,8 +52,7 @@ class MainWindow(QMainWindow):
         nrRecentFiles = 5
         self.initRecentFileHandler(nrRecentFiles)
 
-        self.connect(self.debugController, SIGNAL('executableOpened'),
-                self.showExecutableName)
+        self.debugController.executableOpened.connect(self.showExecutableName)
 
         # signal proxy
         self.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'),
@@ -231,13 +230,11 @@ class MainWindow(QMainWindow):
             recentFileActions[i] = OpenRecentFileAction(self)
             recentFileActions[i].setVisible(False)
             self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            self.connect(recentFileActions[i], SIGNAL('executableOpened'), \
-                    self.distributedObjects.debugController.openExecutable)
+            recentFileActions[i].executableOpened.connect(self.debugController.openExecutable)
 
         self.RecentFileHandler = RecentFileHandler(recentFileActions, \
                 nrRecentFiles, self.distributedObjects)
-        self.connect(self.debugController, SIGNAL('executableOpened'), \
-                self.RecentFileHandler.addToRecentFiles)
+        self.debugController.executableOpened.connect(self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
         """

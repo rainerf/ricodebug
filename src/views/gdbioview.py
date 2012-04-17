@@ -24,7 +24,6 @@
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
-from PyQt4.QtCore import SIGNAL, Qt
 from stylesheets import STYLESHEET
 from helpers.tools import unBackslashify
 from helpers.gdboutput import GdbOutput
@@ -60,9 +59,8 @@ class GdbIoView(QWidget):
         self.debugController = debug_controller
         self.gdbInputEdit.lineEdit().returnPressed.connect(self.gdbSendButton.click)
         self.gdbSendButton.clicked.connect(self.executeCliCommand)
-        self.connect(self.debugController.connector.reader,
-                SIGNAL('consoleRecordReceived(PyQt_PyObject)'),
-                self.handleConsoleRecord, Qt.QueuedConnection)
+        self.debugController.connector.reader.consoleRecordReceived.connect(
+                self.handleConsoleRecord)
 
     def executeCliCommand(self):
         cmd = str(self.gdbInputEdit.lineEdit().text())
