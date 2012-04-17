@@ -107,11 +107,13 @@ class MainWindow(QMainWindow):
 
     def __initActions(self):
         self.act = Actions(self)
+        self.act.actions[Actions.Record].setCheckable(True)
         # debug actions
         self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Record])
         self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
         self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
