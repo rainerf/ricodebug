@@ -22,20 +22,22 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QAction
 from os.path import exists
 
 
 class OpenRecentFileAction(QAction):
     """ Class extends QAction to open a recently used file."""
+    executableOpened = pyqtSignal('QString')
+
     def __init__(self, parent):
         QAction.__init__(self, parent)
-        QObject.connect(self, SIGNAL('triggered()'), self.__open)
+        self.triggered.connect(self.__open)
 
     def __open(self):
         ''' Open executable (file named like action). '''
-        self.emit(SIGNAL('executableOpened'), str(self.text()))
+        self.executableOpened.emit(str(self.text()))
 
 
 class RecentFileHandler():
@@ -105,3 +107,4 @@ class RecentFileHandler():
                 i = self.nrRecentFiles - 1
 
         self.settings.endArray()
+
