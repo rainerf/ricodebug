@@ -33,8 +33,6 @@ class DebugController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
 
-        self.isRecording = False
-
         self.settings = QSettings("fh-hagenberg", "SysCDbg")
         self.ptyhandler = PtyHandler()
 
@@ -77,13 +75,11 @@ class DebugController(QObject):
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
 
-    def toggle_record(self):
-        if not self.isRecording:
+    def toggle_record(self, check):
+        if check:
             self.connector.record_start()
-            self.isRecording = True
         else:
             self.connector.record_stop()
-            self.isRecording = False
 
     def next_(self):
         self.connector.next_()

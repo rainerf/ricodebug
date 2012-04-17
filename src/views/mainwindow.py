@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
                 self.debugController.next_)
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
                 self.debugController.step)
-        self.connect(self.act.actions[Actions.Record], SIGNAL('activated()'), \
+        self.connect(self.act.actions[Actions.Record], SIGNAL('toggled(bool)'), \
                 self.debugController.toggle_record)
         self.connect(self.act.actions[Actions.ReverseNext], \
                 SIGNAL('activated()'), self.debugController.reverse_next)
