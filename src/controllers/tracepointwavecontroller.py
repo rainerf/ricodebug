@@ -53,7 +53,7 @@ class TracepointWaveController(QObject):
 
     def insertDockWidgets(self):
         '''Function invoked when mainwindow allows controllers to insert widgets'''
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.view.getDockWidget(), True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.view.getDockWidget(), True)
 
     def updateTracepointWaveView(self, list_):
         ''' Repaint tracepoint waves

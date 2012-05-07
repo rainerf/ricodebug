@@ -88,7 +88,7 @@ class DataGraphController(QObject):
         self.dataGraphDock = QDockWidget("Graph")
         self.dataGraphDock.setObjectName("DataGraphView")
         self.dataGraphDock.setWidget(self.data_graph_view)
-        self.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
+        self.signalProxy.emitAddDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
 
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph

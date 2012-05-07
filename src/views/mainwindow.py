@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
         self.pluginloader.addAvailablePlugins()
 
         # Tell everyone to insert their dock widgets into the main window
-        self.distributedObjects.signalProxy.insertDockWidgets()
+        self.signalproxy.emitInsertDockWidgets()
 
         # get filelist dockwidget
         self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView")

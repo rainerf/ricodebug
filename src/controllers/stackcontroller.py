@@ -51,7 +51,7 @@ class StackController(QObject):
         self.stackDock = QDockWidget("Stack")
         self.stackDock.setObjectName("StackView")
         self.stackDock.setWidget(self.stackView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.stackDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.stackDock, True)
         
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()

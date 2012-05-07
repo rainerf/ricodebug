@@ -40,4 +40,4 @@ class InferiorIoController(QObject):
         self.inferiorioDock = QDockWidget("Output")
         self.inferiorioDock.setObjectName("InferiorIoView")
         self.inferiorioDock.setWidget(self.inferiorioView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)

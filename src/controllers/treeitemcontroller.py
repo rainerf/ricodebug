@@ -192,7 +192,7 @@ class TreeItemController(QObject):
         dock = QDockWidget(self.name)
         dock.setObjectName(self.name + "View")
         dock.setWidget(self.view)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, dock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, dock, True)
 
     def add(self, vw):
         vw.setParent(self.model.root)

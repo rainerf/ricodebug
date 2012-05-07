@@ -40,4 +40,4 @@ class PyIoController(QObject):
         self.pyioDock = QDockWidget("Python Console")
         self.pyioDock.setObjectName("PyIoView")
         self.pyioDock.setWidget(self.pyioView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)

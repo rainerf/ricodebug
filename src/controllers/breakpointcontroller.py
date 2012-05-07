@@ -59,7 +59,7 @@ class BreakpointController(QObject):
         self.breakpointDock = QDockWidget("Breakpoints")
         self.breakpointDock.setObjectName("BreakpointView")
         self.breakpointDock.setWidget(self.breakpointView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
 
     def insertBreakpoint(self, file_, line):
         """insert a breakpoint in specified file on specified line

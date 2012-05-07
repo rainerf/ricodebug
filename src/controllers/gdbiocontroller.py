@@ -40,4 +40,4 @@ class GdbIoController(QObject):
         self.gdbioDock = QDockWidget("GDB Console")
         self.gdbioDock.setObjectName("GdbIoView")
         self.gdbioDock.setWidget(self.gdbioView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.gdbioDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.gdbioDock, True)

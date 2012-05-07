@@ -44,7 +44,7 @@ class FileListController(QObject):
         self.fileListDock = QDockWidget("Files")
         self.fileListDock.setObjectName("FileListView")
         self.fileListDock.setWidget(self.fileListView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.fileListDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.LeftDockWidgetArea, self.fileListDock, True)
 
     def fileInFileListViewActivated(self, index):
         item = index.internalPointer()

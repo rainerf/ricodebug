@@ -72,7 +72,7 @@ class TracepointController(QObject):
         self.tracepointDock = QDockWidget("Tracepoints")
         self.tracepointDock.setObjectName("TracepointView")
         self.tracepointDock.setWidget(self.tracepointView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
 
     def toggleTracepoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line
