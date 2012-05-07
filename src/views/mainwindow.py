@@ -55,23 +55,16 @@ class MainWindow(QMainWindow):
         self.debugController.executableOpened.connect(self.showExecutableName)
 
         # signal proxy
-        self.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'),
-                self.targetStartedRunning, Qt.QueuedConnection)
-        self.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'),
-                self.targetStopped, Qt.QueuedConnection)
-        self.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'),
-                self.targetStopped, Qt.QueuedConnection)
-        self.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'),
-                self.targetExited, Qt.QueuedConnection)
+        self.signalproxy.inferiorIsRunning.connect(self.targetStartedRunning, Qt.QueuedConnection)
+        self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped, Qt.QueuedConnection) 
+        self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped, Qt.QueuedConnection)
+        self.signalproxy.inferiorHasExited.connect(self.targetExited, Qt.QueuedConnection)
 
-        self.connect(self.signalproxy,
-                SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'),
-                self.addPluginDockWidget)
+        self.signalproxy.addDockWidget.connect(self.addPluginDockWidget)
+        self.signalproxy.removeDockWidget.connect(self.removeDockWidget)
 
-        self.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'),
-                self.removeDockWidget)
-        self.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'),
-                self.addPluginAction)
+        # Plugin Loader
+        self.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'), self.addPluginAction)
 
         self.ui.actionSavePlugins.triggered.connect(self.showSavePluginsDialog)
         self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)

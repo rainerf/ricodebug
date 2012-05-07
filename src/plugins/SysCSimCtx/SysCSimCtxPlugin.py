@@ -129,10 +129,10 @@ class SysCSimCtxPlugin():
         self.widget.setObjectName("SysCSimCtx")
         self.widget.setWidget(self.w)
 
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
+        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
         
-        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
+        self.signalproxy.inferiorStoppedNormally.connect(self.update)
+        self.signalproxy.inferiorHasExited.connect(self.clear)
         QObject.connect(self.comboBox, SIGNAL('currentIndexChanged(QString)'), self.comboBoxIndexChanged)
         
     def deInitPlugin(self):

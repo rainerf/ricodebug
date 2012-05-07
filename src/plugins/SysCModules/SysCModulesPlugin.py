@@ -80,16 +80,16 @@ class SysCModulesPlugin():
         self.widget.setObjectName("SysCModules")
         self.widget.setWidget(self.w)
 
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
+        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
         
-        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
+        self.signalproxy.inferiorStoppedNormally.connect(self.update)
+        self.signalproxy.inferiorHasExited.connect(self.clear)
         QObject.connect(self.view, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
         
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
         self.widget.close()
-        self.signalproxy.removeDockWidget(self.widget)
+        self.signalproxy.emitRemoveDockWidget(self.widget)
         
     def clear(self):
         self.ctx = None

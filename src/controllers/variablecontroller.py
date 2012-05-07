@@ -65,7 +65,7 @@ class VariableController(QObject):
 
         #signalproxy
         self.signalProxy = SignalProxy.getInstance()
-        QObject.connect(self.signalProxy, SIGNAL('AddWatch(QString)'), self.addWatch)
+        self.signalProxy.AddWatch.connect(self.addWatch)
 
         # views
         self.watchview = watchview

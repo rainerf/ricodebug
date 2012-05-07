@@ -79,8 +79,8 @@ class DataGraphController(QObject):
 
         # connect signals
         #QObject.connect(self.variableList, SIGNAL('reset()'), self.repaintDataGraph)
-        QObject.connect(self.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.signalProxy, SIGNAL('cleanupModels()'), self.clearDataGraph)
+        self.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
     def insertDockWidgets(self):
         """ adds the Datagraph-DockWidget to the GUI <br>

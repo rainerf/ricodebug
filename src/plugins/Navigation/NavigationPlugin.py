@@ -75,8 +75,8 @@ class NavigationPlugin(QtCore.QObject):
         self.dockwidget.setWidget(self.view)
 
         # add widget to mainwindow
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
-        QtCore.QObject.connect(self.signalproxy.distributedObjects.debugController, QtCore.SIGNAL('executableOpened'), self.update)
+        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
+        self.signalproxy.distributedObjects.debugController.executableOpened.connect(self.update)
 
         self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
         QtCore.QObject.connect(self.ctagsRunner, QtCore.SIGNAL("tagsFileAvailable()"), self.tagsFileReady, Qt.QueuedConnection)
