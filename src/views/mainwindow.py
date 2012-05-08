@@ -33,7 +33,7 @@ from controllers.quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):
-    
+
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self.distributedObjects = DistributedObjects()
 
         self.debugController = self.distributedObjects.debugController
+        self.gdbconnector = self.distributedObjects.gdb_connector
         self.settings = self.debugController.settings
         self.signalproxy = self.distributedObjects.signalProxy
         self.pluginloader = PluginLoader(self.distributedObjects)
@@ -107,9 +108,17 @@ class MainWindow(QMainWindow):
 
     def __initActions(self):
         self.act = Actions(self)
+        self.act.actions[Actions.Continue].setEnabled(False)
+        self.act.actions[Actions.Interrupt].setEnabled(False)
+        self.act.actions[Actions.Next].setEnabled(False)
+        self.act.actions[Actions.Step].setEnabled(False)
+        self.act.actions[Actions.Finish].setEnabled(False)
+        self.act.actions[Actions.RunToCursor].setEnabled(False)
+        self.act.actions[Actions.Record].setEnabled(False)
         self.act.actions[Actions.Record].setCheckable(True)
         self.act.actions[Actions.ReverseNext].setEnabled(False)
         self.act.actions[Actions.ReverseStep].setEnabled(False)
+
         # debug actions
         self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
@@ -119,10 +128,9 @@ class MainWindow(QMainWindow):
         self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
         self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Record])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])        
+        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
-        
-        
+
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
@@ -144,11 +152,11 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.actions[Actions.Next])
         self.ui.Main.addAction(self.act.actions[Actions.Step])
         self.ui.Main.addAction(self.act.actions[Actions.Finish])
-        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])        
+        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
         self.ui.Main.addAction(self.act.actions[Actions.Record])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
         self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
-       
+
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.actions[Actions.Exit])
         # connect actions
@@ -165,7 +173,7 @@ class MainWindow(QMainWindow):
 
         # debug menu
         self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
-                self.debugController.run)
+                self.checkRun)
         self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
                 self.debugController.next_)
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
@@ -293,6 +301,7 @@ class MainWindow(QMainWindow):
 
     def targetExited(self):
         self.ui.statusLabel.setText("Not running")
+        self.disableButtons()
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
 
     def closeEvent(self, event):
@@ -317,3 +326,26 @@ class MainWindow(QMainWindow):
             self.debugController.record_stop()
             self.act.actions[Actions.ReverseNext].setEnabled(False)
             self.act.actions[Actions.ReverseStep].setEnabled(False)
+
+    def checkRun(self):
+        self.debugController.run()
+        if self.gdbconnector.reader.isRunning():
+            self.enableButtons()
+
+    def enableButtons(self):
+        self.act.actions[Actions.Continue].setEnabled(True)
+        self.act.actions[Actions.Interrupt].setEnabled(True)
+        self.act.actions[Actions.Next].setEnabled(True)
+        self.act.actions[Actions.Step].setEnabled(True)
+        self.act.actions[Actions.Finish].setEnabled(True)
+        self.act.actions[Actions.RunToCursor].setEnabled(True)
+        self.act.actions[Actions.Record].setEnabled(True)
+
+    def disableButtons(self):
+        self.act.actions[Actions.Continue].setEnabled(False)
+        self.act.actions[Actions.Interrupt].setEnabled(False)
+        self.act.actions[Actions.Next].setEnabled(False)
+        self.act.actions[Actions.Step].setEnabled(False)
+        self.act.actions[Actions.Finish].setEnabled(False)
+        self.act.actions[Actions.RunToCursor].setEnabled(False)
+        self.act.actions[Actions.Record].setEnabled(False)
