@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from models.variablemodel import TreeItem
 from variables.varwrapperfactory import VarWrapperFactory
@@ -58,13 +58,13 @@ class TreePtrVarWrapper(VariableWrapper, TreeItem):
                 if (len(children) == 0):
                     vwChild = variable.makeWrapper(factory)
                     vwChild.parent = self
-                    QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
+                    vwChild.dataChanged.connect(vwChild.hasChanged)
                     self.addChild(vwChild)
                 else:
                     for child in children:
                         vwChild = child.makeWrapper(factory)
                         vwChild.parent = self
-                        QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
+                        vwChild.dataChanged.connect(vwChild.hasChanged)
                         self.addChild(vwChild)
         return self.childItems
 
@@ -98,7 +98,7 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
             for child in self.variable.getChildren():
                 vwChild = child.makeWrapper(factory)
                 vwChild.parent = self
-                QObject.connect(vwChild, SIGNAL('changed()'), vwChild.hasChanged)
+                vwChild.changed.connect(vwChild.hasChanged)
                 self.addChild(vwChild)
 
         return self.childItems
@@ -175,8 +175,8 @@ class TreeItemController(QObject):
         self.view.setModel(self.model)
         self.variableList = VariableList(self.vwFactory, self.distributedObjects)
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self.clear)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self.clear)
 
     def clear(self):
         """ clears the TreeView and the VariableList <br>
