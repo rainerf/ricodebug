@@ -59,7 +59,7 @@ class WatchController(TreeItemController):
         """
         vw = self.variableList.addVarByName(watch)
         # connect changed and replace signal from wrapper
-        vw.changed.connect(vw.hasChanged)
+        vw.dataChanged.connect(vw.hasChanged)
         vw.replace.connect(self.replaceVariable)
 
         self.add(vw)
