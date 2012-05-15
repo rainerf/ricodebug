@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import SIGNAL, Qt
+from PyQt4.QtCore import Qt
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.signalproxy.removeDockWidget.connect(self.removeDockWidget)
 
         # Plugin Loader
-        self.connect(self.pluginloader, SIGNAL('insertPluginAction(PyQt_PyObject)'), self.addPluginAction)
+        self.pluginloader.insertPluginAction.connect(self.addPluginAction)
 
         self.ui.actionSavePlugins.triggered.connect(self.showSavePluginsDialog)
         self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)
