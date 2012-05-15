@@ -26,11 +26,10 @@ import re
 import cgi
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from math import log, ceil
 from helpers.actions import ActionEx, Actions
 import logging
-
 
 class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
@@ -51,7 +50,11 @@ class OpenedFileView(QObject):
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
         self.expToWatch = False
-
+      
+        self.FileWatcher = QFileSystemWatcher()
+        self.FileWatcher.addPath(self.filename)
+        self.FileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.fileChanged)
+    
         self.tab = QtGui.QWidget()
         self.gridLayout = QtGui.QGridLayout(self.tab)
         self.gridLayout.setMargin(0)
@@ -60,6 +63,7 @@ class OpenedFileView(QObject):
         self.font.setStyleHint(QFont.TypeWriter)
         self.lexer = Qsci.QsciLexerCPP()
         self.lexer.setFont(self.font)
+        
         self.edit.setToolTip("")
         self.edit.setWhatsThis("")
         self.edit.setTabWidth(4)
@@ -129,6 +133,10 @@ class OpenedFileView(QObject):
         self.connect(self.distributedObjects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
         self.connect(self.distributedObjects.actions.actions[Actions.AddVarToDataGraph], SIGNAL('triggered()'), self.AddVarToDataGraph)
 
+    
+    def fileChanged(self):         
+        logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)     
+
     def saveFile(self):
         ''' Save source file '''
         if (QtCore.QFile.exists(self.filename)):
@@ -139,8 +147,6 @@ class OpenedFileView(QObject):
             self.edit.read(self.file_)
             self.file_.close()
             self.__setFileModified(False)
-
-            logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
 
     def __setFileModified(self, modified):
         ''' Method called whenever current file is marked as modified '''
@@ -299,4 +305,4 @@ class OpenedFileView(QObject):
         self.edit.markerDeleteAll(self.MARGIN_MARKER_TP)
         for tp in self.tracepointController.getTracepointsFromModel():
             if tp.fullname == self.filename:
-                self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
+                self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)           
