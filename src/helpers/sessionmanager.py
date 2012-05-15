@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QObject, QIODevice, QFile, QString
+from PyQt4.QtCore import QObject, QIODevice, QFile, QString
 from PyQt4.QtGui import QDialog, QGridLayout, QCheckBox, QPushButton, QFileDialog
 from os.path import exists
 from PyQt4.QtXml import QDomDocument, QDomElement, QDomNode
@@ -46,7 +46,7 @@ class SessionManager(QObject):
 
         self.registeredObjects = {}
         self.saveSessionDlg = SaveSessionDialog(parent, self)
-        QObject.connect(distributedObjects.signalProxy, SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), self.register)
+        distributedObjects.signalProxy.registerWithSessionManager.connect(self.register)
 
     def register(self, regObject, dialogItem=None):
         if dialogItem == None:
@@ -117,7 +117,7 @@ class SaveSessionDialog(QDialog):
         self.layout.addWidget(self.okButton, 0, 2)
         self.setLayout(self.layout)
         self.SessionManager = sessionmgr
-        QObject.connect(self.okButton, SIGNAL("released()"), self.__showSaveFileDialog)
+        self.okButton.released.connect(self.__showSaveFileDialog)
 
     def addDialogItem(self, dialogItem):
         cb = QCheckBox(dialogItem, self)
