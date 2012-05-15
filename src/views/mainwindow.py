@@ -23,14 +23,15 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
-
+import logging
+from PyQt4 import QtGui
 
 class MainWindow(QMainWindow):
     def setupUi(self):
@@ -125,8 +126,9 @@ class MainWindow(QMainWindow):
         #init RecentFileHandler
         nrRecentFiles = 5
         self.initRecentFileHandler(nrRecentFiles)
-
+        
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__binaryFileWatcher)
 
         # signal proxy
         QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
@@ -157,6 +159,17 @@ class MainWindow(QMainWindow):
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
+        
+       
+       
+       
+          
+        self.BinaryName = None
+        self.FileWatcher = QFileSystemWatcher()
+       
+        self.FileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
+       
+        
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -217,6 +230,8 @@ class MainWindow(QMainWindow):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
         if (filename != ""):
             self.debugController.openExecutable(filename)
+            
+            
 
     def showLoadPluginsDialog(self):
         dialog = QFileDialog()
@@ -260,3 +275,22 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
+      
+    """ Private Method to Observe Debugged Binary """  
+    def __binaryFileWatcher(self, filename):
+        # any binary active ?
+        if self.BinaryName != None:
+            self.FileWatcher.removePath(self.BinaryName)     
+        self.FileWatcher.addPath(filename)
+        self.BinaryName = filename
+       
+    """ Slot for FileWatcher - Using QtMessagebox for interaction"""   
+    def __binaryChanged(self):   
+        self.Box = QtGui.QMessageBox();
+        if self.Box.question(self,"Binary Changed !","Reload File ?"
+          ,QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+            self.debugController.openExecutable(self.BinaryName)
+        else:
+            # set Filewatcher active again - strange syntax
+            self.FileWatcher.removePath(self.BinaryName)
+            self.FileWatcher.addPath(self.BinaryName)    
