@@ -30,7 +30,7 @@ import logging
 
 
 class DebugController(QObject):
-    executableOpened = pyqtSignal('QString')
+    executableOpened = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, distributedObjects):
         QObject.__init__(self)

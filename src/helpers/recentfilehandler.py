@@ -29,7 +29,7 @@ from os.path import exists
 
 class OpenRecentFileAction(QAction):
     """ Class extends QAction to open a recently used file."""
-    executableOpened = pyqtSignal('QString')
+    executableOpened = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, parent):
         QAction.__init__(self, parent)

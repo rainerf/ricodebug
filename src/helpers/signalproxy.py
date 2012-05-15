@@ -46,8 +46,8 @@ class SignalProxy(QObject):
     inferiorReceivedSignal = pyqtSignal('PyQt_PyObject')
     inferiorStoppedNormally = pyqtSignal('PyQt_PyObject')
     inferiorIsRunning = pyqtSignal('PyQt_PyObject')
-    executableOpened = pyqtSignal('QString')
-    AddWatch = pyqtSignal('QString')
+    executableOpened = pyqtSignal('PyQt_PyObject')
+    AddWatch = pyqtSignal('PyQt_PyObject')
 #    self.floatingWatchAdded.emit(watch)
 #    self.fixedWatchAdded.emit(watch)
 
