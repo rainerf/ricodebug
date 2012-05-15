@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, Qt
 from PyQt4.QtGui import QWidget, QTextCursor
 from stylesheets import STYLESHEET
 from helpers.tools import unBackslashify
@@ -60,7 +60,7 @@ class GdbIoView(QWidget):
         self.gdbInputEdit.lineEdit().returnPressed.connect(self.gdbSendButton.click)
         self.gdbSendButton.clicked.connect(self.executeCliCommand)
         self.debugController.connector.reader.consoleRecordReceived.connect(
-                self.handleConsoleRecord)
+                self.handleConsoleRecord, Qt.QueuedConnection)
 
     def executeCliCommand(self):
         cmd = str(self.gdbInputEdit.lineEdit().text())
