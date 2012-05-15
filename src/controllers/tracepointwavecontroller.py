@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, Qt, SIGNAL
+from PyQt4.QtCore import QObject, Qt
 from models.tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate
 from views.tracepointwaveview import TracepointWaveView
 import logging
@@ -46,10 +46,10 @@ class TracepointWaveController(QObject):
 
         # TracepointWaveView using TracepointWaveDelegate to paint waveforms
         self.view.setItemDelegate(delegate)
-        QObject.connect(self.view.getZoomInButton(), SIGNAL("clicked()"), self.zoomIn)
-        QObject.connect(self.view.getZoomOutButton(), SIGNAL("clicked()"), self.zoomOut)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self.model.cleanUp)
+        self.view.getZoomInButton().clicked.connect(self.zoomIn)
+        self.view.getZoomOutButton().clicked.connect(self.zoomOut)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self.model.cleanUp)
 
     def insertDockWidgets(self):
         '''Function invoked when mainwindow allows controllers to insert widgets'''

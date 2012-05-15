@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from models.filelistmodel import FileListModel
 from views.filelistview import FileListView
@@ -38,7 +38,7 @@ class FileListController(QObject):
 
         self.fileListView.treeView.setModel(self.fileListModel)
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
 
     def insertDockWidgets(self):
         self.fileListDock = QDockWidget("Files")

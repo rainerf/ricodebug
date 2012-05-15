@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from models.stackmodel import StackModel
 from views.stackview import StackView
@@ -39,13 +39,13 @@ class StackController(QObject):
         
         self.stackView.stackView.setModel(self.stackModel)
         
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.stackModel.update)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.stackModel.clear)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('executableOpened()'), self.stackModel.clear)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.removeStackMarkers)
-        QObject.connect(self.stackView.showStackTrace, SIGNAL('stateChanged(int)'), self.showStackTraceChanged)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.stackModel.update)
+        self.distributedObjects.signalProxy.inferiorHasExited.connect(self.stackModel.clear)
+        self.distributedObjects.signalProxy.executableOpened.connect(self.stackModel.clear)
+        self.distributedObjects.signalProxy.inferiorIsRunning.connect(self.removeStackMarkers)
+        self.stackView.showStackTrace.stateChanged.connect(self.showStackTraceChanged)
         
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         
     def insertDockWidgets(self):
         self.stackDock = QDockWidget("Stack")

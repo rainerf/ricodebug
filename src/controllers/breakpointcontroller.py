@@ -26,7 +26,7 @@
     the breakpoint controller
 """
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
@@ -51,8 +51,8 @@ class BreakpointController(QObject):
         #register with session manager to save breakpoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL("insertDockWidgets()"), self.insertDockWidgets)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL("cleanupModels()"), self._model.clearBreakpoints)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearBreakpoints)
 
     def insertDockWidgets(self):
         """ needed for plugin system"""

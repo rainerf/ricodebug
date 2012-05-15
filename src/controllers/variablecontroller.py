@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject
 from helpers.signalproxy import SignalProxy
 from debugcontroller import DebugController
 from variables.varwrapperfactory import VarWrapperFactory
@@ -82,7 +82,7 @@ class VariableController(QObject):
 
     def addWatch(self, watch):
         var = self.variableList.addVar(watch)
-        QObject.connect(var, SIGNAL('changed()'), self.varChanged)
+        var.changed.connect(self.varChanged)
 #        for item in self.variableList:
 #            print item.getExp() + " " + item.getValue()
 #
