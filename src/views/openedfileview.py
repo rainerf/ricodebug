@@ -305,4 +305,5 @@ class OpenedFileView(QObject):
         self.edit.markerDeleteAll(self.MARGIN_MARKER_TP)
         for tp in self.tracepointController.getTracepointsFromModel():
             if tp.fullname == self.filename:
-                self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)           
+                self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
+
