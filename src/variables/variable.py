@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject, pyqtSignal
 
 
 class Variable(QObject):
@@ -31,7 +31,12 @@ class Variable(QObject):
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type_=None, value=None, inscope=None, haschildren=None, access=None, pending=False, childformat=None):
+    replace = pyqtSignal('PyQt_PyObject')
+    changed = pyqtSignal()
+
+    def __init__(self, variablepool, exp=None, gdbname=None, 
+            uniquename=None, type_=None, value=None, inscope=None,
+            haschildren=None, access=None, pending=False, childformat=None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
@@ -108,8 +113,9 @@ class Variable(QObject):
         """
         raise "pure virtual Function Variable::makeWrapper() called"
 
-    def changed(self):
-        self.emit(SIGNAL('changed()'))
+    def emitChanged(self):
+        self.changed.emit()
 
-    def replace(self, var):
-        self.emit(SIGNAL('replace(PyQt_PyObject)'), var)
+    def emitReplace(self, var):
+        self.replace.emit(var)
+

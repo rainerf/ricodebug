@@ -22,12 +22,15 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject, pyqtSignal
 import filters
 
 
 class VariableWrapper(QObject):
     """ Parent of all Variable-Wrapper-Classes """
+
+    replace = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
+    changed = pyqtSignal()
 
     def __init__(self, variable):
         """ Constructor
@@ -35,16 +38,16 @@ class VariableWrapper(QObject):
         """
         QObject.__init__(self)
         self.variable = variable
-        self.connect(self.variable, SIGNAL('changed()'), self.varChanged)
-        self.connect(self.variable, SIGNAL('replace(PyQt_PyObject)'), self.varReplace)
+        self.variable.changed.connect(self.varChanged)
+        self.variable.replace.connect(self.varReplace)
 
         self.filter = filters.Empty
 
     def varChanged(self):
-        self.emit(SIGNAL('changed()'))
+        self.changed.emit()
 
     def varReplace(self, var):
-        self.emit(SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self, var)
+        self.replace.emit(self, var)
 
     def getExp(self):
         return self.variable.getExp()
