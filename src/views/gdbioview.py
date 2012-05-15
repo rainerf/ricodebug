@@ -22,7 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui, Qt
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget, QTextCursor
 from stylesheets import STYLESHEET
 from helpers.tools import unBackslashify
