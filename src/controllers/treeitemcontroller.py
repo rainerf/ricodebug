@@ -98,7 +98,7 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
             for child in self.variable.getChildren():
                 vwChild = child.makeWrapper(factory)
                 vwChild.parent = self
-                vwChild.changed.connect(vwChild.hasChanged)
+                vwChild.dataChanged.connect(vwChild.hasChanged)
                 self.addChild(vwChild)
 
         return self.childItems
