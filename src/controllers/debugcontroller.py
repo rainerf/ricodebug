@@ -24,7 +24,7 @@
 
 import os
 from helpers.ptyhandler import PtyHandler
-from PyQt4.QtCore import QObject, QSettings, pyqtSignal
+from PyQt4.QtCore import QObject, QSettings, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
 
@@ -53,7 +53,7 @@ class DebugController(QObject):
         self.ptyhandler.start()
         self.connector.start()
 
-        self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord)
+        self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
     def openExecutable(self, filename):
         # die if the file does not exist or has been provided without at least a
