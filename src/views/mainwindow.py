@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
+        QObject.connect(self.signalproxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.fileModified, Qt.QueuedConnection)
 
         QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
         QObject.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'), self.removeDockWidget)
@@ -118,7 +119,7 @@ class MainWindow(QMainWindow):
         self.act.actions[Actions.Record].setCheckable(True)
         self.act.actions[Actions.ReverseNext].setEnabled(False)
         self.act.actions[Actions.ReverseStep].setEnabled(False)
-
+        self.act.actions[Actions.SaveFile].setEnabled(False)
         # debug actions
         self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
         self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
@@ -316,6 +317,12 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
+
+    def fileModified(self, filename, changed):
+        if changed:
+            self.act.actions[Actions.SaveFile].setEnabled(True)
+        else:
+            self.act.actions[Actions.SaveFile].setEnabled(False)
 
     def toggleRecord(self, check):
         if check:
