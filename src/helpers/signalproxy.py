@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QObject, pyqtSignal 
+from PyQt4.QtCore import QObject, pyqtSignal 
 
 
 class SignalProxy(QObject):
