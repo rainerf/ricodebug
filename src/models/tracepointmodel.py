@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject, SIGNAL
+from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
 from PyQt4.QtGui import QItemDelegate
 from operator import attrgetter
 from breakpointmodel import ExtendedBreakpoint
@@ -96,14 +96,14 @@ class Tracepoint(ExtendedBreakpoint):
         self.counter = 0
         self.hitted = False
         self.stop = False
-        self.connect(self.distObjects.signalProxy, SIGNAL('dataForTracepointsReady()'), self.readDataFromVarModel)
+        self.distObjects.signalProxy.dataForTracepointsReady.connect(self.readDataFromVarModel)
         self.wave = []
 
     def addVar(self, variableToTrace):
         """ add a var to trace its value
         @param variableToTrace: variable name of the variable that shoudl be traced"""
         vw = self.variableList.addVarByName(variableToTrace)
-        QObject.connect(vw, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        vw.replace.connect(self.replaceVariable)
         newValueList = ValueList(variableToTrace, vw.getType())
         self.wave.append(newValueList)
 
@@ -111,9 +111,9 @@ class Tracepoint(ExtendedBreakpoint):
         """ replace existing variable in list with new one
         @param pendingVar: var to replace
         @param newVar: new var"""
-        vwOld = self.variableList.getVariableWrapper(pendingVar)
+        #vwOld = self.variableList.getVariableWrapper(pendingVar)
         vwNew = self.variableList.replaceVar(pendingVar, newVar)
-        QObject.connect(vwNew, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        vwNew.replace.connect(self.replaceVariable)
 
     def tracePointOccurred(self, stop):
         """ set if stop is needed or not

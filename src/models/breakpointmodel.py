@@ -103,7 +103,7 @@ class BreakpointModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self, parent)
         self.breakpoints = []
         self.connector = connector
-        #self.connect(self.connector.reader, SIGNAL('forwardMultipleBreakpointInfo(PyQt_PyObject)'), self.handleMultipleBreakpointInfo)
+        #self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
 
     #def handleMultipleBreakpointInfo(self, lines):
         #print "----------------handle Multiple Breakpoint"
