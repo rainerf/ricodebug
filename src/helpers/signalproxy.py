@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, pyqtSignal 
+from PyQt4.QtCore import QObject, pyqtSignal
 
 
 class SignalProxy(QObject):
@@ -66,7 +66,7 @@ class SignalProxy(QObject):
 
     #def addWatchFloating(self, watch):
     #    self.floatingWatchAdded.emit(watch)
-    
+
     def addWatch(self, watch):
         self.AddWatch.emit(str(watch))
     """ ================================================================================================= """

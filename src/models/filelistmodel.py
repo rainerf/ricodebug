@@ -28,7 +28,7 @@ A tree model that provides data for the file list view.
 
 import os
 from operator import attrgetter
-from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex 
+from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex
 from PyQt4.QtGui import QPixmap
 
 
