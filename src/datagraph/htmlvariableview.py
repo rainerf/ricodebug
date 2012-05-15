@@ -34,7 +34,7 @@ import logging
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
 
-    removig = pyqtSignal()
+    removing = pyqtSignal()
 
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
