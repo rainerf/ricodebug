@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 from QTermWidget import QTermWidget
 
@@ -48,7 +48,7 @@ class TermWidgetPlugin():
                 
         #init QTermWidget 
         self.initQTermWidget(True)
-        QObject.connect(self.widget, SIGNAL('visibilityChanged(bool)'), self.initQTermWidget)
+        self.widget.visibilityChanged.connect(self.initQTermWidget)
         
                
     def deInitPlugin(self):
@@ -66,4 +66,4 @@ class TermWidgetPlugin():
             self.widget.setContentsMargins(10, 10, 10, 10)  
             self.term = QTermWidget()
             self.widget.setWidget(self.term) 
-            QObject.connect(self.term, SIGNAL('finished()'), self.widget.close ) #connect command "exit" with widget.close
+            self.term.finished.connect(self.widget.close ) #connect command "exit" with widget.close
