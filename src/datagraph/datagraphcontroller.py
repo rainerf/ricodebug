@@ -25,7 +25,7 @@ import logging
 
 """ @package datagraph.datagraphcontroller    the DataGraphController """
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from datagraphvwfactory import DataGraphVWFactory
 from datagraphview import DataGraphView
@@ -78,7 +78,7 @@ class DataGraphController(QObject):
         self.signalProxy.emitRegisterWithSessionManager(self, "Graph")
 
         # connect signals
-        #QObject.connect(self.variableList, SIGNAL('reset()'), self.repaintDataGraph)
+        #self.variableList.reset.connect(self.repaintDataGraph)
         self.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
@@ -119,7 +119,7 @@ class DataGraphController(QObject):
         self.data_graph_view.addItem(varWrapper.getView())
         if addVarToList:
             self.variableList.addVar(varWrapper)
-        QObject.connect(varWrapper, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        varWrapper.replace.connect(self.replaceVariable)
 
     def replaceVariable(self, pendingVar, newVar):
         """ replaces existing variable in list with new one
