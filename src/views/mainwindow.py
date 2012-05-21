@@ -123,7 +123,7 @@ class MainWindow(QMainWindow):
         #init RecentFileHandler
         nrRecentFiles = 5
         self.initRecentFileHandler(nrRecentFiles)
-        
+
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__observeWorkingBinary)
 
@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         self.binaryName = None
         self.fileWatcher = QFileSystemWatcher()
         self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
-       
+    
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
         if addToggleViewAction:
@@ -263,19 +263,21 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
-      
+
     def __observeWorkingBinary(self,filename):
-        """ Private Method to Observe Debugged Binary """  
+        """ Private Method to Observe Debugged Binary """
         if self.binaryName != None:
-            self.fileWatcher.removePath(self.binaryName)     
+            self.fileWatcher.removePath(self.binaryName)
         self.fileWatcher.addPath(filename)
-        self.binaryName = filename    
-   
-    def __binaryChanged(self): 
-        """ Slot for FileWatcher - Using QtMessagebox for interaction"""   
+        self.binaryName = filename
+
+    def __binaryChanged(self):
+        """ Slot for FileWatcher - Using QtMessagebox for interaction"""
         box = QtGui.QMessageBox();
-        if box.question(self,"Binary Changed!","Reload File?", QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+        if box.question(self,"Binary Changed!","Reload File?",
+             QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
            self.debugController.openExecutable(self.binaryName)
         else:
             self.fileWatcher.removePath(self.binaryName)
-            self.fileWatcher.addPath(self.binaryName)    
+            self.fileWatcher.addPath(self.binaryName)
+
