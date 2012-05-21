@@ -31,10 +31,9 @@ class Variable(QObject):
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
 
-    replace = pyqtSignal('PyQt_PyObject')
     changed = pyqtSignal()
 
-    def __init__(self, variablepool, exp=None, gdbname=None, 
+    def __init__(self, variablepool, exp=None, gdbname=None,
             uniquename=None, type_=None, value=None, inscope=None,
             haschildren=None, access=None, pending=False, childformat=None):
         """ Constructor
@@ -115,7 +114,4 @@ class Variable(QObject):
 
     def emitChanged(self):
         self.changed.emit()
-
-    def emitReplace(self, var):
-        self.replace.emit(var)
 

@@ -119,20 +119,6 @@ class DataGraphController(QObject):
         self.data_graph_view.addItem(varWrapper.getView())
         if addVarToList:
             self.variableList.addVar(varWrapper)
-        varWrapper.replace.connect(self.replaceVariable)
-
-    def replaceVariable(self, pendingVar, newVar):
-        """ replaces existing variable in list with new one
-        @param pendingVar    variables.variable.Variable, the pending Variable to replace with newVar
-        @param newVar        variables.variable.Variable, the new Variable pendingVar is replaced with
-        """
-        self.removeVar(pendingVar)
-        newVW = newVar.makeWrapper(self.vwFactory)
-        self.addVar(newVW, pendingVar.getXPos(), pendingVar.getYPos())
-        #for pointer in pendingVar.getView().getIncomingPointers():
-        #    self.addPointer(pointer.getFromView(), newVW.getView())
-        #for pointer in pendingVar.getView().getOutgoingPointers():
-        #    self.addPointer(newVW.getView(), pointer.getToView())
 
     def removeVar(self, varWrapper):
         """ removes the given varWrapper from the DataGraphView and the PointerList

@@ -29,7 +29,6 @@ import filters
 class VariableWrapper(QObject):
     """ Parent of all Variable-Wrapper-Classes """
 
-    replace = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
     dataChanged = pyqtSignal()
 
     def __init__(self, variable):
@@ -39,15 +38,11 @@ class VariableWrapper(QObject):
         QObject.__init__(self)
         self.variable = variable
         self.variable.changed.connect(self.varChanged)
-        self.variable.replace.connect(self.varReplace)
 
         self.filter = filters.Empty
 
     def varChanged(self):
         self.dataChanged.emit()
-
-    def varReplace(self, var):
-        self.replace.emit(self, var)
 
     def getExp(self):
         return self.variable.getExp()
