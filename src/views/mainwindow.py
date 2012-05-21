@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         #self.c1 = Composite()
         #self.c1.addItem(LeafEntry("exp1", "val11"))
         #self.c1.addItem(LeafEntry("exp2 long", "val22"))
-        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
+        #self.c2.addItem(LeafEntry("exp2 even longer", "val22")) self.__connectActions()TypeError: coercing to Unicode: need string or buffer, NoneType found
         #self.c2.addItem(CompositeEntry("subcomp", self.c1))
         #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
         #self.scene.addItem(self.c2)
@@ -87,8 +87,6 @@ class MainWindow(QMainWindow):
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.actions[Actions.Exit])
         # connect actions
-        self.__connectActions()
-
     def __connectActions(self):
         # file menu
         self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), self.showOpenExecutableDialog)
@@ -129,7 +127,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__observeWorkingBinary)
 
-        # signal proxy
+         # signal proxy
         QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
@@ -161,7 +159,7 @@ class MainWindow(QMainWindow):
            
         self.binaryName = None
         self.fileWatcher = QFileSystemWatcher()
-        self.fileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
+        self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
        
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -269,15 +267,14 @@ class MainWindow(QMainWindow):
     def __observeWorkingBinary(self,filename):
         """ Private Method to Observe Debugged Binary """  
         if self.binaryName != None:
-            self.fileWatcher.removePath(self.BinaryName)     
+            self.fileWatcher.removePath(self.binaryName)     
         self.fileWatcher.addPath(filename)
-        self.finaryName = filename    
+        self.binaryName = filename    
    
     def __binaryChanged(self): 
         """ Slot for FileWatcher - Using QtMessagebox for interaction"""   
         box = QtGui.QMessageBox();
-        if box.question(self,"Binary Changed!","Reload File?",
-           QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+        if box.question(self,"Binary Changed!","Reload File?", QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
            self.debugController.openExecutable(self.binaryName)
         else:
             self.fileWatcher.removePath(self.binaryName)
