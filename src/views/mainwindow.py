@@ -159,9 +159,9 @@ class MainWindow(QMainWindow):
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
            
-        self.BinaryName = None
-        self.FileWatcher = QFileSystemWatcher()
-        self.FileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
+        self.binaryName = None
+        self.fileWatcher = QFileSystemWatcher()
+        self.fileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
        
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
@@ -266,20 +266,19 @@ class MainWindow(QMainWindow):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
       
-    def __observeWorkingBinary(self, filename):
+    def __observeWorkingBinary(self,filename):
         """ Private Method to Observe Debugged Binary """  
-        if self.BinaryName != None:
-            self.FileWatcher.removePath(self.BinaryName)     
-        self.FileWatcher.addPath(filename)
-        self.BinaryName = filename    
+        if self.binaryName != None:
+            self.fileWatcher.removePath(self.BinaryName)     
+        self.fileWatcher.addPath(filename)
+        self.finaryName = filename    
    
     def __binaryChanged(self): 
         """ Slot for FileWatcher - Using QtMessagebox for interaction"""   
-        Box = QtGui.QMessageBox();
-        if Box.question(self,"Binary Changed !","Reload File ?"
-           ,QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
-            self.debugController.openExecutable(self.BinaryName)
+        box = QtGui.QMessageBox();
+        if box.question(self,"Binary Changed!","Reload File?",
+           QtGui.QMessageBox.Yes,QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+           self.debugController.openExecutable(self.binaryName)
         else:
-            # set Filewatcher active again - strange syntax
-            self.FileWatcher.removePath(self.BinaryName)
-            self.FileWatcher.addPath(self.BinaryName)    
+            self.fileWatcher.removePath(self.binaryName)
+            self.fileWatcher.addPath(self.binaryName)    
