@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         #self.c1 = Composite()
         #self.c1.addItem(LeafEntry("exp1", "val11"))
         #self.c1.addItem(LeafEntry("exp2 long", "val22"))
-        #self.c2.addItem(LeafEntry("exp2 even longer", "val22")) self.__connectActions()TypeError: coercing to Unicode: need string or buffer, NoneType found
+        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
         #self.c2.addItem(CompositeEntry("subcomp", self.c1))
         #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
         #self.scene.addItem(self.c2)
@@ -87,6 +87,8 @@ class MainWindow(QMainWindow):
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.actions[Actions.Exit])
         # connect actions
+        self.__connectActions()
+
     def __connectActions(self):
         # file menu
         self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), self.showOpenExecutableDialog)
@@ -156,11 +158,11 @@ class MainWindow(QMainWindow):
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
-           
+
         self.binaryName = None
         self.fileWatcher = QFileSystemWatcher()
-        self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)  
-    
+        self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)
+
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
         if addToggleViewAction:
