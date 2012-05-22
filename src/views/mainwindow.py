@@ -30,6 +30,7 @@ from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
+from views.editorview import EditorView
 
 
 class MainWindow(QMainWindow):
@@ -49,6 +50,8 @@ class MainWindow(QMainWindow):
         self.settings = self.debugController.settings
         self.signalproxy = self.distributedObjects.signalProxy
         self.pluginloader = PluginLoader(self.distributedObjects)
+        self.editor_view = EditorView(self.distributedObjects)
+        self.editorController = self.distributedObjects.editorController
 
         #init RecentFileHandler
         nrRecentFiles = 5
@@ -61,7 +64,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.targetExited, Qt.QueuedConnection)
-        QObject.connect(self.signalproxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.fileModified, Qt.QueuedConnection)
 
         QObject.connect(self.signalproxy, SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), self.addPluginDockWidget)
         QObject.connect(self.signalproxy, SIGNAL('removeDockWidget(QDockWidget)'), self.removeDockWidget)
@@ -108,7 +110,7 @@ class MainWindow(QMainWindow):
         #self.scene.addItem(self.c2)
 
     def __initActions(self):
-        self.act = Actions(self)
+        self.act = self.distributedObjects.actions
         self.act.actions[Actions.Continue].setEnabled(False)
         self.act.actions[Actions.Interrupt].setEnabled(False)
         self.act.actions[Actions.Next].setEnabled(False)
@@ -174,7 +176,7 @@ class MainWindow(QMainWindow):
 
         # debug menu
         self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
-                self.checkRun)
+                self.Run)
         self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
                 self.debugController.next_)
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
@@ -261,7 +263,7 @@ class MainWindow(QMainWindow):
 
     def restoreInitialWindowPlacement(self):
         """
-        Restores the window placement created by 
+        Restores the window placement created by
         createInitialWindowPlacement().
         """
         self.restoreGeometry(self.settings.value(\
@@ -318,12 +320,6 @@ class MainWindow(QMainWindow):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
 
-    def fileModified(self, filename, changed):
-        if changed:
-            self.act.actions[Actions.SaveFile].setEnabled(True)
-        else:
-            self.act.actions[Actions.SaveFile].setEnabled(False)
-
     def toggleRecord(self, check):
         if check:
             self.debugController.record_start()
@@ -334,10 +330,9 @@ class MainWindow(QMainWindow):
             self.act.actions[Actions.ReverseNext].setEnabled(False)
             self.act.actions[Actions.ReverseStep].setEnabled(False)
 
-    def checkRun(self):
+    def Run(self):
         self.debugController.run()
-        if self.gdbconnector.reader.isRunning():
-            self.enableButtons()
+        self.enableButtons()
 
     def enableButtons(self):
         self.act.actions[Actions.Continue].setEnabled(True)
