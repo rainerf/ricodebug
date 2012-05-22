@@ -32,6 +32,9 @@ import logging
 class DebugController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
+
+        self.isRecording = False
+
         self.settings = QSettings("fh-hagenberg", "SysCDbg")
         self.ptyhandler = PtyHandler()
 
@@ -74,12 +77,28 @@ class DebugController(QObject):
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
 
+    def toggle_record(self):
+        if not self.isRecording:
+            self.connector.record_start()
+            self.isRecording = True
+        else:
+            self.connector.record_stop()
+            self.isRecording = False
+
     def next_(self):
         self.connector.next_()
         self.lastCmdWasStep = True
 
+    def reverse_next(self):
+        self.connector.reverse_next()
+        self.lastCmdWasStep = True
+
     def step(self):
         self.connector.step()
+        self.lastCmdWasStep = True
+
+    def reverse_step(self):
+        self.connector.reverse_step()
         self.lastCmdWasStep = True
 
     def cont(self):
@@ -115,6 +134,11 @@ class DebugController(QObject):
                 self.signalProxy.emitInferiorIsRunning(rec)
 
     def handleStoppedRecord(self, rec):
+        # With reverse debugging, some stopped records might not contain a
+        # reason. Predefine it as None, since all unknown reasons will be
+        # handled as the inferior having stopped normally.
+        reason = None
+
         for r in rec.results:
             if r.dest == 'reason':
                 reason = r.src
@@ -124,8 +148,6 @@ class DebugController(QObject):
                 signal_name = r.src
             if r.dest == 'signal-meaning':
                 signal_meaning = r.src
-            if r.dest == 'frame':
-                frame = r.src
             if r.dest == "bkptno":
                 bkptno = int(r.src)
 

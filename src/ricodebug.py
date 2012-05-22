@@ -36,6 +36,7 @@ from PyQt4.QtCore import pyqtRemoveInputHook, QDir
 
 from views.mainwindow import MainWindow
 from views import logview
+from helpers import criticalloghandler
 
 
 def main():
@@ -45,14 +46,26 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
 
+    # We use all kinds of loggers here:
+    # * a CriticalLogHandler that will abort the program whenever a critical error is received
+    # * a FileHanlder writing to a log in the home directory (all messages, for debugging)
+    # * a LogViewHandler to have the log available in the GUI
+    # * a ErrorLabelHandler that visually notifies the user of an error or a warning
+    logger = logging.getLogger()
+    formatter = logging.Formatter('[%(levelname)-8s] : %(filename)15s:%(lineno)4d/%(funcName)-20s : %(message)s')
+
+    filehandler = logging.FileHandler(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()))
+    filehandler.setFormatter(formatter)
+    logger.addHandler(filehandler)
+
+    logger.addHandler(criticalloghandler.CriticalLogHandler())
+
     window = MainWindow()
 
-    logging.basicConfig(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()), level=logging.DEBUG)
     logviewhandler = logview.LogViewHandler(window.ui.logView, window.ui.filterSlider)
     window.ui.filterSlider.setValue(3)
-    errormsghandler = logview.ErrorLabelHandler(window)
-    logger = logging.getLogger()
     logger.addHandler(logviewhandler)
+    errormsghandler = logview.ErrorLabelHandler(window)
     logger.addHandler(errormsghandler)
 
     if (len(sys.argv) > 1):
@@ -60,6 +73,7 @@ def main():
 
     window.show()
     sys.exit(app.exec_())
+    logging.shutdown()
 
 if __name__ == "__main__":
     main()

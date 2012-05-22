@@ -37,7 +37,11 @@ class GdbConnector(QObject):
         self.reader = GdbReader(self)
 
     def start(self):
-        self.gdb = subprocess.Popen(['gdb', '--interpreter', 'mi'], shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            self.gdb = subprocess.Popen(['gdb', '--interpreter', 'mi'], \
+                    shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        except OSError as e:
+            logging.critical("Could not start gdb. Error message: %s", e)
         self.reader.startReading(self.gdb.stdout)
 
     def execute(self, cmd, error_msg=None):
@@ -47,7 +51,8 @@ class GdbConnector(QObject):
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
 
         if res.class_ == GdbOutput.ERROR:
-            logging.debug("Command '%s' failed with %s (%s, '%s')", cmd, res.msg, res.raw, error_msg)
+            logging.debug("Command '%s' failed with %s (%s, '%s')", \
+                    cmd, res.msg, res.raw, error_msg)
 
         return res
 
@@ -63,13 +68,16 @@ class GdbConnector(QObject):
         return res
 
     def setTty(self, tty):
-        self.executeAndRaiseIfFailed("-inferior-tty-set " + tty, "Could not set target's TTY!")
+        self.executeAndRaiseIfFailed("-inferior-tty-set " + tty, \
+                "Could not set target's TTY!")
 
     def openFile(self, filename):
-        self.executeAndRaiseIfFailed("-file-exec-and-symbols " + filename, "Could not open file!")
+        self.executeAndRaiseIfFailed("-file-exec-and-symbols " + filename, \
+                "Could not open file!")
 
     def getSources(self):
-        res = self.executeAndRaiseIfFailed("-file-list-exec-source-files", "Could not get files.")
+        res = self.executeAndRaiseIfFailed("-file-list-exec-source-files", \
+                "Could not get files.")
 
         files = []
         for f in res.files:
@@ -83,11 +91,13 @@ class GdbConnector(QObject):
         return files
 
     def getMultipleBreakpoints(self, nr):
-        res = self.executeAndRaiseIfFailed("info break " + str(nr), "Could not get multiple breakpoint list.")
+        res = self.executeAndRaiseIfFailed("info break " + str(nr), \
+                "Could not get multiple breakpoint list.")
         return res
 
     def getBreakpoints(self):
-        res = self.executeAndRaiseIfFailed("-break-list", "Could not get breakpoint list.")
+        res = self.executeAndRaiseIfFailed("-break-list", \
+                "Could not get breakpoint list.")
 
         breakpoints = []
         for bp in res.BreakpointTable.body:
@@ -140,37 +150,71 @@ class GdbConnector(QObject):
 
     def insertBreakpoint(self, file_, line):
         loc = file_ + ":" + str(line)
-        return self.executeAndRaiseIfFailed("-break-insert " + loc, "Could not create breakpoint " + loc + ".")
+        return self.executeAndRaiseIfFailed("-break-insert " + loc, \
+                "Could not create breakpoint " + loc + ".")
 
     def deleteBreakpoint(self, number):
         return self.executeAndRaiseIfFailed("-break-delete " + str(number))
 
     def enableBreakpoint(self, number):
-        return self.executeAndRaiseIfFailed("-break-enable " + str(number), "Could not enable breakpoint " + str(number) + ".")
+        return self.executeAndRaiseIfFailed("-break-enable " + str(number), \
+                "Could not enable breakpoint " + str(number) + ".")
 
     def disableBreakpoint(self, number):
-        return self.executeAndRaiseIfFailed("-break-disable " + str(number), "Could not disable breakpoint " + str(number) + ".")
+        return self.executeAndRaiseIfFailed("-break-disable " + str(number), \
+                "Could not disable breakpoint " + str(number) + ".")
 
     def setSkipBreakpoint(self, number, skip):
-        return self.executeAndRaiseIfFailed("-break-after " + str(number) + " " + str(skip), "Could not set breakpoint interval '" + str(skip) + "' for breakpoint " + str(number) + ".")
+        return self.executeAndRaiseIfFailed("-break-after " + str(number) + \
+                " " + str(skip), "Could not set breakpoint interval '" + \
+                str(skip) + "' for breakpoint " + str(number) + ".")
 
     def setConditionBreakpoint(self, number, condition):
-        return self.executeAndRaiseIfFailed("-break-condition " + str(number) + " " + str(condition), "Could not set condition '" + str(condition) + "' for breakpoint " + str(number) + ".")
-    ''
+        return self.executeAndRaiseIfFailed("-break-condition " + str(number) \
+                + " " + str(condition), "Could not set condition '" + \
+                str(condition) + "' for breakpoint " + str(number) + ".")
+
     def changeWorkingDirectory(self, dir_):
         return self.executeAndRaiseIfFailed("-environment-cd " + dir_)
 
     def run(self):
-        return self.executeAndRaiseIfFailed("-exec-run", "Could not run the program.")
+        return self.executeAndRaiseIfFailed("-exec-run", \
+                "Could not run the program.")
+
+    def record_start(self):
+        """Start recording
+
+        Records the call stack and gdb executions for reverse debugging
+        """
+        # FIXME: find the real mi command!
+        return self.executeAndRaiseIfFailed("-interpreter-exec console rec", \
+                "Could not record the process.")
+
+    def record_stop(self):
+        """Stop recording
+        """
+        # FIXME: find the real mi command!
+        return self.executeAndRaiseIfFailed(\
+                "-interpreter-exec console \"record stop\"", \
+                "Could not record the process.")
 
     def next_(self):
         return self.executeAndRaiseIfFailed("-exec-next")
 
+    def reverse_next(self):
+        return self.executeAndRaiseIfFailed("-exec-next --reverse")
+
     def step(self):
         return self.executeAndRaiseIfFailed("-exec-step")
 
+    def reverse_step(self):
+        return self.executeAndRaiseIfFailed("-exec-step --reverse")
+
     def cont(self):
         return self.executeAndRaiseIfFailed("-exec-continue")
+
+    def reverse_cont(self):
+        return self.executeAndRaiseIfFailed("-exec-continue --reverse")
 
     def interrupt(self):
         # TODO: check if it also works in windows
@@ -189,7 +233,7 @@ class GdbConnector(QObject):
         if res.class_ == GdbOutput.ERROR:
             return None
         else:
-            return res.value if res else ""
+            return res.value
 
     def executeCliCommand(self, cmd):
         res = self.execute("-interpreter-exec console \"" + cmd + "\"")
@@ -208,7 +252,8 @@ class GdbConnector(QObject):
         return self.execute("-var-assign \"" + exp + "\" " + value)
 
     def var_list_children(self, exp):
-        return self.execute("-var-list-children --all-values \"" + str(exp) + "\"")
+        return self.execute("-var-list-children --all-values \"" + \
+                str(exp) + "\"")
 
     def var_update(self, exp):
         return self.execute("-var-update --all-values \"" + exp + "\"")
@@ -218,7 +263,8 @@ class GdbConnector(QObject):
         if res.class_ == GdbOutput.ERROR:
             return None
         else:
-            return int(res.depth) if res else 0
+            return int(res.depth)
 
     def selectStackFrame(self, exp):
         return self.executeAndRaiseIfFailed("-stack-select-frame " + str(exp))
+

@@ -34,80 +34,7 @@ from controllers.quickwatch import QuickWatch
 
 
 class MainWindow(QMainWindow):
-    def setupUi(self):
-        self.__initActions()
-        self.ui.statusLabel = QLabel()
-        self.ui.statusLabel.setText("Not running")
-        self.ui.statusbar.addPermanentWidget(self.ui.statusLabel)
-        self.ui.statusIcon = QLabel()
-        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
-        self.ui.statusbar.addPermanentWidget(self.ui.statusIcon)
-
-    #def setupGraph(self):
-        #self.scene = QGraphicsScene()
-        #self.c2 = Composite()
-        #self.c1 = Composite()
-        #self.c1.addItem(LeafEntry("exp1", "val11"))
-        #self.c1.addItem(LeafEntry("exp2 long", "val22"))
-        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
-        #self.c2.addItem(CompositeEntry("subcomp", self.c1))
-        #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        #self.scene.addItem(self.c2)
-
-    def __initActions(self):
-        self.act = Actions(self)
-        # debug actions
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
-        # file actions
-        self.ui.menuFile.insertAction(self.ui.actionSaveSession, self.act.actions[Actions.Open])
-        self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
-        self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
-
-        # add them to menubar and also menuView to respect order
-        self.ui.menubar.addAction(self.ui.menuFile.menuAction())
-        self.ui.menubar.addAction(self.ui.menuView.menuAction())
-        self.ui.menubar.addAction(self.ui.menuDebug.menuAction())
-        self.ui.menubar.addAction(self.ui.menuHelp.menuAction())
-        # now make toolbar actions
-        self.ui.Main.addAction(self.act.actions[Actions.Open])
-        self.ui.Main.addAction(self.act.actions[Actions.SaveFile])
-        self.ui.Main.addSeparator()
-        self.ui.Main.addAction(self.act.actions[Actions.Run])
-        self.ui.Main.addAction(self.act.actions[Actions.Continue])
-        self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
-        self.ui.Main.addAction(self.act.actions[Actions.Next])
-        self.ui.Main.addAction(self.act.actions[Actions.Step])
-        self.ui.Main.addAction(self.act.actions[Actions.Finish])
-        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
-        self.ui.Main.addSeparator()
-        self.ui.Main.addAction(self.act.actions[Actions.Exit])
-        # connect actions
-        self.__connectActions()
-
-    def __connectActions(self):
-        # file menu
-        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), self.showOpenExecutableDialog)
-        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'), self.signalproxy.emitSaveCurrentFile)
-
-        # debug menu
-        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), self.debugController.run)
-        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), self.debugController.next_)
-        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), self.debugController.step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'), self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'), self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), self.debugController.finish)
-        self.connect(self.act.actions[Actions.RunToCursor], SIGNAL('activated()'), self.debugController.inferiorUntil)
-
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showRestoreSessionDialog)
-        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), self.distributedObjects.sessionManager.showSaveSessionDialog)
-
+    
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -158,6 +85,104 @@ class MainWindow(QMainWindow):
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
 
+    def setupUi(self):
+        self.__initActions()
+        self.ui.statusLabel = QLabel()
+        self.ui.statusLabel.setText("Not running")
+        self.ui.statusbar.addPermanentWidget(self.ui.statusLabel)
+        self.ui.statusIcon = QLabel()
+        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
+        self.ui.statusbar.addPermanentWidget(self.ui.statusIcon)
+
+    #def setupGraph(self):
+        #self.scene = QGraphicsScene()
+        #self.c2 = Composite()
+        #self.c1 = Composite()
+        #self.c1.addItem(LeafEntry("exp1", "val11"))
+        #self.c1.addItem(LeafEntry("exp2 long", "val22"))
+        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
+        #self.c2.addItem(CompositeEntry("subcomp", self.c1))
+        #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
+        #self.scene.addItem(self.c2)
+
+    def __initActions(self):
+        self.act = Actions(self)
+        # debug actions
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
+        self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
+        # file actions
+        self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
+                self.act.actions[Actions.Open])
+        self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
+        self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
+
+        # add them to menubar and also menuView to respect order
+        self.ui.menubar.addAction(self.ui.menuFile.menuAction())
+        self.ui.menubar.addAction(self.ui.menuView.menuAction())
+        self.ui.menubar.addAction(self.ui.menuDebug.menuAction())
+        self.ui.menubar.addAction(self.ui.menuHelp.menuAction())
+        # now make toolbar actions
+        self.ui.Main.addAction(self.act.actions[Actions.Open])
+        self.ui.Main.addAction(self.act.actions[Actions.SaveFile])
+        self.ui.Main.addSeparator()
+        self.ui.Main.addAction(self.act.actions[Actions.Run])
+        self.ui.Main.addAction(self.act.actions[Actions.Continue])
+        self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
+        self.ui.Main.addAction(self.act.actions[Actions.Next])
+        self.ui.Main.addAction(self.act.actions[Actions.Step])
+        self.ui.Main.addAction(self.act.actions[Actions.Record])
+        self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
+        self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
+        self.ui.Main.addAction(self.act.actions[Actions.Finish])
+        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
+        self.ui.Main.addSeparator()
+        self.ui.Main.addAction(self.act.actions[Actions.Exit])
+        # connect actions
+        self.__connectActions()
+
+    def __connectActions(self):
+        # file menu
+        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), \
+                self.showOpenExecutableDialog)
+        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
+                self.close)
+        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
+                self.signalproxy.emitSaveCurrentFile)
+
+        # debug menu
+        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
+                self.debugController.run)
+        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
+                self.debugController.next_)
+        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
+                self.debugController.step)
+        self.connect(self.act.actions[Actions.Record], SIGNAL('activated()'), \
+                self.debugController.toggle_record)
+        self.connect(self.act.actions[Actions.ReverseNext], \
+                SIGNAL('activated()'), self.debugController.reverse_next)
+        self.connect(self.act.actions[Actions.ReverseStep], \
+                SIGNAL('activated()'), self.debugController.reverse_step)
+        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
+                self.debugController.cont)
+        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
+                , self.debugController.interrupt)
+        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
+                self.debugController.finish)
+        self.connect(self.act.actions[Actions.RunToCursor], \
+                SIGNAL('activated()'), self.debugController.inferiorUntil)
+
+        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
+                self.distributedObjects.sessionManager.showRestoreSessionDialog)
+        QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
+                self.distributedObjects.sessionManager.showSaveSessionDialog)
+
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
         if addToggleViewAction:
@@ -168,7 +193,9 @@ class MainWindow(QMainWindow):
         self.ui.menuPlugins.addAction(Action)
 
     def createInitialWindowPlacement(self):
-        """ Saves the window and widget placement after first start of program. """
+        """
+        Saves the window and widget placement after first start of program.
+        """
         #check if settings do not exist
         initExists = self.settings.contains("InitialWindowPlacement/geometry")
         if not initExists:
@@ -192,17 +219,24 @@ class MainWindow(QMainWindow):
             self.tabifyDockWidget(self.gdbIoWidget, self.pyIoWidget)
             self.tabifyDockWidget(self.pyIoWidget, self.inferiorIoWidget)
 
-            self.settings.setValue("InitialWindowPlacement/geometry", self.saveGeometry())
-            self.settings.setValue("InitialWindowPlacement/windowState", self.saveState())
+            self.settings.setValue("InitialWindowPlacement/geometry", \
+                    self.saveGeometry())
+            self.settings.setValue("InitialWindowPlacement/windowState", \
+                    self.saveState())
 
     def initRecentFileHandler(self):
         self.RecentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
-        """ Restores the window placement created by createInitialWindowPlacement(). """
-        self.restoreGeometry(self.settings.value("InitialWindowPlacement/geometry").toByteArray())
-        self.restoreState(self.settings.value("InitialWindowPlacement/windowState").toByteArray())
+        """
+        Restores the window placement created by 
+        createInitialWindowPlacement().
+        """
+        self.restoreGeometry(self.settings.value(\
+                "InitialWindowPlacement/geometry").toByteArray())
+        self.restoreState(self.settings.value(\
+                "InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable", os.path.dirname(str(self.RecentFileHandler.recentfiles[0]))))

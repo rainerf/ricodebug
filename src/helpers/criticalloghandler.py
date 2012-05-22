@@ -22,38 +22,15 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-"""
-Predefined constants for the gdb output
-"""
+import logging
+from PyQt4.QtCore import qFatal
 
-class GdbOutput:
-    RESULT_RECORD, \
-    EXEC_ASYN, \
-    STATUS_ASYN, \
-    NOTIFY_ASYN, \
-    CONSOLE_STREAM, \
-    TARGET_STREAM, \
-    LOG_STREAM, \
-    DONE, \
-    RUNNING, \
-    STOPPED, \
-    THREAD_CREATED, \
-    THREAD_GROUP_CREATED, \
-    THREAD_GROUP_ADDED, \
-    THREAD_GROUP_STARTED, \
-    THREAD_EXITED, \
-    THREAD_GROUP_EXITED, \
-    THREAD_SELECTED, \
-    LIBRARY_LOADED, \
-    LIBRARY_UNLOADED, \
-    BREAKPOINT_MODIFIED, \
-    EXIT, \
-    CONNECTED, \
-    ERROR \
-    = range(23)
 
+class CriticalLogHandler(logging.Handler):
+    """A simple logging handler that aborts the program whenever an error message >= logging.CRITICAL is received."""
     def __init__(self):
-        self.class_ = None     # done, running,...
-        self.string = None     # the string of a stream output
-        self.type_ = None     # the type of a async response
+        logging.Handler.__init__(self)
 
+    def emit(self, record):
+        if record.levelno >= logging.CRITICAL:
+            qFatal("Received critical error: '%s'.\nAborting program.\n" % record.message)
