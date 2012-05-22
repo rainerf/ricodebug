@@ -78,7 +78,7 @@ class RecentFileHandler():
     def __storeRecentFiles(self):
         """ store filelist to configfile """
         self.settings.beginWriteArray("RecentlyUsedFiles")
-        for i in range (self.nrRecentFiles):
+        for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
             self.settings.setValue("Filename", self.recentfiles[i])
         self.settings.endArray()
@@ -91,7 +91,7 @@ class RecentFileHandler():
     def __getRecentFiles(self):
         """ get filelist from configfile """
         self.settings.beginReadArray("RecentlyUsedFiles")
-        for i in range (self.nrRecentFiles):
+        for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
             filename = self.settings.value("Filename").toString()
             duplicate = False 
