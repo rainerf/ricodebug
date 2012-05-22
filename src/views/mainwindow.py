@@ -106,22 +106,22 @@ class MainWindow(QMainWindow):
         #self.scene.addItem(self.c2)
 
     def __initActions(self):
-        self.act = Actions(self)
+        self.act = Actions()
         # debug actions
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Run])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Continue])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Interrupt])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Next])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseNext])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Step])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.ReverseStep])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.Finish])
-        self.ui.menuDebug.addAction(self.act.actions[Actions.RunToCursor])
+        self.ui.menuDebug.addAction(Actions.Run)
+        self.ui.menuDebug.addAction(Actions.Continue)
+        self.ui.menuDebug.addAction(Actions.Interrupt)
+        self.ui.menuDebug.addAction(Actions.Next)
+        self.ui.menuDebug.addAction(Actions.ReverseNext)
+        self.ui.menuDebug.addAction(Actions.Step)
+        self.ui.menuDebug.addAction(Actions.ReverseStep)
+        self.ui.menuDebug.addAction(Actions.Finish)
+        self.ui.menuDebug.addAction(Actions.RunToCursor)
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
-                self.act.actions[Actions.Open])
-        self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
-        self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
+                Actions.Open)
+        self.ui.menuFile.addAction(Actions.SaveFile)
+        self.ui.menuFile.addAction(Actions.Exit)
 
         # add them to menubar and also menuView to respect order
         self.ui.menubar.addAction(self.ui.menuFile.menuAction())
@@ -129,53 +129,53 @@ class MainWindow(QMainWindow):
         self.ui.menubar.addAction(self.ui.menuDebug.menuAction())
         self.ui.menubar.addAction(self.ui.menuHelp.menuAction())
         # now make toolbar actions
-        self.ui.Main.addAction(self.act.actions[Actions.Open])
-        self.ui.Main.addAction(self.act.actions[Actions.SaveFile])
+        self.ui.Main.addAction(Actions.Open)
+        self.ui.Main.addAction(Actions.SaveFile)
         self.ui.Main.addSeparator()
-        self.ui.Main.addAction(self.act.actions[Actions.Run])
-        self.ui.Main.addAction(self.act.actions[Actions.Continue])
-        self.ui.Main.addAction(self.act.actions[Actions.Interrupt])
-        self.ui.Main.addAction(self.act.actions[Actions.Next])
-        self.ui.Main.addAction(self.act.actions[Actions.Step])
-        self.ui.Main.addAction(self.act.actions[Actions.Record])
-        self.ui.Main.addAction(self.act.actions[Actions.ReverseNext])
-        self.ui.Main.addAction(self.act.actions[Actions.ReverseStep])
-        self.ui.Main.addAction(self.act.actions[Actions.Finish])
-        self.ui.Main.addAction(self.act.actions[Actions.RunToCursor])
+        self.ui.Main.addAction(Actions.Run)
+        self.ui.Main.addAction(Actions.Continue)
+        self.ui.Main.addAction(Actions.Interrupt)
+        self.ui.Main.addAction(Actions.Next)
+        self.ui.Main.addAction(Actions.Step)
+        self.ui.Main.addAction(Actions.Record)
+        self.ui.Main.addAction(Actions.ReverseNext)
+        self.ui.Main.addAction(Actions.ReverseStep)
+        self.ui.Main.addAction(Actions.Finish)
+        self.ui.Main.addAction(Actions.RunToCursor)
         self.ui.Main.addSeparator()
-        self.ui.Main.addAction(self.act.actions[Actions.Exit])
+        self.ui.Main.addAction(Actions.Exit)
         # connect actions
         self.__connectActions()
 
     def __connectActions(self):
         # file menu
-        self.connect(self.act.actions[Actions.Open], SIGNAL('activated()'), \
+        self.connect(Actions.Open, SIGNAL('activated()'), \
                 self.showOpenExecutableDialog)
-        self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
+        self.connect(Actions.Exit, SIGNAL('activated()'), \
                 self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
+        self.connect(Actions.SaveFile, SIGNAL('activated()'),\
                 self.signalproxy.emitSaveCurrentFile)
 
         # debug menu
-        self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
+        self.connect(Actions.Run, SIGNAL('activated()'), \
                 self.debugController.run)
-        self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
+        self.connect(Actions.Next, SIGNAL('activated()'), \
                 self.debugController.next_)
-        self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
+        self.connect(Actions.Step, SIGNAL('activated()'), \
                 self.debugController.step)
-        self.connect(self.act.actions[Actions.Record], SIGNAL('activated()'), \
+        self.connect(Actions.Record, SIGNAL('activated()'), \
                 self.debugController.toggle_record)
-        self.connect(self.act.actions[Actions.ReverseNext], \
+        self.connect(Actions.ReverseNext, \
                 SIGNAL('activated()'), self.debugController.reverse_next)
-        self.connect(self.act.actions[Actions.ReverseStep], \
+        self.connect(Actions.ReverseStep, \
                 SIGNAL('activated()'), self.debugController.reverse_step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
+        self.connect(Actions.Continue, SIGNAL('activated()'),\
                 self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
+        self.connect(Actions.Interrupt, SIGNAL('activated()')\
                 , self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
+        self.connect(Actions.Finish, SIGNAL('activated()'), \
                 self.debugController.finish)
-        self.connect(self.act.actions[Actions.RunToCursor], \
+        self.connect(Actions.RunToCursor, \
                 SIGNAL('activated()'), self.debugController.inferiorUntil)
 
         QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
