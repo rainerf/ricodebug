@@ -49,6 +49,7 @@ class MainWindow(QMainWindow):
         self.signalproxy = self.distributedObjects.signalProxy
         self.pluginloader = PluginLoader(self.distributedObjects)
 
+        self.act = self.distributedObjects.actions
         #init RecentFileHandler
         nrRecentFiles = 5
         self.initRecentFileHandler(nrRecentFiles)
@@ -106,7 +107,6 @@ class MainWindow(QMainWindow):
         #self.scene.addItem(self.c2)
 
     def __initActions(self):
-        self.act = Actions()
         # debug actions
         self.ui.menuDebug.addAction(Actions.Run)
         self.ui.menuDebug.addAction(Actions.Continue)

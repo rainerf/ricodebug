@@ -57,8 +57,7 @@ class ActionEx(QtGui.QAction):
             print "------------------------ parameter ok."
             self.emit(QtCore.SIGNAL("triggered(PyQt_PyObject)"), self.parameter)
 
-
-class Actions():
+class Actions(QtCore.QObject):
     NumActions = 21
     Open, Exit, SaveFile, \
     Run, Continue, ReverseContinue, Interrupt, Next, ReverseNext, \
@@ -66,8 +65,89 @@ class Actions():
     ToggleBreak, ToggleTrace, AddTraceVar, DelTraveVar, \
     AddWatch, AddVarToDataGraph, DelWatch = [None for _ in range(NumActions)]
 
-    @staticmethod()
-    def createEx(cls, parameter):
+    def __init__(self):
+        QObject.__init__(self)
+        ###############################################
+        ## file/program control
+        ###############################################
+        #open
+        Actions.Open = self.__createAction(":/icons/images/open.png", "Open", 
+                "Ctrl+O", "Open executable file")
+        #exit
+        Actions.Exit = self.__createAction(":/icons/images/exit.png", "Exit", 
+                "Ctrl+Q", "Close Program")
+        #save source file
+        Actions.SaveFile = self.__createAction(":/icons/images/save.png",
+                "Save File", "Ctrl+S", "Save source file")
+
+        ###############################################
+        ## file control
+        ###############################################
+        #run
+        Actions.Run = self.__createAction(":/icons/images/run.png", "Run", "F5",
+                "Run current executable")
+        #continue
+        Actions.Continue = self.__createAction(":/icons/images/continue.png",
+                "Continue", "F6", "Continue current executable")
+        #interrupt
+        Actions.Interrupt = self.__createAction(":/icons/images/interrupt.png",
+                "Interrupt", "F4", "Interrupt current executable")
+        #next
+        Actions.Next = self.__createAction(":/icons/images/next.png", "Next", "F10",
+                "Execute next line")
+        #step
+        Actions.Step = self.__createAction(":/icons/images/step.png", "Step", "F11",
+                "Next Step")
+        #record
+        Actions.Record = self.__createAction(":/icons/images/record.png", "Record",
+                None, "Record gdb executions")
+        #previous
+        Actions.ReverseNext = self.__createAction(":/icons/images/rnext.png",
+                "Reverse Next", None, "Execute previous line")
+        #reverse step
+        Actions.ReverseStep = self.__createAction(":/icons/images/rstep.png",
+                "Reverse Step", None, "Previous Step")
+        #finish
+        Actions.Finish = self.__createAction(":/icons/images/finish.png", "Finish",
+                None, "Finish executable")
+        #run to cursor
+        Actions.RunToCursor = self.__createAction(":/icons/images/until.png",
+                "Run to Cursor", None, "Run executable to cursor position")
+
+        ###############################################
+        ## watch/break/trace points
+        ###############################################
+        #toggle breakpoint
+        Actions.ToggleBreak = self.__createAction(":/icons/images/bp.png",
+                "Toggle Breakpoint", "Ctrl+b",
+                "Toggle breakpoint in current line")
+        #add tracepoint
+        Actions.ToggleTrace = self.__createAction(":/icons/images/tp.png",
+                "Toggle Tracepoint", "Ctrl+t",
+                "Toggle tracepoint in current line")
+        #AddTraceVar
+        Actions.AddTraceVar = self.__createAction(":/icons/images/tp_var_plus.png",
+                "Add var to Tracepoint", "+",
+                "Add selected variable to tracepoint")
+        #DelTraceVar
+        Actions.DelTraveVar = self.__createAction(":/icons/images/tp_var_minus.png",
+                "Del var from Tracepoint", "-",
+                "Remove selected variable from tracepoint")
+        #AddWatch
+        Actions.AddWatch = self.__createAction(":/icons/images/watch_plus.png",
+                "Add var to Watch", "+",
+                "Add selected variable to watchview-window")
+        #AddToDataGraph
+        Actions.AddVarToDataGraph = self.__createAction(":/icons/images/watch_plus.png",
+                "Add var to DataGraph", "+",
+                "Add selected variable to datagraph-window")
+        #DelWatch
+        Actions.DelWatch = self.__createAction(":/icons/images/watch_minus.png",
+                "Del var from Watch", "+",
+                "Remove selected variable from watchview-window")
+
+    @staticmethod
+    def createEx(parameter):
         return ActionEx(parameter)
 
     def __createAction(self, icon, text, shortcut, statustip):
@@ -79,87 +159,4 @@ class Actions():
             newAction.setShortcut(shortcut)
         
         return newAction
-
-    @staticmethod()
-    def initActions(self):
-
-        ###############################################
-        ## file/program control
-        ###############################################
-        #open
-        self.Open = self.createAction(":/icons/images/open.png", "Open", 
-                "Ctrl+O", "Open executable file")
-        #exit
-        self.Exit = self.createAction(":/icons/images/exit.png", "Exit", 
-                "Ctrl+Q", "Close Program")
-        #save source file
-        self.SaveFile = self.createAction(":/icons/images/save.png",
-                "Save File", "Ctrl+S", "Save source file")
-
-        ###############################################
-        ## file control
-        ###############################################
-        #run
-        self.Run = self.createAction(":/icons/images/run.png", "Run", "F5",
-                "Run current executable")
-        #continue
-        self.Continue = self.createAction(":/icons/images/continue.png",
-                "Continue", "F6", "Continue current executable")
-        #interrupt
-        self.Interrupt = self.createAction(":/icons/images/interrupt.png",
-                "Interrupt", "F4", "Interrupt current executable")
-        #next
-        self.Next = self.createAction(":/icons/images/next.png", "Next", "F10",
-                "Execute next line")
-        #step
-        self.Step = self.createAction(":/icons/images/step.png", "Step", "F11",
-                "Next Step")
-        #record
-        self.Record = self.createAction(":/icons/images/record.png", "Record",
-                None, "Record gdb executions")
-        #previous
-        self.ReverseNext = self.createAction(":/icons/images/rnext.png",
-                "Reverse Next", None, "Execute previous line")
-        #reverse step
-        self.ReverseStep = self.createAction(":/icons/images/rstep.png",
-                "Reverse Step", None, "Previous Step")
-        #finish
-        self.Finish = self.createAction(":/icons/images/finish.png", "Finish",
-                None, "Finish executable")
-        #run to cursor
-        self.RunToCursor = self.createAction(":/icons/images/until.png",
-                "Run to Cursor", None, "Run executable to cursor position")
-
-        ###############################################
-        ## watch/break/trace points
-        ###############################################
-        #toggle breakpoint
-        self.ToggleBreak = self.createAction(":/icons/images/bp.png",
-                "Toggle Breakpoint", "Ctrl+b",
-                "Toggle breakpoint in current line")
-        #add tracepoint
-        self.ToggleTrace = self.createAction(":/icons/images/tp.png",
-                "Toggle Tracepoint", "Ctrl+t",
-                "Toggle tracepoint in current line")
-        #AddTraceVar
-        self.AddTraceVar = self.createAction(":/icons/images/tp_var_plus.png",
-                "Add var to Tracepoint", "+",
-                "Add selected variable to tracepoint")
-        #DelTraceVar
-        self.DelTraveVar = self.createAction(":/icons/images/tp_var_minus.png",
-                "Del var from Tracepoint", "-",
-                "Remove selected variable from tracepoint")
-        #AddWatch
-        self.AddWatch = self.createAction(":/icons/images/watch_plus.png",
-                "Add var to Watch", "+",
-                "Add selected variable to watchview-window")
-        #AddToDataGraph
-        self.AddVarToDataGraph = self.createAction(":/icons/images/watch_plus.png",
-                "Add var to DataGraph", "+",
-                "Add selected variable to datagraph-window")
-        #DelWatch
-        self.DelWatch = self.createAction(":/icons/images/watch_minus.png",
-                "Del var from Watch", "+",
-                "Remove selected variable from watchview-window")
-
 
