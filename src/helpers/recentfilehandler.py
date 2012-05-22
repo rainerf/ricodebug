@@ -25,21 +25,23 @@
 from PyQt4.QtCore import SIGNAL, QObject
 from PyQt4.QtGui import QAction
 from os.path import exists
-
+import logging
 
 class OpenRecentFileAction(QAction):
     """ Class extends QAction to open a recently used file."""
-    def __init__(self, parent):
+    def __init__(self, parent, distributedObjects):
         QAction.__init__(self, parent)
+        self.debugController = distributedObjects.debugController
         QObject.connect(self, SIGNAL('triggered()'), self.__open)
 
     def __open(self):
         ''' Open executable (file named like action). '''
-        self.emit(SIGNAL('executableOpened'), str(self.text()))
+        self.debugController.openExecutable(str(self.text()))
 
 
 class RecentFileHandler():
-    def __init__(self, recentFileActionCont, nrRecentFileActions, distributedObjects):
+
+    def __init__(self, parent, recentFilesMenu, distributedObjects):
         """Load recently used file names to menu actions.
             @param recentFileActionCont: list[sessionmanager.OpenRecentFileAction], actions of items in menu
             @param nrRecentFileActions: integer, number of recently used files listed in menu
@@ -47,61 +49,70 @@ class RecentFileHandler():
         """
         self.distributedObjects = distributedObjects
         self.debugController = distributedObjects.debugController
-        self.breakpointController = distributedObjects.breakpointController
-        self.watchController = distributedObjects.watchController
+        self.recentFilesMenu = recentFilesMenu
+        #self.breakpointController = distributedObjects.breakpointController
+        #self.watchController = distributedObjects.watchController
         self.settings = self.debugController.settings
-        self.nrRecentFiles = nrRecentFileActions
+        #self.nrRecentFiles = nrRecentFileActions
+        self.nrRecentFiles = 5
+        self.recentfiles = []
 
         # array with menu actions
-        self.actions = recentFileActionCont
+        self.actions = []
+        self.__makeActions(parent)
+        self.__getRecentFiles()
         self.__loadRecentFiles()
-
+        
     def addToRecentFiles(self, filename):
-        """ Add new filename to recently used files. """
+        """ Add new filename to self.recentfiles """
         #check if filename is already in recently used files
-        size = self.settings.beginReadArray("RecentlyUsedFiles")
-        included = False
-        for i in range(size):
+        for i in range(self.nrRecentFiles):
+            if (i < len(self.recentfiles) and filename == self.recentfiles[i]):
+                self.recentfiles.pop(i)
+        #add file
+        self.recentfiles.insert(0, filename)
+        #refresh menu & store to configfile
+        self.__storeRecentFiles()
+        self.__loadRecentFiles()
+            
+    def __storeRecentFiles(self):
+        """ store filelist to configfile """
+        self.settings.beginWriteArray("RecentlyUsedFiles")
+        for i in range (self.nrRecentFiles):
             self.settings.setArrayIndex(i)
-            if not included:
-                included = self.settings.value("Filename") == filename
+            self.settings.setValue("Filename", self.recentfiles[i])
         self.settings.endArray()
-
-        if not included:
-            self.settings.beginWriteArray("RecentlyUsedFiles")
-            #increase index with every entry
-            index = self.settings.value("RecentlyUsedFileIndex").toInt()[0]
-            index = (index + 1) % self.nrRecentFiles
-            self.settings.setValue("RecentlyUsedFileIndex", index)
-
-            #add file
-            self.settings.setArrayIndex(index)
-            self.settings.setValue("Filename", filename)
-            self.settings.endArray()
-
-            #refresh menu
-            self.__loadRecentFiles()
-
-    def __loadRecentFiles(self):
-        """Load recently used files from qsettings file to the menu. """
+        
+    def __makeActions(self, parent):
+        for i in range(self.nrRecentFiles):
+            self.actions.append(OpenRecentFileAction(parent, self.distributedObjects))
+            self.recentFilesMenu.addAction(self.actions[i])
+        
+    def __getRecentFiles(self):
+        """ get filelist from configfile """
         self.settings.beginReadArray("RecentlyUsedFiles")
-
-        last_used_index = self.settings.value("RecentlyUsedFileIndex", -1).toInt()[0]
-        i = last_used_index
-        if i < 0:
-            i = self.nrRecentFiles - 1
-        action_index = 0
-
-        for action_index in range(self.nrRecentFiles):
+        for i in range (self.nrRecentFiles):
             self.settings.setArrayIndex(i)
             filename = self.settings.value("Filename").toString()
+            duplicate = False 
+            for j in range(len(self.recentfiles)):
+                if (filename != "" and self.recentfiles[j] == filename):
+                    logging.debug("file %s appears multiple times in configfile. fixed now" % filename)
+                    self.recentfiles.append("")
+                    duplicate = True
+            if not duplicate:
+                self.recentfiles.append(filename)
+        self.settings.endArray()
+        
+    def __loadRecentFiles(self):
+        """Load recently used files from self.recentfiles to the menu. """
+        for action_index in range(self.nrRecentFiles):
+            filename = self.recentfiles[action_index]
             if exists(filename):
                 self.actions[action_index].setText(filename)
                 self.actions[action_index].setVisible(True)
             else:
                 self.actions[action_index].setVisible(False)
-            i = i - 1
-            if i < 0:
-                i = self.nrRecentFiles - 1
-
-        self.settings.endArray()
+        for i in range (self.nrRecentFiles):
+            print self.recentfiles[i]
+            

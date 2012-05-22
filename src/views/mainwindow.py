@@ -22,6 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import os
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from ui_mainwindow import Ui_MainWindow
@@ -123,8 +124,7 @@ class MainWindow(QMainWindow):
         self.pluginloader = PluginLoader(self.distributedObjects)
 
         #init RecentFileHandler
-        nrRecentFiles = 5
-        self.initRecentFileHandler(nrRecentFiles)
+        self.initRecentFileHandler()
 
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
 
@@ -195,17 +195,8 @@ class MainWindow(QMainWindow):
             self.settings.setValue("InitialWindowPlacement/geometry", self.saveGeometry())
             self.settings.setValue("InitialWindowPlacement/windowState", self.saveState())
 
-    def initRecentFileHandler(self, nrRecentFiles):
-        """ Create menu entries for recently used files and connect them to the RecentFileHandler """
-        # create menu entries and connect the actions to the debug controller
-        recentFileActions = [0] * nrRecentFiles
-        for i in range(nrRecentFiles):
-            recentFileActions[i] = OpenRecentFileAction(self)
-            recentFileActions[i].setVisible(False)
-            self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), self.distributedObjects.debugController.openExecutable)
-
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, nrRecentFiles, self.distributedObjects)
+    def initRecentFileHandler(self):
+        self.RecentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
@@ -214,7 +205,7 @@ class MainWindow(QMainWindow):
         self.restoreState(self.settings.value("InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
-        filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
+        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", os.path.dirname(str(self.RecentFileHandler.recentfiles[0]))))
         if (filename != ""):
             self.debugController.openExecutable(filename)
 
