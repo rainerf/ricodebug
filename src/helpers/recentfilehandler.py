@@ -50,10 +50,7 @@ class RecentFileHandler():
         self.distributedObjects = distributedObjects
         self.debugController = distributedObjects.debugController
         self.recentFilesMenu = recentFilesMenu
-        #self.breakpointController = distributedObjects.breakpointController
-        #self.watchController = distributedObjects.watchController
         self.settings = self.debugController.settings
-        #self.nrRecentFiles = nrRecentFileActions
         self.nrRecentFiles = 5
         self.recentfiles = []
 
