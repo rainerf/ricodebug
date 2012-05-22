@@ -113,6 +113,4 @@ class RecentFileHandler():
                 self.actions[action_index].setVisible(True)
             else:
                 self.actions[action_index].setVisible(False)
-        for i in range (self.nrRecentFiles):
-            print self.recentfiles[i]
             
