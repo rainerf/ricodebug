@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__observeWorkingBinary)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
-
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.disableButtons)
         # signal proxy
         QObject.connect(self.signalproxy, SIGNAL('inferiorIsRunning(PyQt_PyObject)'), self.targetStartedRunning, Qt.QueuedConnection)
         QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.targetStopped, Qt.QueuedConnection)
@@ -261,7 +261,6 @@ class MainWindow(QMainWindow):
     def showExecutableName(self, filename):
         self.ui.actionSaveSession.setEnabled(True)   # enable saving session
         self.setWindowFilePath(filename)
-        self.disableButtons()
 
     def targetStartedRunning(self):
         self.ui.statusLabel.setText("Running")
