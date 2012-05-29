@@ -26,14 +26,14 @@ from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
 from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
-from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
+from helpers.recentfilehandler import RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
 
-class MainWindow(QMainWindow):
 
+class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -97,17 +97,6 @@ class MainWindow(QMainWindow):
         self.ui.statusIcon = QLabel()
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
         self.ui.statusbar.addPermanentWidget(self.ui.statusIcon)
-
-    #def setupGraph(self):
-        #self.scene = QGraphicsScene()
-        #self.c2 = Composite()
-        #self.c1 = Composite()
-        #self.c1.addItem(LeafEntry("exp1", "val11"))
-        #self.c1.addItem(LeafEntry("exp2 long", "val22"))
-        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
-        #self.c2.addItem(CompositeEntry("subcomp", self.c1))
-        #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        #self.scene.addItem(self.c2)
 
     def __initActions(self):
         self.act = Actions(self)
@@ -232,7 +221,7 @@ class MainWindow(QMainWindow):
 
     def restoreInitialWindowPlacement(self):
         """
-        Restores the window placement created by 
+        Restores the window placement created by
         createInitialWindowPlacement().
         """
         self.restoreGeometry(self.settings.value(\
