@@ -50,10 +50,8 @@ class MainWindow(QMainWindow):
         self.pluginloader = PluginLoader(self.distributedObjects)
 
         #init RecentFileHandler
-        nrRecentFiles = 5
-        self.initRecentFileHandler(nrRecentFiles)
-
-        self.debugController.executableOpened.connect(self.showExecutableName)
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        self.debugController.executableOpened.connect(self.recentFileHandler.addToRecentFiles)
 
         # signal proxy
         self.signalproxy.inferiorIsRunning.connect(self.targetStartedRunning, Qt.QueuedConnection)
@@ -123,6 +121,8 @@ class MainWindow(QMainWindow):
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
+                
+        self.act.actions[Actions.Open].setMenu(self.ui.menuRecentlyUsedFiles)
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
 
@@ -156,16 +156,21 @@ class MainWindow(QMainWindow):
         self.act.actions[Actions.Exit].triggered.connect(self.close)
         self.act.actions[Actions.SaveFile].triggered.connect(self.signalproxy.emitSaveCurrentFile) 
         # debug menu
+
         self.act.actions[Actions.Run].triggered.connect(self.debugController.run)
         self.act.actions[Actions.Next].triggered.connect( self.debugController.next_)
-        self.act.actions[Actions.ReverseNext].triggered.connect(self.debugController.reverse_next)
         self.act.actions[Actions.Step].triggered.connect(self.debugController.step)
-        self.act.actions[Actions.ReverseStep].triggered.connect(self.debugController.reverse_step)
         self.act.actions[Actions.Continue].triggered.connect( self.debugController.cont)
+        self.act.actions[Actions.Record].triggered.connect(self.debugController.toggle_record)
+        self.act.actions[Actions.ReverseStep].triggered.connect(self.debugController.reverse_step)
+        self.act.actions[Actions.ReverseNext].triggered.connect(self.debugController.reverse_next)
+
         self.act.actions[Actions.Interrupt].triggered.connect(self.debugController.interrupt)
         self.act.actions[Actions.Finish].triggered.connect( self.debugController.finish)
         self.act.actions[Actions.RunToCursor].triggered.connect(self.debugController.inferiorUntil) 
          
+        self.ui.actionRestoreSession.triggered.connect(
+                self.distributedObjects.sessionManager.showRestoreSessionDialog)
         self.ui.actionSaveSession.triggered.connect(
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
 
@@ -238,7 +243,7 @@ class MainWindow(QMainWindow):
                 "InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
-        filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
+        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
             self.debugController.openExecutable(filename)
 
