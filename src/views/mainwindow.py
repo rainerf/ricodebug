@@ -50,7 +50,8 @@ class MainWindow(QMainWindow):
         self.pluginloader = PluginLoader(self.distributedObjects)
 
         #init RecentFileHandler
-        self.initRecentFileHandler()
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
 
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
 
@@ -222,10 +223,6 @@ class MainWindow(QMainWindow):
                     self.saveGeometry())
             self.settings.setValue("InitialWindowPlacement/windowState", \
                     self.saveState())
-
-    def initRecentFileHandler(self):
-        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
         """

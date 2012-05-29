@@ -99,7 +99,7 @@ class RecentFileHandler():
             if not filename in self.recentFiles:
                 self.recentFiles.append(filename)
             else:
-                logging.debug("file %s appears multiple times in configfile. fixed now" % filename)
+                logging.debug("file %s appears multiple times in configfile. fixed now", filename)
                 self.recentFiles.append("")     
                 
         self.settings.endArray()
