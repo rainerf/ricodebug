@@ -50,8 +50,8 @@ class MainWindow(QMainWindow):
         self.pluginloader = PluginLoader(self.distributedObjects)
 
         #init RecentFileHandler
-        nrRecentFiles = 5
-        self.initRecentFileHandler(nrRecentFiles)
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
 
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
 
@@ -171,14 +171,14 @@ class MainWindow(QMainWindow):
                 SIGNAL('activated()'), self.debugController.reverse_step)
         self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
                 self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
-                , self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
+        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'),\
+                self.debugController.interrupt)
+        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'),\
                 self.debugController.finish)
         self.connect(self.act.actions[Actions.RunToCursor], \
                 SIGNAL('activated()'), self.debugController.inferiorUntil)
 
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
+        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'),\
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
@@ -224,25 +224,6 @@ class MainWindow(QMainWindow):
             self.settings.setValue("InitialWindowPlacement/windowState", \
                     self.saveState())
 
-    def initRecentFileHandler(self, nrRecentFiles):
-        """
-        Create menu entries for recently used files and connect them to the 
-        RecentFileHandler
-        """
-        # create menu entries and connect the actions to the debug controller
-        recentFileActions = [0] * nrRecentFiles
-        for i in range(nrRecentFiles):
-            recentFileActions[i] = OpenRecentFileAction(self)
-            recentFileActions[i].setVisible(False)
-            self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), \
-                    self.distributedObjects.debugController.openExecutable)
-
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, \
-                nrRecentFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), \
-                self.RecentFileHandler.addToRecentFiles)
-
     def restoreInitialWindowPlacement(self):
         """
         Restores the window placement created by 
@@ -254,7 +235,7 @@ class MainWindow(QMainWindow):
                 "InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
-        filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
+        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
             self.debugController.openExecutable(filename)
 
