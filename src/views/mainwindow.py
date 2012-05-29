@@ -23,17 +23,17 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
-
+from PyQt4 import QtGui
 
 class MainWindow(QMainWindow):
-    
+
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         #init RecentFileHandler
         self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
-
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__observeWorkingBinary)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
 
         # signal proxy
@@ -84,6 +84,10 @@ class MainWindow(QMainWindow):
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
+
+        self.binaryName = None
+        self.fileWatcher = QFileSystemWatcher()
+        self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)
 
     def setupUi(self):
         self.__initActions()
@@ -120,7 +124,7 @@ class MainWindow(QMainWindow):
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
-                
+
         self.act.actions[Actions.Open].setMenu(self.ui.menuRecentlyUsedFiles)
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
@@ -155,7 +159,7 @@ class MainWindow(QMainWindow):
                 self.showOpenExecutableDialog)
         self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
                 self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'), \
                 self.signalproxy.emitSaveCurrentFile)
 
         # debug menu
@@ -171,16 +175,16 @@ class MainWindow(QMainWindow):
                 SIGNAL('activated()'), self.debugController.reverse_next)
         self.connect(self.act.actions[Actions.ReverseStep], \
                 SIGNAL('activated()'), self.debugController.reverse_step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'), \
                 self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'), \
                 self.debugController.interrupt)
-        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
                 self.debugController.finish)
         self.connect(self.act.actions[Actions.RunToCursor], \
                 SIGNAL('activated()'), self.debugController.inferiorUntil)
 
-        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'),\
+        QObject.connect(self.ui.actionRestoreSession, SIGNAL('activated()'), \
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         QObject.connect(self.ui.actionSaveSession, SIGNAL('activated()'), \
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
@@ -283,3 +287,20 @@ class MainWindow(QMainWindow):
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
         self.restoreState(self.settings.value("windowState").toByteArray())
+
+    def __observeWorkingBinary(self, filename):
+        """ Private Method to Observe Debugged Binary """
+        if self.binaryName != None:
+            self.fileWatcher.removePath(self.binaryName)
+        self.fileWatcher.addPath(filename)
+        self.binaryName = filename
+
+    def __binaryChanged(self):
+        """ Slot for FileWatcher - Using QtMessagebox for interaction"""
+        box = QtGui.QMessageBox()
+        if box.question(self, "Binary Changed!", "Reload File?",
+                        QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+            self.debugController.openExecutable(self.binaryName)
+        else:
+            self.fileWatcher.removePath(self.binaryName)
+            self.fileWatcher.addPath(self.binaryName)
