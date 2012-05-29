@@ -120,6 +120,8 @@ class MainWindow(QMainWindow):
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
+                
+        self.act.actions[Actions.Open].setMenu(self.ui.menuRecentlyUsedFiles)
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
 
