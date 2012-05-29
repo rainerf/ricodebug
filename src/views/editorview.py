@@ -25,6 +25,7 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QMessageBox
 from openedfileview import OpenedFileView
+from helpers.actions import Actions
 import os
 import logging
 import helpers.excep
@@ -49,6 +50,10 @@ class EditorView(QWidget):
 
         self.distributedObjects = distributedObjects
         self.tabWidget.tabCloseRequested.connect(self.hideTab)
+        self.tabWidget.currentChanged.connect(self.__changedTab)
+        self.act = self.distributedObjects.actions
+
+
         self.openedFiles = {}
 
     def hideTab(self, idx):
@@ -75,6 +80,12 @@ class EditorView(QWidget):
                         del self.openedFiles[i.filename]
                     break
         return ret != QMessageBox.Cancel
+
+    def __changedTab(self, idx):
+        if self.__getFileModified(idx):
+            self.act.actions[Actions.SaveFile].setEnabled(True)
+        else:
+            self.act.actions[Actions.SaveFile].setEnabled(False)
 
     def getCurrentOpenedFile(self):
         w = self.tabWidget.currentWidget()
@@ -114,11 +125,15 @@ class EditorView(QWidget):
         """ Adds a '*' to name of modified file in the editors tab widget.  """
         if filename in self.openedFiles:
             if (modified):
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab),
-                        os.path.basename(filename) + '*')
+                self.tabWidget.setTabText(self.tabWidget.indexOf(
+                    self.openedFiles[filename].tab),
+                    os.path.basename(filename) + '*')
+                self.act.actions[Actions.SaveFile].setEnabled(True)
             else:
-                self.tabWidget.setTabText(self.tabWidget.indexOf(self.openedFiles[filename].tab),
-                        os.path.basename(filename))
+                self.tabWidget.setTabText(self.tabWidget.indexOf(
+                    self.openedFiles[filename].tab),
+                    os.path.basename(filename))
+                self.act.actions[Actions.SaveFile].setEnabled(False)
 
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """
