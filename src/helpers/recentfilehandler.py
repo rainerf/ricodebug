@@ -22,6 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import os
 from PyQt4.QtCore import SIGNAL, QObject
 from PyQt4.QtGui import QAction
 from os.path import exists
@@ -52,7 +53,7 @@ class RecentFileHandler():
         self.recentFilesMenu = recentFilesMenu
         self.settings = self.debugController.settings
         self.nrRecentFiles = 5
-        self.recentfiles = []
+        self.recentFiles = []
 
         # array with menu actions
         self.actions = []
@@ -64,20 +65,23 @@ class RecentFileHandler():
         """ Add new filename to self.recentfiles """
         #check if filename is already in recently used files
         for i in range(self.nrRecentFiles):
-            if (i < len(self.recentfiles) and filename == self.recentfiles[i]):
-                self.recentfiles.pop(i)
+            if (i < len(self.recentFiles) and filename == self.recentFiles[i]):
+                self.recentFiles.pop(i)
         #add file
-        self.recentfiles.insert(0, filename)
+        self.recentFiles.insert(0, filename)
         #refresh menu & store to configfile
         self.__storeRecentFiles()
         self.__loadRecentFiles()
+        
+    def getDirOfLastFile(self):
+        return os.path.dirname(str(self.recentFiles[0]))
             
     def __storeRecentFiles(self):
         """ store filelist to configfile """
         self.settings.beginWriteArray("RecentlyUsedFiles")
         for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
-            self.settings.setValue("Filename", self.recentfiles[i])
+            self.settings.setValue("Filename", self.recentFiles[i])
         self.settings.endArray()
         
     def __makeActions(self, parent):
@@ -91,23 +95,21 @@ class RecentFileHandler():
         for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
             filename = self.settings.value("Filename").toString()
-            duplicate = False 
-            for j in range(len(self.recentfiles)):
-                if (filename != "" and self.recentfiles[j] == filename):
-                    logging.debug("file %s appears multiple times in configfile. fixed now" % filename)
-                    self.recentfiles.append("")
-                    duplicate = True
-            if not duplicate:
-                self.recentfiles.append(filename)
+            
+            if not filename in self.recentFiles:
+                self.recentFiles.append(filename)
+            else:
+                logging.debug("file %s appears multiple times in configfile. fixed now" % filename)
+                self.recentFiles.append("")     
+                
         self.settings.endArray()
         
     def __loadRecentFiles(self):
         """Load recently used files from self.recentfiles to the menu. """
         for action_index in range(self.nrRecentFiles):
-            filename = self.recentfiles[action_index]
+            filename = self.recentFiles[action_index]
             if exists(filename):
                 self.actions[action_index].setText(filename)
                 self.actions[action_index].setVisible(True)
             else:
                 self.actions[action_index].setVisible(False)
-            

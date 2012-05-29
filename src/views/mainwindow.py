@@ -22,7 +22,6 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-import os
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
 from PyQt4.QtCore import SIGNAL, QObject, Qt
 from ui_mainwindow import Ui_MainWindow
@@ -225,8 +224,8 @@ class MainWindow(QMainWindow):
                     self.saveState())
 
     def initRecentFileHandler(self):
-        self.RecentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.RecentFileHandler.addToRecentFiles)
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
         """
@@ -239,7 +238,7 @@ class MainWindow(QMainWindow):
                 "InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
-        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", os.path.dirname(str(self.RecentFileHandler.recentfiles[0]))))
+        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
             self.debugController.openExecutable(filename)
 
