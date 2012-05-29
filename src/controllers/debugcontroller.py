@@ -33,7 +33,10 @@ class DebugController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
 
-        self.settings = QSettings("fh-hagenberg", "SysCDbg")
+        self.isRecording = False
+
+        self.settings = QSettings("fh-hagenberg", "ricodebug")
+
         self.ptyhandler = PtyHandler()
 
         self.distributedObjects = distributedObjects
@@ -59,7 +62,7 @@ class DebugController(QObject):
             logging.error("File %s was not found." % filename)
             return
 
-        if self.editorController.closeOpenedFiles(): #closing source files may be canceled by user
+        if self.editorController.closeOpenedFiles():  # closing source files may be canceled by user
             if self.executableName != None:
                 #clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()

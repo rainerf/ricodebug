@@ -23,13 +23,14 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
-from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
+from helpers.recentfilehandler import RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
+from PyQt4 import QtGui
 
 
 class MainWindow(QMainWindow):
@@ -52,9 +53,9 @@ class MainWindow(QMainWindow):
         self.editorController = self.distributedObjects.editorController
 
         #init RecentFileHandler
-        nrRecentFiles = 5
-        self.initRecentFileHandler(nrRecentFiles)
-
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.recentFileHandler.addToRecentFiles)
+        QObject.connect(self.debugController, SIGNAL('executableOpened'), self.__observeWorkingBinary)
         QObject.connect(self.debugController, SIGNAL('executableOpened'), self.showExecutableName)
 
         # signal proxy
@@ -87,6 +88,10 @@ class MainWindow(QMainWindow):
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
 
+        self.binaryName = None
+        self.fileWatcher = QFileSystemWatcher()
+        self.fileWatcher.connect(self.fileWatcher, SIGNAL("fileChanged(const QString&)"), self.__binaryChanged)
+
     def setupUi(self):
         self.__initActions()
         self.ui.statusLabel = QLabel()
@@ -95,17 +100,6 @@ class MainWindow(QMainWindow):
         self.ui.statusIcon = QLabel()
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
         self.ui.statusbar.addPermanentWidget(self.ui.statusIcon)
-
-    #def setupGraph(self):
-        #self.scene = QGraphicsScene()
-        #self.c2 = Composite()
-        #self.c1 = Composite()
-        #self.c1.addItem(LeafEntry("exp1", "val11"))
-        #self.c1.addItem(LeafEntry("exp2 long", "val22"))
-        #self.c2.addItem(LeafEntry("exp2 even longer", "val22"))
-        #self.c2.addItem(CompositeEntry("subcomp", self.c1))
-        #self.c2.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsMovable)
-        #self.scene.addItem(self.c2)
 
     def __initActions(self):
         self.disableButtons()
@@ -128,6 +122,8 @@ class MainWindow(QMainWindow):
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
                 self.act.actions[Actions.Open])
+
+        self.act.actions[Actions.Open].setMenu(self.ui.menuRecentlyUsedFiles)
         self.ui.menuFile.addAction(self.act.actions[Actions.SaveFile])
         self.ui.menuFile.addAction(self.act.actions[Actions.Exit])
 
@@ -162,7 +158,7 @@ class MainWindow(QMainWindow):
                 self.showOpenExecutableDialog)
         self.connect(self.act.actions[Actions.Exit], SIGNAL('activated()'), \
                 self.close)
-        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.SaveFile], SIGNAL('activated()'), \
                 self.signalproxy.emitSaveCurrentFile)
 
         # debug menu
@@ -178,10 +174,10 @@ class MainWindow(QMainWindow):
                 SIGNAL('activated()'), self.debugController.reverse_next)
         self.connect(self.act.actions[Actions.ReverseStep], \
                 SIGNAL('activated()'), self.debugController.reverse_step)
-        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'),\
+        self.connect(self.act.actions[Actions.Continue], SIGNAL('activated()'), \
                 self.debugController.cont)
-        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()')\
-                , self.debugController.interrupt)
+        self.connect(self.act.actions[Actions.Interrupt], SIGNAL('activated()'), \
+                self.debugController.interrupt)
         self.connect(self.act.actions[Actions.Finish], SIGNAL('activated()'), \
                 self.debugController.finish)
         self.connect(self.act.actions[Actions.RunToCursor], \
@@ -233,25 +229,6 @@ class MainWindow(QMainWindow):
             self.settings.setValue("InitialWindowPlacement/windowState", \
                     self.saveState())
 
-    def initRecentFileHandler(self, nrRecentFiles):
-        """
-        Create menu entries for recently used files and connect them to the 
-        RecentFileHandler
-        """
-        # create menu entries and connect the actions to the debug controller
-        recentFileActions = [0] * nrRecentFiles
-        for i in range(nrRecentFiles):
-            recentFileActions[i] = OpenRecentFileAction(self)
-            recentFileActions[i].setVisible(False)
-            self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            QObject.connect(recentFileActions[i], SIGNAL('executableOpened'), \
-                    self.distributedObjects.debugController.openExecutable)
-
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, \
-                nrRecentFiles, self.distributedObjects)
-        QObject.connect(self.debugController, SIGNAL('executableOpened'), \
-                self.RecentFileHandler.addToRecentFiles)
-
     def restoreInitialWindowPlacement(self):
         """
         Restores the window placement created by
@@ -263,7 +240,7 @@ class MainWindow(QMainWindow):
                 "InitialWindowPlacement/windowState").toByteArray())
 
     def showOpenExecutableDialog(self):
-        filename = str(QFileDialog.getOpenFileName(self, "Open Executable"))
+        filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
             self.debugController.openExecutable(filename)
 
@@ -341,3 +318,21 @@ class MainWindow(QMainWindow):
         self.act.actions[Actions.RunToCursor].setEnabled(False)
         self.act.actions[Actions.Record].setChecked(False)
         self.act.actions[Actions.Record].setEnabled(False)
+
+    def __observeWorkingBinary(self, filename):
+        """ Private Method to Observe Debugged Binary """
+        if self.binaryName != None:
+            self.fileWatcher.removePath(self.binaryName)
+        self.fileWatcher.addPath(filename)
+        self.binaryName = filename
+
+    def __binaryChanged(self):
+        """ Slot for FileWatcher - Using QtMessagebox for interaction"""
+        box = QtGui.QMessageBox()
+        if box.question(self, "Binary Changed!", "Reload File?",
+                        QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+            self.debugController.openExecutable(self.binaryName)
+        else:
+            self.fileWatcher.removePath(self.binaryName)
+            self.fileWatcher.addPath(self.binaryName)
+

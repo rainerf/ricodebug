@@ -37,8 +37,11 @@ class GdbConnector(QObject):
         self.reader = GdbReader(self)
 
     def start(self):
-        self.gdb = subprocess.Popen(['gdb', '--interpreter', 'mi'], \
-                shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            self.gdb = subprocess.Popen(['gdb', '--interpreter', 'mi'], \
+                    shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        except OSError as e:
+            logging.critical("Could not start gdb. Error message: %s", e)
         self.reader.startReading(self.gdb.stdout)
 
     def execute(self, cmd, error_msg=None):
@@ -170,7 +173,7 @@ class GdbConnector(QObject):
         return self.executeAndRaiseIfFailed("-break-condition " + str(number) \
                 + " " + str(condition), "Could not set condition '" + \
                 str(condition) + "' for breakpoint " + str(number) + ".")
-    
+
     def changeWorkingDirectory(self, dir_):
         return self.executeAndRaiseIfFailed("-environment-cd " + dir_)
 
@@ -186,7 +189,7 @@ class GdbConnector(QObject):
         # FIXME: find the real mi command!
         return self.executeAndRaiseIfFailed("-interpreter-exec console rec", \
                 "Could not record the process.")
-    
+
     def record_stop(self):
         """Stop recording
         """

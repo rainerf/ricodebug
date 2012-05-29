@@ -39,18 +39,12 @@ class GdbReader(QThread):
         self.resultRecordQueue = deque()
         self.resultRecordMutex = QMutex()
         self.resultRecordSem = QSemaphore(0)
-        self.asynQueue = deque()
-        self.asynMutex = QMutex()
-        self.asynSem = QSemaphore(0)
-        self.streamQueue = deque()
-        self.streamMutex = QMutex()
-        self.streamSem = QSemaphore(0)
 
     def startReading(self, stdout):
         """Intialise and start the gdbreader thread
         """
         self.stdout = stdout
-        
+
         # self.start is predefined method by QThread and starts the thread.
         self.start()
 
