@@ -30,7 +30,6 @@ from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
 from helpers.actions import Actions
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
-from views.editorview import EditorView
 
 
 class MainWindow(QMainWindow):
@@ -45,12 +44,11 @@ class MainWindow(QMainWindow):
 
         self.distributedObjects = DistributedObjects()
 
+        self.act = self.distributedObjects.actions
         self.debugController = self.distributedObjects.debugController
-        self.gdbconnector = self.distributedObjects.gdb_connector
         self.settings = self.debugController.settings
         self.signalproxy = self.distributedObjects.signalProxy
         self.pluginloader = PluginLoader(self.distributedObjects)
-        self.editor_view = EditorView(self.distributedObjects)
         self.editorController = self.distributedObjects.editorController
 
         #init RecentFileHandler
@@ -110,14 +108,7 @@ class MainWindow(QMainWindow):
         #self.scene.addItem(self.c2)
 
     def __initActions(self):
-        self.act = self.distributedObjects.actions
-        self.act.actions[Actions.Continue].setEnabled(False)
-        self.act.actions[Actions.Interrupt].setEnabled(False)
-        self.act.actions[Actions.Next].setEnabled(False)
-        self.act.actions[Actions.Step].setEnabled(False)
-        self.act.actions[Actions.Finish].setEnabled(False)
-        self.act.actions[Actions.RunToCursor].setEnabled(False)
-        self.act.actions[Actions.Record].setEnabled(False)
+        self.disableButtons()
         self.act.actions[Actions.Record].setCheckable(True)
         self.act.actions[Actions.ReverseNext].setEnabled(False)
         self.act.actions[Actions.ReverseStep].setEnabled(False)
@@ -176,7 +167,7 @@ class MainWindow(QMainWindow):
 
         # debug menu
         self.connect(self.act.actions[Actions.Run], SIGNAL('activated()'), \
-                self.Run)
+                 self.debugController.run)
         self.connect(self.act.actions[Actions.Next], SIGNAL('activated()'), \
                 self.debugController.next_)
         self.connect(self.act.actions[Actions.Step], SIGNAL('activated()'), \
@@ -293,10 +284,12 @@ class MainWindow(QMainWindow):
     def showExecutableName(self, filename):
         self.ui.actionSaveSession.setEnabled(True)   # enable saving session
         self.setWindowFilePath(filename)
+        self.disableButtons()
 
     def targetStartedRunning(self):
         self.ui.statusLabel.setText("Running")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_running.png"))
+        self.enableButtons()
 
     def targetStopped(self, rec):
         self.ui.statusLabel.setText("Stopped")
@@ -330,10 +323,6 @@ class MainWindow(QMainWindow):
             self.act.actions[Actions.ReverseNext].setEnabled(False)
             self.act.actions[Actions.ReverseStep].setEnabled(False)
 
-    def Run(self):
-        self.debugController.run()
-        self.enableButtons()
-
     def enableButtons(self):
         self.act.actions[Actions.Continue].setEnabled(True)
         self.act.actions[Actions.Interrupt].setEnabled(True)
@@ -350,4 +339,5 @@ class MainWindow(QMainWindow):
         self.act.actions[Actions.Step].setEnabled(False)
         self.act.actions[Actions.Finish].setEnabled(False)
         self.act.actions[Actions.RunToCursor].setEnabled(False)
+        self.act.actions[Actions.Record].setChecked(False)
         self.act.actions[Actions.Record].setEnabled(False)

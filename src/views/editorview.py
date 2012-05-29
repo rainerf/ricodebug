@@ -57,9 +57,6 @@ class EditorView(QWidget):
 
         self.openedFiles = {}
 
-    def setActions(self, actions):
-        self.act = actions
-
     def hideTab(self, idx):
         """ Close an opened file tab. Show message box if file has been modified. """
         w = self.tabWidget.widget(idx)
