@@ -22,8 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4 import QtCore, QtGui
 
 """
 general information:
@@ -39,9 +38,11 @@ general information:
     ...
  * connect your actions via connectAction or connectActionEx or your own Implementation
 """
-class ActionEx(QAction):
+
+
+class ActionEx(QtGui.QAction):
     def __init__(self, parameter, parent=None):
-        QAction.__init__(self, parent)
+        QtGui.QAction.__init__(self, parent)
         self.parameter = parameter
         self.triggered.connect(self.commit)
         self.parent = parent
@@ -55,82 +56,114 @@ class ActionEx(QAction):
             print "------------------------ parameter ok."
             self.triggered(self.parameter)
 
-class Actions(QObject):
-    Open = Exit = SaveFile = Run = Continue = ReverseContinue = Interrupt = Next = \
-        ReverseNext = Step = ReverseStep = Finish = RunToCursor = ToggleBreak = \
-        ToggleTrace = AddTraceVar = DelTraveVar = AddWatch = AddVarToDataGraph = \
-        DelWatch = Record = None
 
-    def __init__(self, parent):
-        QObject.__init__(self, parent)
-        self.parent = parent
-        ###############################################
-        ## file/program control
-        ###############################################
-        Actions.Open = self.createAction(":/icons/images/open.png", "Open", "Ctrl+O", \
-                "Open executable file", self.Open)
-        Actions.Exit = self.createAction(":/icons/images/exit.png", "Exit", "Ctrl+Q", \
-                "Close Program", self.Exit)
-        Actions.SaveFile = self.createAction(":/icons/images/save.png", "Save File", "Ctrl+S", \
-                "Save source file", self.SaveFile)
+class Actions(QtCore.QObject):
+    NumActions = 21
+    Open, Exit, SaveFile, \
+    Run, Continue, ReverseContinue, Interrupt, Next, ReverseNext, \
+    Step, ReverseStep, Finish, RunToCursor, Record, \
+    ToggleBreak, ToggleTrace, AddTraceVar, DelTraveVar, \
+    AddWatch, AddVarToDataGraph, DelWatch = range(NumActions)
 
-        ###############################################
-        ## file control
-        ###############################################
-        Actions.Run = self.createAction(":/icons/images/run.png", "Run", "F5", \
-                "Run current executable")
-        Actions.Continue = self.createAction(":/icons/images/continue.png", "Continue", "F6", \
-                "Continue current executable")
-        Actions.Interrupt = self.createAction(":/icons/images/interrupt.png", "Interrupt", "F4", \
-                "Interrupt current executable")
-        Actions.Next = self.createAction(":/icons/images/next.png", "Next", "F10", \
-                "Execute next line")
-        Actions.Step = self.createAction(":/icons/images/step.png", "Step", "F11", \
-                "Next Step")
-        Actions.Record = self.createAction(":/icons/images/record.png", \
-                "Record", None, "Record gdb executions")
-        Actions.ReverseNext = self.createAction(":/icons/images/rnext.png", "Reverse Next", None, \
-                "Execute previous line")
-        Actions.ReverseStep = self.createAction(":/icons/images/rstep.png", "Reverse Step", None, \
-                "Previous Step")
-        Actions.Finish = self.createAction(":/icons/images/finish.png", "Finish", None, \
-                "Finish executable")
-        Actions.RunToCursor = self.createAction(":/icons/images/until.png", "Run to Cursor", None, \
-                "Run executable to cursor position")
+    def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
+        self.actions = [None for _ in range(self.NumActions)]
+        self.initGlobalActions()
 
-        ###############################################
-        ## watch/break/trace points
-        ###############################################
-        Actions.ToggleBreak = self.createAction(":/icons/images/bp.png", "Toggle Breakpoint", \
-                "Ctrl+b", "Toggle breakpoint in current line")
-        Actions.ToggleTrace = self.createAction(":/icons/images/tp.png", "Toggle Tracepoint", \
-                "Ctrl+t", "Toggle tracepoint in current line")
-        Actions.AddTraceVar = self.createAction(":/icons/images/tp_var_plus.png", \
-                "Add var to Tracepoint", "+", \
-                "Add selected variable to tracepoint")
-        Actions.DelTraceVar = self.createAction(":/icons/images/tp_var_minus.png", \
-                "Del var from Tracepoint", "-", \
-                "Remove selected variable from tracepoint")
-        Actions.AddWatch = self.createAction(":/icons/images/watch_plus.png", "Add var to Watch",\
-                "+", "Add selected variable to watchview-window")
-        Actions.AddVarToDataGraph = self.createAction(":/icons/images/watch_plus.png", \
-                "Add var to DataGraph", "+", \
-                "Add selected variable to datagraph-window",)
-        Actions.DelWatch = self.createAction(":/icons/images/watch_minus.png", \
-                "Del var from Watch", "+", \
-                "Remove selected variable from watchview-window")
+    def add(self, enum, action):
+        """dont use this function outside of class!!!"""
+        self.actions[enum] = action
 
-    def createAction(self, icon, text, shortcut, statustip, parameter=None):
+    def createAction(self, icon, text, shortcut, statustip, enum, parameter=None):
         """dont use this function outside of class!!!"""
         if parameter is None:
-            newAction = QAction(QIcon(icon), text, self.parent)
+            newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
         else:
-            newAction = None
+            newAction = ActionEx(parameter)
 
         if shortcut is not None:
             newAction.setShortcut(shortcut)
 
         newAction.setStatusTip(statustip)
-        return newAction
+        self.add(enum, newAction)
+
+    def initGlobalActions(self):
+
+        ###############################################
+        ## file/program control
+        ###############################################
+        #open
+        self.createAction(":/icons/images/open.png", "Open", "Ctrl+O", \
+                "Open executable file", self.Open)
+        #exit
+        self.createAction(":/icons/images/exit.png", "Exit", "Ctrl+Q", \
+                "Close Program", self.Exit)
+        #save source file
+        self.createAction(":/icons/images/save.png", "Save File", "Ctrl+S", \
+                "Save source file", self.SaveFile)
+
+        ###############################################
+        ## file control
+        ###############################################
+        #run
+        self.createAction(":/icons/images/run.png", "Run", "F5", \
+                "Run current executable", self.Run)
+        #continue
+        self.createAction(":/icons/images/continue.png", "Continue", "F6", \
+                "Continue current executable", self.Continue)
+        #interrupt
+        self.createAction(":/icons/images/interrupt.png", "Interrupt", "F4", \
+                "Interrupt current executable", self.Interrupt)
+        #next
+        self.createAction(":/icons/images/next.png", "Next", "F10", \
+                "Execute next line", self.Next)
+        #step
+        self.createAction(":/icons/images/step.png", "Step", "F11", \
+                "Next Step", self.Step)
+        #record
+        self.createAction(":/icons/images/record.png", "Record", None, \
+                "Record gdb executions", self.Record)
+        #previous
+        self.createAction(":/icons/images/rnext.png", "Reverse Next", None, \
+                "Execute previous line", self.ReverseNext)
+        #reverse step
+        self.createAction(":/icons/images/rstep.png", "Reverse Step", None, \
+                "Previous Step", self.ReverseStep)
+        #finish
+        self.createAction(":/icons/images/finish.png", "Finish", None, \
+                "Finish executable", self.Finish)
+        #run to cursor
+        self.createAction(":/icons/images/until.png", "Run to Cursor", None, \
+                "Run executable to cursor position", self.RunToCursor)
+
+        ###############################################
+        ## watch/break/trace points
+        ###############################################
+        #toggle breakpoint
+        self.createAction(":/icons/images/bp.png", "Toggle Breakpoint", \
+                "Ctrl+b", "Toggle breakpoint in current line", self.ToggleBreak)
+        #add tracepoint
+        self.createAction(":/icons/images/tp.png", "Toggle Tracepoint", \
+                "Ctrl+t", "Toggle tracepoint in current line", self.ToggleTrace)
+        #AddTraceVar
+        self.createAction(":/icons/images/tp_var_plus.png", \
+                "Add var to Tracepoint", "+", \
+                "Add selected variable to tracepoint", self.AddTraceVar)
+        #DelTraceVar
+        self.createAction(":/icons/images/tp_var_minus.png", \
+                "Del var from Tracepoint", "-", \
+                "Remove selected variable from tracepoint", self.DelTraveVar)
+        #AddWatch
+        self.createAction(":/icons/images/watch_plus.png", "Add var to Watch",\
+                "+", "Add selected variable to watchview-window", self.AddWatch)
+        #AddToDataGraph
+        self.createAction(":/icons/images/watch_plus.png", \
+                "Add var to DataGraph", "+", \
+                "Add selected variable to datagraph-window", \
+                self.AddVarToDataGraph)
+        #DelWatch
+        self.createAction(":/icons/images/watch_minus.png", \
+                "Del var from Watch", "+", \
+                "Remove selected variable from watchview-window", self.DelWatch)
 
 

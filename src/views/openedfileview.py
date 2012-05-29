@@ -131,9 +131,11 @@ class OpenedFileView(QObject):
         _model.rowsInserted.connect(self.getTracepointsFromModel)
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
 
-        Actions.AddWatch.triggered.connect(self.addWatch)
-        Actions.ToggleTrace.triggered.connect(self.toggleTracepoint)
-        Actions.AddVarToDataGraph.triggered.connect(self.AddVarToDataGraph)
+        act = self.distributedObjects.actions.actions
+        act[Actions.AddWatch].triggered.connect(self.addWatch)
+        act[Actions.ToggleTrace].triggered.connect(self.toggleTracepoint)
+        act[Actions.AddVarToDataGraph].triggered.connect(
+                self.AddVarToDataGraph)
 
     def saveFile(self):
         ''' Save source file '''
@@ -189,9 +191,10 @@ class OpenedFileView(QObject):
 
         self.popupMenu = QtGui.QMenu(self.edit)
         # add watch and toggle breakpoint to menu
-        self.popupMenu.addAction(Actions.AddWatch)
-        self.popupMenu.addAction(Actions.ToggleTrace)
-        self.popupMenu.addAction(Actions.AddVarToDataGraph)
+        act = self.distributedObjects.actions.actions
+        self.popupMenu.addAction(act[Actions.AddWatch])
+        self.popupMenu.addAction(act[Actions.ToggleTrace])
+        self.popupMenu.addAction(act[Actions.AddVarToDataGraph])
         # add separator and self.subPopupMenu
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)

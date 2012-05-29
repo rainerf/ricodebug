@@ -40,11 +40,12 @@ from variables.variablepool import VariablePool
 from stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
-
+from helpers.actions import Actions
 
 class DistributedObjects:
     def __init__(self):
         self.gdb_connector = GdbConnector()
+        self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
         self.editorController = EditorController(self)
