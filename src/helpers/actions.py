@@ -49,7 +49,7 @@ class Actions(QtCore.QObject):
 
         def commit(self):
             assert(self.parameter is not None)
-            self.triggered.emit(elf.parameter)
+            self.triggered.emit(self.parameter)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
