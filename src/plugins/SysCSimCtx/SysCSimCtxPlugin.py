@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import re
-from PyQt4.QtCore import Qt, QObject, SIGNAL
+from PyQt4.QtCore import Qt
 from PyQt4 import QtCore, QtGui
 
 # plugin requirements:
@@ -129,11 +129,11 @@ class SysCSimCtxPlugin():
         self.widget.setObjectName("SysCSimCtx")
         self.widget.setWidget(self.w)
 
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
+        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
         
-        QObject.connect(self.signalproxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
-        QObject.connect(self.signalproxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
-        QObject.connect(self.comboBox, SIGNAL('currentIndexChanged(QString)'), self.comboBoxIndexChanged)
+        self.signalproxy.inferiorStoppedNormally.connect(self.update)
+        self.signalproxy.inferiorHasExited.connect(self.clear)
+        self.comboBox.currentIndexChanged.connect(self.comboBoxIndexChanged)
         
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""

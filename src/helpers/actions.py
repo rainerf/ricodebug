@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import SIGNAL, QObject
 
 """
 general information:
@@ -45,16 +44,17 @@ class ActionEx(QtGui.QAction):
     def __init__(self, parameter, parent=None):
         QtGui.QAction.__init__(self, parent)
         self.parameter = parameter
-        QObject.connect(self, SIGNAL("triggered()"), self.commit)
+        self.triggered.connect(self.commit)
         self.parent = parent
 
+    # FIXME: this doesn't makes any sense
     def commit(self):
         print "---------------------------- commit ActionEx success."
         if self.parameter == None:
             print "------------------------ ActionEx: set paramter first!"
         else:
             print "------------------------ parameter ok."
-            self.emit(QtCore.SIGNAL("triggered(PyQt_PyObject)"), self.parameter)
+            self.triggered(self.parameter)
 
 
 class Actions(QtCore.QObject):

@@ -24,7 +24,7 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import QTreeView, QMenu
-from PyQt4.QtCore import SIGNAL, QObject, Qt
+from PyQt4.QtCore import Qt
 from variables import filters
 from controllers.treeitemcontroller import TreeStdVarWrapper
 
@@ -35,7 +35,7 @@ class TreeItemView(QTreeView):
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.controller = controller
-        QObject.connect(self, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
+        self.expanded.connect(self.resizeColumn)
 
     def resizeColumn(self, _):
         """Resize the first column to contents when expanded."""
@@ -62,3 +62,4 @@ class WatchView(TreeItemView):
                 menu = QMenu()
                 filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
                 menu.exec_(event.globalPos())
+

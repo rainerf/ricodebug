@@ -23,8 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QWidget, QTextCursor
-from PyQt4.QtCore import QObject, SIGNAL, Qt
 from stylesheets import STYLESHEET
 from helpers.tools import unBackslashify
 from helpers.gdboutput import GdbOutput
@@ -58,9 +58,10 @@ class GdbIoView(QWidget):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         self.debugController = debug_controller
-        QObject.connect(self.gdbInputEdit.lineEdit(), SIGNAL('returnPressed()'), self.gdbSendButton.click)
-        QObject.connect(self.gdbSendButton, SIGNAL('clicked()'), self.executeCliCommand)
-        QObject.connect(self.debugController.connector.reader, SIGNAL('consoleRecordReceived(PyQt_PyObject)'), self.handleConsoleRecord, Qt.QueuedConnection)
+        self.gdbInputEdit.lineEdit().returnPressed.connect(self.gdbSendButton.click)
+        self.gdbSendButton.clicked.connect(self.executeCliCommand)
+        self.debugController.connector.reader.consoleRecordReceived.connect(
+                self.handleConsoleRecord, Qt.QueuedConnection)
 
     def executeCliCommand(self):
         cmd = str(self.gdbInputEdit.lineEdit().text())
@@ -81,3 +82,4 @@ class GdbIoView(QWidget):
             s = unBackslashify(rec.string)
             self.gdbIoEdit.insertPlainText(s)
             self.gdbIoEdit.moveCursor(QTextCursor.End)
+

@@ -25,7 +25,7 @@ import logging
 
 """ @package datagraph.datagraphcontroller    the DataGraphController """
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from datagraphvwfactory import DataGraphVWFactory
 from datagraphview import DataGraphView
@@ -78,9 +78,9 @@ class DataGraphController(QObject):
         self.signalProxy.emitRegisterWithSessionManager(self, "Graph")
 
         # connect signals
-        #QObject.connect(self.variableList, SIGNAL('reset()'), self.repaintDataGraph)
-        QObject.connect(self.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.signalProxy, SIGNAL('cleanupModels()'), self.clearDataGraph)
+        #self.variableList.reset.connect(self.repaintDataGraph)
+        self.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
     def insertDockWidgets(self):
         """ adds the Datagraph-DockWidget to the GUI <br>
@@ -88,7 +88,7 @@ class DataGraphController(QObject):
         self.dataGraphDock = QDockWidget("Graph")
         self.dataGraphDock.setObjectName("DataGraphView")
         self.dataGraphDock.setWidget(self.data_graph_view)
-        self.signalProxy.addDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
+        self.signalProxy.emitAddDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
 
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph
@@ -119,7 +119,7 @@ class DataGraphController(QObject):
         self.data_graph_view.addItem(varWrapper.getView())
         if addVarToList:
             self.variableList.addVar(varWrapper)
-        QObject.connect(varWrapper, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        varWrapper.replace.connect(self.replaceVariable)
 
     def replaceVariable(self, pendingVar, newVar):
         """ replaces existing variable in list with new one

@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject
 from helpers.gdboutput import GdbOutput
 from stdvariable import StdVariable
 from ptrvariable import PtrVariable
@@ -51,9 +51,9 @@ class VariablePool(QObject):
 
         # signalproxy
         self.signalProxy = distributedObjects.signalProxy
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('tracepointOccurred()'), self.justUpdateValues)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateVars)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self.clearVars)
+        self.distributedObjects.signalProxy.tracepointOccurred.connect(self.justUpdateValues)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateVars)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self.clearVars)
 
     def clearVars(self):
         """ delete all variables stored in pool
@@ -96,7 +96,7 @@ class VariablePool(QObject):
             if hasattr(changed, "value"):
                 var.value = changed.value
             if not isTracePoint:
-                var.changed()
+                var.emitChanged()
 
         # search for pending variables and replace them if
         # they are in scope
@@ -107,7 +107,7 @@ class VariablePool(QObject):
         #        if gdbVar.class_ != GdbOutput.ERROR:
         #            newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
         #            self.list[var.getUniqueName()] = newVar
-        #            var.replace(newVar)
+        #            var.emitReplace(newVar)
 
         self.signalProxy.emitVariableUpdateCompleted()
 

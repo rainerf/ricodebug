@@ -23,17 +23,19 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QAction
 from os.path import exists
 import logging
 
 class OpenRecentFileAction(QAction):
     """ Class extends QAction to open a recently used file."""
+    executableOpened = pyqtSignal('PyQt_PyObject')
+    
     def __init__(self, parent, distributedObjects):
         QAction.__init__(self, parent)
         self.debugController = distributedObjects.debugController
-        QObject.connect(self, SIGNAL('triggered()'), self.__open)
+        self.triggered.connect(self.__open)
 
     def __open(self):
         ''' Open executable (file named like action). '''
@@ -113,3 +115,4 @@ class RecentFileHandler():
                 self.actions[action_index].setVisible(True)
             else:
                 self.actions[action_index].setVisible(False)
+

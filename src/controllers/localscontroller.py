@@ -22,7 +22,6 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
 from models.localsmodel import LocalsModel
 from views.localsview import LocalsView
 from treeitemcontroller import TreeItemController
@@ -31,7 +30,7 @@ from treeitemcontroller import TreeItemController
 class LocalsController(TreeItemController):
     def __init__(self, distributedObjects):
         TreeItemController.__init__(self, distributedObjects, "Locals", LocalsView, LocalsModel)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.getLocals)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
 
     def getLocals(self):
         self.clear()

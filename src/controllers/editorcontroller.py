@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject
 from views.editorview import EditorView
 
 
@@ -33,11 +33,11 @@ class EditorController(QObject):
 
         self.editor_view = EditorView(self.distributedObjects)
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.editor_view.targetStoppedNormally)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), self.editor_view.targetStoppedWithSignal)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.editor_view.targetExited)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('saveFile()'), self.saveCurrentFile)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('fileModified(PyQt_PyObject, bool)'), self.editor_view.setFileModified)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.editor_view.targetStoppedNormally)
+        self.distributedObjects.signalProxy.inferiorReceivedSignal.connect(self.editor_view.targetStoppedWithSignal)
+        self.distributedObjects.signalProxy.inferiorHasExited.connect(self.editor_view.targetExited)
+        self.distributedObjects.signalProxy.saveFile.connect(self.saveCurrentFile)
+        self.distributedObjects.signalProxy.fileModified.connect(self.editor_view.setFileModified)
 
     def jumpToLine(self, filename, line):
         line = int(line) - 1
@@ -65,3 +65,4 @@ class EditorController(QObject):
 
     def closeOpenedFiles(self):
         return self.editor_view.removeAllTabs()
+

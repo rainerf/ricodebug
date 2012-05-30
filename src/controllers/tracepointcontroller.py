@@ -26,7 +26,7 @@
     the tracepoint controller
 """
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from models.tracepointmodel import TracepointModel
 from views.tracepointview import TracepointView
@@ -55,11 +55,11 @@ class TracepointController(QObject):
         #register with session manager to save Tracepoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
-        QObject.connect(self.tracepointView.tracepointView, SIGNAL('clicked(QModelIndex)'), self.updateWaveforms)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.updateWaveforms)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('cleanupModels()'), self._model.clearTracepoints)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('runClicked()'), self._model.clearTracepointData)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.tracepointView.tracepointView.clicked.connect(self.updateWaveforms)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateWaveforms)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearTracepoints)
+        self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
@@ -72,7 +72,7 @@ class TracepointController(QObject):
         self.tracepointDock = QDockWidget("Tracepoints")
         self.tracepointDock.setObjectName("TracepointView")
         self.tracepointDock.setWidget(self.tracepointView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
 
     def toggleTracepoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line

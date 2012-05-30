@@ -22,9 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QSize, QSizeF, Qt
+from PyQt4.QtCore import QSize, QSizeF, pyqtSignal
 from PyQt4.QtGui import QGraphicsItem, QCursor, QFileDialog, QIcon
-from PyQt4.QtWebKit import QGraphicsWebView, QWebPage
+from PyQt4.QtWebKit import QGraphicsWebView
 from mako.template import Template
 from PyQt4 import QtCore
 import sys
@@ -33,6 +33,8 @@ import logging
 
 class HtmlVariableView(QGraphicsWebView):
     """ the view to show variables in the DataGraph """
+
+    removing = pyqtSignal()
 
     def __init__(self, varWrapper, distributedObjects):
         """ Constructor
@@ -59,8 +61,8 @@ class HtmlVariableView(QGraphicsWebView):
         self.dirty = True
 
         self.id = self.getUniqueId(self)
-
-        self.connect(self.distributedObjects.signalProxy, SIGNAL("variableUpdateCompleted()"), self.render)
+        
+        self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
 
     def getIncomingPointers(self):
         return self.incomingPointers
@@ -104,8 +106,10 @@ class HtmlVariableView(QGraphicsWebView):
         return self.source
 
     def openContextMenu(self, menu):
-        menu.addAction(QIcon(":/icons/images/minus.png"), "Remove %s" % self.varWrapper.getExp(), self.remove)
-        menu.addAction(QIcon(":/icons/images/save-html.png"), "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
+        menu.addAction(QIcon(":/icons/images/minus.png"), 
+                "Remove %s" % self.varWrapper.getExp(), self.remove)
+        menu.addAction(QIcon(":/icons/images/save-html.png"), 
+                "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
         menu.exec_(QCursor.pos())
 
     @QtCore.pyqtSlot()
@@ -122,7 +126,7 @@ class HtmlVariableView(QGraphicsWebView):
     @QtCore.pyqtSlot()
     def remove(self):
         """remove the varWrapper from the datagraph"""
-        self.emit(SIGNAL('removing()'))
+        self.removing.emit()
         self.distributedObjects.datagraphController.removeVar(self.varWrapper)
 
     def getUniqueId(self, template):

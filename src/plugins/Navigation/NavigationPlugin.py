@@ -1,4 +1,4 @@
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from ctags_support import EntryList, EntryItem, Function
@@ -8,6 +8,9 @@ from PyQt4.QtCore import QThread
 
 
 class CTagsRunner(QThread):
+    
+    tagsFileAvailable = pyqtSignal
+
     def __init__(self, tmpFile, parent=None):
         super(CTagsRunner, self).__init__(parent)
         self.tmpFile = tmpFile
@@ -19,7 +22,7 @@ class CTagsRunner(QThread):
 
     def run(self):
         os.system('ctags --fields=afmikKlnsStz -f %s %s' % (self.tmpFile, " ".join(self.sources)))
-        self.emit(QtCore.SIGNAL("tagsFileAvailable()"))
+        self.tagsFileAvailable.emit()
 
 
 class NavigationView(QtGui.QTreeView):
@@ -75,11 +78,11 @@ class NavigationPlugin(QtCore.QObject):
         self.dockwidget.setWidget(self.view)
 
         # add widget to mainwindow
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
-        QtCore.QObject.connect(self.signalproxy.distributedObjects.debugController, QtCore.SIGNAL('executableOpened'), self.update)
+        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
+        self.signalproxy.distributedObjects.debugController.executableOpened.connect(self.update)
 
         self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
-        QtCore.QObject.connect(self.ctagsRunner, QtCore.SIGNAL("tagsFileAvailable()"), self.tagsFileReady, Qt.QueuedConnection)
+        self.ctagsRunner.tagsFileAvailable.connect(self.tagsFileReady, Qt.QueuedConnection)
 
         # load the tags if the plugin was loaded after the executable
         self.update()

@@ -24,7 +24,6 @@
 
 """ @package controllers.watchcontroller    the WatchController """
 
-from PyQt4.QtCore import QObject, SIGNAL
 from models.variablemodel import VariableModel
 from views.watchview import WatchView
 from treeitemcontroller import TreeItemController
@@ -44,7 +43,7 @@ class WatchController(TreeItemController):
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         TreeItemController.__init__(self, distributedObjects, "Watch", WatchView, VariableModel)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('AddWatch(QString)'), self.addWatch)
+        self.distributedObjects.signalProxy.AddWatch.connect(self.addWatch)
 
     def removeSelected(self, row, parent):
         """ remove selected variable from WatchView
@@ -60,8 +59,8 @@ class WatchController(TreeItemController):
         """
         vw = self.variableList.addVarByName(watch)
         # connect changed and replace signal from wrapper
-        QObject.connect(vw, SIGNAL('changed()'), vw.hasChanged)
-        QObject.connect(vw, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        vw.dataChanged.connect(vw.hasChanged)
+        vw.replace.connect(self.replaceVariable)
 
         self.add(vw)
 
@@ -73,8 +72,8 @@ class WatchController(TreeItemController):
         vwOld = self.variableList.getVariableWrapper(pendingVar)
 
         vwNew = self.variableList.replaceVar(pendingVar, newVar)
-        QObject.connect(vwNew, SIGNAL('changed()'), vwNew.hasChanged)
-        QObject.connect(vwNew, SIGNAL('replace(PyQt_PyObject, PyQt_PyObject)'), self.replaceVariable)
+        vwNew.changed.connect(vwNew.hasChanged)
+        vwNew.replace.connect(self.replaceVariable)
 
         # set parent for root variable
         vwNew.setParent(self.variableModel.root)
