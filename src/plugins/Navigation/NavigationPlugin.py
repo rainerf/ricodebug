@@ -8,8 +8,7 @@ from PyQt4.QtCore import QThread
 
 
 class CTagsRunner(QThread):
-    
-    tagsFileAvailable = pyqtSignal
+    tagsFileAvailable = pyqtSignal()
 
     def __init__(self, tmpFile, parent=None):
         super(CTagsRunner, self).__init__(parent)
