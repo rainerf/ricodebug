@@ -26,13 +26,15 @@ import re
 import cgi
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
-from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
+from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher
 from math import log, ceil
 from helpers.actions import Actions
 import logging
 
 class OpenedFileView(QObject):
-    MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
+    
+    MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
+    MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
 
     def __init__(self, distributedObjects, filename):
         QObject.__init__(self)
@@ -53,7 +55,7 @@ class OpenedFileView(QObject):
       
         self.FileWatcher = QFileSystemWatcher()
         self.FileWatcher.addPath(self.filename)
-        self.FileWatcher.connect(self.FileWatcher, SIGNAL("fileChanged(const QString&)"), self.fileChanged)
+        self.FileWatcher.fileChanged.connect(self.fileChanged)
     
         self.tab = QtGui.QWidget()
         self.gridLayout = QtGui.QGridLayout(self.tab)
@@ -87,7 +89,9 @@ class OpenedFileView(QObject):
         self.edit.setMarginWidth(self.MARGIN_MARKER_TP, 10)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_TP, 1 << self.MARGIN_MARKER_TP)
         self.edit.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC, 1 << self.MARGIN_MARKER_EXEC | 1 << self.MARGIN_MARKER_EXEC_SIGNAL)
+        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC,
+                1 << self.MARGIN_MARKER_EXEC |
+                1 << self.MARGIN_MARKER_EXEC_SIGNAL)
         self.edit.setMarginWidth(self.MARGIN_MARKER_STACK, 0)
         self.edit.setMarkerBackgroundColor(QColor(Qt.yellow), self.MARGIN_MARKER_STACK)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_STACK, 1 << self.MARGIN_MARKER_STACK)
@@ -105,7 +109,7 @@ class OpenedFileView(QObject):
         self.file_.close()
 
         self.changed = False
-        QObject.connect(self.edit, SIGNAL("modificationChanged(bool)"), self.__setFileModified)
+        self.edit.modificationChanged.connect(self.__setFileModified)
 
         self.setMarginWidthByLineNumbers()
         self.edit.SendScintilla(Qsci.QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
@@ -113,45 +117,31 @@ class OpenedFileView(QObject):
         # override scintillas context menu with our own
         self.edit.SendScintilla(Qsci.QsciScintilla.SCI_USEPOPUP, 0)
         self.edit.setContextMenuPolicy(Qt.CustomContextMenu)
-        QObject.connect(self.edit,
-                SIGNAL('customContextMenuRequested(QPoint)'),
-                self.showContextMenu)
+        self.edit.customContextMenuRequested.connect(self.showContextMenu)
 
-        QObject.connect(self.edit,
-                SIGNAL("marginClicked(int,int,Qt::KeyboardModifiers)"),
-                self.marginClicked)
-        QObject.connect(self.edit, SIGNAL("SCN_DOUBLECLICK(int, int, int)"),
-                self.editDoubleClicked)
-        QObject.connect(self.edit, SIGNAL("SCN_DWELLSTART(int, int, int)"),
-                self.dwellStart)
-        QObject.connect(self.edit, SIGNAL("SCN_DWELLEND(int, int, int)"),
-                self.dwellEnd)
+        self.edit.marginClicked.connect(self.marginClicked)
+        self.edit.SCN_DOUBLECLICK.connect(self.editDoubleClicked)
+        self.edit.SCN_DWELLSTART.connect(self.dwellStart)
+        self.edit.SCN_DWELLEND.connect(self.dwellEnd)
 
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
         
-        actions = self.distributedObjects.actions
 
-        self.connect(self.breakpointController.model(),
-                SIGNAL('rowsInserted(QModelIndex, int, int)'),
-                self.getBreakpointsFromModel)
-        self.connect(self.breakpointController.model(),
-                SIGNAL('rowsRemoved(QModelIndex, int, int)'),
-                self.getBreakpointsFromModel)
-        self.connect(self.tracepointController.model(),
-                SIGNAL('rowsInserted(QModelIndex, int, int)'),
-                self.getTracepointsFromModel)
-        self.connect(self.tracepointController.model(),
-                SIGNAL('rowsRemoved(QModelIndex, int, int)'),
-                self.getTracepointsFromModel)
+        _model = self.breakpointController.model()
+        _model.rowsInserted.connect(self.getBreakpointsFromModel)
+        _model.rowsRemoved.connect(self.getBreakpointsFromModel)
+        _model = self.tracepointController.model() 
+        _model.rowsInserted.connect(self.getTracepointsFromModel)
+        _model.rowsRemoved.connect(self.getTracepointsFromModel)
 
-        self.connect(actions.AddWatch, SIGNAL('triggered()'), self.addWatch)
-        self.connect(actions.ToggleTrace, SIGNAL('triggered()'),
-                self.toggleTracepoint)
-        self.connect(actions.AddVarToDataGraph, SIGNAL('triggered()'),
+        act = self.distributedObjects.actions
+        act.AddWatch.triggered.connect(self.addWatch)
+        act.ToggleTrace.triggered.connect(self.toggleTracepoint)
+        act.AddVarToDataGraph.triggered.connect(
                 self.AddVarToDataGraph)
- 
+
     def fileChanged(self):         
         logging.warning("Source file %s modified. Recompile executable for \
                 correct debugging.", self.filename)
@@ -205,8 +195,7 @@ class OpenedFileView(QObject):
             # dynamic actions, not in actiony.py Action class
             self.action = self.distributedObjects.actions.createEx(
                     self.expToWatch, self)
-            QObject.connect(self.action, SIGNAL("triggered(PyQt_PyObject)"),
-                    tp.addVar)
+            self.action.triggered.connect(tp.addVar)
             self.action.setText(str(tp.name))
             self.action.setIcon(QIcon(QPixmap(":/icons/images/insert.png")))
             self.action.setIconVisibleInMenu(True)

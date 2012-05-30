@@ -37,11 +37,10 @@ from controllers.inferioriocontroller import InferiorIoController
 from controllers.gdbiocontroller import GdbIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
-from actions import Actions
 from stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
-
+from helpers.actions import Actions
 
 class DistributedObjects:
     def __init__(self):

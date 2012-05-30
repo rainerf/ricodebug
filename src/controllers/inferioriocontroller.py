@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, SIGNAL, Qt
+from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from views.inferiorioview import InferiorIoView
 
@@ -34,10 +34,10 @@ class InferiorIoController(QObject):
 
         self.inferiorioView = InferiorIoView(self.distributedObjects.debugController)
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('insertDockWidgets()'), self.insertDockWidgets)
+        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
 
     def insertDockWidgets(self):
         self.inferiorioDock = QDockWidget("Output")
         self.inferiorioDock.setObjectName("InferiorIoView")
         self.inferiorioDock.setWidget(self.inferiorioView)
-        self.distributedObjects.signalProxy.addDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)
+        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.inferiorioDock, True)

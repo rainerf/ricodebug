@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem, QPainter
-from PyQt4.QtCore import QObject, QPointF, SIGNAL, QLineF, QRectF, QSizeF
+from PyQt4.QtCore import QPointF, QLineF, QRectF, QSizeF
 import math
 import logging
 
@@ -51,14 +51,14 @@ class Pointer(QGraphicsLineItem):
 
         self.distributedObjects = distributedObjects
 
-        QObject.connect(self.fromView, SIGNAL('geometryChanged()'), self.updatePosition)
-        QObject.connect(self.toView, SIGNAL('geometryChanged()'), self.updatePosition)
-        QObject.connect(self.fromView, SIGNAL('xChanged()'), self.updatePosition)
-        QObject.connect(self.fromView, SIGNAL('yChanged()'), self.updatePosition)
-        QObject.connect(self.toView, SIGNAL('xChanged()'), self.updatePosition)
-        QObject.connect(self.toView, SIGNAL('yChanged()'), self.updatePosition)
-        QObject.connect(self.fromView, SIGNAL('removing()'), self.delete)
-        QObject.connect(self.toView, SIGNAL('removing()'), self.delete)
+        self.fromView.geometryChanged.connect(self.updatePosition)
+        self.toView.geometryChanged.connect(self.updatePosition)
+        self.fromView.xChanged.connect(self.updatePosition)
+        self.fromView.yChanged.connect(self.updatePosition)
+        self.toView.xChanged.connect(self.updatePosition)
+        self.toView.yChanged.connect(self.updatePosition)
+        self.fromView.removing.connect(self.delete)
+        self.toView.removing.connect(self.delete)
 
         self.arrowhead = QPolygonF()
         self.arrowSize = 20

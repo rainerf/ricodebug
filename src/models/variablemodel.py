@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject, SIGNAL
+from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject
 from PyQt4.QtGui import QPixmap, QBrush
 
 
@@ -192,9 +192,9 @@ class VariableModel(QAbstractItemModel):
         #  RootVarWrapper, root item of tree
         self.root = RootVarWrapper()
 
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), self.update)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('inferiorHasExited(PyQt_PyObject)'), self.clear)
-        QObject.connect(self.distributedObjects.signalProxy, SIGNAL('executableOpened()'), self.clear)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.update)
+        self.distributedObjects.signalProxy.inferiorHasExited.connect(self.clear)
+        self.distributedObjects.signalProxy.executableOpened.connect(self.clear)
 
     def addVar(self, var):
         """ Adds a variable to the VariableModel <br>
@@ -202,10 +202,10 @@ class VariableModel(QAbstractItemModel):
             update TreeItem value and highlight state
         @par var   TreeItem, variable to be added
         """
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.layoutAboutToBeChanged.emit()
         self.setUnmarked(var)
         self.updateData(var)
-        self.emit(SIGNAL('layoutChanged()'))
+        self.layoutChanged.emit()
 
     def removeChildren(self, parent):
         """ remove all children for given TreeItem
@@ -379,10 +379,10 @@ class VariableModel(QAbstractItemModel):
             update TreeItems value and highlight state
             this function is connected to the signal SignalProxy::inferiorStoppedNormally(PyQt_PyObject)
         """
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.layoutAboutToBeChanged.emit()
         self.setUnmarked(self.root)
         self.updateData(self.root)
-        self.emit(SIGNAL('layoutChanged()'))
+        self.layoutChanged.emit()
 
     def updateData(self, parent):
         """ update TreeItems value and highlight state
@@ -410,7 +410,7 @@ class VariableModel(QAbstractItemModel):
         """
         if index.isValid() and role == Qt.EditRole:
             index.internalPointer().variable.setValue(value.toString())
-            self.emit(SIGNAL('dataChanged(QModelIndex, QModelIndex)'), index, index)
+            self.dataChanged.emit(index, index)
             return True
         return False
 

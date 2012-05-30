@@ -25,7 +25,7 @@
 import logging
 from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
 from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
-from PyQt4.QtCore import Qt, SIGNAL, pyqtSlot, QTimer, QObject
+from PyQt4.QtCore import Qt, pyqtSlot, QTimer
 from models.logmodel import LogModel, FilteredLogModel
 
 
@@ -38,7 +38,7 @@ class LogViewHandler(logging.Handler):
         self.filter_model.setSourceModel(self.model)
         target_widget.setModel(self.filter_model)
         self.target_widget = target_widget
-        QObject.connect(filter_slider, SIGNAL("valueChanged(int)"), self.setFilter)
+        filter_slider.valueChanged.connect(self.setFilter)
 
     def emit(self, record):
         self.model.insertMessage(record)
@@ -77,10 +77,10 @@ class ErrorLabel(QWidget):
         self.time_bar.setTextVisible(False)
         self.pauseButton = QPushButton(QIcon(QPixmap(":/icons/images/pause.png")), "")
         self.pauseButton.setFixedSize(32, 32)
-        self.connect(self.pauseButton, SIGNAL('clicked()'), self.stopTimer)
+        self.pauseButton.clicked.connect(self.stopTimer)
         self.stopButton = QPushButton(QIcon(QPixmap(":/icons/images/stop.png")), "")
         self.stopButton.setFixedSize(32, 32)
-        self.connect(self.stopButton, SIGNAL('clicked()'), self.closeWidget)
+        self.stopButton.clicked.connect(self.closeWidget)
         self.layout = QGridLayout(self)
         self.layout.addWidget(self.time_bar, 0, 0, 2, 1)
         self.layout.addWidget(self.icon_label, 0, 1, 2, 1)
@@ -90,7 +90,7 @@ class ErrorLabel(QWidget):
         self.layout.setColumnStretch(2, 1)
         self.setAutoFillBackground(True)
         self.timer = QTimer()
-        self.connect(self.timer, SIGNAL("timeout()"), self.decrementTime)
+        self.timer.timeout.connect(self.decrementTime)
 
     def stopTimer(self):
         self.timer.stop()
@@ -154,3 +154,4 @@ class ErrorLabelHandler(logging.Handler):
 class LogView(QTableView):
     def __init__(self, parent=None):
         QTableView.__init__(self, parent)
+

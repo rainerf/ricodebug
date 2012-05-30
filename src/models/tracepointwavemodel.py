@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import Qt, QAbstractTableModel, QModelIndex, SIGNAL, QPointF, QLineF, QRectF
+from PyQt4.QtCore import Qt, QAbstractTableModel, QModelIndex, QPointF, QLineF, QRectF
 from PyQt4 import QtGui
 from operator import attrgetter
 
@@ -227,7 +227,7 @@ class TracepointWaveModel(QAbstractTableModel):
             waveform.setScene(TracepointWaveScene(prevScene.type, prevScene.values, self.duration))
             self.waveforms[i] = waveform
             index = self.createIndex(i, self.wavecolumn, None)
-            self.emit(SIGNAL('dataChanged(QModelIndex, QModelIndex)'), index, index)
+            self.dataChanged(index, index)
 
     def zoomOut(self):
         '''Zoom wave horizontally'''
@@ -238,7 +238,7 @@ class TracepointWaveModel(QAbstractTableModel):
             waveform.setScene(TracepointWaveScene(prevScene.type, prevScene.values, self.duration))
             self.waveforms[i] = waveform
             index = self.createIndex(i, self.wavecolumn, None)
-            self.emit(SIGNAL('dataChanged(QModelIndex, QModelIndex)'), index, index)
+            self.dataChanged.emit(index, index)
 
     def rowCount(self, parent):
         return len(self.waveforms)
@@ -271,7 +271,7 @@ class TracepointWaveModel(QAbstractTableModel):
             self.beginResetModel()
             self.waveforms.sort(key=attrgetter(key), reverse=rev)
             self.endResetModel()
-            self.emit(SIGNAL("orderChanged()"))
+            self.orderChanged.emit()
 
     def headerData(self, section, orientation, role):
         ret = None

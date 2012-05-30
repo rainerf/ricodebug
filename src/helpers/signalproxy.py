@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import SIGNAL, QObject
+from PyQt4.QtCore import QObject, pyqtSignal
 
 
 class SignalProxy(QObject):
@@ -30,6 +30,27 @@ class SignalProxy(QObject):
     class presenting signal interface for plugins
     plugins only need this class to communicate with main program
     '''
+
+    insertDockWidgets = pyqtSignal()
+    removeDockWidget = pyqtSignal('QDockWidget')
+    addDockWidget = pyqtSignal('PyQt_PyObject', 'QDockWidget', 'PyQt_PyObject')
+    variableUpdateCompleted = pyqtSignal()
+    registerWithSessionManager = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
+    runClicked = pyqtSignal()
+    cleanupModels = pyqtSignal()
+    saveFile = pyqtSignal()
+    dataForTracepointsReady = pyqtSignal()
+    tracepointOccurred = pyqtSignal()
+    fileModified = pyqtSignal('PyQt_PyObject', bool)
+    inferiorHasExited = pyqtSignal('PyQt_PyObject')
+    inferiorReceivedSignal = pyqtSignal('PyQt_PyObject')
+    inferiorStoppedNormally = pyqtSignal('PyQt_PyObject')
+    inferiorIsRunning = pyqtSignal('PyQt_PyObject')
+    executableOpened = pyqtSignal('PyQt_PyObject')
+    AddWatch = pyqtSignal('PyQt_PyObject')
+#    self.floatingWatchAdded.emit(watch)
+#    self.fixedWatchAdded.emit(watch)
+
 
     def __init__(self, distributedObjects):
         '''CTOR'''
@@ -41,88 +62,88 @@ class SignalProxy(QObject):
     ###################################################
     """ ============================================  WATCH  ============================================ """
     #def addWatchFixed(self, watch):
-    #    self.emit(SIGNAL('fixedWatchAdded(QString)'), watch)
+    #    self.fixedWatchAdded.emit(watch)
 
     #def addWatchFloating(self, watch):
-    #    self.emit(SIGNAL('floatingWatchAdded(QString)'), watch)
+    #    self.floatingWatchAdded.emit(watch)
 
     def addWatch(self, watch):
-        self.emit(SIGNAL('AddWatch(QString)'), str(watch))
+        self.AddWatch.emit(str(watch))
     """ ================================================================================================= """
 
     def emitExecutableOpened(self, filename):
         '''SLOT is called from signal of main program and passes another signal on to plugins'''
-        self.emit(SIGNAL('executableOpened(QString)'), filename)
+        self.executableOpened.emit(filename)
 
     def emitInferiorIsRunning(self, rec):
-        self.emit(SIGNAL('inferiorIsRunning(PyQt_PyObject)'), rec)
+        self.inferiorIsRunning.emit(rec)
 
     def emitInferiorStoppedNormally(self, rec):
-        self.emit(SIGNAL('inferiorStoppedNormally(PyQt_PyObject)'), rec)
+        self.inferiorStoppedNormally.emit(rec)
 
     def emitInferiorReceivedSignal(self, rec):
-        self.emit(SIGNAL('inferiorReceivedSignal(PyQt_PyObject)'), rec)
+        self.inferiorReceivedSignal.emit(rec)
 
     def emitInferiorHasExited(self, rec):
-        self.emit(SIGNAL('inferiorHasExited(PyQt_PyObject)'), rec)
+        self.inferiorHasExited.emit(rec)
 
     def emitFileModified(self, filename, changed):
         '''Emit signal to mark a file as edited
         @param filename: string with path to file
         @param changed: True -> file has changed
         '''
-        self.emit(SIGNAL('fileModified(PyQt_PyObject, bool)'), filename, changed)
+        self.fileModified.emit(filename, changed)
 
     def emitTracepointOccurred(self):
-        self.emit(SIGNAL('tracepointOccurred()'))
+        self.tracepointOccurred.emit()
 
     def emitDataForTracepointsReady(self):
-        self.emit(SIGNAL('dataForTracepointsReady()'))
+        self.dataForTracepointsReady.emit()
 
     def emitSaveCurrentFile(self):
         '''Tell editorview to save current file'''
-        self.emit(SIGNAL('saveFile()'))
+        self.saveFile.emit()
 
     def emitCleanupModels(self):
         '''Signal is emitted just before a new executable is opened to delete breakpoints, watches, ...'''
-        self.emit(SIGNAL('cleanupModels()'))
+        self.cleanupModels.emit()
 
     def emitRunClicked(self):
         '''Signal is emitted after run button was clicked. '''
-        self.emit(SIGNAL('runClicked()'))
+        self.runClicked.emit()
 
     def emitRegisterWithSessionManager(self, regObject, dialogItem):
         '''Register with session manager to add debug info to xml session file
             @param regObject: object must implement saveSession(self, XmlHandler) and loadSession(self, XmlHandler)
             @param dialogItem: String which appears with a checkbox in the save session dialog
         '''
-        self.emit(SIGNAL('registerWithSessionManager(PyQt_PyObject, PyQt_PyObject)'), regObject, dialogItem)
+        self.registerWithSessionManager.emit(regObject, dialogItem)
 
     def emitVariableUpdateCompleted(self):
         """Emitted when the variable pool has finished updating all variables
         for this step. Use this signal instead of rerendering stuff on the
         variable's changed() event to avoid multiple renderings."""
-        self.emit(SIGNAL("variableUpdateCompleted()"))
+        self.variableUpdateCompleted.emit()
 
     # pass on further signals here ...
 
     ###################################################
     # functions for plugin placement in the mainwindow
     ###################################################
-    def addDockWidget(self, area, widget, addToggleViewAction=False):
+    def emitAddDockWidget(self, area, widget, addToggleViewAction=False):
         '''
         Emitting signal to tell mainwindow where to add a widget
         @param addToggleViewAction: True -> add the widget's toggleViewAction to the Menu
         '''
-        self.emit(SIGNAL('addDockWidget(PyQt_PyObject, QDockWidget, PyQt_PyObject)'), area, widget, addToggleViewAction)
+        self.addDockWidget.emit(area, widget, addToggleViewAction)
 
-    def removeDockWidget(self, widget):
+    def emitRemoveDockWidget(self, widget):
         '''Emitting signal to tell mainwindow where to add a widget '''
-        self.emit(SIGNAL('removeDockWidget(QDockWidget)'), widget)
+        self.removeDockWidget.emit(widget)
 
-    def insertDockWidgets(self):
+    def emitInsertDockWidgets(self):
         '''Emitting signal to tell controllers to insert their dock widgets '''
-        self.emit(SIGNAL('insertDockWidgets()'))
+        self.insertDockWidgets.emit()
 
     # define further widget placement functions here ...
 

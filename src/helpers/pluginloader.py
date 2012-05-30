@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from PyQt4.QtCore import SIGNAL, QObject, QIODevice, QFile
+from PyQt4.QtCore import QObject, QIODevice, QFile, pyqtSignal
 from PyQt4.QtGui import QAction
 from PyQt4.QtXml import QDomDocument
 import logging
@@ -58,7 +58,7 @@ class PluginAction(QAction):
             self.setText(os.path.basename(path))
 
         #connect action to initPlugin() and deInitPlugin methods
-        QObject.connect(self, SIGNAL('triggered(bool)'), self.__togglePlugin)
+        self.triggered.connect(self.__togglePlugin)
 
     def __togglePlugin(self, checked):
         ''' Load/Unload Plugin by toggling menu entries '''
@@ -80,6 +80,7 @@ class PluginLoader(QObject):
         Goes through subfolders of /plugins and searches for plugin files(ending with "plugin.py").
         SamplePlugin provides a sample for such plugins.
     '''
+    insertPluginAction = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, distributedObjects):
         """CTOR of pluginloader."""
@@ -109,7 +110,7 @@ class PluginLoader(QObject):
                     path = os.path.join(root, f)
                     pAction = PluginAction(self, path)
                     self.pluginActions[path] = pAction
-                    self.emit(SIGNAL('insertPluginAction(PyQt_PyObject)'), pAction)
+                    self.insertPluginAction.emit(pAction)
 
         # activate all plugins which where active on previous program execution
         self.__getActivePlugins()

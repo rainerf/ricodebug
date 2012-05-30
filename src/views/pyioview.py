@@ -24,8 +24,6 @@
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
-from PyQt4.QtCore import QObject, SIGNAL
-
 
 class PyIoView(QWidget):
     def __init__(self, debug_controller, parent=None):
@@ -55,8 +53,8 @@ class PyIoView(QWidget):
 
         self.debugController = debug_controller
 
-        QObject.connect(self.pyInputEdit.lineEdit(), SIGNAL('returnPressed()'), self.pySendButton.click)
-        QObject.connect(self.pySendButton, SIGNAL('clicked()'), self.executePythonCode)
+        self.pyInputEdit.lineEdit().returnPressed.connect(self.pySendButton.click)
+        self.pySendButton.clicked.connect(self.executePythonCode)
 
     def executePythonCode(self):
         cmd = str(self.pyInputEdit.lineEdit().text())

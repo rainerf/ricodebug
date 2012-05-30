@@ -26,7 +26,7 @@
 A model that provides data about the GDB's call stack.
 """
 
-from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel, SIGNAL
+from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel
 from operator import attrgetter
 
 
@@ -99,9 +99,9 @@ class StackModel(QAbstractTableModel):
         elif column == 3:
             key = 'line'
 
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.layoutAboutToBeChanged.emit()
         self.stack.sort(key=attrgetter(key), reverse=rev)
-        self.emit(SIGNAL('layoutChanged()'))
+        self.layoutChanged.emit()
 
     def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
@@ -115,18 +115,18 @@ class StackModel(QAbstractTableModel):
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled
 
     def clear(self):
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.layoutAboutToBeChanged.emit()
         self.stack = []
-        self.emit(SIGNAL('layoutChanged()'))
+        self.layoutChanged.emit()
 
         self.controller.removeStackMarkers()
 
     def update(self, rec):
-        self.emit(SIGNAL('layoutAboutToBeChanged()'))
+        self.layoutAboutToBeChanged.emit()
         self.stack = self.connector.getStack()
         for s in self.stack:
             s.level = int(s.level)
-        self.emit(SIGNAL('layoutChanged()'))
+        self.layoutChanged.emit()
 
         self.sort(self.sortColumn, self.sortOrder)
 

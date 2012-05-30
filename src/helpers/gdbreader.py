@@ -25,7 +25,7 @@
 """GdbReader that listens to the gnu debugger output
 """
 
-from PyQt4.QtCore import QThread, QMutex, QSemaphore, SIGNAL
+from PyQt4.QtCore import QThread, QMutex, QSemaphore, pyqtSignal
 from gdbresultparser import GdbResultParser
 from gdboutput import GdbOutput
 from collections import deque
@@ -33,6 +33,10 @@ import helpers.excep
 
 
 class GdbReader(QThread):
+    asyncRecordReceived = pyqtSignal('PyQt_PyObject')
+    consoleRecordReceived = pyqtSignal('PyQt_PyObject')
+    forwardMultipleBreakpointInfo = pyqtSignal('PyQt_PyObject')
+
     def __init__(self, connector, parent=None):
         QThread.__init__(self, parent)
 
@@ -77,7 +81,7 @@ class GdbReader(QThread):
     def forwardMultipleBreakPointInfo(self, lines):
         """Documentation Incomplete for this method!"""
         # Can't reproduce the step to call this function
-        self.emit(SIGNAL("forwardMultipleBreakpointInfo(PyQt_PyObject)"), lines)
+        self.forwardMultipleBreakpointInfo.emit(lines)
 
     def forwardResult(self, res):
         """Forwards the result from the gdb output according to its type
@@ -88,11 +92,11 @@ class GdbReader(QThread):
         elif type_ == GdbOutput.EXEC_ASYN or \
              type_ == GdbOutput.STATUS_ASYN or \
              type_ == GdbOutput.NOTIFY_ASYN:
-            self.emit(SIGNAL("asyncRecordReceived(PyQt_PyObject)"), res)
+             self.asyncRecordReceived.emit(res)
         elif type_ == GdbOutput.CONSOLE_STREAM or \
              type_ == GdbOutput.TARGET_STREAM or \
              type_ == GdbOutput.LOG_STREAM:
-            self.emit(SIGNAL("consoleRecordReceived(PyQt_PyObject)"), res)
+             self.consoleRecordReceived.emit(res)
         else:
             raise helpers.excep.GdbError("Illegal type_!")
 

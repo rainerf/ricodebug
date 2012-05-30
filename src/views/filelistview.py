@@ -28,8 +28,6 @@ A view that displays the content of the file list model.
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
-from PyQt4.QtCore import QObject, SIGNAL
-
 
 class FileListView(QWidget):
     """ Class that displays the content of the file list model in a tree view. """
@@ -51,8 +49,9 @@ class FileListView(QWidget):
         self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        QObject.connect(self.treeView, SIGNAL('activated(QModelIndex)'), filelist_controller.fileInFileListViewActivated)
-        QObject.connect(self.treeView, SIGNAL('expanded(QModelIndex)'), self.resizeColumn)
+        self.treeView.activated.connect(
+                filelist_controller.fileInFileListViewActivated)
+        self.treeView.expanded.connect(self.resizeColumn)
 
     def resizeColumn(self, index):
         """ Resize the first column to contents when expanded.

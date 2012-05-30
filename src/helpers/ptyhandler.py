@@ -31,10 +31,11 @@ Not portable!
 import pty
 import os
 import select
-from PyQt4.QtCore import QThread, SIGNAL
+from PyQt4.QtCore import QThread, pyqtSignal
 
 
 class PtyHandler(QThread):
+    dataAvailable = pyqtSignal('QString')
     def __init__(self, parent=None):
         """Initialise Linux pseudo terminal
         """
@@ -54,7 +55,7 @@ class PtyHandler(QThread):
         while not self.stop:
             if select.select([self.master], [], [], 0.2) != ([], [], []):
                 ret = os.read(self.master, 100)
-                self.emit(SIGNAL('dataAvailable(QString)'), ret)
+                self.dataAvailable.emit(ret)
 
     def write(self, s):
         """Writes to the pseudo terminal

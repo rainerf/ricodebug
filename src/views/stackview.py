@@ -24,8 +24,6 @@
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget
-from PyQt4.QtCore import QObject, SIGNAL
-
 
 class StackView(QWidget):
     def __init__(self, stack_controller, parent=None):
@@ -52,4 +50,4 @@ class StackView(QWidget):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        QObject.connect(self.stackView, SIGNAL('activated(QModelIndex)'), stack_controller.stackInStackViewActivated)
+        self.stackView.activated.connect(stack_controller.stackInStackViewActivated)

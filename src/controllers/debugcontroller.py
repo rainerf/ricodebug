@@ -23,19 +23,22 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from PyQt4.QtCore import QObject, SIGNAL, Qt, QSettings
 from helpers.ptyhandler import PtyHandler
+from PyQt4.QtCore import QObject, QSettings, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
 
 
 class DebugController(QObject):
+    executableOpened = pyqtSignal('PyQt_PyObject')
+
     def __init__(self, distributedObjects):
         QObject.__init__(self)
 
         self.isRecording = False
 
         self.settings = QSettings("fh-hagenberg", "ricodebug")
+
         self.ptyhandler = PtyHandler()
 
         self.distributedObjects = distributedObjects
@@ -51,7 +54,7 @@ class DebugController(QObject):
         self.ptyhandler.start()
         self.connector.start()
 
-        QObject.connect(self.connector.reader, SIGNAL('asyncRecordReceived(PyQt_PyObject)'), self.handleAsyncRecord, Qt.QueuedConnection)
+        self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
     def openExecutable(self, filename):
         # die if the file does not exist or has been provided without at least a
@@ -68,7 +71,7 @@ class DebugController(QObject):
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
-            self.emit(SIGNAL('executableOpened'), filename)
+            self.executableOpened.emit(filename)
             self.executableName = filename
 
     def run(self):
@@ -77,13 +80,11 @@ class DebugController(QObject):
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
 
-    def toggle_record(self):
-        if not self.isRecording:
-            self.connector.record_start()
-            self.isRecording = True
-        else:
-            self.connector.record_stop()
-            self.isRecording = False
+    def record_start(self):
+        self.connector.record_start()
+
+    def record_stop(self):
+        self.connector.record_stop()
 
     def next_(self):
         self.connector.next_()

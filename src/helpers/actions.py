@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import SIGNAL, QObject
 
 """
 general information:
