@@ -44,15 +44,15 @@ class Actions(QtCore.QObject):
         def __init__(self, parameter, parent=None):
             QtGui.QAction.__init__(self, parent)
             self.parameter = parameter
-            QObject.connect(self, SIGNAL("triggered()"), self.commit)
+            self.tiggered.connect(self.commit)
             self.parent = parent
 
         def commit(self):
             assert(self.parameter is not None)
-            self.emit(QtCore.SIGNAL("triggered(PyQt_PyObject)"), self.parameter)
+            self.triggered.emit(elf.parameter)
 
     def __init__(self):
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
         ###############################################
         ## file/program control
         ###############################################
