@@ -106,29 +106,29 @@ class MainWindow(QMainWindow):
 
     def __initActions(self):
         self.disableButtons()
-        self.act.Actions.Record.setCheckable(True)
-        self.act.Actions.ReverseNext.setEnabled(False)
-        self.act.Actions.ReverseStep.setEnabled(False)
-        self.act.Actions.SaveFile.setEnabled(False)
+        self.act.Record.setCheckable(True)
+        self.act.ReverseNext.setEnabled(False)
+        self.act.ReverseStep.setEnabled(False)
+        self.act.SaveFile.setEnabled(False)
         # debug actions
-        self.ui.menuDebug.addAction(self.act.Actions.Run)
-        self.ui.menuDebug.addAction(self.act.Actions.Continue)
-        self.ui.menuDebug.addAction(self.act.Actions.Interrupt)
-        self.ui.menuDebug.addAction(self.act.Actions.Next)
-        self.ui.menuDebug.addAction(self.act.Actions.Step)
-        self.ui.menuDebug.addAction(self.act.Actions.Finish)
-        self.ui.menuDebug.addAction(self.act.Actions.RunToCursor)
-        self.ui.menuDebug.addAction(self.act.Actions.Record)
-        self.ui.menuDebug.addAction(self.act.Actions.ReverseNext)
-        self.ui.menuDebug.addAction(self.act.Actions.ReverseStep)
+        self.ui.menuDebug.addAction(self.act.Run)
+        self.ui.menuDebug.addAction(self.act.Continue)
+        self.ui.menuDebug.addAction(self.act.Interrupt)
+        self.ui.menuDebug.addAction(self.act.Next)
+        self.ui.menuDebug.addAction(self.act.Step)
+        self.ui.menuDebug.addAction(self.act.Finish)
+        self.ui.menuDebug.addAction(self.act.RunToCursor)
+        self.ui.menuDebug.addAction(self.act.Record)
+        self.ui.menuDebug.addAction(self.act.ReverseNext)
+        self.ui.menuDebug.addAction(self.act.ReverseStep)
 
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
-                self.act.Actions.Open)
+                self.act.Open)
 
-        self.act.Actions.Open.setMenu(self.ui.menuRecentlyUsedFiles)
-        self.ui.menuFile.addAction(self.act.Actions.SaveFile)
-        self.ui.menuFile.addAction(self.act.Actions.Exit)
+        self.act.Open.setMenu(self.ui.menuRecentlyUsedFiles)
+        self.ui.menuFile.addAction(self.act.SaveFile)
+        self.ui.menuFile.addAction(self.act.Exit)
 
         # add them to menubar and also menuView to respect order
         self.ui.menubar.addAction(self.ui.menuFile.menuAction())
@@ -301,31 +301,31 @@ class MainWindow(QMainWindow):
     def toggleRecord(self, check):
         if check:
             self.debugController.record_start()
-            self.act.Actions.ReverseNext.setEnabled(True)
-            self.act.Actions.ReverseStep.setEnabled(True)
+            self.act.ReverseNext.setEnabled(True)
+            self.act.ReverseStep.setEnabled(True)
         else:
             self.debugController.record_stop()
-            self.act.Actions.ReverseNext.setEnabled(False)
-            self.act.Actions.ReverseStep.setEnabled(False)
+            self.act.ReverseNext.setEnabled(False)
+            self.act.ReverseStep.setEnabled(False)
 
     def enableButtons(self):
-        self.act.Actions.Continue.setEnabled(True)
-        self.act.Actions.Interrupt.setEnabled(True)
-        self.act.Actions.Next.setEnabled(True)
-        self.act.Actions.Step.setEnabled(True)
-        self.act.Actions.Finish.setEnabled(True)
-        self.act.Actions.RunToCursor.setEnabled(True)
-        self.act.Actions.Record.setEnabled(True)
+        self.act.Continue.setEnabled(True)
+        self.act.Interrupt.setEnabled(True)
+        self.act.Next.setEnabled(True)
+        self.act.Step.setEnabled(True)
+        self.act.Finish.setEnabled(True)
+        self.act.RunToCursor.setEnabled(True)
+        self.act.Record.setEnabled(True)
 
     def disableButtons(self):
-        self.act.Actions.Continue.setEnabled(False)
-        self.act.Actions.Interrupt.setEnabled(False)
-        self.act.Actions.Next.setEnabled(False)
-        self.act.Actions.Step.setEnabled(False)
-        self.act.Actions.Finish.setEnabled(False)
-        self.act.Actions.RunToCursor.setEnabled(False)
-        self.act.Actions.Record.setChecked(False)
-        self.act.Actions.Record.setEnabled(False)
+        self.act.Continue.setEnabled(False)
+        self.act.Interrupt.setEnabled(False)
+        self.act.Next.setEnabled(False)
+        self.act.Step.setEnabled(False)
+        self.act.Finish.setEnabled(False)
+        self.act.RunToCursor.setEnabled(False)
+        self.act.Record.setChecked(False)
+        self.act.Record.setEnabled(False)
 
     def __observeWorkingBinary(self, filename):
         """ Private Method to Observe Debugged Binary """

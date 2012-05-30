@@ -25,7 +25,6 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QMessageBox
 from openedfileview import OpenedFileView
-from helpers.actions import Actions
 import os
 import logging
 import helpers.excep
@@ -83,9 +82,9 @@ class EditorView(QWidget):
 
     def __changedTab(self, idx):
         if self.__getFileModified(idx):
-            self.act.actions[Actions.SaveFile].setEnabled(True)
+            self.act.SaveFile.setEnabled(True)
         else:
-            self.act.actions[Actions.SaveFile].setEnabled(False)
+            self.act.SaveFile.setEnabled(False)
 
     def getCurrentOpenedFile(self):
         w = self.tabWidget.currentWidget()
@@ -128,12 +127,12 @@ class EditorView(QWidget):
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
                     self.openedFiles[filename].tab),
                     os.path.basename(filename) + '*')
-                self.act.actions[Actions.SaveFile].setEnabled(True)
+                self.act.SaveFile.setEnabled(True)
             else:
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
                     self.openedFiles[filename].tab),
                     os.path.basename(filename))
-                self.act.actions[Actions.SaveFile].setEnabled(False)
+                self.act.SaveFile.setEnabled(False)
 
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """
