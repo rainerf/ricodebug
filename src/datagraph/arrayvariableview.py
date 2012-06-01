@@ -26,10 +26,14 @@ from datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 from stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
 from PyQt4.QtGui import QIcon
+import sys
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+
+def _importMatplotlib():
+	if "matplotlib" not in sys.modules:
+		import matplotlib
+		matplotlib.use('Agg')
+		import matplotlib.pyplot as plt
 
 
 def _getAvailableFiltes():
@@ -98,6 +102,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
             self.graphicalView = False
             self.setTemplate('structvariableview.mako')
         else:
+            _importMatplotlib()		# only import matplotlib if we really need it
             self.graphicalView = True
             self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
