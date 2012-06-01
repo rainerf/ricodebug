@@ -28,10 +28,11 @@ from PyQt4.QtGui import QAction
 from os.path import exists
 import logging
 
+
 class OpenRecentFileAction(QAction):
     """ Class extends QAction to open a recently used file."""
     executableOpened = pyqtSignal('PyQt_PyObject')
-    
+
     def __init__(self, parent, distributedObjects):
         QAction.__init__(self, parent)
         self.debugController = distributedObjects.debugController
@@ -62,7 +63,7 @@ class RecentFileHandler():
         self.__makeActions(parent)
         self.__getRecentFiles()
         self.__loadRecentFiles()
-        
+
     def addToRecentFiles(self, filename):
         """ Add new filename to self.recentfiles """
         #check if filename is already in recently used files
@@ -74,10 +75,10 @@ class RecentFileHandler():
         #refresh menu & store to configfile
         self.__storeRecentFiles()
         self.__loadRecentFiles()
-        
+
     def getDirOfLastFile(self):
         return os.path.dirname(str(self.recentFiles[0]))
-            
+
     def __storeRecentFiles(self):
         """ store filelist to configfile """
         self.settings.beginWriteArray("RecentlyUsedFiles")
@@ -85,27 +86,27 @@ class RecentFileHandler():
             self.settings.setArrayIndex(i)
             self.settings.setValue("Filename", self.recentFiles[i])
         self.settings.endArray()
-        
+
     def __makeActions(self, parent):
         for i in range(self.nrRecentFiles):
             self.actions.append(OpenRecentFileAction(parent, self.distributedObjects))
             self.recentFilesMenu.addAction(self.actions[i])
-        
+
     def __getRecentFiles(self):
         """ get filelist from configfile """
         self.settings.beginReadArray("RecentlyUsedFiles")
         for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
             filename = self.settings.value("Filename").toString()
-            
+
             if not filename in self.recentFiles:
                 self.recentFiles.append(filename)
             else:
                 logging.debug("file %s appears multiple times in configfile. fixed now", filename)
-                self.recentFiles.append("")     
-                
+                self.recentFiles.append("")
+
         self.settings.endArray()
-        
+
     def __loadRecentFiles(self):
         """Load recently used files from self.recentfiles to the menu. """
         for action_index in range(self.nrRecentFiles):
@@ -115,4 +116,3 @@ class RecentFileHandler():
                 self.actions[action_index].setVisible(True)
             else:
                 self.actions[action_index].setVisible(False)
-

@@ -26,44 +26,42 @@ from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 from QTermWidget import QTermWidget
 
+
 class TermWidgetPlugin():
-    
-    # ================================= 
+    # =================================
     # functions called by pluginloader
-    # ================================= 
+    # =================================
     def __init__(self):
         self.shellWidget = None
         self.term = None
-        
+
     def initPlugin(self, signalproxy):
         """Init function - called when pluginloader loads plugin."""
-        
+
         self.signalproxy = signalproxy
 
         # create and place DockWidget in mainwindow using signalproxy
         self.widget = QtGui.QDockWidget(None)
         self.widget.setObjectName("QTermWidget")
-        self.widget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Shell", None, QtGui.QApplication.UnicodeUTF8))     
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget)        
-                
-        #init QTermWidget 
+        self.widget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Shell", None, QtGui.QApplication.UnicodeUTF8))
+        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget)
+
+        #init QTermWidget
         self.initQTermWidget(True)
         self.widget.visibilityChanged.connect(self.initQTermWidget)
-        
-               
+
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
         self.widget.close()
         self.signalproxy.emitRemoveDockWidget(self.widget)
 
-
-    # ================================= 
-    # plugin specific functions 
-    # ================================= 
+    # =================================
+    # plugin specific functions
+    # =================================
     def initQTermWidget(self, visible):
         """ Initialize QTermWidget - used when shell widget is (re)opened. """
         if (visible):
-            self.widget.setContentsMargins(10, 10, 10, 10)  
+            self.widget.setContentsMargins(10, 10, 10, 10)
             self.term = QTermWidget()
-            self.widget.setWidget(self.term) 
-            self.term.finished.connect(self.widget.close ) #connect command "exit" with widget.close
+            self.widget.setWidget(self.term)
+            self.term.finished.connect(self.widget.close)  # connect command "exit" with widget.close

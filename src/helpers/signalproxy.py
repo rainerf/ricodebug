@@ -48,9 +48,6 @@ class SignalProxy(QObject):
     inferiorIsRunning = pyqtSignal('PyQt_PyObject')
     executableOpened = pyqtSignal('PyQt_PyObject')
     AddWatch = pyqtSignal('PyQt_PyObject')
-#    self.floatingWatchAdded.emit(watch)
-#    self.fixedWatchAdded.emit(watch)
-
 
     def __init__(self, distributedObjects):
         '''CTOR'''
