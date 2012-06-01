@@ -25,7 +25,7 @@
 import re
 import cgi
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
+from PyQt4.QtGui import QPixmap, QToolTip, QFont, QColor
 from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher
 from math import log, ceil
 import logging
@@ -50,7 +50,6 @@ class OpenedFileView(QObject):
         self.markerExec = QPixmap(":/markers/exec_pos.png")
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
-        self.expToWatch = False
 
         self.FileWatcher = QFileSystemWatcher()
         self.FileWatcher.addPath(self.filename)
@@ -135,10 +134,7 @@ class OpenedFileView(QObject):
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
 
         act = self.distributedObjects.actions
-        act.AddWatch.triggered.connect(self.addWatch)
         act.ToggleTrace.triggered.connect(self.toggleTracepoint)
-        act.AddVarToDataGraph.triggered.connect(
-                self.AddVarToDataGraph)
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
@@ -182,8 +178,6 @@ class OpenedFileView(QObject):
         # self.edit.lineIndexFromPosition(..) returns tupel. first of tupel is line
         self.lastContexMenuLine = int(self.edit.lineIndexFromPosition(scipos)[0])
 
-        self.expToWatch = exp
-
         listOfTracepoints = self.tracepointController.getTracepointsFromModel()
 
         self.subPopupMenu = QtGui.QMenu(self.edit)
@@ -191,41 +185,17 @@ class OpenedFileView(QObject):
 
         for tp in listOfTracepoints:
             # dynamic actions, not in actiony.py Action class
-            self.action = self.distributedObjects.actions.createEx(
-                    self.expToWatch, self)
-            self.action.triggered.connect(tp.addVar)
-            self.action.setText(str(tp.name))
-            self.action.setIcon(QIcon(QPixmap(":/icons/images/insert.png")))
-            self.action.setIconVisibleInMenu(True)
-            self.subPopupMenu.addAction(self.action)
+            self.subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
 
         self.popupMenu = QtGui.QMenu(self.edit)
         # add watch and toggle breakpoint to menu
-        self.popupMenu.addAction(self.distributedObjects.actions.AddWatch)
+        self.popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
         self.popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
-        self.popupMenu.addAction(self.distributedObjects.actions.AddVarToDataGraph)
+        self.popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
         # add separator and self.subPopupMenu
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)
         self.popupMenu.popup(point)
-
-    def addWatch(self, watch=None):
-        if watch:
-            self.signalProxy.addWatch(watch)
-        elif self.expToWatch:
-            self.signalProxy.addWatch(self.expToWatch)
-
-    def AddVarToDataGraph(self, watch=None):
-        if watch:
-            self.distributedObjects.datagraphController.addWatch(watch)
-        elif self.expToWatch:
-            self.distributedObjects.datagraphController.addWatch(self.expToWatch)
-
-    def addWatchFloating(self, watch=None):
-        if watch:
-            self.signalProxy.addVarFloating(watch)
-        elif self.expToWatch:
-            self.signalProxy.addVarFloating(self.expToWatch)
 
     def isPositionInsideSelection(self, position):
         lf, cf, lt, ct = self.edit.getSelection()
@@ -268,7 +238,7 @@ class OpenedFileView(QObject):
 
     def editDoubleClicked(self, position, line, modifiers):
         w = self.getWordFromPosition(position)
-        self.addWatch(str(w))
+        self.signalProxy.addWatch(str(w))
 
     def showExecutionPosition(self, line):
         self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC)

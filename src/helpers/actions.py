@@ -42,15 +42,16 @@ general information:
 
 class Actions(QtCore.QObject):
     class ActionEx(QtGui.QAction):
+        triggeredEx = QtCore.pyqtSignal('PyQt_PyObject')
+
         def __init__(self, parameter, parent=None):
             QtGui.QAction.__init__(self, parent)
             self.parameter = parameter
-            self.tiggered.connect(self.commit)
-            self.parent = parent
+            self.triggered.connect(self.commit)
 
         def commit(self):
             assert(self.parameter is not None)
-            self.triggered.emit(self.parameter)
+            self.triggeredEx.emit(self.parameter)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -120,21 +121,39 @@ class Actions(QtCore.QObject):
         self.DelTraveVar = self.__createAction(":/icons/images/tp_var_minus.png",
                 "Del var from Tracepoint", "-",
                 "Remove selected variable from tracepoint")
-        #AddWatch
-        self.AddWatch = self.__createAction(":/icons/images/watch_plus.png",
-                "Add var to Watch", "+",
-                "Add selected variable to watchview-window")
-        #AddToDataGraph
-        self.AddVarToDataGraph = self.__createAction(":/icons/images/watch_plus.png",
-                "Add var to DataGraph", "+",
-                "Add selected variable to datagraph-window")
         #DelWatch
         self.DelWatch = self.__createAction(":/icons/images/watch_minus.png",
                 "Del var from Watch", "+",
                 "Remove selected variable from watchview-window")
 
+    def getAddToWatchAction(self, name, slot):
+        a = self.createEx(name)
+        a.setText("Add '%s' to watch window" % name)
+        a.setToolTip("Add selected variable to watchview window")
+        a.setIcon(QtGui.QIcon(":/icons/images/watch_plus.png"))
+        a.setShortcut("+")
+        a.triggeredEx.connect(slot)
+        return a
+
+    def getAddToDatagraphAction(self, name, slot):
+        a = self.createEx(name)
+        a.setText("Add '%s' to datagraph window" % name)
+        a.setToolTip("Add selected variable to datagraph window")
+        a.setIcon(QtGui.QIcon(":/icons/images/watch_plus.png"))
+        a.setShortcut("+")
+        a.triggeredEx.connect(slot)
+        return a
+
+    def getAddToTracepointAction(self, varname, tpname, slot):
+        a = self.createEx(varname)
+        a.setText(str(tpname))
+        a.setIcon(QtGui.QIcon(":/icons/images/insert.png"))
+        a.setIconVisibleInMenu(True)
+        a.triggeredEx.connect(slot)
+        return a
+
     def createEx(self, parameter):
-        return self.ActionEx(parameter)
+        return self.ActionEx(parameter, self)
 
     def __createAction(self, icon, text, shortcut, statustip):
         newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
