@@ -26,7 +26,7 @@ from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
 from PyQt4.QtCore import Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
-from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
+from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
@@ -219,23 +219,6 @@ class MainWindow(QMainWindow):
                     self.saveGeometry())
             self.settings.setValue("InitialWindowPlacement/windowState", \
                     self.saveState())
-
-    def initRecentFileHandler(self, nrRecentFiles):
-        """
-        Create menu entries for recently used files and connect them to the
-        RecentFileHandler
-        """
-        # create menu entries and connect the actions to the debug controller
-        recentFileActions = [0] * nrRecentFiles
-        for i in range(nrRecentFiles):
-            recentFileActions[i] = OpenRecentFileAction(self)
-            recentFileActions[i].setVisible(False)
-            self.ui.menuRecentlyUsedFiles.addAction(recentFileActions[i])
-            recentFileActions[i].executableOpened.connect(self.debugController.openExecutable)
-
-        self.RecentFileHandler = RecentFileHandler(recentFileActions, \
-                nrRecentFiles, self.distributedObjects)
-        self.debugController.executableOpened.connect(self.RecentFileHandler.addToRecentFiles)
 
     def restoreInitialWindowPlacement(self):
         """
