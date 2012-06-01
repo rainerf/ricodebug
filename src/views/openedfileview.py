@@ -28,11 +28,10 @@ from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
 from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher
 from math import log, ceil
-from helpers.actions import Actions
 import logging
 
+
 class OpenedFileView(QObject):
-    
     MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
     MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
 
@@ -52,11 +51,11 @@ class OpenedFileView(QObject):
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
         self.expToWatch = False
-      
+
         self.FileWatcher = QFileSystemWatcher()
         self.FileWatcher.addPath(self.filename)
         self.FileWatcher.fileChanged.connect(self.fileChanged)
-    
+
         self.tab = QtGui.QWidget()
         self.gridLayout = QtGui.QGridLayout(self.tab)
         self.gridLayout.setMargin(0)
@@ -65,7 +64,7 @@ class OpenedFileView(QObject):
         self.font.setStyleHint(QFont.TypeWriter)
         self.lexer = Qsci.QsciLexerCPP()
         self.lexer.setFont(self.font)
-        
+
         self.edit.setToolTip("")
         self.edit.setWhatsThis("")
         self.edit.setTabWidth(4)
@@ -127,12 +126,11 @@ class OpenedFileView(QObject):
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
-        
 
         _model = self.breakpointController.model()
         _model.rowsInserted.connect(self.getBreakpointsFromModel)
         _model.rowsRemoved.connect(self.getBreakpointsFromModel)
-        _model = self.tracepointController.model() 
+        _model = self.tracepointController.model()
         _model.rowsInserted.connect(self.getTracepointsFromModel)
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
 
@@ -142,7 +140,7 @@ class OpenedFileView(QObject):
         act.AddVarToDataGraph.triggered.connect(
                 self.AddVarToDataGraph)
 
-    def fileChanged(self):         
+    def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
                 correct debugging.", self.filename)
 
@@ -320,4 +318,3 @@ class OpenedFileView(QObject):
         for tp in self.tracepointController.getTracepointsFromModel():
             if tp.fullname == self.filename:
                 self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
-

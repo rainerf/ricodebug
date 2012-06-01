@@ -52,7 +52,6 @@ class EditorView(QWidget):
         self.tabWidget.currentChanged.connect(self.__changedTab)
         self.act = self.distributedObjects.actions
 
-
         self.openedFiles = {}
 
     def hideTab(self, idx):

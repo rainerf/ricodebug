@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
-from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher
+from PyQt4.QtCore import Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import OpenRecentFileAction, RecentFileHandler
@@ -33,7 +33,6 @@ from PyQt4 import QtGui
 
 
 class MainWindow(QMainWindow):
-
     def __init__(self, parent=None):
         """ init UI """
         QMainWindow.__init__(self, parent)
@@ -60,7 +59,7 @@ class MainWindow(QMainWindow):
         self.debugController.executableOpened.connect(self.disableButtons)
         # signal proxy
         self.signalproxy.inferiorIsRunning.connect(self.targetStartedRunning, Qt.QueuedConnection)
-        self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped, Qt.QueuedConnection) 
+        self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped, Qt.QueuedConnection)
         self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped, Qt.QueuedConnection)
         self.signalproxy.inferiorHasExited.connect(self.targetExited, Qt.QueuedConnection)
 
@@ -149,7 +148,7 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.ReverseStep)
         self.ui.Main.addAction(self.act.Finish)
         self.ui.Main.addAction(self.act.RunToCursor)
-        
+
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.Exit)
         # connect actions
@@ -159,22 +158,22 @@ class MainWindow(QMainWindow):
         # file menu
         self.act.Open.triggered.connect(self.showOpenExecutableDialog)
         self.act.Exit.triggered.connect(self.close)
-        self.act.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile) 
+        self.act.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile)
         # debug menu
 
         self.act.Run.triggered.connect(self.debugController.run)
 
-        self.act.Next.triggered.connect( self.debugController.next_)
+        self.act.Next.triggered.connect(self.debugController.next_)
         self.act.Step.triggered.connect(self.debugController.step)
-        self.act.Continue.triggered.connect( self.debugController.cont)
+        self.act.Continue.triggered.connect(self.debugController.cont)
         self.act.Record.triggered.connect(self.toggleRecord)
         self.act.ReverseStep.triggered.connect(self.debugController.reverse_step)
         self.act.ReverseNext.triggered.connect(self.debugController.reverse_next)
 
         self.act.Interrupt.triggered.connect(self.debugController.interrupt)
-        self.act.Finish.triggered.connect( self.debugController.finish)
-        self.act.RunToCursor.triggered.connect(self.debugController.inferiorUntil) 
-         
+        self.act.Finish.triggered.connect(self.debugController.finish)
+        self.act.RunToCursor.triggered.connect(self.debugController.inferiorUntil)
+
         self.ui.actionRestoreSession.triggered.connect(
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         self.ui.actionSaveSession.triggered.connect(
@@ -343,4 +342,3 @@ class MainWindow(QMainWindow):
         else:
             self.fileWatcher.removePath(self.binaryName)
             self.fileWatcher.addPath(self.binaryName)
-

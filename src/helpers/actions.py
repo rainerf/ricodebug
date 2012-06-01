@@ -26,10 +26,10 @@ from PyQt4 import QtCore, QtGui
 
 """
 general information:
- * to add a action write a enum-Key-word into list below class declaration 
-   and raise range in both, range after list AND range for 
+ * to add a action write a enum-Key-word into list below class declaration
+   and raise range in both, range after list AND range for
    self.actions = rang(N) dont forget "\" if line is ending
- * then create the action using createAction function in initActions 
+ * then create the action using createAction function in initActions
    from Actions class:
     ...
     def initActions(self):
@@ -38,6 +38,7 @@ general information:
     ...
  * connect your actions via connectAction or connectActionEx or your own Implementation
 """
+
 
 class Actions(QtCore.QObject):
     class ActionEx(QtGui.QAction):
@@ -57,10 +58,10 @@ class Actions(QtCore.QObject):
         ## file/program control
         ###############################################
         #open
-        self.Open = self.__createAction(":/icons/images/open.png", "Open", 
+        self.Open = self.__createAction(":/icons/images/open.png", "Open",
                 "Ctrl+O", "Open executable file")
         #exit
-        self.Exit = self.__createAction(":/icons/images/exit.png", "Exit", 
+        self.Exit = self.__createAction(":/icons/images/exit.png", "Exit",
                 "Ctrl+Q", "Close Program")
         #save source file
         self.SaveFile = self.__createAction(":/icons/images/save.png",
@@ -136,12 +137,9 @@ class Actions(QtCore.QObject):
         return self.ActionEx(parameter)
 
     def __createAction(self, icon, text, shortcut, statustip):
-        """dont use this function outside of class!!!"""
-        
         newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
 
         if shortcut is not None:
             newAction.setShortcut(shortcut)
-        
-        return newAction
 
+        return newAction
