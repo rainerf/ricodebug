@@ -34,11 +34,11 @@ from PyQt4 import QtCore, QtGui
 #
 # The variable PluginName in the __init__.py file of each package may be used to define a name for the plugin
 
-class SysCSimCtxPlugin():
 
-    # ================================= 
+class SysCSimCtxPlugin():
+    # =================================
     # functions called by pluginloader
-    # ================================= 
+    # =================================
     def __init__(self):
         self.widget = None
 
@@ -252,4 +252,3 @@ class SysCSimCtxPlugin():
             return r.group(0)
         else:
             return name
-
