@@ -166,27 +166,27 @@ class SysCModulesPlugin():
         self.view.clear()
         self.treeItems = {}
 
-        for object in self.objects:
-            if object[1] == "None":
-                self.treeItems[str(object[0])] = QtGui.QTreeWidgetItem(self.view)
+        for o in self.os:
+            if o[1] == "None":
+                self.treeItems[str(o[0])] = QtGui.QTreeWidgetItem(self.view)
             else:
-                self.treeItems[str(object[0])] = QtGui.QTreeWidgetItem(self.treeItems[str(object[1])])
+                self.treeItems[str(o[0])] = QtGui.QTreeWidgetItem(self.treeItems[str(o[1])])
 
-            self.treeItems[str(object[0])].setText(0, str(self.parseName(object[0])))
-            self.treeItems[str(object[0])].setText(1, str(self.parseName(object[2])))
+            self.treeItems[str(o[0])].setText(0, str(self.parseName(o[0])))
+            self.treeItems[str(o[0])].setText(1, str(self.parseName(o[2])))
 
-            if str(self.parseName(object[2])) == "sc_module":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_module.png")))
-            elif str(self.parseName(object[2])) == "sc_method_process" or str(self.parseName(object[2])) == "sc_thread_process" or str(self.parseName(object[2])) == "sc_cthread_process":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_process.png")))
-            elif str(self.parseName(object[2])) == "sc_signal":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_signal.png")))
-            elif str(self.parseName(object[2])) == "sc_port":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_port.png")))
-            elif str(self.parseName(object[2])) == "sc_in":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_in.png")))
-            elif str(self.parseName(object[2])) == "sc_out":
-                self.treeItems[str(object[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_out.png")))
+            if str(self.parseName(o[2])) == "sc_module":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_module.png")))
+            elif str(self.parseName(o[2])) == "sc_method_process" or str(self.parseName(o[2])) == "sc_thread_process" or str(self.parseName(o[2])) == "sc_cthread_process":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_process.png")))
+            elif str(self.parseName(o[2])) == "sc_signal":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_signal.png")))
+            elif str(self.parseName(o[2])) == "sc_port":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_port.png")))
+            elif str(self.parseName(o[2])) == "sc_in":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_in.png")))
+            elif str(self.parseName(o[2])) == "sc_out":
+                self.treeItems[str(o[0])].setIcon(0, QtGui.QIcon(QtGui.QPixmap(":/icons/images/sc_out.png")))
 
     def parseName(self, name):
         r = re.search('(?<=\.)\w*(?=\")', name)
