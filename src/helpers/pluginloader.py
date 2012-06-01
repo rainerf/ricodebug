@@ -113,7 +113,7 @@ class PluginLoader(QObject):
                     self.insertPluginAction.emit(pAction)
 
         # activate all plugins which where active on previous program execution
-        self.__getActivePlugins()
+        self.getActivePlugins()
 
     def loadPlugin(self, plugin):
         """Load plugin from plugin folder. Name of class and file of plugin must be the same."""
@@ -146,13 +146,17 @@ class PluginLoader(QObject):
         else:
             del self.loadedPlugins[plugin]
 
-    def __getActivePlugins(self):
+    def getActivePlugins(self, filename=None):
         '''
         Function checks xml and returns if plugin was active on previous program execution
         xmlfile: specifies alternative path to xml file with plugin information
         '''
-        if os.path.exists(self.xmlFile):
-            fileObject = QFile(self.xmlFile)
+
+        if not filename:
+            filename = self.xmlFile
+
+        if os.path.exists(filename):
+            fileObject = QFile(filename)
             Xml = QDomDocument("xmldoc")
             Xml.clear()
             if (fileObject.open(QIODevice.ReadOnly)):
@@ -170,11 +174,15 @@ class PluginLoader(QObject):
                 else:
                     logging.warning("No plugin for %s found, maybe it was moved/deleted?", path)
 
-    def savePluginInfo(self):
+    def savePluginInfo(self, filename=None):
         '''
         write plugin info to xml (plugin active/inactive ...)
         xmlfile: specifies alternative path to xml file with plugin information
         '''
+
+        if not filename:
+            filename = self.xmlFile
+
         # create xml
         Xml = QDomDocument("xmldoc")
         rootNode = Xml.createElement("SysCDbgActivePlugins")
@@ -190,7 +198,7 @@ class PluginLoader(QObject):
             rootNode.appendChild(pluginNode)
 
         # create and write xml file
-        fileObject = QFile(self.xmlFile)
+        fileObject = QFile(filename)
         fileObject.open(QIODevice.WriteOnly)
         fileObject.writeData(Xml.toString())
         fileObject.close()
