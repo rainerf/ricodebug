@@ -54,9 +54,9 @@ class TermWidgetPlugin():
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
         self.widget.close()
-        self.signalproxy.removeDockWidget(self.widget)    
-     
-           
+        self.signalproxy.emitRemoveDockWidget(self.widget)
+
+
     # ================================= 
     # plugin specific functions 
     # ================================= 

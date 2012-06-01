@@ -42,6 +42,4 @@ class SamplePlugin():
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
         self.dockwidget.close()
-        self.signalproxy.removeDockWidget(self.dockwidget)    
-     
-           
+        self.signalproxy.emitRemoveDockWidget(self.dockwidget)
