@@ -28,7 +28,7 @@ from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QIcon, QToolTip, QFont, QColor
 from PyQt4.QtCore import SIGNAL, QObject, Qt, QFileSystemWatcher
 from math import log, ceil
-from helpers.actions import ActionEx, Actions
+from helpers.actions import Actions
 import logging
 
 class OpenedFileView(QObject):
@@ -113,29 +113,48 @@ class OpenedFileView(QObject):
         # override scintillas context menu with our own
         self.edit.SendScintilla(Qsci.QsciScintilla.SCI_USEPOPUP, 0)
         self.edit.setContextMenuPolicy(Qt.CustomContextMenu)
-        QObject.connect(self.edit, SIGNAL('customContextMenuRequested(QPoint)'), self.showContextMenu)
+        QObject.connect(self.edit,
+                SIGNAL('customContextMenuRequested(QPoint)'),
+                self.showContextMenu)
 
-        QObject.connect(self.edit, SIGNAL("marginClicked(int,int,Qt::KeyboardModifiers)"), self.marginClicked)
-        QObject.connect(self.edit, SIGNAL("SCN_DOUBLECLICK(int, int, int)"), self.editDoubleClicked)
-        QObject.connect(self.edit, SIGNAL("SCN_DWELLSTART(int, int, int)"), self.dwellStart)
-        QObject.connect(self.edit, SIGNAL("SCN_DWELLEND(int, int, int)"), self.dwellEnd)
+        QObject.connect(self.edit,
+                SIGNAL("marginClicked(int,int,Qt::KeyboardModifiers)"),
+                self.marginClicked)
+        QObject.connect(self.edit, SIGNAL("SCN_DOUBLECLICK(int, int, int)"),
+                self.editDoubleClicked)
+        QObject.connect(self.edit, SIGNAL("SCN_DWELLSTART(int, int, int)"),
+                self.dwellStart)
+        QObject.connect(self.edit, SIGNAL("SCN_DWELLEND(int, int, int)"),
+                self.dwellEnd)
 
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
+        
+        actions = self.distributedObjects.actions
 
-        self.connect(self.breakpointController.model(), SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getBreakpointsFromModel)
-        self.connect(self.breakpointController.model(), SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getBreakpointsFromModel)
-        self.connect(self.tracepointController.model(), SIGNAL('rowsInserted(QModelIndex, int, int)'), self.getTracepointsFromModel)
-        self.connect(self.tracepointController.model(), SIGNAL('rowsRemoved(QModelIndex, int, int)'), self.getTracepointsFromModel)
+        self.connect(self.breakpointController.model(),
+                SIGNAL('rowsInserted(QModelIndex, int, int)'),
+                self.getBreakpointsFromModel)
+        self.connect(self.breakpointController.model(),
+                SIGNAL('rowsRemoved(QModelIndex, int, int)'),
+                self.getBreakpointsFromModel)
+        self.connect(self.tracepointController.model(),
+                SIGNAL('rowsInserted(QModelIndex, int, int)'),
+                self.getTracepointsFromModel)
+        self.connect(self.tracepointController.model(),
+                SIGNAL('rowsRemoved(QModelIndex, int, int)'),
+                self.getTracepointsFromModel)
 
-        self.connect(self.distributedObjects.actions.actions[Actions.AddWatch], SIGNAL('triggered()'), self.addWatch)
-        self.connect(self.distributedObjects.actions.actions[Actions.ToggleTrace], SIGNAL('triggered()'), self.toggleTracepoint)
-        self.connect(self.distributedObjects.actions.actions[Actions.AddVarToDataGraph], SIGNAL('triggered()'), self.AddVarToDataGraph)
-
-    
+        self.connect(actions.AddWatch, SIGNAL('triggered()'), self.addWatch)
+        self.connect(actions.ToggleTrace, SIGNAL('triggered()'),
+                self.toggleTracepoint)
+        self.connect(actions.AddVarToDataGraph, SIGNAL('triggered()'),
+                self.AddVarToDataGraph)
+ 
     def fileChanged(self):         
-        logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)     
+        logging.warning("Source file %s modified. Recompile executable for \
+                correct debugging.", self.filename)
 
     def saveFile(self):
         ''' Save source file '''
@@ -159,13 +178,17 @@ class OpenedFileView(QObject):
             if val != None:
                 name = cgi.escape(name)
                 val = cgi.escape(val)
-                QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)), "<b>" + name + "</b> = " + val, self.edit, QtCore.QRect())
+                QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)),
+                        "<b>" + name + "</b> = " + val, self.edit,
+                        QtCore.QRect())
 
     def dwellEnd(self, position, x, y):
-        QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)), "", self.edit, QtCore.QRect())
+        QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)), "",
+                self.edit, QtCore.QRect())
 
     def showContextMenu(self, point):
-        scipos = self.edit.SendScintilla(Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
+        scipos = self.edit.SendScintilla(
+                Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.edit.mapToGlobal(point)
         exp = self.getWordOrSelectionFromPosition(scipos)
         # self.edit.lineIndexFromPosition(..) returns tupel. first of tupel is line
@@ -180,8 +203,10 @@ class OpenedFileView(QObject):
 
         for tp in listOfTracepoints:
             # dynamic actions, not in actiony.py Action class
-            self.action = ActionEx(self.expToWatch, self)
-            QObject.connect(self.action, SIGNAL("triggered(PyQt_PyObject)"), tp.addVar)
+            self.action = self.distributedObjects.actions.createEx(
+                    self.expToWatch, self)
+            QObject.connect(self.action, SIGNAL("triggered(PyQt_PyObject)"),
+                    tp.addVar)
             self.action.setText(str(tp.name))
             self.action.setIcon(QIcon(QPixmap(":/icons/images/insert.png")))
             self.action.setIconVisibleInMenu(True)
@@ -189,9 +214,9 @@ class OpenedFileView(QObject):
 
         self.popupMenu = QtGui.QMenu(self.edit)
         # add watch and toggle breakpoint to menu
-        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.AddWatch])
-        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.ToggleTrace])
-        self.popupMenu.addAction(self.distributedObjects.actions.actions[Actions.AddVarToDataGraph])
+        self.popupMenu.addAction(self.distributedObjects.actions.AddWatch)
+        self.popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
+        self.popupMenu.addAction(self.distributedObjects.actions.AddVarToDataGraph)
         # add separator and self.subPopupMenu
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)
