@@ -147,7 +147,7 @@ class TreeVWFactory(VarWrapperFactory):
         return TreeStructVarWrapper(var)
 
     def makeArrayVarWrapper(self, var):
-        """ create PendingVarWrapper
+        """ create ArrayVarWrapper
         """
         return TreeArrayVarWrapper(var)
 

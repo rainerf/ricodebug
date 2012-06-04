@@ -101,9 +101,8 @@ class Tracepoint(ExtendedBreakpoint):
 
     def addVar(self, variableToTrace):
         """ add a var to trace its value
-        @param variableToTrace: variable name of the variable that shoudl be traced"""
+        @param variableToTrace: variable name of the variable that should be traced"""
         vw = self.variableList.addVarByName(variableToTrace)
-        vw.replace.connect(self.replaceVariable)
         newValueList = ValueList(variableToTrace, vw.getType())
         self.wave.append(newValueList)
 

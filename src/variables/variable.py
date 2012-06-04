@@ -90,9 +90,6 @@ class Variable(QObject):
     def getAccess(self):
         return self.access
 
-    def getPending(self):
-        return False
-
     def _getChildItems(self):
         """ Returns a list of childs as Variables.
             This is a pure private Method!

@@ -70,13 +70,6 @@ class TreeItem(QObject):
         """
         self.childItems.append(child)
 
-    def replaceChild(self, old, new):
-        """ replace existing child TreeItem with a new one
-        @param old   TreeItem, item to replace
-        @param new   TreeItem, new item
-        """
-        self.childItems[self.childItems.index(old)] = new
-
     def getChildren(self, factory=None):
         """ return list of children
         @param factory   derived from VarWrapperFactory, factory to look in VariableList for children

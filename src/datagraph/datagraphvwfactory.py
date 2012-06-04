@@ -51,5 +51,3 @@ class DataGraphVWFactory(VarWrapperFactory):
     def makeArrayVarWrapper(self, var):
         return ArrayDataGraphVW(var, self.distributedObjects, self)
 
-    def makePendingVarWrapper(self, var):
-        return PendingDataGraphVW(var, self.distributedObjects)
