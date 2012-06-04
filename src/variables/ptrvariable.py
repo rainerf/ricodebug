@@ -28,11 +28,15 @@ from variables.variable import Variable
 class PtrVariable(Variable):
     """ Class holding a Pointer-Variable. """
 
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None, type_=None, value=None, inscope=None, haschildren=None, access=None, pending=None):
+    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None,
+            type_=None, value=None, inscope=None, haschildren=None,
+            access=None):
         """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
+        @param variablepool    variables.variablepool.VariablePool, the
+                               VariablePool-Instance
         """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_, value, inscope, haschildren, access, pending, "*%(parent)s")
+        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_,
+                value, inscope, haschildren, access, "*%(parent)s")
 
     def dereference(self):
         """ Dereferences the Variable, if possible.

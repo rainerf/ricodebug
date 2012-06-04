@@ -105,22 +105,15 @@ class VariablePool(QObject):
         res = self.connector.getLocals()
 
         for x in reversed(res):
-            var = self.getVar(x.name, True)
+            var = self.getVar(x.name)
             ret.append(var)
         return ret
 
-    def getVar(self, exp, isLocal=False):
+    def getVar(self, exp):
         """ return variable from pool if already existing <br>
             if variable is not existing in pool, create new GDB variable and add to pool
         @param exp       string, expression from variable to return
-        @param isLocal   bool, replace pending variables from pool if variable is local variable
         """
-        # variable existing in pool and in current scope
-        #if exp in self.list:
-        #    if not self.list[exp].getPending() and self.list[exp].getInScope():
-        #        logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
-        #        return self.list[exp]
-
         # get variable from gdb (fixed)
         gdbVar = self.connector.var_create("- * " + str(exp))
 
@@ -133,7 +126,8 @@ class VariablePool(QObject):
 
         self.variables[varReturn.gdbname] = varReturn
 
-        logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
+        logging.debug("Returning internal variable %s for expression %s",
+                varReturn.gdbname, exp)
 
         return varReturn
 

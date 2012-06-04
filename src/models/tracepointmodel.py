@@ -107,14 +107,6 @@ class Tracepoint(ExtendedBreakpoint):
         newValueList = ValueList(variableToTrace, vw.getType())
         self.wave.append(newValueList)
 
-    def replaceVariable(self, pendingVar, newVar):
-        """ replace existing variable in list with new one
-        @param pendingVar: var to replace
-        @param newVar: new var"""
-        #vwOld = self.variableList.getVariableWrapper(pendingVar)
-        vwNew = self.variableList.replaceVar(pendingVar, newVar)
-        vwNew.replace.connect(self.replaceVariable)
-
     def tracePointOccurred(self, stop):
         """ set if stop is needed or not
         @param stop: (bool), gdb stops after tracing if True, gdb continues after tracing if False
