@@ -57,11 +57,13 @@ class DebugController(QObject):
         self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
     def openExecutable(self, filename):
-        # die if the file does not exist or has been provided without at least a
-        # relative path; files without a path work with pythons os.* functions
-        # but fail in gdb, so do an extra check for those
-        if not os.path.exists(filename) or os.path.dirname(filename) == "":
-            logging.error("File %s was not found." % filename)
+        # make sure we only open absolute paths, otherwise eg. RecentFileHandler
+        # will not know _where_ the file was we opened and store different
+        # relative paths for the same file
+        filename = os.path.abspath(filename)
+
+        if not os.path.exists(filename):
+            logging.error("File %s was not found.", filename)
             return
 
         if self.editorController.closeOpenedFiles():  # closing source files may be canceled by user
