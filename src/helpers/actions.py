@@ -61,6 +61,9 @@ class Actions(QtCore.QObject):
         #open
         self.Open = self.__createAction(":/icons/images/open.png", "Open",
                 "Ctrl+O", "Open executable file")
+
+        self.OpenMenu = self.__createAction(":/icons/images/open.png", "Open",
+                "Ctrl+O", "Open executable file")
         #exit
         self.Exit = self.__createAction(":/icons/images/exit.png", "Exit",
                 "Ctrl+Q", "Close Program")

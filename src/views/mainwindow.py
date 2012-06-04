@@ -122,10 +122,8 @@ class MainWindow(QMainWindow):
         self.ui.menuDebug.addAction(self.act.ReverseStep)
 
         # file actions
-        self.ui.menuFile.insertAction(self.ui.actionSaveSession, \
-                self.act.Open)
-
-        self.act.Open.setMenu(self.ui.menuRecentlyUsedFiles)
+        self.ui.menuFile.insertAction(self.ui.actionSaveSession,
+                self.act.OpenMenu)
         self.ui.menuFile.addAction(self.act.SaveFile)
         self.ui.menuFile.addAction(self.act.Exit)
 
@@ -135,6 +133,7 @@ class MainWindow(QMainWindow):
         self.ui.menubar.addAction(self.ui.menuDebug.menuAction())
         self.ui.menubar.addAction(self.ui.menuHelp.menuAction())
         # now make toolbar actions
+        self.act.Open.setMenu(self.ui.menuRecentlyUsedFiles)
         self.ui.Main.addAction(self.act.Open)
         self.ui.Main.addAction(self.act.SaveFile)
         self.ui.Main.addSeparator()
@@ -157,6 +156,7 @@ class MainWindow(QMainWindow):
     def __connectActions(self):
         # file menu
         self.act.Open.triggered.connect(self.showOpenExecutableDialog)
+        self.act.OpenMenu.triggered.connect(self.showOpenExecutableDialog)
         self.act.Exit.triggered.connect(self.close)
         self.act.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile)
         # debug menu
