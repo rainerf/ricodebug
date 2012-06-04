@@ -28,7 +28,6 @@ from stdvariable import StdVariable
 from ptrvariable import PtrVariable
 from structvariable import StructVariable
 from arrayvariable import ArrayVariable
-from pendingvariable import PendingVariable
 import logging
 import re
 
@@ -47,7 +46,6 @@ class VariablePool(QObject):
         self.connector = distributedObjects.gdb_connector
         #self.list = {}
         self.variables = {}
-        self.pending = []
 
         # signalproxy
         self.signalProxy = distributedObjects.signalProxy
@@ -98,17 +96,6 @@ class VariablePool(QObject):
             if not isTracePoint:
                 var.emitChanged()
 
-        # search for pending variables and replace them if
-        # they are in scope
-        #tempList = self.list.copy()
-        #for var in tempList.itervalues():
-        #    if var.getPending():
-        #        gdbVar = self.connector.var_create("- * " + var.getExp())
-        #        if gdbVar.class_ != GdbOutput.ERROR:
-        #            newVar = self.__createVariable(gdbVar, None, var.getExp(), None)
-        #            self.list[var.getUniqueName()] = newVar
-        #            var.emitReplace(newVar)
-
         self.signalProxy.emitVariableUpdateCompleted()
 
     def addLocals(self):
@@ -118,22 +105,15 @@ class VariablePool(QObject):
         res = self.connector.getLocals()
 
         for x in reversed(res):
-            var = self.getVar(x.name, True)
+            var = self.getVar(x.name)
             ret.append(var)
         return ret
 
-    def getVar(self, exp, isLocal=False):
+    def getVar(self, exp):
         """ return variable from pool if already existing <br>
             if variable is not existing in pool, create new GDB variable and add to pool
         @param exp       string, expression from variable to return
-        @param isLocal   bool, replace pending variables from pool if variable is local variable
         """
-        # variable existing in pool and in current scope
-        #if exp in self.list:
-        #    if not self.list[exp].getPending() and self.list[exp].getInScope():
-        #        logging.debug("Returning preexisting internal variable %s for expression %s", self.list[exp].gdbname, exp)
-        #        return self.list[exp]
-
         # get variable from gdb (fixed)
         gdbVar = self.connector.var_create("- * " + str(exp))
 
@@ -146,7 +126,8 @@ class VariablePool(QObject):
 
         self.variables[varReturn.gdbname] = varReturn
 
-        logging.debug("Returning internal variable %s for expression %s", varReturn.gdbname, exp)
+        logging.debug("Returning internal variable %s for expression %s",
+                varReturn.gdbname, exp)
 
         return varReturn
 
@@ -212,7 +193,7 @@ class VariablePool(QObject):
         if gdbVar == None:
             uniqueName = exp
             inscope = False
-            varReturn = PendingVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            logging.error("Error gdbVar = None")
         else:
             if hasattr(gdbVar, "exp"):
                 exp = gdbVar.exp

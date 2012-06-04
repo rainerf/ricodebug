@@ -60,29 +60,8 @@ class WatchController(TreeItemController):
         vw = self.variableList.addVarByName(watch)
         # connect changed and replace signal from wrapper
         vw.dataChanged.connect(vw.hasChanged)
-        vw.replace.connect(self.replaceVariable)
 
         self.add(vw)
-
-    def replaceVariable(self, pendingVar, newVar):
-        """ replaces a variable in the variablelist
-        @param pendingVar    variables.variablewrapper.VariableWrapper, VariableWrapper to replace in the list
-        @param newVar        variables.Variable, new Variable which replaces existing VariableWrapper in List
-        """
-        vwOld = self.variableList.getVariableWrapper(pendingVar)
-
-        vwNew = self.variableList.replaceVar(pendingVar, newVar)
-        vwNew.changed.connect(vwNew.hasChanged)
-        vwNew.replace.connect(self.replaceVariable)
-
-        # set parent for root variable
-        vwNew.setParent(self.variableModel.root)
-
-        # add variable to root children
-        self.variableModel.root.replaceChild(vwOld, vwNew)
-
-        vwNew.setChanged(True)
-        self.variableModel.update()
 
     def saveSession(self, xmlHandler):
         """ Insert session info to xml file

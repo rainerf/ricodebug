@@ -31,12 +31,11 @@ class Variable(QObject):
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
 
-    replace = pyqtSignal('PyQt_PyObject')
     changed = pyqtSignal()
 
-    def __init__(self, variablepool, exp=None, gdbname=None, 
+    def __init__(self, variablepool, exp=None, gdbname=None,
             uniquename=None, type_=None, value=None, inscope=None,
-            haschildren=None, access=None, pending=False, childformat=None):
+            haschildren=None, access=None, childformat=None):
         """ Constructor
         @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
         """
@@ -53,7 +52,6 @@ class Variable(QObject):
         self.inscope = inscope
         self.haschildren = haschildren
         self.access = access
-        self.pending = pending
         self.childformat = childformat
         self.childItems = []
 
@@ -65,7 +63,6 @@ class Variable(QObject):
                 "in scope" if self.inscope else "",
                 "has children" if self.haschildren else "",
                 self.access if self.access else "",
-                "pending" if self.pending else "",
                 str(len(self.childItems))]))
 
     def getExp(self):
@@ -115,7 +112,4 @@ class Variable(QObject):
 
     def emitChanged(self):
         self.changed.emit()
-
-    def emitReplace(self, var):
-        self.replace.emit(var)
 

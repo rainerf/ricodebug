@@ -27,7 +27,6 @@ from stdvariableview import StdDataGraphVW
 from ptrvariableview import PtrDataGraphVW
 from structvariableview import StructDataGraphVW
 from arrayvariableview import ArrayDataGraphVW
-from pendingvariableview import PendingDataGraphVW
 
 
 class DataGraphVWFactory(VarWrapperFactory):

@@ -69,13 +69,6 @@ class VariableList(QObject):
         """ Clears the whole VariableList. """
         self.list = []
 
-    def replaceVar(self, oldVar, newVar):
-        #vw = self.list[self.list.index(oldVar)]
-        #vw.variable = newVar
-        vw = newVar.makeWrapper(self.factory)
-        self.list[self.list.index(oldVar)] = vw
-        return vw
-
     def getVariableWrapper(self, var):
         return self.list[self.list.index(var)]
 
