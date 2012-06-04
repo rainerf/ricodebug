@@ -44,11 +44,9 @@ class VariableList(QObject):
         """ adds new VariableWrapper for given varName and returns this newly added VariableWrapper
         @param varName    string, the name of the Variable to add  """
         var = self.varPool.getVar(str(varName))
-        if var != None:
-            vw = var.makeWrapper(self.factory)
-            self.list.append(vw)
-            return vw
-        return var
+        vw = var.makeWrapper(self.factory)
+        self.list.append(vw)
+        return vw
 
     def addVar(self, varWrapper):
         """ adds VariableWrapper varWrapper to the list

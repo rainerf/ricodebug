@@ -21,9 +21,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-
 """ @package controllers.watchcontroller    the WatchController """
 
+from helpers.excep import VariableNotFoundException
 from models.variablemodel import VariableModel
 from views.watchview import WatchView
 from treeitemcontroller import TreeItemController
@@ -57,11 +57,14 @@ class WatchController(TreeItemController):
             this function is connected to the signal SignalProxy::AddWatch(QString)
         @param watch    Variable, the Variable to add to watch
         """
-        vw = self.variableList.addVarByName(watch)
-        # connect changed and replace signal from wrapper
-        vw.dataChanged.connect(vw.hasChanged)
+        try:
+            vw = self.variableList.addVarByName(watch)
+            # connect changed and replace signal from wrapper
+            vw.dataChanged.connect(vw.hasChanged)
 
-        self.add(vw)
+            self.add(vw)
+        except VariableNotFoundException:
+            pass
 
     def saveSession(self, xmlHandler):
         """ Insert session info to xml file

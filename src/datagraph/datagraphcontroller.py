@@ -21,10 +21,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-import logging
-
 """ @package datagraph.datagraphcontroller    the DataGraphController """
 
+import logging
+from helpers.excep import VariableNotFoundException
 from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
 from datagraphvwfactory import DataGraphVWFactory
@@ -96,9 +96,11 @@ class DataGraphController(QObject):
         @param xPos     Integer, the X-Coordinate of the Position where to add the Variable
         @param yPos     Integer, the Y-Coordinate of the Position where to add the Variable
         """
-        varWrapper = self.variableList.addVarByName(watch)
-        self.addVar(varWrapper, xPos, yPos, False)
-        return varWrapper
+        try:
+            varWrapper = self.variableList.addVarByName(watch)
+            self.addVar(varWrapper, xPos, yPos, False)
+        except VariableNotFoundException:
+            pass
 
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -

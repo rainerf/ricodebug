@@ -30,6 +30,7 @@ from structvariable import StructVariable
 from arrayvariable import ArrayVariable
 import logging
 import re
+from helpers.excep import VariableNotFoundException
 
 
 class VariablePool(QObject):
@@ -117,9 +118,9 @@ class VariablePool(QObject):
         # get variable from gdb (fixed)
         gdbVar = self.connector.var_create("- * " + str(exp))
 
-        # successful result
         if gdbVar.class_ == GdbOutput.ERROR:
-            gdbVar = None
+            logging.error("Variable '%s' not found!", exp)
+            raise VariableNotFoundException()
 
         # create variable
         varReturn = self.__createVariable(gdbVar, None, exp, None)
@@ -189,45 +190,39 @@ class VariablePool(QObject):
         inscope = None
         haschildren = None
 
-        # PendingVariable
-        if gdbVar == None:
+        if hasattr(gdbVar, "exp"):
+            exp = gdbVar.exp
+        gdbName = gdbVar.name
+        if parentName == None:
             uniqueName = exp
-            inscope = False
-            logging.error("Error gdbVar = None")
         else:
-            if hasattr(gdbVar, "exp"):
-                exp = gdbVar.exp
-            gdbName = gdbVar.name
-            if parentName == None:
-                uniqueName = exp
-            else:
-                uniqueName = childformat % {"parent": parentName, "child": exp}
-            type_ = gdbVar.type
-            value = gdbVar.value
-            inscope = True
-            haschildren = (int(gdbVar.numchild) > 0)
-            access = access
+            uniqueName = childformat % {"parent": parentName, "child": exp}
+        type_ = gdbVar.type
+        value = gdbVar.value
+        inscope = True
+        haschildren = (int(gdbVar.numchild) > 0)
+        access = access
 
-            # We use some heuristics to find out whether a type is a pointer, an
-            # array, or a structure:
-            # * Pointers will have addresses as their values, ie. their value will
-            # start with "0x"
-            # * Arrays will have their size as their value as reported by gdb.
-            # Therefore, if the value looks like a size, treat it as an array.
-            # * Everything else with children is a structure.
-            # * Again, everything else is a normal variable.
-            if gdbVar.value.startswith('0x') and int(gdbVar.numchild) >= 1:
-                logging.debug("Creating a pointer variable for '%s'", exp)
-                varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
-                logging.debug("Creating a array variable for '%s'", exp)
-                varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            elif haschildren:
-                logging.debug("Creating a struct variable for '%s'", exp)
-                varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
-            else:
-                logging.debug("Creating a normal variable for '%s'", exp)
-                varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+        # We use some heuristics to find out whether a type is a pointer, an
+        # array, or a structure:
+        # * Pointers will have addresses as their values, ie. their value will
+        # start with "0x"
+        # * Arrays will have their size as their value as reported by gdb.
+        # Therefore, if the value looks like a size, treat it as an array.
+        # * Everything else with children is a structure.
+        # * Again, everything else is a normal variable.
+        if gdbVar.value.startswith('0x') and int(gdbVar.numchild) >= 1:
+            logging.debug("Creating a pointer variable for '%s'", exp)
+            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+        elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
+            logging.debug("Creating a array variable for '%s'", exp)
+            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+        elif haschildren:
+            logging.debug("Creating a struct variable for '%s'", exp)
+            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+        else:
+            logging.debug("Creating a normal variable for '%s'", exp)
+            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
 
         return varReturn
 
