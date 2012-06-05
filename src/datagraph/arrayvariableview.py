@@ -27,13 +27,16 @@ from stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
 from PyQt4.QtGui import QIcon
 import sys
+import importlib
+plt = None      # this will be imported lazily
 
 
 def _importMatplotlib():
-	if "matplotlib" not in sys.modules:
-		import matplotlib
-		matplotlib.use('Agg')
-		import matplotlib.pyplot as plt
+    if "matplotlib" not in sys.modules:
+        global plt
+        import matplotlib
+        matplotlib.use('Agg')
+        plt = importlib.import_module("matplotlib.pyplot")
 
 
 def _getAvailableFiltes():
@@ -102,7 +105,6 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
             self.graphicalView = False
             self.setTemplate('structvariableview.mako')
         else:
-            _importMatplotlib()		# only import matplotlib if we really need it
             self.graphicalView = True
             self.setTemplate('arrayview.mako')
         self.varWrapper.setDirty(True)
@@ -128,6 +130,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         self.varWrapper.setDirty(True)
 
     def plot(self, output):
+        _importMatplotlib()        # only import matplotlib if we really need it
         data = [float(var.getUnfilteredValue()) for var in self.varWrapper.children]
 
         fig = plt.figure(figsize=(4, 3))
