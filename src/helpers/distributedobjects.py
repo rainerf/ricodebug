@@ -41,9 +41,14 @@ from stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
 from sessionmanager import SessionManager
 from helpers.actions import Actions
+from helpers.configstore import ConfigStore
+from PyQt4.QtCore import QSettings
+
 
 class DistributedObjects:
     def __init__(self):
+        self.settings = QSettings("fh-hagenberg", "ricodebug")
+        self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
         self.actions = Actions()
         self.signalProxy = SignalProxy(self)
@@ -63,4 +68,3 @@ class DistributedObjects:
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
-

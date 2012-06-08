@@ -24,7 +24,7 @@
 
 import os
 from helpers.ptyhandler import PtyHandler
-from PyQt4.QtCore import QObject, QSettings, pyqtSignal, Qt
+from PyQt4.QtCore import QObject, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
 
@@ -36,8 +36,6 @@ class DebugController(QObject):
         QObject.__init__(self)
 
         self.isRecording = False
-
-        self.settings = QSettings("fh-hagenberg", "ricodebug")
 
         self.ptyhandler = PtyHandler()
 

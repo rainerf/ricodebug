@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 
         self.act = self.distributedObjects.actions
         self.debugController = self.distributedObjects.debugController
-        self.settings = self.debugController.settings
+        self.settings = self.distributedObjects.settings
         self.signalproxy = self.distributedObjects.signalProxy
         self.pluginloader = PluginLoader(self.distributedObjects)
         self.editorController = self.distributedObjects.editorController

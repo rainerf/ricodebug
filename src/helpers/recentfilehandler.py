@@ -52,9 +52,8 @@ class RecentFileHandler():
             @param distributedObjects: distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
         self.distributedObjects = distributedObjects
-        self.debugController = distributedObjects.debugController
         self.recentFilesMenu = recentFilesMenu
-        self.settings = self.debugController.settings
+        self.settings = self.distributedObjects.settings
         self.nrRecentFiles = 5
         self.recentFiles = []
 
