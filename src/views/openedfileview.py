@@ -32,8 +32,8 @@ import logging
 
 
 class OpenedFileView(QObject):
-    MARGIN_NUMBERS, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
-    MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(6)
+    MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
+    MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(7)
 
     def __init__(self, distributedObjects, filename):
         QObject.__init__(self)
@@ -66,10 +66,7 @@ class OpenedFileView(QObject):
 
         self.edit.setToolTip("")
         self.edit.setWhatsThis("")
-        self.edit.setTabWidth(4)
         self.edit.setLexer(self.lexer)
-        self.edit.setWhitespaceVisibility(Qsci.QsciScintilla.WsVisible)
-        self.edit.setIndentationGuides(True)
         self.edit.setMarginLineNumbers(self.MARGIN_NUMBERS, True)
         # set sensitivity
         self.edit.setMarginSensitivity(self.MARGIN_NUMBERS, True)
@@ -135,6 +132,28 @@ class OpenedFileView(QObject):
 
         act = self.distributedObjects.actions
         act.ToggleTrace.triggered.connect(self.toggleTracepoint)
+
+        self.distributedObjects.editorController.config.itemsHaveChanged.connect(self.updateConfig)
+        self.updateConfig()
+
+    def updateConfig(self):
+        qs = Qsci.QsciScintilla
+        c = self.distributedObjects.editorController.config
+        self.edit.setWhitespaceVisibility(qs.WsVisible if c.showWhiteSpaces.value else qs.WsInvisible)
+        self.edit.setIndentationGuides(c.showIndentationGuides.value)
+        self.edit.setTabWidth(int(c.tabWidth.value))
+        self.edit.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
+        self.edit.setFolding(qs.BoxedTreeFoldStyle if c.folding.value else qs.NoFoldStyle, self.MARGIN_MARKER_FOLD)
+        self.lexer.setPaper(QColor(c.backgroundColor.value))
+        self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Identifier)
+        self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Operator)
+        self.edit.setCaretForegroundColor(QColor(c.identifierColor.value))
+        self.lexer.setColor(QColor(c.keywordColor.value), self.lexer.Keyword)
+        self.lexer.setColor(QColor(c.stringColor.value), self.lexer.SingleQuotedString)
+        self.lexer.setColor(QColor(c.stringColor.value), self.lexer.DoubleQuotedString)
+        self.lexer.setColor(QColor(c.numberColor.value), self.lexer.Number)
+        self.lexer.setColor(QColor(c.preprocessorColor.value), self.lexer.PreProcessor)
+        self.edit.setMarkerBackgroundColor(QColor(c.stackMarkerColor.value), self.MARGIN_MARKER_STACK)
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \

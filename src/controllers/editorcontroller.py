@@ -24,6 +24,26 @@
 
 from PyQt4.QtCore import QObject
 from views.editorview import EditorView
+from helpers.configstore import ConfigSet, ConfigItem
+
+
+class EditorConfig(ConfigSet):
+    def __init__(self):
+        ConfigSet.__init__(self, "Editor", "Editor Settings")
+        self.backgroundColor = ConfigItem(self, "Background Color", "#ffffff")
+        self.identifierColor = ConfigItem(self, "Identifier Color", "#000000")
+        self.keywordColor = ConfigItem(self, "Keyword Color", "#00007f")
+        self.commentColor = ConfigItem(self, "Comment Color", "#007f00")
+        self.stringColor = ConfigItem(self, "String Color", "#7f007f")
+        self.numberColor = ConfigItem(self, "Number Color", "#007f7f")
+        self.preprocessorColor = ConfigItem(self, "Preprocessor Color", "#7f7f00")
+        self.stackMarkerColor = ConfigItem(self, "Stack Marker", "#ffffa0")
+        self.showWhiteSpaces = ConfigItem(self, "Show White Spaces", False)
+        self.showIndentationGuides = ConfigItem(self, "Show Indentation Guides", False)
+        self.tabWidth = ConfigItem(self, "Tab Width", 4)
+        self.wrapLines = ConfigItem(self, "Wrap Lines", True)
+        self.folding = ConfigItem(self, "Allow Folding", True)
+        #self.font = ConfigItem(self, "Font", ('DejaVu Sans Mono', 10, False, True))
 
 
 class EditorController(QObject):
@@ -38,6 +58,9 @@ class EditorController(QObject):
         self.distributedObjects.signalProxy.inferiorHasExited.connect(self.editor_view.targetExited)
         self.distributedObjects.signalProxy.saveFile.connect(self.saveCurrentFile)
         self.distributedObjects.signalProxy.fileModified.connect(self.editor_view.setFileModified)
+
+        self.config = EditorConfig()
+        self.distributedObjects.configStore.registerConfigSet(self.config)
 
     def jumpToLine(self, filename, line):
         line = int(line) - 1
@@ -59,7 +82,7 @@ class EditorController(QObject):
             file_ = self.editor_view.openedFiles[filename]
             editor = file_.edit
             editor.markerDeleteAll(file_.MARGIN_MARKER_STACK)
-            
+
     def saveCurrentFile(self):
         self.editor_view.getCurrentOpenedFile().saveFile()
 

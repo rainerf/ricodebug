@@ -178,6 +178,7 @@ class MainWindow(QMainWindow):
                 self.distributedObjects.sessionManager.showRestoreSessionDialog)
         self.ui.actionSaveSession.triggered.connect(
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
+        self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
 
     def addPluginDockWidget(self, area, widget, addToggleViewAction):
         self.addDockWidget(area, widget)
