@@ -23,6 +23,13 @@ class ConfigItem(QObject):
     value = property(getValue, setValue)
 
 
+class Separator:
+    def __init__(self, context, name):
+        context.appendConfigItem(self)
+        self.description = None
+        self.value = name
+
+
 class ConfigSet(QObject):
     itemsHaveChanged = pyqtSignal()
 
@@ -38,7 +45,8 @@ class ConfigSet(QObject):
 
     def appendConfigItem(self, i):
         self.items.append(i)
-        i.valueChanged.connect(self.itemChanged)
+        if isinstance(i, ConfigItem):
+            i.valueChanged.connect(self.itemChanged)
 
     def beginUpdateItems(self):
         self.__itemHasChanged = False
@@ -55,21 +63,23 @@ class ConfigSet(QObject):
     def __storeSettings(self, settings):
         settings.beginGroup(self._name)
         for i in self.items:
-            settings.setValue(i.description.lower(), i.value)
+            if isinstance(i, ConfigItem):
+                settings.setValue(i.description.lower(), i.value)
         settings.endGroup()
 
     def loadSettings(self, settings):
         settings.beginGroup(self._name)
         for i in self.items:
-            desc = i.description.lower()
-            if settings.contains(desc):
-                # use the item's default value to check the type we should read
-                if isinstance(i._default, bool):
-                    i.value = settings.value(desc).toBool()
-                elif isinstance(i._default, basestring):
-                    i.value = str(settings.value(desc).toString())
-                elif isinstance(i._default, int):
-                    i.value = int(settings.value(desc).toInt()[0])
+            if isinstance(i, ConfigItem):
+                desc = i.description.lower()
+                if settings.contains(desc):
+                    # use the item's default value to check the type we should read
+                    if isinstance(i._default, bool):
+                        i.value = settings.value(desc).toBool()
+                    elif isinstance(i._default, basestring):
+                        i.value = str(settings.value(desc).toString())
+                    elif isinstance(i._default, int):
+                        i.value = int(settings.value(desc).toInt()[0])
         settings.endGroup()
 
 
@@ -88,6 +98,6 @@ class ConfigStore:
         if resultlists:
             for configset, resultlist in zip(self.datasets, resultlists):
                 configset.beginUpdateItems()
-                for config, result in zip(configset.items, resultlist):
+                for config, result in zip((c for c in configset.items if isinstance(c, ConfigItem)), resultlist):
                     config.value = result
                 configset.endUpdateItems(self.__settings)
