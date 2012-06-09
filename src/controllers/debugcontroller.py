@@ -27,6 +27,13 @@ from helpers.ptyhandler import PtyHandler
 from PyQt4.QtCore import QObject, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
+from helpers.configstore import ConfigSet, ConfigItem
+
+
+class DebugConfig(ConfigSet):
+    def __init__(self):
+        ConfigSet.__init__(self, "Debugging", "Debugging Options")
+        self.breakAtMain = ConfigItem(self, "Break at main function", True)
 
 
 class DebugController(QObject):
@@ -52,6 +59,14 @@ class DebugController(QObject):
 
         self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
+        self.__config = DebugConfig()
+        self.distributedObjects.configStore.registerConfigSet(self.__config)
+        self.__config.itemsHaveChanged.connect(self.updateConfig)
+
+    def updateConfig(self):
+        if self.executableName:
+            logging.warning("Please reload executable for changes to take effect!")
+
     def openExecutable(self, filename):
         # make sure we only open absolute paths, otherwise eg. RecentFileHandler
         # will not know _where_ the file was we opened and store different
@@ -69,6 +84,8 @@ class DebugController(QObject):
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
+            if self.__config.breakAtMain.value:
+                self.distributedObjects.breakpointController.insertBreakpoint("main", None)
             self.executableOpened.emit(filename)
             self.executableName = filename
 
