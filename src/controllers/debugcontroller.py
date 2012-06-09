@@ -35,8 +35,6 @@ class DebugController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
 
-        self.isRecording = False
-
         self.ptyhandler = PtyHandler()
 
         self.distributedObjects = distributedObjects
