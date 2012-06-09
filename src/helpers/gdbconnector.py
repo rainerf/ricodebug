@@ -148,8 +148,9 @@ class GdbConnector(QObject):
 
         return stack
 
-    def insertBreakpoint(self, file_, line):
-        loc = file_ + ":" + str(line)
+    def insertBreakpoint(self, loc, line):
+        if line is not None:
+            loc = "%s:%s" % (loc, str(line))
         return self.executeAndRaiseIfFailed("-break-insert " + loc, \
                 "Could not create breakpoint " + loc + ".")
 
