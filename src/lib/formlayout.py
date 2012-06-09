@@ -103,12 +103,10 @@ class ColorButton(QPushButton):
         self._color = QColor()
 
     def choose_color(self):
-        rgba, valid = QColorDialog.getRgba(self._color.rgba(),
-                                           self.parentWidget())
-        if valid:
-            color = QColor.fromRgba(rgba)
-            self.set_color(color)
-    
+        rgb = QColorDialog.getColor(self._color, self.parentWidget())
+        if rgb.isValid():
+            self.set_color(rgb)
+
     def get_color(self):
         return self._color
 
