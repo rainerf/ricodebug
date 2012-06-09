@@ -38,7 +38,7 @@ class GdbConnector(QObject):
 
     def start(self):
         try:
-            self.gdb = subprocess.Popen(['gdb', '--interpreter', 'mi'], \
+            self.gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q'], \
                     shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         except OSError as e:
             logging.critical("Could not start gdb. Error message: %s", e)
