@@ -24,7 +24,7 @@
 
 from PyQt4.QtCore import QObject
 from views.editorview import EditorView
-from helpers.configstore import ConfigSet, ConfigItem
+from helpers.configstore import ConfigSet, ConfigItem, Separator
 
 
 class EditorConfig(ConfigSet):
@@ -38,6 +38,7 @@ class EditorConfig(ConfigSet):
         self.numberColor = ConfigItem(self, "Number Color", "#007f7f")
         self.preprocessorColor = ConfigItem(self, "Preprocessor Color", "#7f7f00")
         self.stackMarkerColor = ConfigItem(self, "Stack Marker", "#ffffa0")
+        Separator(self, None)
         self.showWhiteSpaces = ConfigItem(self, "Show White Spaces", False)
         self.showIndentationGuides = ConfigItem(self, "Show Indentation Guides", False)
         self.tabWidth = ConfigItem(self, "Tab Width", 4)

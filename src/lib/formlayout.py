@@ -73,7 +73,7 @@ if os.environ['QT_API'] == 'pyqt':
                      QColorDialog, QPixmap, QTabWidget, QApplication, #@UnresolvedImport
                      QStackedWidget, QDateEdit, QDateTimeEdit, QFont, #@UnresolvedImport
                      QFontComboBox, QFontDatabase, QGridLayout, #@UnresolvedImport
-                     QDoubleValidator)  #@UnresolvedImport
+                     QDoubleValidator, QFrame)  #@UnresolvedImport
     from PyQt4.QtCore import Qt, SIGNAL, SLOT, QSize
     from PyQt4.QtCore import pyqtSlot as Slot
     from PyQt4.QtCore import pyqtProperty as Property
@@ -85,7 +85,7 @@ if os.environ['QT_API'] == 'pyside':
                      QColorDialog, QPixmap, QTabWidget, QApplication, #@UnresolvedImport
                      QStackedWidget, QDateEdit, QDateTimeEdit, QFont, #@UnresolvedImport
                      QFontComboBox, QFontDatabase, QGridLayout, #@UnresolvedImport
-                     QDoubleValidator, QFormLayout)  #@UnresolvedImport
+                     QDoubleValidator, QFormLayout, QFrame)  #@UnresolvedImport
     from PySide.QtCore import Qt, SIGNAL, SLOT, QSize, Slot, Property  #@UnresolvedImport
 
 
@@ -244,6 +244,7 @@ def is_edit_valid(edit):
     state, _t = edit.validator().validate(text, 0)
     return state == QDoubleValidator.Acceptable
 
+
 class FormWidget(QWidget):
     def __init__(self, data, comment="", parent=None):
         QWidget.__init__(self, parent)
@@ -274,7 +275,10 @@ class FormWidget(QWidget):
                 print "value:", value
             if label is None and value is None:
                 # Separator: (None, None)
-                self.formlayout.addRow(QLabel(" "), QLabel(" "))
+                frame = QFrame()
+                frame.setFrameShape(QFrame.HLine)
+                frame.setFrameShadow(QFrame.Sunken)
+                self.formlayout.addRow(frame)
                 self.widgets.append(None)
                 continue
             elif label is None:
