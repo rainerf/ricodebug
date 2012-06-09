@@ -1,4 +1,4 @@
-from formlayout import fedit
+from lib.formlayout import fedit
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QObject
 
 
