@@ -97,7 +97,7 @@ class ColorButton(QPushButton):
 
     def __init__(self, parent=None):
         QPushButton.__init__(self, parent)
-        self.setFixedSize(20, 20)
+        self.setFixedSize(22, 22)
         self.setIconSize(QSize(12, 12))
         self.connect(self, SIGNAL("clicked()"), self.choose_color)
         self._color = QColor()
