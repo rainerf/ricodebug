@@ -37,7 +37,9 @@ class EditorConfig(ConfigSet):
         self.stringColor = ConfigItem(self, "String Color", "#7f007f")
         self.numberColor = ConfigItem(self, "Number Color", "#007f7f")
         self.preprocessorColor = ConfigItem(self, "Preprocessor Color", "#7f7f00")
-        self.stackMarkerColor = ConfigItem(self, "Stack Marker", "#ffffa0")
+        Separator(self, None)
+        self.highlightColor = ConfigItem(self, "Highlight Color", "#ffffa0")
+        self.highlightingDuration = ConfigItem(self, "Duration of Highlighting (ms)", 1500)
         Separator(self, None)
         self.showWhiteSpaces = ConfigItem(self, "Show White Spaces", False)
         self.showIndentationGuides = ConfigItem(self, "Show Indentation Guides", False)
@@ -68,15 +70,13 @@ class EditorController(QObject):
         self.editor_view.openFile(filename)
         file_ = self.editor_view.openedFiles[filename]
         file_.showLine(line)
-        editor = file_.edit
-        editor.setSelection(line, 0, line, editor.lineLength(line))
+        file_.highlightLine(line)
 
     def addStackMarker(self, filename, line):
         line = int(line) - 1
         self.editor_view.openFile(filename)
         file_ = self.editor_view.openedFiles[filename]
-        editor = file_.edit
-        editor.markerAdd(line, file_.MARGIN_MARKER_STACK)
+        file_.edit.markerAdd(line, file_.MARGIN_MARKER_STACK)
 
     def delStackMarkers(self, filename):
         if self.editor_view.isOpen(filename):

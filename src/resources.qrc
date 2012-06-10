@@ -61,6 +61,7 @@
   </qresource>
   <qresource prefix="markers">
     <file alias="exec_pos.png">images/markers/exec_pos.png</file>
+    <file alias="stack_pos.png">images/markers/stack_pos.png</file>
 	<file alias="exec_pos_signal.png">images/markers/exec_pos_signal.png</file>
     <file alias="bp.png">images/markers/bp.png</file>
     <file alias="tp.png">images/markers/tp.png</file>

@@ -26,14 +26,14 @@ import re
 import cgi
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QToolTip, QFont, QColor
-from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher
+from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher, QTimer
 from math import log, ceil
 import logging
 
 
 class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
-    MARGIN_MARKER_EXEC_SIGNAL, MARGIN_MARKER_STACK = range(7)
+    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK = range(8)
 
     def __init__(self, distributedObjects, filename):
         QObject.__init__(self)
@@ -48,6 +48,7 @@ class OpenedFileView(QObject):
         self.markerBp = QPixmap(":/markers/bp.png")
         self.markerTp = QPixmap(":/markers/tp.png")
         self.markerExec = QPixmap(":/markers/exec_pos.png")
+        self.markerStack = QPixmap(":/markers/stack_pos.png")
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
 
@@ -76,8 +77,9 @@ class OpenedFileView(QObject):
         self.edit.markerDefine(self.markerBp, self.MARGIN_MARKER_BP)
         self.edit.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
         self.edit.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
+        self.edit.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
         self.edit.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
-        self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARGIN_MARKER_STACK)
+        self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
         # define width and mask to show margin
         self.edit.setMarginWidth(self.MARGIN_MARKER_BP, 10)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP)
@@ -86,11 +88,11 @@ class OpenedFileView(QObject):
         self.edit.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC,
                 1 << self.MARGIN_MARKER_EXEC |
-                1 << self.MARGIN_MARKER_EXEC_SIGNAL)
-        self.edit.setMarginWidth(self.MARGIN_MARKER_STACK, 0)
-        self.edit.setMarkerBackgroundColor(QColor(Qt.yellow), self.MARGIN_MARKER_STACK)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_STACK, 1 << self.MARGIN_MARKER_STACK)
-        # ...
+                1 << self.MARGIN_MARKER_EXEC_SIGNAL |
+                1 << self.MARGIN_MARKER_STACK)
+        self.edit.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
+        self.edit.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
+
         self.edit.setReadOnly(False)
         self.gridLayout.addWidget(self.edit, 0, 0, 1, 1)
 
@@ -153,7 +155,7 @@ class OpenedFileView(QObject):
         self.lexer.setColor(QColor(c.stringColor.value), self.lexer.DoubleQuotedString)
         self.lexer.setColor(QColor(c.numberColor.value), self.lexer.Number)
         self.lexer.setColor(QColor(c.preprocessorColor.value), self.lexer.PreProcessor)
-        self.edit.setMarkerBackgroundColor(QColor(c.stackMarkerColor.value), self.MARGIN_MARKER_STACK)
+        self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
@@ -307,3 +309,12 @@ class OpenedFileView(QObject):
         for tp in self.tracepointController.getTracepointsFromModel():
             if tp.fullname == self.filename:
                 self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
+
+    def highlightLine(self, line):
+        self.removeHighlightedLines()
+        self.edit.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE)
+        QTimer.singleShot(int(self.distributedObjects.editorController.config.highlightingDuration.value),
+                          self.removeHighlightedLines)
+
+    def removeHighlightedLines(self):
+        self.edit.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)
