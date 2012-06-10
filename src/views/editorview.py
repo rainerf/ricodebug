@@ -146,8 +146,12 @@ class EditorView(QWidget):
                 try:
                     file_ = res.src.fullname
                 except AttributeError:
-                    logging.warning("No source for %s found.", res.src.file)
-                    raise helpers.excep.SourceFileNotFound(res.src.file)
+                    try:
+                        logging.warning("No source for %s found.", res.src.file)
+                        raise helpers.excep.SourceFileNotFound(res.src.file)
+                    except AttributeError:
+                        logging.warning("No source file found.")
+                        raise helpers.excep.SourceFileNotFound(None)
                 line = int(res.src.line) - 1
                 break
 
