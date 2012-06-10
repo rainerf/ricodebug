@@ -22,57 +22,59 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, Qt
+from PyQt4.QtCore import QObject, Qt, pyqtSignal
 from PyQt4.QtGui import QDockWidget
 from models.stackmodel import StackModel
 from views.stackview import StackView
 
+
 class StackController(QObject):
+    stackFrameSelected = pyqtSignal()
+
     def __init__(self, distributedObjects):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
-        
+
         self.editorController = distributedObjects.editorController
-        
+
         self.stackModel = StackModel(self, self.distributedObjects.debugController, self.distributedObjects.gdb_connector)
         self.stackView = StackView(self)
-        
+
         self.stackView.stackView.setModel(self.stackModel)
-        
+
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.stackModel.update)
         self.distributedObjects.signalProxy.inferiorHasExited.connect(self.stackModel.clear)
         self.distributedObjects.signalProxy.executableOpened.connect(self.stackModel.clear)
         self.distributedObjects.signalProxy.inferiorIsRunning.connect(self.removeStackMarkers)
         self.stackView.showStackTrace.stateChanged.connect(self.showStackTraceChanged)
-        
+
         self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
-        
+
     def insertDockWidgets(self):
         self.stackDock = QDockWidget("Stack")
         self.stackDock.setObjectName("StackView")
         self.stackDock.setWidget(self.stackView)
         self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.stackDock, True)
-        
+
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
         self.distributedObjects.gdb_connector.selectStackFrame(item.level)
         self.distributedObjects.signalProxy.openFile(item.fullname, item.line)
-        # FIXME: make locals view etc change their view too!
-        
+        self.stackFrameSelected.emit()
+
     def insertStackMarkers(self):
         if self.stackView.showStackTrace.checkState() == Qt.Checked:
             for entry in self.stackModel.stack:
                 if int(entry.level) != 0 and hasattr(entry, "fullname") and hasattr(entry, "line"):
                     self.editorController.addStackMarker(entry.fullname, entry.line)
-    
+
     def removeStackMarkers(self):
         for entry in self.stackModel.stack:
             if int(entry.level) != 0 and hasattr(entry, "fullname"):
                 self.editorController.delStackMarkers(entry.fullname)
-                
+
     def showStackTraceChanged(self, state):
         if state == Qt.Checked:
             self.insertStackMarkers()
         elif state == Qt.Unchecked:
             self.removeStackMarkers()
-    

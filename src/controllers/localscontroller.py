@@ -31,6 +31,7 @@ class LocalsController(TreeItemController):
     def __init__(self, distributedObjects):
         TreeItemController.__init__(self, distributedObjects, "Locals", LocalsView, LocalsModel)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
+        self.distributedObjects.stackController.stackFrameSelected.connect(self.getLocals)
 
     def getLocals(self):
         self.clear()
