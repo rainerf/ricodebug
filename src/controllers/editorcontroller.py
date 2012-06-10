@@ -89,4 +89,3 @@ class EditorController(QObject):
 
     def closeOpenedFiles(self):
         return self.editor_view.removeAllTabs()
-

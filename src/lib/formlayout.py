@@ -1,3 +1,5 @@
+#@PydevCodeAnalysisIgnore
+# pylint: ignore-module
 # -*- coding: utf-8 -*-
 """
 formlayout
