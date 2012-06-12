@@ -50,7 +50,7 @@ class WatchController(TreeItemController):
         @param row     int, selected row
         @param parent  TreeItem, parent item from selectected item
         """
-        self.variableModel.removeRow(row, parent)
+        self.model.removeRow(row, parent)
 
     def addWatch(self, watch):
         """ adds the Variable watch to the VariableList and its wrapper to the WatchView

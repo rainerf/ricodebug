@@ -51,7 +51,7 @@ class WatchView(TreeItemView):
         if (int(key) == Qt.Key_Delete):
             selectionModel = self.selectionModel()
             index = selectionModel.currentIndex()
-            self.variableController.removeSelected(index.row(), index.parent())
+            self.controller.removeSelected(index.row(), index.parent())
 
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)
