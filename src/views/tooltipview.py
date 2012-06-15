@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from treeitemview import TreeItemView
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
 from PyQt4.QtGui import QWidget, QPushButton, QIcon, QGridLayout, QSizeGrip
 
 
@@ -54,9 +54,19 @@ class ToolTipView(QWidget):
         self.treeItemView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.treeItemView.setCornerWidget(QSizeGrip(self))
 
+        self.__hideTimer = QTimer()
+        self.__hideTimer.setSingleShot(True)
+        self.__hideTimer.timeout.connect(self.hide)
+
+    def enterEvent(self, event):
+        self.__hideTimer.stop()
+
+    def hideLater(self):
+        self.__hideTimer.start(250)
+
     # hide the widget when the mouse leaves it
     def leaveEvent(self, event):
-        self.hide()
+        self.hideLater()
 
     def __addToWatch(self):
         self.__do.signalProxy.addWatch(self.exp)

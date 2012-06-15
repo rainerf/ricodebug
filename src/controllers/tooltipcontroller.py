@@ -45,4 +45,4 @@ class ToolTipController(TreeItemController):
         self.view.show(exp)
 
     def hideToolTip(self):
-        self.view.hide()
+        self.view.hideLater()
