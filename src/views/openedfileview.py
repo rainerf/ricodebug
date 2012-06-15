@@ -192,7 +192,8 @@ class OpenedFileView(QObject):
                 Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.edit.mapToGlobal(point)
         exp = self.getWordOrSelectionFromPosition(scipos)
-        # self.edit.lineIndexFromPosition(..) returns tupel. first of tupel is line
+
+        # self.edit.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContexMenuLine = int(self.edit.lineIndexFromPosition(scipos)[0])
 
         listOfTracepoints = self.tracepointController.getTracepointsFromModel()
@@ -201,15 +202,12 @@ class OpenedFileView(QObject):
         self.subPopupMenu.setTitle("Add variable " + exp + " to...")
 
         for tp in listOfTracepoints:
-            # dynamic actions, not in actiony.py Action class
             self.subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
 
         self.popupMenu = QtGui.QMenu(self.edit)
-        # add watch and toggle breakpoint to menu
         self.popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
         self.popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
         self.popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
-        # add separator and self.subPopupMenu
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)
         self.popupMenu.popup(point)

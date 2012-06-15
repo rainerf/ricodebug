@@ -54,9 +54,7 @@ class WatchController(TreeItemController):
         """
         try:
             vw = self.variableList.addVarByName(watch)
-            # connect changed and replace signal from wrapper
             vw.dataChanged.connect(vw.hasChanged)
-
             self.add(vw)
         except VariableNotFoundException:
             pass
