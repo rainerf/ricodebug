@@ -43,6 +43,10 @@ from sessionmanager import SessionManager
 from helpers.actions import Actions
 from helpers.configstore import ConfigStore
 from PyQt4.QtCore import QSettings
+from views.watchview import WatchView
+from views.localsview import LocalsView
+from controllers.tooltipcontroller import ToolTipController
+from views.tooltipview import ToolTipView
 
 
 class DistributedObjects:
@@ -53,14 +57,22 @@ class DistributedObjects:
         self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
-        self.editorController = EditorController(self)
         self.breakpointController = BreakpointController(self)
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
+        self.toolTipController = ToolTipController(self, ToolTipView(self))
+        self.editorController = EditorController(self)
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
-        self.watchController = WatchController(self)
-        self.localsController = LocalsController(self)
+
+        self.watchView = WatchView()
+        self.watchController = WatchController(self, self.watchView)
+        self.signalProxy.insertDockWidgets.connect(self.watchController.insertDockWidgets)
+
+        self.localsView = LocalsView()
+        self.localsController = LocalsController(self, self.localsView)
+        self.signalProxy.insertDockWidgets.connect(self.localsController.insertDockWidgets)
+
         self.tracepointController = TracepointController(self)
         self.pyioController = PyIoController(self)
         self.inferiorioController = InferiorIoController(self)

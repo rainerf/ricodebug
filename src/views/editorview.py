@@ -31,8 +31,8 @@ import helpers.excep
 
 
 class EditorView(QWidget):
-    def __init__(self, distributedObjects, _=None):
-        QWidget.__init__(self, parent=None)
+    def __init__(self, distributedObjects, parent=None):
+        QWidget.__init__(self, parent)
 
         self.gridLayout = QtGui.QGridLayout(self)
         self.gridLayout.setMargin(0)

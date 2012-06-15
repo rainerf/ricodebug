@@ -22,29 +22,16 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtGui
 from PyQt4.QtGui import QTreeView, QMenu
 from PyQt4.QtCore import Qt
 from variables import filters
 from controllers.treeitemcontroller import TreeStdVarWrapper
-
-
-class TreeItemView(QTreeView):
-    def __init__(self, controller, parent=None):
-        QTreeView.__init__(self, parent)
-        self.setAlternatingRowColors(True)
-        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.controller = controller
-        self.expanded.connect(self.resizeColumn)
-
-    def resizeColumn(self, _):
-        """Resize the first column to contents when expanded."""
-        self.resizeColumnToContents(0)
+from views.treeitemview import TreeItemView
 
 
 class WatchView(TreeItemView):
-    def __init__(self, controller, parent=None):
-        TreeItemView.__init__(self, controller, parent)
+    def __init__(self, parent=None):
+        TreeItemView.__init__(self, parent)
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -62,4 +49,3 @@ class WatchView(TreeItemView):
                 menu = QMenu()
                 filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
                 menu.exec_(event.globalPos())
-

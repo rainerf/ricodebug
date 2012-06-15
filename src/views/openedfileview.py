@@ -23,9 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import re
-import cgi
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QToolTip, QFont, QColor
+from PyQt4.QtGui import QPixmap, QFont, QColor
 from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher, QTimer
 from math import log, ceil
 import logging
@@ -35,8 +34,8 @@ class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
     MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK = range(8)
 
-    def __init__(self, distributedObjects, filename):
-        QObject.__init__(self)
+    def __init__(self, distributedObjects, filename, parent=None):
+        QObject.__init__(self, parent)
         filename = str(filename)
         self.distributedObjects = distributedObjects
         self.debugController = self.distributedObjects.debugController
@@ -179,17 +178,14 @@ class OpenedFileView(QObject):
     def dwellStart(self, pos, x, y):
         if self.edit.frameGeometry().contains(x, y):
             name = self.getWordOrSelectionFromPosition(pos)
-            val = self.debugController.evaluateExpression(name.strip())
-            if val != None:
-                name = cgi.escape(name)
-                val = cgi.escape(val)
-                QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)),
-                        "<b>" + name + "</b> = " + val, self.edit,
-                        QtCore.QRect())
+
+            # try evaluating the expression before doing anything else: this will return None if the
+            # expression is not valid (ie. something that is not a variable)
+            if self.debugController.evaluateExpression(name.strip()) is not None:
+                self.distributedObjects.toolTipController.showToolTip(name, QtCore.QPoint(x, y), self.edit)
 
     def dwellEnd(self, position, x, y):
-        QToolTip.showText(self.edit.mapToGlobal(QtCore.QPoint(x, y)), "",
-                self.edit, QtCore.QRect())
+        self.distributedObjects.toolTipController.hideToolTip()
 
     def showContextMenu(self, point):
         scipos = self.edit.SendScintilla(

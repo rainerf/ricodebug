@@ -22,19 +22,18 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from models.localsmodel import LocalsModel
-from treeitemcontroller import TreeItemController
+from PyQt4 import QtGui
+from PyQt4.QtGui import QTreeView
 
 
-class LocalsController(TreeItemController):
-    def __init__(self, distributedObjects, view):
-        TreeItemController.__init__(self, distributedObjects, "Locals", view, LocalsModel)
-        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
-        self.distributedObjects.stackController.stackFrameSelected.connect(self.getLocals)
+class TreeItemView(QTreeView):
+    def __init__(self, parent=None):
+        QTreeView.__init__(self, parent)
+        self.setAlternatingRowColors(True)
+        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.controller = None
+        self.expanded.connect(self.resizeColumn)
 
-    def getLocals(self):
-        self.clear()
-        self.variableList.addLocals()
-
-        for vw in self.variableList.list:
-            self.add(vw)
+    def resizeColumn(self, _):
+        """Resize the first column to contents when expanded."""
+        self.resizeColumnToContents(0)

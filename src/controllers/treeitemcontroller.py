@@ -170,12 +170,12 @@ class TreeItemController(QObject):
         self.vwFactory = TreeVWFactory()
 
         self.model = model(self, self.distributedObjects)
-        self.view = view(self)
-
+        self.view = view
+        self.view.controller = self
         self.view.setModel(self.model)
         self.variableList = VariableList(self.vwFactory, self.distributedObjects)
 
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        #self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.distributedObjects.signalProxy.cleanupModels.connect(self.clear)
 
     def clear(self):
@@ -183,7 +183,7 @@ class TreeItemController(QObject):
             this function is connected to the signal SignalProxy::cleanupModels()
         """
         # clear lists
-        del self.variableList.list[:]
+        self.variableList.clear()
         self.model.clear()
 
     def insertDockWidgets(self):

@@ -22,19 +22,27 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from models.localsmodel import LocalsModel
-from treeitemcontroller import TreeItemController
+from controllers.treeitemcontroller import TreeItemController
+from models.variablemodel import VariableModel
+from helpers.excep import VariableNotFoundException
 
 
-class LocalsController(TreeItemController):
+class ToolTipController(TreeItemController):
     def __init__(self, distributedObjects, view):
-        TreeItemController.__init__(self, distributedObjects, "Locals", view, LocalsModel)
-        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
-        self.distributedObjects.stackController.stackFrameSelected.connect(self.getLocals)
+        TreeItemController.__init__(self, distributedObjects, "Tooltip", view, VariableModel)
 
-    def getLocals(self):
+    def __setVar(self, watch):
         self.clear()
-        self.variableList.addLocals()
+        try:
+            self.add(self.variableList.addVarByName(watch))
+        except VariableNotFoundException:
+            pass
 
-        for vw in self.variableList.list:
-            self.add(vw)
+    def showToolTip(self, exp, pos, parent):
+        self.__setVar(exp)
+        self.view.move(parent.mapToGlobal(pos))
+        self.view.raise_()
+        self.view.show(exp)
+
+    def hideToolTip(self):
+        self.view.hide()

@@ -25,24 +25,19 @@
 
 from helpers.excep import VariableNotFoundException
 from models.variablemodel import VariableModel
-from views.watchview import WatchView
 from treeitemcontroller import TreeItemController
-
-#####################################################################################
-## CONTROLLER
-#####################################################################################
 
 
 class WatchController(TreeItemController):
     """ the Controller for the WatchView """
 
-    def __init__(self, distributedObjects):
+    def __init__(self, distributedObjects, view):
         """ Constructor <br>
             Create a WatchView, a WatchVWFactory and a VariableList <br>
             Listens to the following Signals: SignalProxy::AddWatch(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
-        TreeItemController.__init__(self, distributedObjects, "Watch", WatchView, VariableModel)
+        TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel)
         self.distributedObjects.signalProxy.AddWatch.connect(self.addWatch)
 
     def removeSelected(self, row, parent):
