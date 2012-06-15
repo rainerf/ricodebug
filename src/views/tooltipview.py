@@ -32,7 +32,7 @@ class ToolTipView(QWidget):
         QWidget.__init__(self, parent)
         self.__do = distributedObjects
         self.treeItemView = TreeItemView()
-        self.setWindowFlags(Qt.ToolTip)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.hide()
         self.resize(300, 150)
 
