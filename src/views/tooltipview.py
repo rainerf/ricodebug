@@ -31,6 +31,7 @@ class ToolTipView(QWidget):
     def __init__(self, distributedObjects, parent=None):
         QWidget.__init__(self, parent)
         self.__do = distributedObjects
+        self.__allowHide = True
         self.treeItemView = TreeItemView()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.hide()
@@ -57,6 +58,15 @@ class ToolTipView(QWidget):
         self.__hideTimer = QTimer()
         self.__hideTimer.setSingleShot(True)
         self.__hideTimer.timeout.connect(self.hide)
+
+        self.treeItemView.contextMenuOpen.connect(self.setAllowHide)
+
+    def hide(self):
+        if self.__allowHide:
+            QWidget.hide(self)
+
+    def setAllowHide(self, x):
+        self.__allowHide = not x
 
     def enterEvent(self, event):
         self.__hideTimer.stop()
