@@ -44,7 +44,7 @@ class PtrVariable(Variable):
         """
         # avoid null-pointer dereference
         if self.value != "0x0":
-            return self.variablepool.getVar("*(" + self.getUniqueName() + ")")
+            return self.variablepool.getVar("(*" + self.getUniqueName() + ")")
         else:
             return None
 
