@@ -137,6 +137,9 @@ class OpenedFileView(QObject):
         self.distributedObjects.editorController.config.itemsHaveChanged.connect(self.updateConfig)
         self.updateConfig()
 
+        self.__allowToolTip = True
+        self.__enableToolTip(True)
+
     def updateConfig(self):
         qs = Qsci.QsciScintilla
         c = self.distributedObjects.editorController.config
@@ -176,7 +179,7 @@ class OpenedFileView(QObject):
         self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
 
     def dwellStart(self, pos, x, y):
-        if self.edit.frameGeometry().contains(x, y):
+        if self.__allowToolTip and self.edit.frameGeometry().contains(x, y):
             name = self.getWordOrSelectionFromPosition(pos)
 
             # try evaluating the expression before doing anything else: this will return None if the
@@ -211,6 +214,13 @@ class OpenedFileView(QObject):
         self.popupMenu.addSeparator()
         self.popupMenu.addMenu(self.subPopupMenu)
         self.popupMenu.popup(point)
+
+        # disable the tooltips while the menu is shown
+        self.__enableToolTip(False)
+        self.popupMenu.aboutToHide.connect(lambda: self.__enableToolTip(True))
+
+    def __enableToolTip(self, enable):
+        self.__allowToolTip = enable
 
     def isPositionInsideSelection(self, position):
         lf, cf, lt, ct = self.edit.getSelection()
