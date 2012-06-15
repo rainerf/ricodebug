@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+from helpers.tools import try_get
 
 """@package breakpointmodel
     there are some classes in this package:\n
@@ -59,6 +60,21 @@ class ExtendedBreakpoint(QObject):
         QObject.__init__(self)
 
         self.gdbConnector = connector
+        self.file = None
+        self.fullname = None
+        self.func = None
+        self.line = -1
+
+        self.addr = None
+        self.disp = None
+        self.enabled = None
+        self.numer = None
+        self.original_location = None
+        self.times = None
+        self.type = None
+        self.name = None
+        self.condition = None
+        self.skip = None
 
         if (breakPoint != None):
             self.addr = breakPoint.addr
@@ -79,10 +95,15 @@ class ExtendedBreakpoint(QObject):
                 self.parseOriginalLocation(breakPoint.__dict__['original-location'])
                 self.func = "unknown"
             else:
-                self.file = breakPoint.file
-                self.fullname = breakPoint.fullname
-                self.func = breakPoint.func
-                self.line = breakPoint.line
+                self.file = try_get(breakPoint, "file", "<unknown>")
+                self.fullname = try_get(breakPoint, "fullname", "<unknown>")
+                self.func = try_get(breakPoint, "func", None)
+                if not self.func:
+                    self.func = try_get(breakPoint, "at", None)
+                self.line = try_get(breakPoint, "line", "-1")
+
+        if not self.func:
+            self.func = "unknown"
 
     def parseOriginalLocation(self, origLoc):
         """ needed for special case of breakpoints <MULTIPLE> address"""
