@@ -22,10 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QTreeView, QMenu
 from PyQt4.QtCore import Qt
-from variables import filters
-from controllers.treeitemcontroller import TreeStdVarWrapper
 from views.treeitemview import TreeItemView
 
 
@@ -39,13 +36,3 @@ class WatchView(TreeItemView):
             selectionModel = self.selectionModel()
             index = selectionModel.currentIndex()
             self.controller.removeSelected(index.row(), index.parent())
-
-    def contextMenuEvent(self, event):
-        QTreeView.contextMenuEvent(self, event)
-        if not event.isAccepted():
-            selectionModel = self.selectionModel()
-            wrapper = selectionModel.currentIndex().internalPointer()
-            if isinstance(wrapper, TreeStdVarWrapper):
-                menu = QMenu()
-                filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
-                menu.exec_(event.globalPos())

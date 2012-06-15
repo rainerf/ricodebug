@@ -22,14 +22,30 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QTreeView
+from PyQt4.Qt import pyqtSignal
+from PyQt4.QtGui import QTreeView, QMenu, QAbstractItemView, QHeaderView
+from controllers.treeitemcontroller import TreeStdVarWrapper
+from variables import filters
 
 
 class TreeItemView(QTreeView):
+    contextMenuOpen = pyqtSignal(bool)
+
     def __init__(self, parent=None):
         QTreeView.__init__(self, parent)
         self.setAlternatingRowColors(True)
-        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.controller = None
-        self.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.header().setResizeMode(QHeaderView.ResizeToContents)
+
+    def contextMenuEvent(self, event):
+        QTreeView.contextMenuEvent(self, event)
+        if not event.isAccepted():
+            selectionModel = self.selectionModel()
+            wrapper = selectionModel.currentIndex().internalPointer()
+            if isinstance(wrapper, TreeStdVarWrapper):
+                menu = QMenu(self)
+                filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.getExp()), wrapper)
+                self.contextMenuOpen.emit(True)
+                menu.exec_(event.globalPos())
+                self.contextMenuOpen.emit(False)
