@@ -24,11 +24,13 @@
 
 from PyQt4.QtCore import Qt
 from views.treeitemview import TreeItemView
+from variables import variable
 
 
 class WatchView(TreeItemView):
     def __init__(self, parent=None):
         TreeItemView.__init__(self, parent)
+        self.setAcceptDrops(True)
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -36,3 +38,13 @@ class WatchView(TreeItemView):
             selectionModel = self.selectionModel()
             index = selectionModel.currentIndex()
             self.controller.removeSelected(index.row(), index.parent())
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat(variable.MIME_TYPE):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, e):
+        data = str(e.mimeData().data(variable.MIME_TYPE))
+        self.controller.addWatch(data)

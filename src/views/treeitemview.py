@@ -37,6 +37,7 @@ class TreeItemView(QTreeView):
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.controller = None
         self.header().setResizeMode(QHeaderView.ResizeToContents)
+        self.setDragEnabled(True)
 
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)

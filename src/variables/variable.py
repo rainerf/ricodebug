@@ -25,6 +25,9 @@
 from PyQt4.QtCore import QObject, pyqtSignal
 
 
+MIME_TYPE = "application/x-variableexpresssion"
+
+
 class Variable(QObject):
     """ Class holding a Variable. <br>
         This is the Parent of all Variable-Classes and the Core of all VariableWrappers.

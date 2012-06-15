@@ -22,8 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject
+from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject, QMimeData, QStringList
 from PyQt4.QtGui import QPixmap, QBrush
+from variables import variable
 
 
 class TreeItem(QObject):
@@ -331,7 +332,8 @@ class VariableModel(QAbstractItemModel):
             out of scope variables are not editable
         """
         if not index.isValid():
-            return 0
+            return Qt.ItemIsDropEnabled
+
         item = index.internalPointer()
         if not item.getInScope():
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -341,8 +343,8 @@ class VariableModel(QAbstractItemModel):
         if index.column() == 2:
             ret |= Qt.ItemIsEditable
 
-        elif index.column() == 3:
-            ret |= Qt.ItemIsUserCheckable | Qt.ItemIsEditable
+        if index.column() == 0:
+            ret |= Qt.ItemIsDragEnabled
 
         return ret
 
@@ -432,3 +434,15 @@ class VariableModel(QAbstractItemModel):
             del self.root.childItems[position]
             self.endRemoveRows()
         return success
+
+    def mimeTypes(self):
+        return QStringList([variable.MIME_TYPE])
+
+    def mimeData(self, indexes):
+        if len(indexes) == 1:
+            item = indexes[0].internalPointer()
+            d = QMimeData()
+            d.setData(variable.MIME_TYPE, item.variable.getUniqueName())
+            return d
+        else:
+            return None
