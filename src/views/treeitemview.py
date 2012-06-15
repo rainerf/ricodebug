@@ -32,8 +32,4 @@ class TreeItemView(QTreeView):
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.controller = None
-        self.expanded.connect(self.resizeColumn)
-
-    def resizeColumn(self, _):
-        """Resize the first column to contents when expanded."""
-        self.resizeColumnToContents(0)
+        self.header().setResizeMode(QtGui.QHeaderView.ResizeToContents)

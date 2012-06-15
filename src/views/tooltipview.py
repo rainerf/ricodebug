@@ -60,10 +60,6 @@ class ToolTipView(QWidget):
         self.__do.datagraphController.addWatch(self.exp)
 
     def show(self, exp):
-        # the treeItemView will not resize its first column until something is
-        # expanded, so make sure the size is set correctly when we are shown
-        self.treeItemView.resizeColumnToContents(0)
-
         # store the expression for __addToWatch and __addToDatagraph
         self.exp = exp
         self.addToWatchButton.setText("Add '%s' to Watch" % exp)
