@@ -24,7 +24,7 @@
 
 from treeitemview import TreeItemView
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QWidget, QPushButton, QIcon, QGridLayout
+from PyQt4.QtGui import QWidget, QPushButton, QIcon, QGridLayout, QSizeGrip
 
 
 class ToolTipView(QWidget):
@@ -49,6 +49,10 @@ class ToolTipView(QWidget):
         self.__layout.addWidget(self.treeItemView, 1, 0, 1, -1)
         self.__layout.setContentsMargins(1, 1, 1, 1)
         self.__layout.setVerticalSpacing(0)
+
+        # show a size grip in the corner to allow the user to resize the window
+        self.treeItemView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.treeItemView.setCornerWidget(QSizeGrip(self))
 
     # hide the widget when the mouse leaves it
     def leaveEvent(self, event):
