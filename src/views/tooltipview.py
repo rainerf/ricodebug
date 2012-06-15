@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from treeitemview import TreeItemView
-from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtCore import Qt, QTimer, QModelIndex
 from PyQt4.QtGui import QWidget, QPushButton, QIcon, QGridLayout, QSizeGrip
 
 
@@ -89,6 +89,9 @@ class ToolTipView(QWidget):
         self.exp = exp
         self.addToWatchButton.setText("Add '%s' to Watch" % exp)
         self.addToDatagraphButton.setText("Add '%s' to Data Graph" % exp)
+
+        # expand the item shown in the tool tip to save the user some work ;)s
+        self.treeItemView.setExpanded(self.treeItemView.model().index(0, 0, QModelIndex()), True)
 
         QWidget.show(self)
 
