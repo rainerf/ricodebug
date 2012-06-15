@@ -47,7 +47,6 @@ class DebugController(QObject):
         self.distributedObjects = distributedObjects
 
         self.connector = self.distributedObjects.gdb_connector
-        self.editorController = self.distributedObjects.editorController
         self.breakpointController = self.distributedObjects.breakpointController
         self.signalProxy = self.distributedObjects.signalProxy
 
@@ -77,7 +76,7 @@ class DebugController(QObject):
             logging.error("File %s was not found.", filename)
             return
 
-        if self.editorController.closeOpenedFiles():  # closing source files may be canceled by user
+        if self.distributedObjects.editorController.closeOpenedFiles():  # closing source files may be canceled by user
             if self.executableName != None:
                 #clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
@@ -190,7 +189,7 @@ class DebugController(QObject):
         exec(code, {'do': self.distributedObjects})
 
     def inferiorUntil(self):
-        current_opened_file = self.editorController.editor_view.getCurrentOpenedFile()
+        current_opened_file = self.distributedObjects.editorController.editor_view.getCurrentOpenedFile()
         line, _ = current_opened_file.edit.getCursorPosition()
         self.until(current_opened_file.filename, line + 1)
 
