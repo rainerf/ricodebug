@@ -44,10 +44,11 @@ class ToolTipView(QWidget):
         self.addToDatagraphButton.clicked.connect(self.__addToDatagraph)
 
         self.__layout = QGridLayout(self)
-        self.__layout.addWidget(self.treeItemView, 0, 0, 1, -1)
-        self.__layout.addWidget(self.addToWatchButton, 1, 0)
-        self.__layout.addWidget(self.addToDatagraphButton, 1, 1)
+        self.__layout.addWidget(self.addToWatchButton, 0, 0)
+        self.__layout.addWidget(self.addToDatagraphButton, 0, 1)
+        self.__layout.addWidget(self.treeItemView, 1, 0, 1, -1)
         self.__layout.setContentsMargins(1, 1, 1, 1)
+        self.__layout.setVerticalSpacing(0)
 
     # hide the widget when the mouse leaves it
     def leaveEvent(self, event):
