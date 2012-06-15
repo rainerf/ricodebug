@@ -244,7 +244,7 @@ class GdbConnector(QObject):
             return None
 
     def var_create(self, exp):
-        return self.execute("-var-create " + exp)
+        return self.execute("-var-create - * \"" + exp + "\"")
 
     def var_delete(self, exp):
         return self.execute("-var-delete \"" + exp + "\"")

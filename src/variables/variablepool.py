@@ -116,7 +116,7 @@ class VariablePool(QObject):
         @param exp       string, expression from variable to return
         """
         # get variable from gdb (fixed)
-        gdbVar = self.connector.var_create("- * " + str(exp))
+        gdbVar = self.connector.var_create(str(exp))
 
         if gdbVar.class_ == GdbOutput.ERROR:
             logging.error("Variable '%s' not found!", exp)
