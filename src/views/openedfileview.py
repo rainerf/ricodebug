@@ -185,7 +185,7 @@ class OpenedFileView(QObject):
             # try evaluating the expression before doing anything else: this will return None if the
             # expression is not valid (ie. something that is not a variable)
             if self.debugController.evaluateExpression(name.strip()) is not None:
-                self.distributedObjects.toolTipController.showToolTip(name, QtCore.QPoint(x, y), self.edit)
+                self.distributedObjects.toolTipController.showToolTip(name, QtCore.QPoint(x + 2, y + 2), self.edit)
 
     def dwellEnd(self, position, x, y):
         self.distributedObjects.toolTipController.hideToolTip()
