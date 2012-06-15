@@ -157,6 +157,9 @@ class OpenedFileView(QObject):
         self.lexer.setColor(QColor(c.stringColor.value), self.lexer.DoubleQuotedString)
         self.lexer.setColor(QColor(c.numberColor.value), self.lexer.Number)
         self.lexer.setColor(QColor(c.preprocessorColor.value), self.lexer.PreProcessor)
+        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.Comment)
+        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentLine)
+        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
         self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
 
     def fileChanged(self):
