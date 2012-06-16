@@ -22,7 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap
+from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap, \
+        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QFileSystemWatcher
 from ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
@@ -94,6 +95,35 @@ class MainWindow(QMainWindow):
         self.fileWatcher = QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.__binaryChanged)
 
+        self.__runWithArgumentsMenu = None
+        self.__argumentsEdit = None
+        self.__makeRunWithArgumentsMenu()
+
+    def __makeRunWithArgumentsMenu(self):
+        self.__runWithArgumentsMenu = QMenu(self)
+        self.__argumentsEdit = QLineEdit()
+        self.__argumentsEdit.returnPressed.connect(self.__runWithArgumentsTriggered)
+
+        hl = QHBoxLayout(self.__runWithArgumentsMenu)
+        hl.addWidget(QLabel("Run with arguments:"))
+        hl.addWidget(self.__argumentsEdit)
+
+        w = QWidget(self.__runWithArgumentsMenu)
+        w.setLayout(hl)
+
+        wa = QWidgetAction(self.__runWithArgumentsMenu)
+        wa.setDefaultWidget(w)
+        self.__runWithArgumentsMenu.addAction(wa)
+
+        self.act.Run.setMenu(self.__runWithArgumentsMenu)
+
+    def __runTriggered(self):
+        self.debugController.run()
+
+    def __runWithArgumentsTriggered(self):
+        self.__runWithArgumentsMenu.close()
+        self.debugController.run(str(self.__argumentsEdit.text()))
+
     def setupUi(self):
         self.__initActions()
         self.ui.statusLabel = QLabel()
@@ -161,7 +191,7 @@ class MainWindow(QMainWindow):
         self.act.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile)
         # debug menu
 
-        self.act.Run.triggered.connect(self.debugController.run)
+        self.act.Run.triggered.connect(self.__runTriggered)
 
         self.act.Next.triggered.connect(self.debugController.next_)
         self.act.Step.triggered.connect(self.debugController.step)

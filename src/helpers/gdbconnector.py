@@ -178,6 +178,14 @@ class GdbConnector(QObject):
     def changeWorkingDirectory(self, dir_):
         return self.executeAndRaiseIfFailed("-environment-cd " + dir_)
 
+    def setArgs(self, args):
+        if args is not None:
+            args = '"%s"' % args
+        else:
+            args = ""
+        return self.executeAndRaiseIfFailed("-exec-arguments " + args,
+                "Failed to set arguments")
+
     def run(self):
         return self.executeAndRaiseIfFailed("-exec-run", \
                 "Could not run the program.")

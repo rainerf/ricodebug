@@ -24,7 +24,7 @@
 
 import os
 from helpers.ptyhandler import PtyHandler
-from PyQt4.QtCore import QObject, pyqtSignal, Qt
+from PyQt4.QtCore import QObject, pyqtSignal, Qt, pyqtSlot
 from helpers.gdboutput import GdbOutput
 import logging
 from helpers.configstore import ConfigSet, ConfigItem
@@ -88,8 +88,9 @@ class DebugController(QObject):
             self.executableOpened.emit(filename)
             self.executableName = filename
 
-    def run(self):
+    def run(self, args=None):
         self.connector.setTty(self.ptyhandler.ptyname)
+        self.connector.setArgs(args)
         self.connector.run()
         self.lastCmdWasStep = False
         self.signalProxy.emitRunClicked()
