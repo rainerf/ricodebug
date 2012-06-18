@@ -37,6 +37,7 @@ class EditorConfig(ConfigSet):
         self.stringColor = ConfigItem(self, "String Color", "#7f007f")
         self.numberColor = ConfigItem(self, "Number Color", "#007f7f")
         self.preprocessorColor = ConfigItem(self, "Preprocessor Color", "#7f7f00")
+        self.tooltipIndicatorColor = ConfigItem(self, "Tooltip Indicator Color", "#cccccc")
         Separator(self, None)
         self.highlightColor = ConfigItem(self, "Highlight Color", "#ffffa0")
         self.highlightingDuration = ConfigItem(self, "Duration of Highlighting (ms)", 1500)

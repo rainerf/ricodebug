@@ -92,6 +92,8 @@ class OpenedFileView(QObject):
         self.edit.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
         self.edit.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
 
+        self.INDICATOR_TOOLTIP = self.edit.indicatorDefine(self.edit.BoxIndicator, -1)
+
         self.edit.setReadOnly(False)
         self.gridLayout.addWidget(self.edit, 0, 0, 1, 1)
 
@@ -160,6 +162,7 @@ class OpenedFileView(QObject):
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.Comment)
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentLine)
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
+        self.edit.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
         self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
 
     def fileChanged(self):
@@ -182,22 +185,30 @@ class OpenedFileView(QObject):
         self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
 
     def dwellStart(self, pos, x, y):
-        if self.__allowToolTip and self.edit.frameGeometry().contains(x, y):
-            name = self.getWordOrSelectionFromPosition(pos)
+        # check self.edit.hasFocus() since QScintilla will emit dwell events
+        # even when not focused
+        if self.edit.hasFocus() and self.__allowToolTip and self.edit.frameGeometry().contains(x, y):
+            exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(pos)
 
             # try evaluating the expression before doing anything else: this will return None if the
             # expression is not valid (ie. something that is not a variable)
-            if self.debugController.evaluateExpression(name.strip()) is not None:
-                self.distributedObjects.toolTipController.showToolTip(name, QtCore.QPoint(x + 2, y + 2), self.edit)
+            if self.debugController.evaluateExpression(exp.strip()) is not None:
+                self.edit.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
+                startPos = self.edit.positionFromLineIndex(line, start)
+                x = self.edit.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
+                y = self.edit.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
+                self.distributedObjects.toolTipController.showToolTip(exp, QtCore.QPoint(x + 3, y + 3 + self.edit.textHeight(line)), self.edit)
 
     def dwellEnd(self, position, x, y):
         self.distributedObjects.toolTipController.hideToolTip()
+        self.edit.clearIndicatorRange(0, 0, self.edit.lines(), 1, self.INDICATOR_TOOLTIP)
 
     def showContextMenu(self, point):
         scipos = self.edit.SendScintilla(
                 Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.edit.mapToGlobal(point)
-        exp = self.getWordOrSelectionFromPosition(scipos)
+        exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(scipos)
+        self.edit.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
 
         # self.edit.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContexMenuLine = int(self.edit.lineIndexFromPosition(scipos)[0])
@@ -240,33 +251,39 @@ class OpenedFileView(QObject):
         else:
             return False
 
-    def getWordOrSelectionFromPosition(self, position):
+    def getWordOrSelectionAndRangeFromPosition(self, position):
         if self.isPositionInsideSelection(position):
-            return str(self.edit.selectedText())
+            line, start, lineTo, end = self.edit.getSelection()
+            if line != lineTo:
+                return ""
         else:
-            return self.getWordFromPosition(position)
+            line, start, end = self.getWordRangeFromPosition(position)
+        l = str(self.edit.text(line))
+        return l[start:end], (line, start, end)
 
-    def getWordFromPosition(self, position):
+    def getWordRangeFromPosition(self, position):
         line, col = self.edit.lineIndexFromPosition(position)
         s = str(self.edit.text(line))
-        start = col
+        start = col - 1
         end = col
 
-        r = re.compile(r'[\w\d_]')
+        r = re.compile(r'[\w\d_\.]')    # FIXME: also scan over ->
         while start >= 0:
             if not r.match(s[start]):
                 break
             start -= 1
         start += 1
+        r = re.compile(r'[\w\d_]')
         while end < len(s):
             if not r.match(s[end]):
                 break
             end += 1
-        return s[start:end]
+        return (line, start, end)
 
     def editDoubleClicked(self, position, line, modifiers):
-        w = self.getWordFromPosition(position)
-        self.signalProxy.addWatch(str(w))
+        line, start, end = self.getWordRangeFromPosition(position)
+        l = str(self.edit.text(line))
+        self.signalProxy.addWatch(str(l[start:end]))
 
     def showExecutionPosition(self, line):
         self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC)
