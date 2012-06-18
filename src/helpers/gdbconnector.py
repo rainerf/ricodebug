@@ -276,3 +276,9 @@ class GdbConnector(QObject):
 
     def selectStackFrame(self, exp):
         return self.executeAndRaiseIfFailed("-stack-select-frame " + str(exp))
+
+    def threadInfo(self):
+        return self.executeAndRaiseIfFailed("-thread-info")
+
+    def selectThread(self, id_):
+        return self.executeAndRaiseIfFailed("-thread-select %s" % id_)
