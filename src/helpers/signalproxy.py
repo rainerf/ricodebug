@@ -46,6 +46,8 @@ class SignalProxy(QObject):
     inferiorStoppedNormally = pyqtSignal('PyQt_PyObject')
     inferiorIsRunning = pyqtSignal('PyQt_PyObject')
     executableOpened = pyqtSignal('PyQt_PyObject')
+    threadCreated = pyqtSignal('PyQt_PyObject')
+    threadExited = pyqtSignal('PyQt_PyObject')
     AddWatch = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, distributedObjects):
@@ -71,6 +73,12 @@ class SignalProxy(QObject):
     def emitExecutableOpened(self, filename):
         '''SLOT is called from signal of main program and passes another signal on to plugins'''
         self.executableOpened.emit(filename)
+
+    def emitThreadCreated(self, rec):
+        self.threadCreated.emit(rec)
+
+    def emitThreadExited(self, rec):
+        self.threadExited.emit(rec)
 
     def emitInferiorIsRunning(self, rec):
         self.inferiorIsRunning.emit(rec)

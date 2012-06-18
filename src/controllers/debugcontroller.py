@@ -148,6 +148,11 @@ class DebugController(QObject):
                 self.handleStoppedRecord(rec)
             elif rec.class_ == GdbOutput.RUNNING:
                 self.signalProxy.emitInferiorIsRunning(rec)
+        elif rec.type_ == GdbOutput.NOTIFY_ASYN:
+            if rec.class_ == GdbOutput.THREAD_CREATED:
+                self.signalProxy.emitThreadCreated(rec)
+            elif rec.class_ == GdbOutput.THREAD_EXITED:
+                self.signalProxy.emitThreadExited(rec)
 
     def handleStoppedRecord(self, rec):
         # With reverse debugging, some stopped records might not contain a
