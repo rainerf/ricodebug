@@ -24,10 +24,13 @@
 
 from treeitemview import TreeItemView
 from PyQt4.QtCore import Qt, QTimer, QModelIndex
-from PyQt4.QtGui import QWidget, QPushButton, QIcon, QGridLayout, QSizeGrip
+from PyQt4.QtGui import QWidget, QPushButton, QIcon, QHBoxLayout, QVBoxLayout, \
+        QSizeGrip, QSpacerItem, QSizePolicy
 
 
 class ToolTipView(QWidget):
+    ICON_SIZE = 22
+
     def __init__(self, distributedObjects, parent=None):
         QWidget.__init__(self, parent)
         self.__do = distributedObjects
@@ -35,37 +38,47 @@ class ToolTipView(QWidget):
         self.treeItemView = TreeItemView()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.hide()
-        self.resize(300, 150)
+        self.resize(300, 90)
 
         self.exp = None
 
         self.addToWatchButton = QPushButton(QIcon(":/icons/images/watch.png"), "")
-        self.addToDatagraphButton = QPushButton(QIcon(":/icons/images/datagraph.png"), "")
+        self.addToWatchButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
+        self.addToWatchButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
+        self.addToWatchButton.setToolTip("Add to Watch")
         self.addToWatchButton.clicked.connect(self.__addToWatch)
+        self.addToDatagraphButton = QPushButton(QIcon(":/icons/images/datagraph.png"), "")
+        self.addToDatagraphButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
+        self.addToDatagraphButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
+        self.addToDatagraphButton.setToolTip("Add to Data Graph")
         self.addToDatagraphButton.clicked.connect(self.__addToDatagraph)
 
-        self.__layout = QGridLayout(self)
-        self.__layout.addWidget(self.addToWatchButton, 0, 0)
-        self.__layout.addWidget(self.addToDatagraphButton, 0, 1)
-        self.__layout.addWidget(self.treeItemView, 1, 0, 1, -1)
-        self.__layout.setContentsMargins(1, 1, 1, 1)
-        self.__layout.setVerticalSpacing(0)
-
+        self.__layout = QHBoxLayout(self)
+        self.__layout.addWidget(self.treeItemView)
+        l = QVBoxLayout()
+        l.addWidget(self.addToWatchButton)
+        l.addWidget(self.addToDatagraphButton)
+        l.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         # show a size grip in the corner to allow the user to resize the window
-        self.treeItemView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.treeItemView.setCornerWidget(QSizeGrip(self))
+        l.addWidget(QSizeGrip(self))
+        l.setSpacing(0)
+        self.__layout.addLayout(l)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
 
         self.__hideTimer = QTimer()
         self.__hideTimer.setSingleShot(True)
         self.__hideTimer.timeout.connect(self.hide)
 
-        self.treeItemView.contextMenuOpen.connect(self.setAllowHide)
+        self.treeItemView.contextMenuOpen.connect(self.__setAllowHide)
+        self.treeItemView.setRootIsDecorated(False)
+        self.treeItemView.setHeaderHidden(True)
 
     def hide(self):
         if self.__allowHide:
             QWidget.hide(self)
 
-    def setAllowHide(self, x):
+    def __setAllowHide(self, x):
         self.__allowHide = not x
 
     def enterEvent(self, event):
@@ -87,11 +100,10 @@ class ToolTipView(QWidget):
     def show(self, exp):
         # store the expression for __addToWatch and __addToDatagraph
         self.exp = exp
-        self.addToWatchButton.setText("Add '%s' to Watch" % exp)
-        self.addToDatagraphButton.setText("Add '%s' to Data Graph" % exp)
 
-        # expand the item shown in the tool tip to save the user some work ;)s
+        # expand the item shown in the tool tip to save the user some work ;)
         self.treeItemView.setExpanded(self.treeItemView.model().index(0, 0, QModelIndex()), True)
+        self.updateGeometry()
 
         QWidget.show(self)
 
