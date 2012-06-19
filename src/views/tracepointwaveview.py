@@ -34,10 +34,7 @@ class TracepointWaveView(QtGui.QTableView):
         self.verticalHeader().setMinimumSectionSize(30)
         self.verticalHeader().setDefaultSectionSize(30)
         self.setShowGrid(False)
-        self.dockwidget = QtGui.QDockWidget(None)
-        self.dockwidget.setObjectName("Tracepoint Waveform")
-        self.dockwidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Tracepoint Waveform", None, QtGui.QApplication.UnicodeUTF8))
-        self.qwidget = QtGui.QWidget()
+        self.widget = QtGui.QWidget()
         self.iconlayout = QtGui.QHBoxLayout()
         self.iconlayout.setAlignment(Qt.AlignLeft)
         self.zoomInButton = QtGui.QPushButton(QtGui.QIcon(":/icons/images/zoom-in.png"), "")
@@ -51,14 +48,10 @@ class TracepointWaveView(QtGui.QTableView):
         self.setAutoScroll(True)
         self.layout.addWidget(self)
         self.layout.addItem(self.iconlayout)
-        self.qwidget.setLayout(self.layout)
-        self.dockwidget.setWidget(self.qwidget)
+        self.widget.setLayout(self.layout)
 
     def getZoomInButton(self):
         return self.zoomInButton
 
     def getZoomOutButton(self):
         return self.zoomOutButton
-
-    def getDockWidget(self):
-        return self.dockwidget

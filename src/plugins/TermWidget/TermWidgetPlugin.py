@@ -46,22 +46,13 @@ class TermWidgetPlugin():
         self.widget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Shell", None, QtGui.QApplication.UnicodeUTF8))
         self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.widget)
 
-        #init QTermWidget
-        self.initQTermWidget(True)
+        self.term = QTermWidget()
+        self.signalproxy.insertDockWidget(self, self.term, "Terminal", Qt.BottomDockWidgetArea, True)
+
         self.widget.visibilityChanged.connect(self.initQTermWidget)
+
+        # FIXME: connect self.term.finished somewhere meaningful
 
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
-        self.widget.close()
-        self.signalproxy.emitRemoveDockWidget(self.widget)
-
-    # =================================
-    # plugin specific functions
-    # =================================
-    def initQTermWidget(self, visible):
-        """ Initialize QTermWidget - used when shell widget is (re)opened. """
-        if (visible):
-            self.widget.setContentsMargins(10, 10, 10, 10)
-            self.term = QTermWidget()
-            self.widget.setWidget(self.term)
-            self.term.finished.connect(self.widget.close)  # connect command "exit" with widget.close
+        self.signalproxy.removeDockWidget(self)

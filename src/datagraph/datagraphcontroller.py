@@ -78,17 +78,9 @@ class DataGraphController(QObject):
         self.signalProxy.emitRegisterWithSessionManager(self, "Graph")
 
         # connect signals
-        #self.variableList.reset.connect(self.repaintDataGraph)
-        self.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
-    def insertDockWidgets(self):
-        """ adds the Datagraph-DockWidget to the GUI <br>
-            this function is connected to the signal SignalProxy::insertDockWidgets() """
-        self.dataGraphDock = QDockWidget("Graph")
-        self.dataGraphDock.setObjectName("DataGraphView")
-        self.dataGraphDock.setWidget(self.data_graph_view)
-        self.signalProxy.emitAddDockWidget(Qt.LeftDockWidgetArea, self.dataGraphDock, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.data_graph_view, "Graph", Qt.LeftDockWidgetArea, True)
 
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph

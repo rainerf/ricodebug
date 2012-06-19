@@ -24,22 +24,15 @@ class SamplePlugin():
 
         self.signalproxy = signalproxy
 
-        # create and place DockWidget in mainwindow using signalproxy
-        self.dockwidget = QtGui.QDockWidget(None)
-        self.dockwidget.setObjectName("SampleWidget")
-        self.dockwidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "SampleWidget", None, QtGui.QApplication.UnicodeUTF8))
-
         qwidget = QtGui.QWidget()
         qlayout = QtGui.QHBoxLayout()
         qlabel = QtGui.QLabel("This is a sample plugin widget")
         qlayout.addWidget(qlabel)
         qwidget.setLayout(qlayout)
-        self.dockwidget.setWidget(qwidget)
 
-        # add widget to mainwindow
-        self.signalproxy.addDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
+        # create and place DockWidget in mainwindow using signalproxy
+        self.signalproxy.insertDockWidget(self, qwidget, "Sample", Qt.BottomDockWidgetArea, True)
 
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
-        self.dockwidget.close()
-        self.signalproxy.emitRemoveDockWidget(self.dockwidget)
+        self.signalproxy.removeDockWidget(self)

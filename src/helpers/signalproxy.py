@@ -31,7 +31,6 @@ class SignalProxy(QObject):
     plugins only need this class to communicate with main program
     '''
 
-    insertDockWidgets = pyqtSignal()
     removeDockWidget = pyqtSignal('QDockWidget')
     addDockWidget = pyqtSignal('PyQt_PyObject', 'QDockWidget', 'PyQt_PyObject')
     variableUpdateCompleted = pyqtSignal()
@@ -53,6 +52,7 @@ class SignalProxy(QObject):
         '''CTOR'''
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
+        self.pluginDocks = {}
 
     ###################################################
     # passing on signals
@@ -127,20 +127,13 @@ class SignalProxy(QObject):
     ###################################################
     # functions for plugin placement in the mainwindow
     ###################################################
-    def emitAddDockWidget(self, area, widget, addToggleViewAction=False):
-        '''
-        Emitting signal to tell mainwindow where to add a widget
-        @param addToggleViewAction: True -> add the widget's toggleViewAction to the Menu
-        '''
-        self.addDockWidget.emit(area, widget, addToggleViewAction)
 
-    def emitRemoveDockWidget(self, widget):
-        '''Emitting signal to tell mainwindow where to add a widget '''
-        self.removeDockWidget.emit(widget)
+    def insertDockWidget(self, plugin, widget, name, area, addToggleViewAction):
+        d = self.distributedObjects.mainwindow.insertDockWidget(widget, name, area, addToggleViewAction)
+        self.pluginDocks[plugin] = d
 
-    def emitInsertDockWidgets(self):
-        '''Emitting signal to tell controllers to insert their dock widgets '''
-        self.insertDockWidgets.emit()
+    def removeDockWidget(self, plugin):
+        self.distributedObjects.mainwindow.removeDockWidget(self.pluginDocks[plugin])
 
     # define further widget placement functions here ...
 

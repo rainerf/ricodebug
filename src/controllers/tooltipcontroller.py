@@ -29,7 +29,7 @@ from helpers.excep import VariableNotFoundException
 
 class ToolTipController(TreeItemController):
     def __init__(self, distributedObjects, view):
-        TreeItemController.__init__(self, distributedObjects, "Tooltip", view, VariableModel)
+        TreeItemController.__init__(self, distributedObjects, "Tooltip", view, VariableModel, False)
 
     def __setVar(self, watch):
         self.clear()

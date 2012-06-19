@@ -48,12 +48,8 @@ class TracepointWaveController(QObject):
         self.view.setItemDelegate(delegate)
         self.view.getZoomInButton().clicked.connect(self.zoomIn)
         self.view.getZoomOutButton().clicked.connect(self.zoomOut)
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
+        self.distributedObjects.mainwindow.insertDockWidget(self.view.widget, "Tracepoint Wave", Qt.BottomDockWidgetArea, True)
         self.distributedObjects.signalProxy.cleanupModels.connect(self.model.cleanUp)
-
-    def insertDockWidgets(self):
-        '''Function invoked when mainwindow allows controllers to insert widgets'''
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.view.getDockWidget(), True)
 
     def updateTracepointWaveView(self, list_):
         ''' Repaint tracepoint waves

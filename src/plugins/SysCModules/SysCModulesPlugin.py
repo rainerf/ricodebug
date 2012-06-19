@@ -76,20 +76,15 @@ class SysCModulesPlugin():
 
         QtCore.QMetaObject.connectSlotsByName(self.w)
 
-        self.widget = QtGui.QDockWidget("SystemC Module Hierarchy")
-        self.widget.setObjectName("SysCModules")
-        self.widget.setWidget(self.w)
-
-        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
-
         self.signalproxy.inferiorStoppedNormally.connect(self.update)
         self.signalproxy.inferiorHasExited.connect(self.clear)
         self.view.expanded.connect(self.resizeColumn)
 
+        self.signalproxy.insertDockWidget(self, self.view, "SystemC Module Hierarchy", Qt.BottomDockWidgetArea, True)
+
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
-        self.widget.close()
-        self.signalproxy.emitRemoveDockWidget(self.widget)
+        self.signalproxy.removeDockWidget(self)
 
     def clear(self):
         self.ctx = None
@@ -166,7 +161,7 @@ class SysCModulesPlugin():
         self.view.clear()
         self.treeItems = {}
 
-        for o in self.os:
+        for o in self.objects:
             if o[1] == "None":
                 self.treeItems[str(o[0])] = QtGui.QTreeWidgetItem(self.view)
             else:

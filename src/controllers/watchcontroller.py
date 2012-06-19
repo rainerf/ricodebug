@@ -37,7 +37,7 @@ class WatchController(TreeItemController):
             Listens to the following Signals: SignalProxy::AddWatch(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
-        TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel)
+        TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel, True)
         self.distributedObjects.signalProxy.AddWatch.connect(self.addWatch)
 
     def removeSelected(self, row, parent):

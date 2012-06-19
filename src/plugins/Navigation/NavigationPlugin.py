@@ -67,17 +67,12 @@ class NavigationPlugin(QtCore.QObject):
         self.signalproxy = signalproxy
         self.entrylist = EntryList()
 
-        # create and place DockWidget in mainwindow using signalproxy
-        self.dockwidget = QtGui.QDockWidget(None)
-        self.dockwidget.setObjectName("Navigation")
-        self.dockwidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Navigation", None, QtGui.QApplication.UnicodeUTF8))
-
         self.view = NavigationView(self.signalproxy)
         self.view.setModel(self.entrylist.model)
-        self.dockwidget.setWidget(self.view)
 
-        # add widget to mainwindow
-        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.dockwidget)
+        # create and place DockWidget in mainwindow using signalproxy
+        self.signalproxy.insertDockWidget(self, self.view, "Navigation", Qt.BottomDockWidgetArea, True)
+
         self.signalproxy.distributedObjects.debugController.executableOpened.connect(self.update)
 
         self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
@@ -88,8 +83,7 @@ class NavigationPlugin(QtCore.QObject):
 
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
-        self.dockwidget.close()
-        self.signalproxy.emitRemoveDockWidget(self.dockwidget)
+        self.signalproxy.removeDockWidget(self)
 
     def update(self):
         sources = self.signalproxy.distributedObjects.gdb_connector.getSources()

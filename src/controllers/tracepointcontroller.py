@@ -55,25 +55,18 @@ class TracepointController(QObject):
         #register with session manager to save Tracepoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
 
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.tracepointView.tracepointView.clicked.connect(self.updateWaveforms)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateWaveforms)
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearTracepoints)
         self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
+
+        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True)
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
         index = self.tracepointView.getSelectedRow()
         if index != None:
             self._model.selectionMade(index)
-
-    def insertDockWidgets(self):
-        """needed for plugin system"""
-        self.tracepointDock = QDockWidget("Tracepoints")
-        self.tracepointDock.setObjectName("TracepointView")
-        self.tracepointDock.setWidget(self.tracepointView)
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.tracepointDock, True)
-
     def toggleTracepoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line
         @param file_: (string), fullname of file

@@ -50,7 +50,8 @@ from views.tooltipview import ToolTipView
 
 
 class DistributedObjects:
-    def __init__(self):
+    def __init__(self, mainwindow):
+        self.mainwindow = mainwindow
         self.settings = QSettings("fh-hagenberg", "ricodebug")
         self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
@@ -67,11 +68,9 @@ class DistributedObjects:
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
-        self.signalProxy.insertDockWidgets.connect(self.watchController.insertDockWidgets)
 
         self.localsView = LocalsView()
         self.localsController = LocalsController(self, self.localsView)
-        self.signalProxy.insertDockWidgets.connect(self.localsController.insertDockWidgets)
 
         self.tracepointController = TracepointController(self)
         self.pyioController = PyIoController(self)

@@ -125,11 +125,7 @@ class SysCSimCtxPlugin():
 
         QtCore.QMetaObject.connectSlotsByName(self.w)
 
-        self.widget = QtGui.QDockWidget("SystemC Simulation Context")
-        self.widget.setObjectName("SysCSimCtx")
-        self.widget.setWidget(self.w)
-
-        self.signalproxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.widget, True)
+        self.signalproxy.insertDockWidget(self, self.w, "SystemC Simulation Context", Qt.BottomDockWidgetArea, True)
 
         self.signalproxy.inferiorStoppedNormally.connect(self.update)
         self.signalproxy.inferiorHasExited.connect(self.clear)
@@ -137,8 +133,7 @@ class SysCSimCtxPlugin():
 
     def deInitPlugin(self):
         """Deinit function - called when pluginloader unloads plugin."""
-        self.widget.close()
-        self.signalproxy.emitRemoveDockWidget(self.widget)
+        self.signalproxy.removeDockWidget(self)
 
     def clear(self):
         self.ctx = None

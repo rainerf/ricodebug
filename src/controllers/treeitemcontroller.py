@@ -157,7 +157,7 @@ class TreeVWFactory(VarWrapperFactory):
 #####################################################################################
 class TreeItemController(QObject):
     """ the Controller for the TreeView """
-    def __init__(self, distributedObjects, name, view, model):
+    def __init__(self, distributedObjects, name, view, model, addDockWidget):
         """ Constructor <br>
             Create a TreeView, a TreeVWFactory and a VariableList <br>
             Listens to the following Signals: SignalProxy::AddTree(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
@@ -175,8 +175,10 @@ class TreeItemController(QObject):
         self.view.setModel(self.model)
         self.variableList = VariableList(self.vwFactory, self.distributedObjects)
 
-        #self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.distributedObjects.signalProxy.cleanupModels.connect(self.clear)
+
+        if addDockWidget:
+            self.distributedObjects.mainwindow.insertDockWidget(self.view, name, Qt.BottomDockWidgetArea, True)
 
     def clear(self):
         """ clears the TreeView and the VariableList <br>
@@ -185,14 +187,6 @@ class TreeItemController(QObject):
         # clear lists
         self.variableList.clear()
         self.model.clear()
-
-    def insertDockWidgets(self):
-        """ adds the Tree-DockWidget to the GUI <br>
-            this function is connected to the signal SignalProxy::insertDockWidgets() """
-        dock = QDockWidget(self.name)
-        dock.setObjectName(self.name + "View")
-        dock.setWidget(self.view)
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, dock, True)
 
     def add(self, vw):
         vw.setParent(self.model.root)

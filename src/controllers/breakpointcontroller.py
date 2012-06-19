@@ -27,7 +27,6 @@
 """
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QDockWidget
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
 
@@ -51,15 +50,9 @@ class BreakpointController(QObject):
         #register with session manager to save breakpoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
 
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearBreakpoints)
 
-    def insertDockWidgets(self):
-        """ needed for plugin system"""
-        self.breakpointDock = QDockWidget("Breakpoints")
-        self.breakpointDock.setObjectName("BreakpointView")
-        self.breakpointDock.setWidget(self.breakpointView)
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.breakpointDock, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.breakpointView, "Breakpoints", Qt.BottomDockWidgetArea, True)
 
     def insertBreakpoint(self, file_, line):
         """insert a breakpoint in specified file on specified line

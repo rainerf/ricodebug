@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QDockWidget
 from views.pyioview import PyIoView
 
 
@@ -34,10 +33,4 @@ class PyIoController(QObject):
 
         self.pyioView = PyIoView(self.distributedObjects.debugController)
 
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
-
-    def insertDockWidgets(self):
-        self.pyioDock = QDockWidget("Python Console")
-        self.pyioDock.setObjectName("PyIoView")
-        self.pyioDock.setWidget(self.pyioView)
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.pyioDock, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.pyioView, "Python Console", Qt.BottomDockWidgetArea, True)

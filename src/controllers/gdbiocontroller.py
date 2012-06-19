@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QDockWidget
 from views.gdbioview import GdbIoView
 
 
@@ -34,10 +33,4 @@ class GdbIoController(QObject):
 
         self.gdbioView = GdbIoView(self.distributedObjects.debugController)
 
-        self.distributedObjects.signalProxy.insertDockWidgets.connect(self.insertDockWidgets)
-
-    def insertDockWidgets(self):
-        self.gdbioDock = QDockWidget("GDB Console")
-        self.gdbioDock.setObjectName("GdbIoView")
-        self.gdbioDock.setWidget(self.gdbioView)
-        self.distributedObjects.signalProxy.emitAddDockWidget(Qt.BottomDockWidgetArea, self.gdbioDock, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.gdbioView, "GDB Console", Qt.BottomDockWidgetArea, True)

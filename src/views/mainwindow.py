@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
 
         self.ui.actionSaveSession.setEnabled(False)
 
-        self.distributedObjects = DistributedObjects()
+        self.distributedObjects = DistributedObjects(self)
 
         self.act = self.distributedObjects.actions
         self.debugController = self.distributedObjects.debugController
@@ -64,9 +64,6 @@ class MainWindow(QMainWindow):
         self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped, Qt.QueuedConnection)
         self.signalproxy.inferiorHasExited.connect(self.targetExited, Qt.QueuedConnection)
 
-        self.signalproxy.addDockWidget.connect(self.addPluginDockWidget)
-        self.signalproxy.removeDockWidget.connect(self.removeDockWidget)
-
         # Plugin Loader
         self.pluginloader.insertPluginAction.connect(self.addPluginAction)
 
@@ -77,12 +74,6 @@ class MainWindow(QMainWindow):
         self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
 
         self.pluginloader.addAvailablePlugins()
-
-        # Tell everyone to insert their dock widgets into the main window
-        self.signalproxy.emitInsertDockWidgets()
-
-        # get filelist dockwidget
-        self.filelist_dockwidget = self.findChild(QDockWidget, "FileListView")
 
         self.setWindowFilePath("<none>")
         self.setupUi()
@@ -210,10 +201,16 @@ class MainWindow(QMainWindow):
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
         self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
 
-    def addPluginDockWidget(self, area, widget, addToggleViewAction):
-        self.addDockWidget(area, widget)
+    def insertDockWidget(self, widget, name, area, addToggleViewAction):
+        d = QDockWidget(name, self)
+        d.setObjectName("StackView")
+        d.setWidget(widget)
+
+        self.addDockWidget(area, d)
         if addToggleViewAction:
-            self.ui.menuShow_View.addAction(widget.toggleViewAction())
+            self.ui.menuShow_View.addAction(d.toggleViewAction())
+
+        return d
 
     def addPluginAction(self, Action):
         """ show plugin as menu entry """
