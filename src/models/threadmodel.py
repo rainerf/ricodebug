@@ -1,22 +1,58 @@
+# ricodebug - A GDB frontend which focuses on visually supported
+# debugging using data structure graphs and SystemC features.
+#
+# Copyright (C) 2011  The ricodebug project team at the
+# Upper Austrian University Of Applied Sciences Hagenberg,
+# Department Embedded Systems Design
+#
+# This file is part of ricodebug.
+#
+# ricodebug is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further information see <http://syscdbg.hagenberg.servus.at/>.
+
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex
 from PyQt4.QtGui import QPixmap
+from operator import attrgetter
 
 
 class ThreadInfo:
     STOPPED, RUNNING = range(2)
 
     def __init__(self, id_):
-        self.frame = None
         self.id = id_
         self.core = None
         self.name = None
         self.state = None
+        self.file = None
+        self.func = None
+        self.line = None
+        self.level = None
 
     def updateFromGdb(self, res):
         self.core = res.core
         self.name = res.name
         self.state = {"stopped": self.STOPPED, "running": self.RUNNING}[res.state]
-        self.frame = res.frame
+        self.file = None
+        try:
+            self.file = res.frame.file
+            self.file = res.frame.fullname
+        except AttributeError:
+            pass
+        self.func = res.frame.func
+        self.line = res.frame.line
+        self.level = res.frame.level
 
 
 class ThreadModel(QAbstractTableModel):
@@ -32,6 +68,7 @@ class ThreadModel(QAbstractTableModel):
 
         self.threadRunningPixmap = QPixmap(":/icons/images/16x16/running.png")
         self.threadStoppedPixmap = QPixmap(":/icons/images/16x16/stopped.png")
+        self.currentTheadPixmap = QPixmap(":/icons/images/arrow-right.png")
 
     def __addThread(self, id_):
         self.beginInsertRows(QModelIndex(), len(self.__threads), len(self.__threads))
@@ -72,7 +109,7 @@ class ThreadModel(QAbstractTableModel):
         return len(self.__threads)
 
     def columnCount(self, _):
-        return 7
+        return 8
 
     def data(self, index, role):
         if not index.isValid():
@@ -95,20 +132,26 @@ class ThreadModel(QAbstractTableModel):
                     res = "Running"
                 elif t.state == ThreadInfo.STOPPED:
                     res = "Stopped"
-                if t.id == self.__currentThread:
-                    res += ", Active"
             elif c == 4:
-                res = t.frame.func
+                res = t.file
             elif c == 5:
-                res = t.frame.line
+                res = t.func
             elif c == 6:
-                res = t.frame.level
+                res = t.line
+            elif c == 7:
+                res = t.level
         elif role == Qt.DecorationRole:
-            if c == 3:
+            if c == 0:
+                if t.id == self.__currentThread:
+                    res = self.currentTheadPixmap
+            elif c == 3:
                 if t.state == ThreadInfo.RUNNING:
                     res = self.threadRunningPixmap
                 elif t.state == ThreadInfo.STOPPED:
                     res = self.threadStoppedPixmap
+        elif role == Qt.TextAlignmentRole:
+            if c == 0:
+                res = Qt.AlignRight | Qt.AlignVCenter
 
         return res
 
@@ -117,7 +160,19 @@ class ThreadModel(QAbstractTableModel):
             return None
 
         if role == Qt.DisplayRole:
-            return {0: "ID", 1: "Core", 2: "Name", 3: "State", 4: "Function", 5: "Line", 6: "Level"}[section]
+            return {0: "ID", 1: "Core", 2: "Name", 3: "State", 4: "File", 5: "Function", 6: "Line", 7: "Level"}[section]
+
+    def sort(self, column, order):
+        self.sortColumn = column
+        self.sortOrder = order
+
+        rev = (order == Qt.AscendingOrder)
+
+        key = {0: "id", 1: "core", 2: "name", 3: "state", 4: "file", 5: "func", 6: "line", 7: "level"}[column]
+
+        self.layoutAboutToBeChanged.emit()
+        self.__threads.sort(key=attrgetter(key), reverse=rev)
+        self.layoutChanged.emit()
 
     def threadCreated(self, rec):
         for r in rec.results:
@@ -128,3 +183,6 @@ class ThreadModel(QAbstractTableModel):
         for r in rec.results:
             if r.dest == "id":
                 self.__removeThread(r.src)
+
+    def threadIdForRow(self, row):
+        return self.__threads[row].id
