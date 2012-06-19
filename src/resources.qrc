@@ -32,9 +32,12 @@
     <file>images/open.png</file>
     <file>images/session-open.png</file>
     <file>images/run.png</file>
-    <file>images/inferior_not_running.png</file>
-    <file>images/inferior_running.png</file>
-    <file>images/inferior_stopped.png</file>
+    <file>images/22x22/not_running.png</file>
+    <file>images/22x22/running.png</file>
+    <file>images/22x22/stopped.png</file>
+    <file>images/16x16/not_running.png</file>
+    <file>images/16x16/running.png</file>
+    <file>images/16x16/stopped.png</file>
     <file>images/outofscope.png</file>
     <file>images/important.png</file>
     <file>images/sc_process.png</file>

@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self.ui.statusLabel.setText("Not running")
         self.ui.statusbar.addPermanentWidget(self.ui.statusLabel)
         self.ui.statusIcon = QLabel()
-        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
+        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/not_running.png"))
         self.ui.statusbar.addPermanentWidget(self.ui.statusIcon)
 
     def __initActions(self):
@@ -283,17 +283,17 @@ class MainWindow(QMainWindow):
 
     def targetStartedRunning(self):
         self.ui.statusLabel.setText("Running")
-        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_running.png"))
+        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/running.png"))
         self.enableButtons()
 
     def targetStopped(self, rec):
         self.ui.statusLabel.setText("Stopped")
-        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_stopped.png"))
+        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/stopped.png"))
 
     def targetExited(self):
         self.ui.statusLabel.setText("Not running")
         self.disableButtons()
-        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/inferior_not_running.png"))
+        self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/not_running.png"))
 
     def closeEvent(self, event):
         if not self.distributedObjects.editorController.closeOpenedFiles():
