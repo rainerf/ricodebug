@@ -121,7 +121,7 @@ class StackModel(QAbstractTableModel):
 
         self.controller.removeStackMarkers()
 
-    def update(self, rec):
+    def update(self):
         self.layoutAboutToBeChanged.emit()
         self.stack = self.connector.getStack()
         for s in self.stack:

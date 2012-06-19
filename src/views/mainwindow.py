@@ -59,10 +59,10 @@ class MainWindow(QMainWindow):
         self.debugController.executableOpened.connect(self.showExecutableName)
         self.debugController.executableOpened.connect(self.disableButtons)
         # signal proxy
-        self.signalproxy.inferiorIsRunning.connect(self.targetStartedRunning, Qt.QueuedConnection)
-        self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped, Qt.QueuedConnection)
-        self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped, Qt.QueuedConnection)
-        self.signalproxy.inferiorHasExited.connect(self.targetExited, Qt.QueuedConnection)
+        self.signalproxy.inferiorIsRunning.connect(self.targetStartedRunning)
+        self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped)
+        self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped)
+        self.signalproxy.inferiorHasExited.connect(self.targetExited)
 
         # Plugin Loader
         self.pluginloader.insertPluginAction.connect(self.addPluginAction)
