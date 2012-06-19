@@ -47,6 +47,7 @@ from views.watchview import WatchView
 from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
+from controllers.threadcontroller import ThreadController
 
 
 class DistributedObjects:
@@ -65,6 +66,7 @@ class DistributedObjects:
         self.editorController = EditorController(self)
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
+        self.threadController = ThreadController(self)
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
