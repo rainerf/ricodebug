@@ -138,6 +138,8 @@ class EditorView(QWidget):
         return str(self.tabWidget.tabText(idx)).endswith('*')
 
     def _targetStopped(self, rec):
+        self.__removeExecutionPositionMarkers()
+
         # find the current execution position in the result
         file_ = None
         line = None
@@ -155,12 +157,13 @@ class EditorView(QWidget):
                 line = int(res.src.line) - 1
                 break
 
-        # update the ui
-        for f in self.openedFiles.values():
-            f.clearExecutionPositionMarkers()
         self.openFile(file_)
 
         return file_, line
+
+    def __removeExecutionPositionMarkers(self):
+        for f in self.openedFiles.itervalues():
+            f.clearExecutionPositionMarkers()
 
     def targetStoppedNormally(self, rec):
         file_, line = self._targetStopped(rec)
@@ -171,5 +174,4 @@ class EditorView(QWidget):
         self.openedFiles[file_].showSignalPosition(line)
 
     def targetExited(self):
-        for f in self.openedFiles.values():
-            f.clearExecutionPositionMarkers()
+        self.__removeExecutionPositionMarkers()
