@@ -40,9 +40,6 @@ class TreeItem(QObject):
         ## @var parent
         #  TreeItem, parent TreeItem
         self.parent = None
-        ## @var columnCount
-        #  int, Number of columns in VariableModel
-        self.columnCount = 3
         ## @var changed
         #  bool, changed state of TreeItem
         self.changed = False
@@ -100,12 +97,6 @@ class TreeItem(QObject):
             row = self.parent.getChildren(factory).index(self)
             return row
         return 0
-
-    def getColumnCount(self):
-        """ get number header columns in VariableModel
-        @return   int, number of columns
-        """
-        return self.columnCount
 
     def getChanged(self):
         """ gets a bool value if TreeItem has changed
@@ -271,10 +262,7 @@ class VariableModel(QAbstractItemModel):
     def columnCount(self, parent):
         """ QAbstractItemModel columnCount function
         """
-        if parent.isValid():
-            return parent.internalPointer().getColumnCount()
-        else:
-            return self.root.getColumnCount()
+        return 3
 
     def data(self, index, role):
         """ QAbstractItemModel data function <br>
