@@ -127,11 +127,6 @@ class ThreadModel(QAbstractTableModel):
                 res = t.core
             elif c == 2:
                 res = t.name
-            elif c == 3:
-                if t.state == ThreadInfo.RUNNING:
-                    res = "Running"
-                elif t.state == ThreadInfo.STOPPED:
-                    res = "Stopped"
             elif c == 4:
                 res = t.file
             elif c == 5:
@@ -152,6 +147,15 @@ class ThreadModel(QAbstractTableModel):
         elif role == Qt.TextAlignmentRole:
             if c == 0:
                 res = Qt.AlignRight | Qt.AlignVCenter
+        elif role == Qt.ToolTipRole:
+            if c == 0:
+                if t.id == self.__currentThread:
+                    res = "Current Thread"
+            elif c == 3:
+                if t.state == ThreadInfo.RUNNING:
+                    res = "Running"
+                elif t.state == ThreadInfo.STOPPED:
+                    res = "Stopped"
 
         return res
 
