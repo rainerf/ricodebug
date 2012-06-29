@@ -48,6 +48,7 @@ from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
 from controllers.threadcontroller import ThreadController
+from controllers.micontroller import MiTraceController
 
 
 class DistributedObjects:
@@ -81,3 +82,5 @@ class DistributedObjects:
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
+
+        self.miController = MiTraceController(self)
