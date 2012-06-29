@@ -33,6 +33,7 @@ import helpers
 
 class GdbConnector(QObject):
     def __init__(self):
+        QObject.__init__(self)
         self.gdb = None
         self.reader = GdbReader(self)
 
