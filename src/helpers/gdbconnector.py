@@ -135,8 +135,11 @@ class GdbConnector(QObject):
 
         return variables
 
-    def getStack(self):
-        res = self.executeAndRaiseIfFailed("-stack-list-frames")
+    def getStack(self, thread_id=None):
+        if thread_id:
+            res = self.executeAndRaiseIfFailed("-stack-list-frames --thread %s" % thread_id)
+        else:
+            res = self.executeAndRaiseIfFailed("-stack-list-frames")
 
         stack = []
 
