@@ -23,9 +23,9 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from controllers.debugcontroller import DebugController
-from signalproxy import SignalProxy
+from .signalproxy import SignalProxy
 from controllers.editorcontroller import EditorController
-from gdbconnector import GdbConnector
+from .gdbconnector import GdbConnector
 from controllers.filelistcontroller import FileListController
 from controllers.stackcontroller import StackController
 from controllers.localscontroller import LocalsController
@@ -37,9 +37,9 @@ from controllers.inferioriocontroller import InferiorIoController
 from controllers.gdbiocontroller import GdbIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
-from stlvectorparser import StlVectorParser
+from .stlvectorparser import StlVectorParser
 from controllers.tracepointwavecontroller import TracepointWaveController
-from sessionmanager import SessionManager
+from .sessionmanager import SessionManager
 from helpers.actions import Actions
 from helpers.configstore import ConfigStore
 from PyQt4.QtCore import QSettings

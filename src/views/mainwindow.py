@@ -25,7 +25,7 @@
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap, \
         QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget
 from PyQt4.QtCore import Qt, QFileSystemWatcher
-from ui_mainwindow import Ui_MainWindow
+from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader

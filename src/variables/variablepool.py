@@ -24,10 +24,10 @@
 
 from PyQt4.QtCore import QObject
 from helpers.gdboutput import GdbOutput
-from stdvariable import StdVariable
-from ptrvariable import PtrVariable
-from structvariable import StructVariable
-from arrayvariable import ArrayVariable
+from .stdvariable import StdVariable
+from .ptrvariable import PtrVariable
+from .structvariable import StructVariable
+from .arrayvariable import ArrayVariable
 import logging
 import re
 from helpers.excep import VariableNotFoundException

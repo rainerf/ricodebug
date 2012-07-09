@@ -1,5 +1,5 @@
 import unittest
-import gdbresultparser
+import .gdbresultparser
 
 
 class Test(unittest.TestCase):

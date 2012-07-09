@@ -23,10 +23,10 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject
-from stdvariablewrapper import StdVariableWrapper
-from ptrvariablewrapper import PtrVariableWrapper
-from structvariablewrapper import StructVariableWrapper
-from arrayvariablewrapper import ArrayVariableWrapper
+from .stdvariablewrapper import StdVariableWrapper
+from .ptrvariablewrapper import PtrVariableWrapper
+from .structvariablewrapper import StructVariableWrapper
+from .arrayvariablewrapper import ArrayVariableWrapper
 
 
 class VarWrapperFactory(QObject):

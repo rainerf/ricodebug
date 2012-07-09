@@ -25,8 +25,8 @@
 from PyQt4.QtCore import Qt, pyqtSlot
 from PyQt4.QtGui import QGraphicsView, QGraphicsScene, QMenu, QIcon
 import logging
-import pointer
-import htmlvariableview
+from . import pointer
+from . import htmlvariableview
 
 
 class DataGraphView(QGraphicsView):

@@ -25,7 +25,7 @@
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
 from PyQt4.QtGui import QItemDelegate
 from operator import attrgetter
-from breakpointmodel import ExtendedBreakpoint
+from .breakpointmodel import ExtendedBreakpoint
 from variables.variablelist import VariableList
 from variables.varwrapperfactory import VarWrapperFactory
 from variables.stdvariablewrapper import StdVariableWrapper

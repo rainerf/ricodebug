@@ -24,7 +24,7 @@
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QMessageBox
-from openedfileview import OpenedFileView
+from .openedfileview import OpenedFileView
 import os
 import logging
 import helpers.excep

@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from treeitemview import TreeItemView
+from .treeitemview import TreeItemView
 from PyQt4.QtCore import Qt, QTimer, QModelIndex
 from PyQt4.QtGui import QWidget, QPushButton, QIcon, QHBoxLayout, QVBoxLayout, \
         QSizeGrip, QSpacerItem, QSizePolicy

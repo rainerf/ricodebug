@@ -219,7 +219,7 @@
   <customwidget>
    <class>LogView</class>
    <extends>QTableView</extends>
-   <header>logview</header>
+   <header>.logview</header>
   </customwidget>
  </customwidgets>
  <resources>

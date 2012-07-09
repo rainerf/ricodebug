@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from treeitemview import TreeItemView
+from .treeitemview import TreeItemView
 
 
 class LocalsView(TreeItemView):

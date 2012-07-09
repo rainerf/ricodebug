@@ -26,8 +26,8 @@
 """
 
 from PyQt4.QtCore import QThread, QMutex, QSemaphore, pyqtSignal
-from gdbresultparser import GdbResultParser
-from gdboutput import GdbOutput
+from .gdbresultparser import GdbResultParser
+from .gdboutput import GdbOutput
 from collections import deque
 import helpers.excep
 

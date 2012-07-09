@@ -25,8 +25,8 @@
 import subprocess
 import signal
 import logging
-from gdbreader import GdbReader
-from gdboutput import GdbOutput
+from .gdbreader import GdbReader
+from .gdboutput import GdbOutput
 from PyQt4.QtCore import QObject, pyqtSignal
 import helpers
 

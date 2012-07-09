@@ -23,10 +23,10 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from variables.varwrapperfactory import VarWrapperFactory
-from stdvariableview import StdDataGraphVW
-from ptrvariableview import PtrDataGraphVW
-from structvariableview import StructDataGraphVW
-from arrayvariableview import ArrayDataGraphVW
+from .stdvariableview import StdDataGraphVW
+from .ptrvariableview import PtrDataGraphVW
+from .structvariableview import StructDataGraphVW
+from .arrayvariableview import ArrayDataGraphVW
 
 
 class DataGraphVWFactory(VarWrapperFactory):

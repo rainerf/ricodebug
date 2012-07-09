@@ -27,7 +27,7 @@ from mako.lookup import TemplateLookup
 import sys
 from PyQt4.QtCore import QObject
 from variables.variablewrapper import VariableWrapper
-from htmlvariableview import HtmlVariableView
+from .htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidgetAction, QLabel, QIcon
 

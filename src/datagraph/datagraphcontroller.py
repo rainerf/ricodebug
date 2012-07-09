@@ -27,10 +27,10 @@ import logging
 from helpers.excep import VariableNotFoundException
 from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QDockWidget
-from datagraphvwfactory import DataGraphVWFactory
-from datagraphview import DataGraphView
+from .datagraphvwfactory import DataGraphVWFactory
+from .datagraphview import DataGraphView
 from variables.variablelist import VariableList
-from pointer import Pointer
+from .pointer import Pointer
 
 
 class DataGraphController(QObject):

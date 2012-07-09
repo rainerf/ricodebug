@@ -25,7 +25,7 @@
 
 from helpers.excep import VariableNotFoundException
 from models.variablemodel import VariableModel
-from treeitemcontroller import TreeItemController
+from .treeitemcontroller import TreeItemController
 
 
 class WatchController(TreeItemController):

@@ -29,10 +29,10 @@ For futher information see the ply python module documentation.
 
 import ply.lex as lex
 import ply.yacc as yacc
-from gdboutput import GdbOutput
+from .gdboutput import GdbOutput
 import helpers.excep
 import re
-from tools import unBackslashify
+from .tools import unBackslashify
 from PyQt4.QtCore import QDir
 import logging
 

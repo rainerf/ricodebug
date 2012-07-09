@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from models.localsmodel import LocalsModel
-from treeitemcontroller import TreeItemController
+from .treeitemcontroller import TreeItemController
 
 
 class LocalsController(TreeItemController):

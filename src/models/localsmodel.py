@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from variablemodel import VariableModel
+from .variablemodel import VariableModel
 
 
 class LocalsModel(VariableModel):

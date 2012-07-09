@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, pyqtSignal
-import filters
+from . import filters
 
 
 class VariableWrapper(QObject):
