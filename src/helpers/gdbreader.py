@@ -91,11 +91,11 @@ class GdbReader(QThread):
         elif type_ == GdbOutput.EXEC_ASYN or \
              type_ == GdbOutput.STATUS_ASYN or \
              type_ == GdbOutput.NOTIFY_ASYN:
-             self.asyncRecordReceived.emit(res)
+            self.asyncRecordReceived.emit(res)
         elif type_ == GdbOutput.CONSOLE_STREAM or \
              type_ == GdbOutput.TARGET_STREAM or \
              type_ == GdbOutput.LOG_STREAM:
-             self.consoleRecordReceived.emit(res)
+            self.consoleRecordReceived.emit(res)
         else:
             raise helpers.excep.GdbError("Illegal type_!")
 
