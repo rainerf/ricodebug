@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, QIODevice, QFile, QString
+from PyQt4.QtCore import QObject, QIODevice, QFile
 from PyQt4.QtGui import QDialog, QGridLayout, QCheckBox, QPushButton, QFileDialog
 from os.path import exists
 from PyQt4.QtXml import QDomDocument, QDomElement, QDomNode
@@ -51,7 +51,7 @@ class SessionManager(QObject):
     def register(self, regObject, dialogItem=None):
         if dialogItem == None:
             self.registeredObjects["obj" + len(self.registeredObjects)] = regObject
-        elif not self.registeredObjects. has_key(dialogItem):
+        elif dialogItem not in self.registeredObjects:
             self.saveSessionDlg.addDialogItem(dialogItem)
             self.registeredObjects[dialogItem] = regObject
 
@@ -59,7 +59,7 @@ class SessionManager(QObject):
         self.saveSessionDlg.show()
 
     def showRestoreSessionDialog(self):
-        filename = str(QFileDialog.getOpenFileName(None, "Restore Session", QString(), "*.xml"))
+        filename = str(QFileDialog.getOpenFileName(None, "Restore Session", "", "*.xml"))
         if (filename != ""):
             self.restoreSession(filename)
 
@@ -74,7 +74,7 @@ class SessionManager(QObject):
             if cb.isChecked():
                 #print cb.text()
                 key = str(cb.text())
-                if self.registeredObjects. has_key(key):
+                if key in self.registeredObjects:
                     self.xmlHandler.createNode("save" + key)
                     try:
                         self.registeredObjects[key].saveSession(self.xmlHandler)
@@ -127,7 +127,7 @@ class SaveSessionDialog(QDialog):
         self.cbContainer.append(cb)
 
     def __showSaveFileDialog(self):
-        filename = str(QFileDialog.getSaveFileName(None, "Save Session", QString(), "*.xml"))
+        filename = str(QFileDialog.getSaveFileName(None, "Save Session", "", "*.xml"))
         if (filename != ""):
             self.SessionManager.saveSession(filename, self.cbContainer)
         self.close()
@@ -140,7 +140,7 @@ class RestoreSessionDialog(QObject):
         self.sessionmgr = sessionmgr
 
     def show(self):
-        filename = str(QFileDialog.getOpenFileName(None, "Restore Session", QString(), "*.xml"))
+        filename = str(QFileDialog.getOpenFileName(None, "Restore Session", "", "*.xml"))
         if (filename != ""):
             self.sessionmgr.restoreSession(filename)
 

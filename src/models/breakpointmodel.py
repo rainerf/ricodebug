@@ -126,10 +126,6 @@ class BreakpointModel(QAbstractTableModel):
         self.connector = connector
         #self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
 
-    #def handleMultipleBreakpointInfo(self, lines):
-        #print "----------------handle Multiple Breakpoint"
-        #print lines
-
     def getModel(self):
         return self.bpmodel
 
@@ -357,14 +353,14 @@ class BreakpointModel(QAbstractTableModel):
                 bp.condition = str(value.toString())
                 self.changeCondition(bp.number, bp.condition)
             except:
-                print "setData: data type missmatch bp.condition is str and value is not"
+                logging.error("setData: data type missmatch bp.condition is str and value is not")
                 return False
 
         #"""index.column() == 7 -> skip"""
         elif index.column() == 7:
             validSkip = QVariant(value).toInt()
             if not validSkip[1]:
-                print "setData: value from user is not int"
+                logging.error("setData: value from user is not int")
                 return False
             bp.skip = int(validSkip[0])
             self.changeSkip(bp.number, str(bp.skip))

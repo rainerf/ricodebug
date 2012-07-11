@@ -118,7 +118,6 @@ class Tracepoint(ExtendedBreakpoint):
         if self.hitted:
             self.hitted = False
             self.counter = self.counter + 1
-            #print "\n\n------------------------ tracePoint " + self.name + " line: " + self.line + " occured " + str(self.counter) + " times:"
 
             for varList in self.wave:
                 for v in self.variableList.list:
@@ -391,14 +390,14 @@ class TracepointModel(QAbstractTableModel):
                 bp.condition = str(value.toString())
                 self.changeCondition(bp.number, bp.condition)
             except:
-                print "setData: data type missmatch bp.condition is str and value is not"
+                logging.error("setData: data type missmatch bp.condition is str and value is not")
                 return False
 
         #"""index.column() == 7 -> skip"""
         elif index.column() == 7:
             validSkip = QVariant(value).toInt()
             if not validSkip[1]:
-                print "setData: value from user is not int"
+                logging.error("setData: value from user is not int")
                 return False
             bp.skip = int(validSkip[0])
             self.changeSkip(bp.number, str(bp.skip))

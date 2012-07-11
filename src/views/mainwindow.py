@@ -248,16 +248,6 @@ class MainWindow(QMainWindow):
             self.settings.setValue("InitialWindowPlacement/windowState", \
                     self.saveState())
 
-    def restoreInitialWindowPlacement(self):
-        """
-        Restores the window placement created by
-        createInitialWindowPlacement().
-        """
-        self.restoreGeometry(self.settings.value(\
-                "InitialWindowPlacement/geometry").toByteArray())
-        self.restoreState(self.settings.value(\
-                "InitialWindowPlacement/windowState").toByteArray())
-
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):

@@ -404,7 +404,7 @@ class VariableModel(QAbstractItemModel):
         @param index   QModelIndex, index of item
         """
         if index.isValid():
-            print "only toplevel items can be deleted!"
+            logging.error("Only toplevel items can be deleted!")
             return None
         else:
             return self.root
