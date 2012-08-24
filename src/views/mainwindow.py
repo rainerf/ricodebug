@@ -203,7 +203,7 @@ class MainWindow(QMainWindow):
 
     def insertDockWidget(self, widget, name, area, addToggleViewAction):
         d = QDockWidget(name, self)
-        d.setObjectName("StackView")
+        d.setObjectName(name)
         d.setWidget(widget)
 
         self.addDockWidget(area, d)
