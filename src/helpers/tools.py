@@ -29,10 +29,3 @@ def unBackslashify(s):
     s = s.replace("\\t", "\t")
     s = s.replace("\\\"", "\"")
     return s
-
-
-def try_get(obj, attr, default):
-    if hasattr(obj, attr):
-        return getattr(obj, attr)
-    else:
-        return default

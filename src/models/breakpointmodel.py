@@ -21,7 +21,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-from helpers.tools import try_get
 
 """@package breakpointmodel
     there are some classes in this package:\n
@@ -95,12 +94,12 @@ class ExtendedBreakpoint(QObject):
                 self.parseOriginalLocation(breakPoint.__dict__['original-location'])
                 self.func = "unknown"
             else:
-                self.file = try_get(breakPoint, "file", "<unknown>")
-                self.fullname = try_get(breakPoint, "fullname", "<unknown>")
-                self.func = try_get(breakPoint, "func", None)
+                self.file = getattr(breakPoint, "file", "<unknown>")
+                self.fullname = getattr(breakPoint, "fullname", "<unknown>")
+                self.func = getattr(breakPoint, "func", None)
                 if not self.func:
-                    self.func = try_get(breakPoint, "at", None)
-                self.line = try_get(breakPoint, "line", "-1")
+                    self.func = getattr(breakPoint, "at", None)
+                self.line = getattr(breakPoint, "line", "-1")
 
         if not self.func:
             self.func = "unknown"
