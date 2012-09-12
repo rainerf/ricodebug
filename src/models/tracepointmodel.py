@@ -28,24 +28,6 @@ from operator import attrgetter
 from .breakpointmodel import ExtendedBreakpoint
 from variables.variablelist import VariableList
 from variables.varwrapperfactory import VarWrapperFactory
-from variables.stdvariablewrapper import StdVariableWrapper
-from variables.ptrvariablewrapper import PtrVariableWrapper
-from variables.structvariablewrapper import StructVariableWrapper
-
-
-class TraceVWFactory(VarWrapperFactory):
-    """ using the variable model concept. see variable model"""
-    def __init__(self):
-        VarWrapperFactory.__init__(self)
-
-    def makeStdVarWrapper(self, var):
-        return StdVariableWrapper(var)
-
-    def makePtrVarWrapper(self, var):
-        return PtrVariableWrapper(var)
-
-    def makeStructVarWrapper(self, var):
-        return StructVariableWrapper(var)
 
 
 class ValueList():
@@ -91,7 +73,7 @@ class Tracepoint(ExtendedBreakpoint):
         """here are the traced variables stored with their values"""
         self.gdb_connector = distObjects.gdb_connector
         self.distObjects = distObjects
-        self.vwFactory = TraceVWFactory()
+        self.vwFactory = VarWrapperFactory()
         self.variableList = VariableList(self.vwFactory, distObjects)
         self.counter = 0
         self.hitted = False
