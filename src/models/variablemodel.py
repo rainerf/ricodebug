@@ -393,7 +393,6 @@ class VariableModel(QAbstractItemModel):
         """
         if index.isValid() and role == Qt.EditRole:
             index.internalPointer().variable.setValue(value.toString())
-            self.dataChanged.emit(index, index)
             return True
         return False
 
