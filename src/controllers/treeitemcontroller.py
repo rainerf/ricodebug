@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QDockWidget
 from models.variablemodel import TreeItem
 from variables.varwrapperfactory import VarWrapperFactory
 from variables.variablelist import VariableList
@@ -44,7 +43,6 @@ class TreePtrVarWrapper(VariableWrapper, TreeItem):
         VariableWrapper.__init__(self, variable)
         TreeItem.__init__(self)
         self.valueChanged = False
-        self.visible = True
 
     def getChildren(self, factory):
         """ Get children for TreePtrVarWrapper <br>
@@ -87,7 +85,6 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
         VariableWrapper.__init__(self, variable)
         TreeItem.__init__(self)
         self.valueChanged = False
-        self.visible = True
 
     def getChildren(self, factory):
         """ Get children for TreePtrVarWrapper <br>
@@ -118,7 +115,6 @@ class TreeStdVarWrapper(VariableWrapper, TreeItem):
         VariableWrapper.__init__(self, variable)
         TreeItem.__init__(self)
         self.valueChanged = False
-        self.visible = True
 
 
 #####################################################################################
