@@ -183,13 +183,6 @@ class VariablePool(QObject):
         varReturn = None
 
         # initialize values
-        gdbName = None
-        uniqueName = None
-        type_ = None
-        value = None
-        inscope = None
-        haschildren = None
-
         if hasattr(gdbVar, "exp"):
             exp = gdbVar.exp
         gdbName = gdbVar.name
