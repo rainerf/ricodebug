@@ -50,16 +50,15 @@ class TreePtrVarWrapper(VariableWrapper, TreeItem):
         @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
         """
         if (self.getChildCount() == 0):
-            variable = self.variable.dereference()
-            if variable != None:
-                children = variable._getChildItems()
-                if (len(children) == 0):
+            variable = self._v.dereference()
+            if variable is not None:
+                if not variable.hasChildren:
                     vwChild = variable.makeWrapper(factory)
                     vwChild.parent = self
                     vwChild.dataChanged.connect(vwChild.hasChanged)
                     self.addChild(vwChild)
                 else:
-                    for child in children:
+                    for child in variable.childs:
                         vwChild = child.makeWrapper(factory)
                         vwChild.parent = self
                         vwChild.dataChanged.connect(vwChild.hasChanged)
@@ -91,8 +90,8 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
             Get Children from VariableList for StructVariable
         @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
         """
-        if (self.childItems.__len__() == 0):
-            for child in self.variable.getChildren():
+        if len(self.childItems) == 0:
+            for child in self._v.childs:
                 vwChild = child.makeWrapper(factory)
                 vwChild.parent = self
                 vwChild.dataChanged.connect(vwChild.hasChanged)

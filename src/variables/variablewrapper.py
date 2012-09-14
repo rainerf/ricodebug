@@ -36,38 +36,21 @@ class VariableWrapper(QObject):
         @param variable    variables.variable.Variable, Variable to wrap with the new DataGraphVW
         """
         QObject.__init__(self)
-        self.variable = variable
-        self.variable.changed.connect(self.varChanged)
+        self._v = variable
+        self._v.changed.connect(self.varChanged)
 
         self.filter = filters.Empty
 
     def varChanged(self):
         self.dataChanged.emit()
 
-    def getExp(self):
-        return self.variable.getExp()
+    def __getattr__(self, name):
+        # delegate the accesses to the wrapped variable
+        if name in ["exp", "type", "inScope", "access", "uniqueName", "assignValue", "childs", "__getitem__"]:
+            return getattr(self._v, name)
+        else:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, name))
 
-    def getType(self):
-        return self.variable.getType()
-
-    def getUnfilteredValue(self):
-        return self.variable.getValue()
-
-    def getValue(self):
-        return self.filter.toDisplay(self.getUnfilteredValue())
-
-    def setValue(self, value):
-        self.variable.setValue(value)
-
-    def getInScope(self):
-        return self.variable.getInScope()
-
-    def getAccess(self):
-        return self.variable.getAccess()
-
-    def setFilter(self, f):
-        self.filter = f
-
-    def getFilter(self):
-        return self.filter
+    value = property(lambda self: self.filter.toDisplay(self.unfilteredValue))
+    unfilteredValue = property(lambda self: self._v.value)
 

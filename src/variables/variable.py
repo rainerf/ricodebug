@@ -33,74 +33,66 @@ class Variable(QObject):
         This is the Parent of all Variable-Classes and the Core of all VariableWrappers.
         It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
     """
+    childFormat = None
 
     changed = pyqtSignal()
 
-    def __init__(self, variablepool, exp=None, gdbname=None,
-            uniquename=None, type_=None, value=None, inscope=None,
-            haschildren=None, access=None, childformat=None):
-        """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
-        """
+    def __init__(self, variablepool, exp, gdbName,
+            uniqueName, type_, value, inScope,
+            hasChildren, access):
         QObject.__init__(self)
-
-        self.variablepool = variablepool
-
-        # initialize all attributes with default values
         self.exp = exp
-        self.gdbname = gdbname
-        self.uniquename = uniquename
         self.type = type_
-        self.value = value
-        self.inscope = inscope
-        self.haschildren = haschildren
+        self.inScope = inScope
         self.access = access
-        self.childformat = childformat
-        self.childItems = []
+        self.uniqueName = uniqueName
+        self.value = value
+        self.hasChildren = hasChildren
+
+        self._vp = variablepool
+        self._gdbName = gdbName
+        self._childs = []
+
+    def __getChildrenFromGdb(self):
+        """Load the children from GDB, if there are any."""
+        if not self.hasChildren:
+            raise AttributeError("No children available.")
+        if not self._childFormat:
+            raise AttributeError("No child format set.")
+
+        if len(self._childs) == 0:
+            self._vp.getChildren(self._gdbName, self._childs, self.access, self.uniqueName, self._childFormat)
+
+    def __getChilds(self):
+        """Return the lazily loaded list of children."""
+        self.__getChildrenFromGdb()
+        return self._childs
+    childs = property(__getChilds)
+
+    def getChildrenNames(self):
+        """Return the names of all children."""
+        return [i.exp for i in self.childs]
+
+    def __getitem__(self, name):
+        for i in self.childs:
+            if i.exp == name:
+                return i
+        print AttributeError("No children %s." % name)
+
+    def assignValue(self, value):
+        self._vp.assignValue(self._gdbName, value)
 
     def __str__(self):
+        # we use self._childs instead of self.childs to make sure printing the
+        # variable does not load its children if they are not already
         return "%s [%s]" % (self.__class__.__name__, " ".join([
-                self.gdbname,
+                self._gdbName,
                 self.type,
                 str(self.value),
-                "in scope" if self.inscope else "",
-                "has children" if self.haschildren else "",
+                "in scope" if self.inScope else "",
+                "has children" if self.hasChildren else "",
                 self.access if self.access else "",
-                str(len(self.childItems))]))
-
-    def getExp(self):
-        return self.exp
-
-    def getGdbName(self):
-        return self.gdbname
-
-    def getUniqueName(self):
-        return self.uniquename
-
-    def getType(self):
-        return self.type
-
-    def getValue(self):
-        return self.value
-
-    def setValue(self, value):
-        self.variablepool.assignValue(self.gdbname, value)
-
-    def getInScope(self):
-        return self.inscope
-
-    def getAccess(self):
-        return self.access
-
-    def _getChildItems(self):
-        """ Returns a list of childs as Variables.
-            This is a pure private Method!
-        @return    List of Variables, children of the variable.
-        """
-        if self.haschildren == True and self.childItems.__len__() == 0:
-            self.variablepool.getChildren(self.gdbname, self.childItems, self.access, self.uniquename, self.childformat)
-        return self.childItems
-
+                str(len(self._childs)) if self._childs else ""]))
 
     def emitChanged(self):
         self.changed.emit()

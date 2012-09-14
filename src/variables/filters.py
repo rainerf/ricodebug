@@ -30,7 +30,7 @@ def _getAvailableFiltes():
 def add_actions_for_all_filters(menu, varWrapper):
     def setFilter(varWrapper, filter_):
         def f():
-            varWrapper.setFilter(filter_)
+            varWrapper.filter = filter_
         return f
 
     for cls in _getAvailableFiltes():

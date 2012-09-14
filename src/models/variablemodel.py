@@ -25,6 +25,7 @@
 from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject, QMimeData, QStringList
 from PyQt4.QtGui import QPixmap, QBrush
 from variables import variable
+import logging
 
 
 class TreeItem(QObject):
@@ -276,39 +277,39 @@ class VariableModel(QAbstractItemModel):
         ret = None
         if role == Qt.DisplayRole:
             if index.column() == 0:
-                ret = item.getExp()
+                ret = item.exp
             elif index.column() == 1:
-                ret = item.getType()
+                ret = item.type
             elif index.column() == 2:
-                ret = item.getValue()
+                ret = item.value
 
         elif role == Qt.EditRole:
             if index.column() == 2:
-                ret = item.getValue()
+                ret = item.value
 
         elif role == Qt.DecorationRole:
             if index.column() == 0:
-                if item.getAccess() in ['private', 'protected']:
-                    iconprefix = item.getAccess() + "_"
+                if item.access in ['private', 'protected']:
+                    iconprefix = item.access + "_"
                 else:
                     iconprefix = ""
 
-                if not item.getInScope():
+                if not item.inScope:
                     return QPixmap(":/icons/images/outofscope.png")
                 elif item.getChildCount() != 0:     # child item
                     return QPixmap(":/icons/images/" + iconprefix + "struct.png")
                 else:                               # leave item
                     return QPixmap(":/icons/images/" + iconprefix + "var.png")
             elif index.column() == 2:
-                if item.getInScope():
+                if item.inScope:
                     return QPixmap(":/icons/images/edit.png")
 
         elif role == Qt.ForegroundRole:
-            if not item.getInScope():
+            if not item.inScope:
                 return QBrush(Qt.gray)
 
             if index.column() == 2:
-                if item.getMarkChanged() and item.getInScope():
+                if item.getMarkChanged() and item.inScope:
                     return QBrush(Qt.green)
 
             return QBrush(Qt.black)
@@ -323,7 +324,7 @@ class VariableModel(QAbstractItemModel):
             return Qt.ItemIsDropEnabled
 
         item = index.internalPointer()
-        if not item.getInScope():
+        if not item.inScope:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
         ret = Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -392,7 +393,7 @@ class VariableModel(QAbstractItemModel):
         """ QAbstractItemModel flags function
         """
         if index.isValid() and role == Qt.EditRole:
-            index.internalPointer().variable.setValue(value.toString())
+            index.internalPointer().assignValue(value.toString())
             return True
         return False
 
@@ -429,7 +430,7 @@ class VariableModel(QAbstractItemModel):
         if len(indexes) == 1:
             item = indexes[0].internalPointer()
             d = QMimeData()
-            d.setData(variable.MIME_TYPE, item.variable.getUniqueName())
+            d.setData(variable.MIME_TYPE, item.uniqueName)
             return d
         else:
             return None

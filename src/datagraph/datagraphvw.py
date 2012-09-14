@@ -75,7 +75,7 @@ class HtmlTemplateHandler(QObject):
 
     @QtCore.pyqtSlot(str)
     def setValue(self, value):
-        self.varWrapper.variable.setValue(value)
+        self.varWrapper.assignValue(value)
 
     def prepareContextMenu(self, menu):
         menu.addSeparator()
@@ -83,7 +83,7 @@ class HtmlTemplateHandler(QObject):
 
     # insert a "header" into the menu for the current element
     def addContextMenuLabel(self, menu):
-        label = QLabel("Actions for %s" % (self.varWrapper.getExp()))
+        label = QLabel("Actions for %s" % (self.varWrapper.exp))
         label.setStyleSheet("color:palette(light); background-color:palette(dark); margin-top:2px; margin-bottom:2px; margin-left:2px; margin-right:2px;")
         we = QWidgetAction(menu)
         we.setDefaultWidget(label)
@@ -117,12 +117,12 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
 
-        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.varWrapper.getExp(), self.toggleCollapsed)
+        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.varWrapper.exp, self.toggleCollapsed)
         action.setCheckable(True)
         action.setChecked(not self.varWrapper.isOpen)
 
         if self.varWrapper.isOpen:
-            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.varWrapper.getExp(), self.toggleVertical)
+            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.varWrapper.exp, self.toggleVertical)
             action.setCheckable(True)
             action.setChecked(self.vertical)
 
@@ -215,7 +215,7 @@ class ComplexDataGraphVW(DataGraphVW):
         DataGraphVW.__init__(self, variable, distributedObjects)
         self.isOpen = True
         self.vwFactory = vwFactory
-        self.children = None        # will be lazily evaluated once we need them
+        self.childrenWrapper = None        # will be lazily evaluated once we need them
         self.templateHandler = templateHandler
 
     def setOpen(self, open_):
@@ -225,10 +225,10 @@ class ComplexDataGraphVW(DataGraphVW):
     def getChildren(self):
         """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been
         @return    list of datagraph.datagraphvw.DataGraphVW """
-        if not self.children:
-            self.children = []
-            for childVar in self.variable.getChildren():
+        if not self.childrenWrapper:
+            self.childrenWrapper = []
+            for childVar in self.childs:
                 wrapper = childVar.makeWrapper(self.vwFactory)
                 wrapper.setExistingView(self.getView(), self)
-                self.children.append(wrapper)
-        return self.children
+                self.childrenWrapper.append(wrapper)
+        return self.childrenWrapper

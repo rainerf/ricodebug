@@ -117,7 +117,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         # we only allow the graphical view if all contained elements are standard variables; also,
         # do not show the menu if the variable view is collapsed
         if self.varWrapper.isOpen and graphicalViewPossible:
-            action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.getExp(), self.toggleGraphicalView)
+            action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.exp, self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)
 

@@ -85,7 +85,7 @@ class Tracepoint(ExtendedBreakpoint):
         """ add a var to trace its value
         @param variableToTrace: variable name of the variable that should be traced"""
         vw = self.variableList.addVarByName(variableToTrace)
-        newValueList = ValueList(variableToTrace, vw.getType())
+        newValueList = ValueList(variableToTrace, vw.type)
         self.wave.append(newValueList)
 
     def tracePointOccurred(self, stop):

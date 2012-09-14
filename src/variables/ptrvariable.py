@@ -26,17 +26,7 @@ from variables.variable import Variable
 
 
 class PtrVariable(Variable):
-    """ Class holding a Pointer-Variable. """
-
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None,
-            type_=None, value=None, inscope=None, haschildren=None,
-            access=None):
-        """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the
-                               VariablePool-Instance
-        """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_,
-                value, inscope, haschildren, access, "*%(parent)s")
+    _childFormat = "(*%(parent)s)"
 
     def dereference(self):
         """ Dereferences the Variable, if possible.
@@ -44,6 +34,6 @@ class PtrVariable(Variable):
         """
         # avoid null-pointer dereference
         if self.value != "0x0":
-            return self.variablepool.getVar("(*" + self.getUniqueName() + ")")
+            return self._vp.getVar(self._childFormat % {"parent": self.uniqueName})
         else:
             return None

@@ -91,7 +91,7 @@ class VariablePool(QObject):
         # just update value in pool
         for changed in res:
             var = self.variables[changed.name]
-            var.inscope = (changed.in_scope == "true")
+            var.inScope = (changed.in_scope == "true")
             if hasattr(changed, "value"):
                 var.value = changed.value
             if not isTracePoint:
@@ -125,10 +125,10 @@ class VariablePool(QObject):
         # create variable
         varReturn = self.__createVariable(gdbVar, None, exp, None)
 
-        self.variables[varReturn.gdbname] = varReturn
+        self.variables[varReturn._gdbName] = varReturn
 
         logging.debug("Returning internal variable %s for expression %s",
-                varReturn.gdbname, exp)
+                varReturn._gdbName, exp)
 
         return varReturn
 
@@ -154,13 +154,12 @@ class VariablePool(QObject):
                     self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
                     var = self.__createVariable(child.src, parentName, None, access, childformat)
-                    self.variables[var.gdbname] = var
+                    self.variables[var._gdbName] = var
                     childList.append(var)
 
     def assignValue(self, gdbName, value):
         """
         Assigns the value from the variable to the gdbvariable
-        Only used when setValue method is called
         @param gdbName     string, GDB name of value
         @param value       new value for variable
         """
@@ -192,7 +191,7 @@ class VariablePool(QObject):
             uniqueName = childformat % {"parent": parentName, "child": exp}
         type_ = gdbVar.type
         value = gdbVar.value
-        inscope = True
+        inScope = True
         haschildren = (int(gdbVar.numchild) > 0)
         access = access
 
@@ -206,16 +205,16 @@ class VariablePool(QObject):
         # * Again, everything else is a normal variable.
         if gdbVar.value.startswith('0x') and int(gdbVar.numchild) >= 1:
             logging.debug("Creating a pointer variable for '%s'", exp)
-            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
             logging.debug("Creating a array variable for '%s'", exp)
-            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         elif haschildren:
             logging.debug("Creating a struct variable for '%s'", exp)
-            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         else:
             logging.debug("Creating a normal variable for '%s'", exp)
-            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inscope, haschildren, access)
+            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
 
         return varReturn
 

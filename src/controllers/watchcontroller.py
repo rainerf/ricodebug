@@ -65,7 +65,7 @@ class WatchController(TreeItemController):
         """
         watchParent = xmlHandler.createNode("Watches")
         for var in self.variableModel.getVariables():
-            xmlHandler.createNode("Watch", watchParent, {'exp': var.getExp()})
+            xmlHandler.createNode("Watch", watchParent, {'exp': var.exp})
 
     def loadSession(self, xmlHandler):
         """ load session info to xml file

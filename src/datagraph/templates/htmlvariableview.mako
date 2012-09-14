@@ -44,7 +44,7 @@ function setValue(obj, td) {
 }
 </script>
 <% assert(top) %>\
-%  if varWrapper.getInScope() == True:
+%  if varWrapper.inScope:
 <table class="variabletop">
 ${varWrapper.render(Role.INCLUDE_HEADER)}
 </table>

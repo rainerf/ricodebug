@@ -26,14 +26,4 @@ from variables.variable import Variable
 
 
 class StdVariable(Variable):
-    """ Class holding a Standard-Variable. """
-
-    def __init__(self, variablepool, exp=None, gdbname=None,
-            uniquename=None, type_=None, value=None, inscope=None,
-            haschildren=None, access=None):
-        """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
-        """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_,
-                value, inscope, haschildren, access)
-
+    pass

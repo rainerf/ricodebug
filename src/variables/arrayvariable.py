@@ -26,19 +26,4 @@ from variables.variable import Variable
 
 
 class ArrayVariable(Variable):
-    """ Class holding an Array. """
-
-    def __init__(self, variablepool, exp=None, gdbname=None, uniquename=None,
-            type_=None, value=None, inscope=None, haschildren=None,
-            access=None):
-        """ Constructor
-        @param variablepool    variables.variablepool.VariablePool, the VariablePool-Instance
-        """
-        Variable.__init__(self, variablepool, exp, gdbname, uniquename, type_,
-                value, inscope, haschildren, access, "%(parent)s[%(child)s]")
-
-    def getChildren(self):
-        """ Returns a List with all Members of the struct.
-        @return    List of Variables, Members of the struct. """
-        return self._getChildItems()
-
+    _childFormat = "%(parent)s[%(child)s]"

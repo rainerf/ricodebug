@@ -40,7 +40,7 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
     def dereference(self):
         dgvw = self.varWrapper.dereference()
         if (dgvw != None):
-            logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.getExp())
+            logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.exp)
             self.distributedObjects.datagraphController.addVar(dgvw)
             self.distributedObjects.datagraphController.addPointer(self.varWrapper.getView(), dgvw.getView())
         else:
@@ -54,13 +54,13 @@ class PtrVariableTemplateHandler(HtmlTemplateHandler):
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
-        menu.addAction("Dereference %s" % self.varWrapper.getExp(), self.dereference)
+        menu.addAction("Dereference %s" % self.varWrapper.exp, self.dereference)
         submenu = menu.addMenu("Show custom...")
 
         # we cannot construct the lineedit in our ctor since it will be automatically deleted once the menu is closed
         self.showCustomEdit = QLineEdit()
         self.showCustomEdit.returnPressed.connect(self.showCustom)
-        self.showCustomEdit.setText("*(%s)" % self.varWrapper.getExp())
+        self.showCustomEdit.setText("*(%s)" % self.varWrapper.exp)
         we = QWidgetAction(menu)
         we.setDefaultWidget(self.showCustomEdit)
         submenu.addAction(we)
@@ -84,8 +84,8 @@ class PtrDataGraphVW(DataGraphVW):
                     the Wrapper of the dereferenced Variable if the Variable can be dereferenced,
                     None otherwise
         """
-        dereferencedVar = self.variable.dereference()
-        if (dereferencedVar != None):
+        dereferencedVar = self._v.dereference()
+        if dereferencedVar is not None:
             return dereferencedVar.makeWrapper(self.factory)
         else:
             return None

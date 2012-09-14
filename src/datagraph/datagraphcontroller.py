@@ -150,10 +150,10 @@ class DataGraphController(QObject):
         """
         dgWatches = xmlHandler.createNode("GraphWatches")
         for vw in self.variableList:
-            xmlHandler.createNode("Watch", dgWatches, {'expression': vw.getExp(), 'xPos': vw.getXPos(), 'yPos': vw.getYPos()})
+            xmlHandler.createNode("Watch", dgWatches, {'expression': vw.exp, 'xPos': vw.getXPos(), 'yPos': vw.getYPos()})
         #dgPointers = xmlHandler.createNode("Pointers")
         #for pointer in self.pointerList:
-        #    xmlHandler.createNode("Pointer", dgPointers, { 'expFrom': pointer.fromView.var.getExp(), 'expTo': pointer.toView.var.getExp() })
+        #    xmlHandler.createNode("Pointer", dgPointers, { 'expFrom': pointer.fromView.var.exp, 'expTo': pointer.toView.var.exp })
 
     def loadSession(self, xmlHandler):
         """ load session info to xml file
@@ -184,10 +184,10 @@ class DataGraphController(QObject):
 #    def getVarByWatch(self, watch):
 #        """
 #        @param watch    string, the watch-Expression of the desired Variable
-#        @return         variables.variable.Variable, the desired Variable with var.getExp() == watch
+#        @return         variables.variable.Variable, the desired Variable with var.exp == watch
 #        """
 #        for var in self.variableList:
-#            if var.getExp() == watch:
+#            if var.exp == watch:
 #                return var
 #        # in case that no var was found, return None
 #        return None

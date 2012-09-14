@@ -18,21 +18,21 @@
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
 		<td nowrap class="varaccess">
-<%	if varWrapper.getAccess() in ['private', 'protected']:
-		iconprefix = varWrapper.getAccess() + "_"
+<%	if varWrapper.access in ['private', 'protected']:
+		iconprefix = varWrapper.access + "_"
 	else:
 		iconprefix = ""
 %>\
 			<img src="qrc:icons/images/${iconprefix}${icon}">
-%		if varWrapper.getAccess():
-			<span class="varaccess"> ${varWrapper.getAccess() | h}</span>
+%		if varWrapper.access:
+			<span class="varaccess"> ${varWrapper.access | h}</span>
 %		endif
 		</td>
 		<td nowrap class="vartype">
-			<span class="vartype"> ${varWrapper.getType() | h}</span>
+			<span class="vartype"> ${varWrapper.type | h}</span>
 		</td>
 		<td nowrap class="varname">
-			<span class="varname"> ${varWrapper.getExp() | h}</span>
+			<span class="varname"> ${varWrapper.exp | h}</span>
 		</td>
 		<td nowrap class="open_close">
 %		if openclose:
@@ -61,8 +61,8 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 	<tr class="header" id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td nowrap>
 			<img src="qrc:icons/images/${icon}">
-			<span class="vartype"> ${varWrapper.getType() | h}</span> 
-			<span class="varname"> ${varWrapper.getExp() | h}</span>
+			<span class="vartype"> ${varWrapper.type | h}</span> 
+			<span class="varname"> ${varWrapper.exp | h}</span>
 			${open_close_entry(id_, varWrapper)}
 		</td>
 	</tr>

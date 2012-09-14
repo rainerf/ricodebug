@@ -61,7 +61,7 @@ class HtmlVariableView(QGraphicsWebView):
         self.dirty = True
 
         self.id = self.getUniqueId(self)
-        
+
         self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
 
     def getIncomingPointers(self):
@@ -106,10 +106,10 @@ class HtmlVariableView(QGraphicsWebView):
         return self.source
 
     def openContextMenu(self, menu):
-        menu.addAction(QIcon(":/icons/images/minus.png"), 
-                "Remove %s" % self.varWrapper.getExp(), self.remove)
-        menu.addAction(QIcon(":/icons/images/save-html.png"), 
-                "Save HTML for %s" % self.varWrapper.getExp(), self.saveHtml)
+        menu.addAction(QIcon(":/icons/images/minus.png"),
+                "Remove %s" % self.varWrapper.exp, self.remove)
+        menu.addAction(QIcon(":/icons/images/save-html.png"),
+                "Save HTML for %s" % self.varWrapper.exp, self.saveHtml)
         menu.exec_(QCursor.pos())
 
     @QtCore.pyqtSlot()

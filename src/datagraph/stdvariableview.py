@@ -37,7 +37,7 @@ class StdVariableTemplateHandler(HtmlTemplateHandler):
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
-        filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.varWrapper.getExp()), self.varWrapper)
+        filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.varWrapper.exp), self.varWrapper)
 
 
 class StdDataGraphVW(DataGraphVW):
