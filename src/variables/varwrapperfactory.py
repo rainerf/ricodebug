@@ -30,39 +30,18 @@ from .arrayvariablewrapper import ArrayVariableWrapper
 
 
 class VarWrapperFactory(QObject):
-    """ Factory-Class for VariableWrappers. <br>
-        Creates VariableWrappers.
-    """
+    def makeWrapper(self, var):
+        func = "make%sWrapper" % var.__class__.__name__
+        return getattr(self, func)(var)
 
-    def __init__(self):
-        """ Constructor """
-        QObject.__init__(self)
-
-    def makeStdVarWrapper(self, var):
-        """ creates a StdVariableWrapper for the given Variable
-        @param var     the Variable to create a StdVariableWrapper for
-        @return        variables.stdvariablewrapper.StdVariableWrapper, StdVariableWrapper for the given Variable
-        """
+    def makeStdVariableWrapper(self, var):
         return StdVariableWrapper(var)
 
-    def makePtrVarWrapper(self, var):
-        """ creates a PtrVariableWrapper for the given Variable
-        @param var     the Variable to create a PtrVariableWrapper for
-        @return        variables.ptrvariablewrapper.PtrVariableWrapper, PtrVariableWrapper for the given Variable
-        """
+    def makePtrVariableWrapper(self, var):
         return PtrVariableWrapper(var)
 
-    def makeStructVarWrapper(self, var):
-        """ creates a StructVariableWrapper for the given Variable
-        @param var     the Variable to create a StructVariableWrapper for
-        @return        variables.structvariablewrapper.StructVariableWrapper, StructVariableWrapper for the given Variable
-        """
+    def makeStructVariableWrapper(self, var):
         return StructVariableWrapper(var)
 
-    def makeArrayVarWrapper(self, var):
-        """ creates an ArrayVariableWrapper for the given Variable
-        @param var     the Variable to create a ArrayVariableWrapper for
-        @return        variables.arrayvariablewrapper.ArrayVariableWrapper, ArrayVariableWrapper for the given Variable
-        """
+    def makeArrayVariableWrapper(self, var):
         return ArrayVariableWrapper(var)
-

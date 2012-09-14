@@ -127,24 +127,16 @@ class TreeVWFactory(VarWrapperFactory):
         """
         VarWrapperFactory.__init__(self)
 
-    def makeStdVarWrapper(self, var):
-        """ create StdVarWrapper
-        """
+    def makeStdVariableWrapper(self, var):
         return TreeStdVarWrapper(var)
 
-    def makePtrVarWrapper(self, var):
-        """ create PtrVarWrapper
-        """
+    def makePtrVariableWrapper(self, var):
         return TreePtrVarWrapper(var)
 
-    def makeStructVarWrapper(self, var):
-        """ create StructVarWrapper
-        """
+    def makeStructVariableWrapper(self, var):
         return TreeStructVarWrapper(var)
 
-    def makeArrayVarWrapper(self, var):
-        """ create ArrayVarWrapper
-        """
+    def makeArrayVariableWrapper(self, var):
         return TreeArrayVarWrapper(var)
 
 

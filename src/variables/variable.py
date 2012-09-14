@@ -101,14 +101,9 @@ class Variable(QObject):
             self.variablepool.getChildren(self.gdbname, self.childItems, self.access, self.uniquename, self.childformat)
         return self.childItems
 
-    def makeWrapper(self, vwFactory):
-        """ Returns a VariableWrapper for the Variable. <br>
-            The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
-        @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
-        """
-        raise "pure virtual Function Variable::makeWrapper() called"
 
     def emitChanged(self):
         self.changed.emit()
 
+    def makeWrapper(self, factory):
+        return factory.makeWrapper(self)

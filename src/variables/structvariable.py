@@ -42,10 +42,3 @@ class StructVariable(Variable):
         @return    List of Variables, Members of the struct. """
         return self._getChildItems()
 
-    def makeWrapper(self, vwFactory):
-        """ Returns a VariableWrapper for the Variable. <br>
-            The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
-        @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
-        """
-        return vwFactory.makeStructVarWrapper(self)

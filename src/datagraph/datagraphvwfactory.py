@@ -39,15 +39,14 @@ class DataGraphVWFactory(VarWrapperFactory):
         VarWrapperFactory.__init__(self)
         self.distributedObjects = distributedObjects
 
-    def makeStdVarWrapper(self, var):
+    def makeStdVariableWrapper(self, var):
         return StdDataGraphVW(var, self.distributedObjects)
 
-    def makePtrVarWrapper(self, var):
+    def makePtrVariableWrapper(self, var):
         return PtrDataGraphVW(var, self.distributedObjects, self)
 
-    def makeStructVarWrapper(self, var):
+    def makeStructVariableWrapper(self, var):
         return StructDataGraphVW(var, self.distributedObjects, self)
 
-    def makeArrayVarWrapper(self, var):
+    def makeArrayVariableWrapper(self, var):
         return ArrayDataGraphVW(var, self.distributedObjects, self)
-

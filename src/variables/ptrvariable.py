@@ -47,11 +47,3 @@ class PtrVariable(Variable):
             return self.variablepool.getVar("(*" + self.getUniqueName() + ")")
         else:
             return None
-
-    def makeWrapper(self, vwFactory):
-        """ Returns a VariableWrapper for the Variable. <br>
-            The Type of the VariableWrapper depends on the Type of the Variable and the vwFactory.
-        @param vwFactory   variables.varwrapperfactory.VarWrapperFactory, Factory to create the VariableWrapper
-        @return            variables.variablewrapper.VariableWrapper, VariableWrapper for the Variable
-        """
-        return vwFactory.makePtrVarWrapper(self)
