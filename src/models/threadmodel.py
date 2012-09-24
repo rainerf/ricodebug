@@ -51,7 +51,7 @@ class ThreadInfo:
         except AttributeError:
             pass
         self.func = res.frame.func
-        self.line = res.frame.line
+        self.line = getattr(res.frame, "line", 0)
         self.level = res.frame.level
 
 
