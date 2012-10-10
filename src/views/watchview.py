@@ -36,8 +36,7 @@ class WatchView(TreeItemView):
         key = event.key()
         if (int(key) == Qt.Key_Delete):
             selectionModel = self.selectionModel()
-            index = selectionModel.currentIndex()
-            self.controller.removeSelected(index.row(), index.parent())
+            self.controller.removeSelected(selectionModel.currentIndex())
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat(variable.MIME_TYPE):
