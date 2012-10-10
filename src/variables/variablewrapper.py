@@ -51,6 +51,9 @@ class VariableWrapper(QObject):
         else:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, name))
 
+    def die(self):
+        self._v.changed.disconnect()
+        self._v.die()
+
     value = property(lambda self: self.filter.toDisplay(self.unfilteredValue))
     unfilteredValue = property(lambda self: self._v.value)
-

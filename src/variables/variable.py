@@ -99,3 +99,6 @@ class Variable(QObject):
 
     def makeWrapper(self, factory):
         return factory.makeWrapper(self)
+
+    def die(self):
+        self._vp.removeVar(self)

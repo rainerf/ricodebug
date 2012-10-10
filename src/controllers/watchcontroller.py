@@ -40,12 +40,16 @@ class WatchController(TreeItemController):
         TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel, True)
         self.distributedObjects.signalProxy.AddWatch.connect(self.addWatch)
 
-    def removeSelected(self, row, parent):
+    def removeSelected(self, index):
         """ remove selected variable from WatchView
         @param row     int, selected row
         @param parent  TreeItem, parent item from selectected item
         """
-        self.model.removeRow(row, parent)
+        vw = index.internalPointer()
+        vw.dataChanged.disconnect(vw.hasChanged)
+        self.variableList.removeVar(vw)
+        self.model.removeRow(index.row(), index.parent())
+        self.model.update()
 
     def addWatch(self, watch):
         """ adds the Variable watch to the VariableList and its wrapper to the WatchView
