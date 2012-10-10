@@ -70,7 +70,7 @@ class ToolTipView(QWidget):
         self.__hideTimer.setSingleShot(True)
         self.__hideTimer.timeout.connect(self.hide)
 
-        self.treeItemView.contextMenuOpen.connect(self.__setAllowHide)
+        self.treeItemView.contextMenuOpen.connect(self.__setDisallowHide)
         self.treeItemView.setRootIsDecorated(False)
         self.treeItemView.setHeaderHidden(True)
 
@@ -78,7 +78,7 @@ class ToolTipView(QWidget):
         if self.__allowHide:
             QWidget.hide(self)
 
-    def __setAllowHide(self, x):
+    def __setDisallowHide(self, x):
         self.__allowHide = not x
 
     def enterEvent(self, event):
