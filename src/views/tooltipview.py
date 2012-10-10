@@ -32,11 +32,10 @@ class ToolTipView(QWidget):
     ICON_SIZE = 22
 
     def __init__(self, distributedObjects, parent=None):
-        QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent, Qt.Tool | Qt.FramelessWindowHint)
         self.__do = distributedObjects
         self.__allowHide = True
         self.treeItemView = TreeItemView()
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.hide()
         self.resize(300, 90)
 
