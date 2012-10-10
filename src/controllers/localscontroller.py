@@ -34,6 +34,7 @@ class LocalsController(TreeItemController):
 
     def getLocals(self):
         self.clear()
+        self.variableList.clear()
         self.variableList.addLocals()
 
         for vw in self.variableList.list:
