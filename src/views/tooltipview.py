@@ -25,7 +25,7 @@
 from .treeitemview import TreeItemView
 from PyQt4.QtCore import Qt, QTimer, QModelIndex
 from PyQt4.QtGui import QWidget, QPushButton, QIcon, QHBoxLayout, QVBoxLayout, \
-        QSizeGrip, QSpacerItem, QSizePolicy
+        QSizeGrip, QSpacerItem, QSizePolicy, QStylePainter, QStyleOptionFrame, QStyle, QToolTip
 
 
 class ToolTipView(QWidget):
@@ -33,11 +33,12 @@ class ToolTipView(QWidget):
 
     def __init__(self, distributedObjects, parent=None):
         QWidget.__init__(self, parent, Qt.Tool | Qt.FramelessWindowHint)
+        self.setPalette(QToolTip.palette())
+
         self.__do = distributedObjects
         self.__allowHide = True
         self.treeItemView = TreeItemView()
         self.hide()
-        self.resize(300, 90)
 
         self.exp = None
 
@@ -97,6 +98,8 @@ class ToolTipView(QWidget):
         self.__do.datagraphController.addWatch(self.exp)
 
     def show(self, exp):
+        self.resize(300, 90)
+
         # store the expression for __addToWatch and __addToDatagraph
         self.exp = exp
 
@@ -108,3 +111,10 @@ class ToolTipView(QWidget):
 
     def setModel(self, model):
         self.treeItemView.setModel(model)
+
+    def paintEvent(self, event):
+        # this makes the tool tip use the system's tool tip color as its background
+        painter = QStylePainter(self)
+        opt = QStyleOptionFrame()
+        opt.initFrom(self)
+        painter.drawPrimitive(QStyle.PE_PanelTipLabel, opt)

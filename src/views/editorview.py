@@ -107,7 +107,7 @@ class EditorView(QWidget):
 
     def openFile(self, filename):
         if not self.isOpen(filename):
-            self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename)
+            self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename, self)
             self.showFile(filename)
         self.openedFiles[filename].getBreakpointsFromModel()
         self.tabWidget.setCurrentWidget(self.openedFiles[filename].tab)

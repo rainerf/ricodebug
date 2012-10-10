@@ -34,7 +34,7 @@ class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
     MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK = range(8)
 
-    def __init__(self, distributedObjects, filename, parent=None):
+    def __init__(self, distributedObjects, filename, parent):
         QObject.__init__(self, parent)
         filename = str(filename)
         self.distributedObjects = distributedObjects
