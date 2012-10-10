@@ -25,9 +25,38 @@
 import re
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QFont, QColor
-from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher, QTimer
+from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher, QTimer, pyqtSignal
 from math import log, ceil
 import logging
+
+
+class ScintillaWrapper(Qsci.QsciScintilla):
+    """
+    A wrapper around QsciScintilla which only emits dwellStart events if the
+    mouse is really dwelling over the widget and not somewhere else. Also, it
+    provides an unfiltered but matching dwellEnd signal.
+    """
+    dwellStart = pyqtSignal(int, int, int)
+    dwellEnd = pyqtSignal(int, int, int)
+
+    def __init__(self, parent):
+        Qsci.QsciScintilla.__init__(self, parent)
+        self.__mouseInWidget = False
+
+        self.SCN_DWELLSTART.connect(self.__dwellStartEvent)
+        self.SCN_DWELLEND.connect(lambda pos, x, y: self.dwellEnd.emit(pos, x, y))
+
+    def enterEvent(self, event):
+        self.__mouseInWidget = True
+        return Qsci.QsciScintilla.enterEvent(self, event)
+
+    def leaveEvent(self, event):
+        self.__mouseInWidget = False
+        return Qsci.QsciScintilla.leaveEvent(self, event)
+
+    def __dwellStartEvent(self, pos, x, y):
+        if self.__mouseInWidget:
+            self.dwellStart.emit(pos, x, y)
 
 
 class OpenedFileView(QObject):
@@ -58,7 +87,7 @@ class OpenedFileView(QObject):
         self.tab = QtGui.QWidget()
         self.gridLayout = QtGui.QGridLayout(self.tab)
         self.gridLayout.setMargin(0)
-        self.edit = Qsci.QsciScintilla(self.tab)
+        self.edit = ScintillaWrapper(self.tab)
         self.font = QFont("DejaVu Sans Mono", 10)
         self.font.setStyleHint(QFont.TypeWriter)
         self.lexer = Qsci.QsciLexerCPP()
@@ -119,8 +148,9 @@ class OpenedFileView(QObject):
 
         self.edit.marginClicked.connect(self.marginClicked)
         self.edit.SCN_DOUBLECLICK.connect(self.editDoubleClicked)
-        self.edit.SCN_DWELLSTART.connect(self.dwellStart)
-        self.edit.SCN_DWELLEND.connect(self.dwellEnd)
+        self.edit.dwellStart.connect(self.dwellStart)
+        self.edit.dwellEnd.connect(self.dwellEnd)
+
 
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
@@ -185,9 +215,7 @@ class OpenedFileView(QObject):
         self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
 
     def dwellStart(self, pos, x, y):
-        # check self.edit.hasFocus() since QScintilla will emit dwell events
-        # even when not focused
-        if self.edit.hasFocus() and self.__allowToolTip and self.edit.frameGeometry().contains(x, y):
+        if self.__allowToolTip:
             exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(pos)
 
             # try evaluating the expression before doing anything else: this will return None if the
