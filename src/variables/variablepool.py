@@ -132,6 +132,14 @@ class VariablePool(QObject):
 
         return varReturn
 
+    def removeVar(self, variable):
+        """ remove variable from variable pool
+        @param Variable Variable type instance
+        """
+        self.variables.pop(variable.getGdbName())
+        self.connector.var_delete(variable.getGdbName())
+        del variable
+
     def getChildren(self, name, childList, access, parentName, childformat):
         """
         Appends the children of the variable with name to childList (and to internal list).
