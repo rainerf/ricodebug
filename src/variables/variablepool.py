@@ -211,7 +211,7 @@ class VariablePool(QObject):
         # Therefore, if the value looks like a size, treat it as an array.
         # * Everything else with children is a structure.
         # * Again, everything else is a normal variable.
-        if gdbVar.value.startswith('0x') and int(gdbVar.numchild) >= 1:
+        if gdbVar.value.startswith('0x'):
             logging.debug("Creating a pointer variable for '%s'", exp)
             varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
