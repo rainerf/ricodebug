@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 
-def _getAvailableFiltes():
+def _getAvailableFilters():
     return [Empty, Hex, Bin]
 
 
@@ -33,7 +33,7 @@ def add_actions_for_all_filters(menu, varWrapper):
             varWrapper.filter = filter_
         return f
 
-    for cls in _getAvailableFiltes():
+    for cls in _getAvailableFilters():
         name = cls.__doc__
         menu.addAction(name, setFilter(varWrapper, cls))
 

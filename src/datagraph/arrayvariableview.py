@@ -39,7 +39,7 @@ def _importMatplotlib():
         plt = importlib.import_module("matplotlib.pyplot")
 
 
-def _getAvailableFiltes():
+def _getAvailableFilters():
     return [Bar, Lines, Steps]
 
 
@@ -49,7 +49,7 @@ def add_actions_for_all_styles(menu, handler):
             handler.setPlotStyle(style)
         return f
 
-    for cls in _getAvailableFiltes():
+    for cls in _getAvailableFilters():
         name = cls.__doc__
         menu.addAction(name, setPlotStyle(handler, cls))
 
