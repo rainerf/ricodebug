@@ -134,9 +134,3 @@ class HtmlVariableView(QGraphicsWebView):
             self.lastId += 1
             self.uniqueIds[template] = "tmpl%d" % self.lastId
         return self.uniqueIds[template]
-
-#    def paint(self, painter, option, widget):
-#        from PyQt4.QtGui import QColor
-#        painter.setPen(QColor(Qt.red))
-#        painter.drawRoundedRect(self.boundingRect(), 5, 5)
-#        QGraphicsWebView.paint(self, painter, option, widget)
