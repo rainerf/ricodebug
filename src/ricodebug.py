@@ -72,8 +72,8 @@ def main():
         window.debugController.openExecutable(sys.argv[1])
 
     window.show()
-    sys.exit(app.exec_())
     logging.shutdown()
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()

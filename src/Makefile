@@ -15,3 +15,9 @@ clean:
 
 pylint:
 	pylint --include-ids=y --disable=W0312,C0103,C0111,C0301 *.py
+
+coverage:
+	python-coverage run ricodebug.py
+	python-coverage report **/*.py
+	python-coverage html
+	xdg-open htmlcov/index.html
