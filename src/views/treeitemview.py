@@ -38,15 +38,21 @@ class TreeItemView(QTreeView):
         self.controller = None
         self.header().setResizeMode(QHeaderView.ResizeToContents)
         self.setDragEnabled(True)
+        self.context_menu = QMenu(self)
+
+    def prepareContextMenu(self):
+        wrapper = self.selectionModel().currentIndex().internalPointer()
+        if isinstance(wrapper, TreeStdVarWrapper):
+            filters.add_actions_for_all_filters(self.context_menu.addMenu(
+                "Set Filter for %s..." % wrapper.exp),  wrapper)
+
 
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)
         if not event.isAccepted():
-            selectionModel = self.selectionModel()
-            wrapper = selectionModel.currentIndex().internalPointer()
+            wrapper = self.selectionModel().currentIndex().internalPointer()
             if isinstance(wrapper, TreeStdVarWrapper):
-                menu = QMenu(self)
-                filters.add_actions_for_all_filters(menu.addMenu("Set Filter for %s..." % wrapper.exp), wrapper)
+                self.prepareContextMenu()
                 self.contextMenuOpen.emit(True)
-                menu.exec_(event.globalPos())
+                self.context_menu.exec_(event.globalPos())
                 self.contextMenuOpen.emit(False)
