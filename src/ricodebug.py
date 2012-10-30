@@ -57,6 +57,7 @@ def main():
     filehandler = logging.FileHandler(filename='%s/.ricodebug/ricodebug.log' % str(QDir.homePath()))
     filehandler.setFormatter(formatter)
     logger.addHandler(filehandler)
+    logger.setLevel(logging.DEBUG)
 
     logger.addHandler(criticalloghandler.CriticalLogHandler())
 
