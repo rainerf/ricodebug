@@ -52,6 +52,8 @@ class WatchView(TreeItemView):
         self.controller.removeSelected(self.selectionModel().currentIndex())
 
     def prepareContextMenu(self):
-        TreeItemView.prepareContextMenu(self)
-        self.context_menu.addAction("Remove variable").triggered.connect(
-                self.removeVariable)
+        menu = TreeItemView.prepareContextMenu(self)
+        if self.selectionModel().currentIndex().parent().internalPointer() is None:
+            menu.addAction("Remove variable").triggered.connect(
+                    self.removeVariable)
+        return menu
