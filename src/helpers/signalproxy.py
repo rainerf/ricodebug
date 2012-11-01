@@ -55,6 +55,7 @@ class SignalProxy(QObject):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
         self.pluginDocks = {}
+        self.pluginSbWidgets = {}
 
     ###################################################
     # passing on signals
@@ -142,6 +143,13 @@ class SignalProxy(QObject):
 
     def removeDockWidget(self, plugin):
         self.distributedObjects.mainwindow.removeDockWidget(self.pluginDocks[plugin])
+
+    def insertStatusbarWidget(self, plugin, widget):
+        d = self.distributedObjects.mainwindow.insertStatusbarWidget(widget)
+        self.pluginSbWidgets[plugin] = d
+
+    def removeStatusbarWidget(self, plugin):
+        self.distributedObjects.mainwindow.removeStatusbarWidget(self.pluginSbWidgets[plugin])
 
     # define further widget placement functions here ...
 

@@ -23,8 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap, \
-        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget
-from PyQt4.QtCore import Qt, QFileSystemWatcher
+        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
+from PyQt4.QtCore import QFileSystemWatcher
 from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import RecentFileHandler
@@ -211,6 +211,20 @@ class MainWindow(QMainWindow):
             self.ui.menuShow_View.addAction(d.toggleViewAction())
 
         return d
+
+    def insertStatusbarWidget(self, widget):
+        w = QFrame()
+        w.setLayout(QHBoxLayout())
+        w.layout().addWidget(widget)
+        f = QFrame()
+        f.setFrameStyle(QFrame.Plain | QFrame.VLine)
+        w.layout().addWidget(f)
+
+        self.ui.statusbar.insertPermanentWidget(0, w)
+        return w
+
+    def removeStatusbarWidget(self, widget):
+        self.ui.statusbar.removeWidget(widget)
 
     def addPluginAction(self, Action):
         """ show plugin as menu entry """
