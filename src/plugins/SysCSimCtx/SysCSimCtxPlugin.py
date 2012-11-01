@@ -22,228 +22,209 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-import re
 from PyQt4.QtCore import Qt
-from PyQt4 import QtCore, QtGui
-
-# plugin requirements:
-#  - plugin must be a package inside folder "plugins"
-#  - package must contain one file ending with "Plugin.py" (e.g. SamplePlugin.py)
-#  - this file must contain a class named like the file (e.g. SamplePlugin)
-#  - this class must implement the functions initPlugin(signalproxy) and deInitPlugin() to load/unload plugin
-#
-# The variable PluginName in the __init__.py file of each package may be used to define a name for the plugin
+from PyQt4.QtGui import QIcon, QLabel
+from PyQt4 import QtGui
+from helpers.tools import cpp2py
+import ui_syscsimctxwidget
 
 
-class SysCSimCtxPlugin():
-    # =================================
-    # functions called by pluginloader
-    # =================================
-    def __init__(self):
-        self.widget = None
+class SysCSimCtxPlugin:
+    class SbInfo:
+        def __init__(self):
+            self.time = None
+            self.process = None
+
+        def __str__(self):
+            v = []
+            if self.time:
+                v.append(self.time)
+            if self.process:
+                v.append("in %s" % self.process)
+
+            if v:
+                return ", ".join(v)
+            else:
+                return "(no information)"
 
     def initPlugin(self, signalproxy):
-        """Init function - called when pluginloader loads plugin."""
+        self.ctxFound = False
 
-        self.signalproxy = signalproxy
+        self.__sp = signalproxy
 
-        self.ctx = None
-
-        self.curr_delta_cycles = 0
-        self.curr_sim_time_ps = 0
-        self.curr_process = ""
-        self.curr_process_kind = ""
-        self.elaboration_done = ""
-        self.in_simulator_control = ""
-
-        # create and place DockWidget in mainwindow using signalproxy
         self.w = QtGui.QWidget()
+        self.ui = ui_syscsimctxwidget.Ui_SysCSimCtxWidget()
+        self.ui.setupUi(self.w)
 
-        self.gridLayout = QtGui.QGridLayout(self.w)
+        self.ui.progress.setMinimum(0)
+        self.ui.progress.setMaximum(2)
+        self.ui.progress.setFormat("")
 
-        self.label_img = QtGui.QLabel(self.w)
-        self.label_img.setPixmap(QtGui.QPixmap(":/icons/images/important.png"))
-        self.gridLayout.addWidget(self.label_img, 0, 0, 1, 1)
-        self.label_img.hide()
+        self.ui.simTimeCB.addItems(["ps", "ns", "us", "ms", "s"])
+        self.ui.simTimeCB.setCurrentIndex(1)
+        self.ui.simTimeCB.currentIndexChanged.connect(self._setSimTime)
 
-        self.label_error = QtGui.QLabel(self.w)
-        self.label_error.setText("No SystemC simulation context found!")
-        self.gridLayout.addWidget(self.label_error, 0, 1, 1, 1)
-        self.label_error.hide()
+        self.ui.writeCheckBox.setEnabled(False)
 
-        self.progress = QtGui.QProgressBar(self.w)
-        self.progress.setMinimum(0)
-        self.progress.setMaximum(2)
-        self.progress.setValue(0)
-        self.progress.setFormat("")
-        self.gridLayout.addWidget(self.progress, 1, 0, 1, 3)
+        self.ui.warningIcon.setPixmap(QIcon.fromTheme("dialog-warning").pixmap(32, 32))
 
-        self.label_3 = QtGui.QLabel(self.w)
-        self.label_3.setText("Current Process:")
-        self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)
+        self.__sp.inferiorStoppedNormally.connect(self._findSimVariables)
+        self.__sp.inferiorHasExited.connect(self.clear)
 
-        self.lineEdit_3 = QtGui.QLineEdit(self.w)
-        self.lineEdit_3.setReadOnly(True)
-        self.lineEdit_3.setText("")
-        self.gridLayout.addWidget(self.lineEdit_3, 2, 1, 1, 2)
+        self.__sp.insertDockWidget(self, self.w, "SystemC Simulation Context", Qt.BottomDockWidgetArea, True)
 
-        self.label_4 = QtGui.QLabel(self.w)
-        self.label_4.setText("Current Process Kind:")
-        self.gridLayout.addWidget(self.label_4, 3, 0, 1, 1)
+        # statusbar widget
+        self.sbLabel = QLabel()
+        self.__sp.insertStatusbarWidget(self, self.sbLabel)
 
-        self.lineEdit_4 = QtGui.QLineEdit(self.w)
-        self.lineEdit_4.setReadOnly(True)
-        self.lineEdit_4.setText("")
-        self.gridLayout.addWidget(self.lineEdit_4, 3, 1, 1, 2)
+        self._currDeltaCycles = None
+        self._currProcess = None
+        self._currProcessKind = None
+        self._currSimTime = None
+        self._elaborationDone = None
+        self._inSimulatorControl = None
+        self._writeCheck = None
+        self._simContext = None
 
-        self.label = QtGui.QLabel(self.w)
-        self.label.setText("Current Simulation Time:")
-        self.gridLayout.addWidget(self.label, 4, 0, 1, 1)
+        self.clear()
 
-        self.lineEdit = QtGui.QLineEdit(self.w)
-        self.lineEdit.setReadOnly(True)
-        self.lineEdit.setText("0")
-        self.gridLayout.addWidget(self.lineEdit, 4, 1, 1, 1)
-
-        self.comboBox = QtGui.QComboBox(self.w)
-        self.comboBox.addItem("ps")
-        self.comboBox.addItem("ns")
-        self.comboBox.addItem("us")
-        self.comboBox.addItem("ms")
-        self.comboBox.addItem("s")
-        self.comboBox.setCurrentIndex(1)
-        self.gridLayout.addWidget(self.comboBox, 4, 2, 1, 1)
-
-        self.label_2 = QtGui.QLabel(self.w)
-        self.label_2.setText("Current Delta Cycle Count:")
-        self.gridLayout.addWidget(self.label_2, 5, 0, 1, 1)
-
-        self.lineEdit_2 = QtGui.QLineEdit(self.w)
-        self.lineEdit_2.setReadOnly(True)
-        self.lineEdit_2.setText("0")
-        self.gridLayout.addWidget(self.lineEdit_2, 5, 1, 1, 2)
-
-        QtCore.QMetaObject.connectSlotsByName(self.w)
-
-        self.signalproxy.insertDockWidget(self, self.w, "SystemC Simulation Context", Qt.BottomDockWidgetArea, True)
-
-        self.signalproxy.inferiorStoppedNormally.connect(self.update)
-        self.signalproxy.inferiorHasExited.connect(self.clear)
-        self.comboBox.currentIndexChanged.connect(self.comboBoxIndexChanged)
+        self._findSimVariables()
 
     def deInitPlugin(self):
-        """Deinit function - called when pluginloader unloads plugin."""
-        self.signalproxy.removeDockWidget(self)
+        self.__sp.removeDockWidget(self)
+        self.__sp.removeStatusbarWidget(self)
+        self.clear()
+        self.__sp.inferiorStoppedNormally.disconnect(self._findSimVariables)
+        self.__sp.inferiorHasExited.disconnect(self.clear)
 
     def clear(self):
-        self.ctx = None
+        self.ctxFound = False
+        self._sbInfo = self.SbInfo()
+        self.ui.progress.setFormat("")
+        self.ui.progress.setValue(0)
+        self.ui.processEdit.setText("")
+        self.ui.processKindEdit.setText("")
+        self.ui.simTimeEdit.setText("")
+        self.ui.deltaCycleEdit.setText("")
+        self.ui.writeCheckBox.setChecked(False)
+        self.ui.stack.setCurrentIndex(1)
 
-        self.curr_delta_cycles = 0
-        self.curr_sim_time_ps = 0
-        self.curr_process = ""
-        self.curr_process_kind = ""
-        self.elaboration_done = ""
-        self.in_simulator_control = ""
+        for i in [self._currDeltaCycles, self._currProcess,
+                  self._currProcessKind, self._currSimTime,
+                  self._elaborationDone, self._inSimulatorControl,
+                  self._writeCheck, self._simContext]:
+            if i:
+                i.die()
 
-        self.updateGui()
+    def _findSimVariables(self):
+        if self.ctxFound:
+            return
 
-    def update(self):
-        curr_sim_time_var = None
-        curr_delta_count_var = None
-        curr_process_var = None
-        curr_process_kind_var = None
-        elaboration_done_var = None
-        in_simulator_control_var = None
+        depth = self.__sp.gdbGetStackDepth()
+        if depth is None:
+            return
 
-        self.curr_sim_time_ps = 0
-        self.curr_delta_cycles = 0
+        frame = 0
+        while not self.ctxFound and frame <= depth:
+            self.__sp.gdbSelectStackFrame(frame)
+            if self.__sp.gdbEvaluateExpression("sc_get_curr_simcontext()") is not None:
+                self.ctxFound = True
+                break
+            frame += 1
 
-        sc_get_curr_simcontext = "sc_get_curr_simcontext()"
+        if self.ctxFound:
+            self._simContext = self.__sp.distributedObjects.variablePool.getVar("sc_get_curr_simcontext()")["*"]
 
-        if self.ctx is None:
-            self.ctx = self.signalproxy.gdbEvaluateExpression(sc_get_curr_simcontext)
-            if self.ctx is None:
-                frame = 0
-                depth = self.signalproxy.gdbGetStackDepth()
-                if depth is not None:
-                    while ((self.ctx is None) and (frame < (depth - 2))):
-                        frame = frame + 1
-                        self.signalproxy.gdbSelectStackFrame(frame)
-                        self.ctx = self.signalproxy.gdbEvaluateExpression(sc_get_curr_simcontext)
+            self._currSimTime = self._simContext["m_curr_time"]["m_value"]
+            self._currSimTime.changed.connect(self._setSimTime)
+            self._setSimTime()
 
-                self.signalproxy.gdbSelectStackFrame(0)
+            self._currDeltaCycles = self._simContext["m_delta_count"]
+            self._currDeltaCycles.changed.connect(self._setDeltaCycle)
+            self._setDeltaCycle(self._currDeltaCycles.value)
 
-        if self.ctx is not None:
-            curr_sim_time_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_curr_time->m_value")
-            curr_delta_count_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_delta_count")
-            curr_process_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_curr_proc_info->process_handle->sc_core::sc_object::m_name")
-            curr_process_kind_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_curr_proc_info->kind")
-            elaboration_done_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_elaboration_done")
-            in_simulator_control_var = self.signalproxy.gdbEvaluateExpression("((sc_core::sc_simcontext*)" + self.ctx + ")->m_in_simulator_control")
+            # FIXME: process_handle might be NULL which will cause its dereference method to return None
+            self._currProcess = self._simContext["m_curr_proc_info"]["process_handle"]["*"]["m_name"]["_M_dataplus"]["_M_p"]
+            self._currProcess.changed.connect(self._setProcess)
+            self._setProcess(self._currProcess.value)
 
-            self.label_img.hide()
-            self.label_error.hide()
+            self._currProcessKind = self._simContext["m_curr_proc_info"]["kind"]
+            self._currProcessKind.changed.connect(self._setProcessKind)
+            self._setProcessKind(self._currProcessKind.value)
+
+            self._elaborationDone = self._simContext["m_elaboration_done"]
+            self._elaborationDone.changed.connect(self._setProgress)
+            self._inSimulatorControl = self._simContext["m_in_simulator_control"]
+            self._inSimulatorControl.changed.connect(self._setProgress)
+            self._setProgress()
+
+            self._writeCheck = self._simContext["m_write_check"]
+            self._writeCheck.changed.connect(self._setWriteCheck)
+            self._setWriteCheck(self._writeCheck.value)
+
+            self.ui.stack.setCurrentIndex(0)
+
+        self.__sp.gdbSelectStackFrame(0)
+
+    def _setProgress(self):
+        if not self._elaborationDone or not self._inSimulatorControl:
+            return
+
+        if not cpp2py(self._elaborationDone.value) and not cpp2py(self._inSimulatorControl.value):
+            self.ui.progress.setValue(0)
+            self.ui.progress.setFormat("Elaboration")
+        elif cpp2py(self._elaborationDone.value) and cpp2py(self._inSimulatorControl.value):
+            self.ui.progress.setValue(1)
+            self.ui.progress.setFormat("Simulation")
+        elif cpp2py(self._elaborationDone.value) and not cpp2py(self._inSimulatorControl.value):
+            self.ui.progress.setValue(2)
+            self.ui.progress.setFormat("Finished")
         else:
-            self.label_img.show()
-            self.label_error.show()
+            self.ui.progress.setValue(0)
+            self.ui.progress.setFormat("")
 
-        if curr_sim_time_var is not None:
-            self.curr_sim_time_ps = int(curr_sim_time_var)
+    def _setProcess(self, v):
+        # process names are reported as '0x.... "name"', present only the name
+        proc = str(v).split('"')[1]
+        self.ui.processEdit.setText(proc)
+        self._sbInfo.process = proc
+        self._updateSbLabel()
 
-        if curr_delta_count_var is not None:
-            self.curr_delta_cycles = int(curr_delta_count_var)
+    def _setProcessKind(self, v):
+        t = {
+             "sc_core::SC_METHOD_PROC_": "Method",
+             "sc_core::SC_THREAD_PROC_": "Thread",
+             "sc_core::SC_CTHREAD_PROC_": "CThread",
+            }
 
-        if curr_process_var is not None:
-            self.curr_process = str(self.parseName(str(curr_process_var)))
+        self.ui.processKindEdit.setText(t[str(v)])
 
-        if curr_process_kind_var is not None:
-            self.curr_process_kind = str(curr_process_kind_var)
+    def _setSimTime(self):
+        if not self._currSimTime:
+            return
 
-        if elaboration_done_var is not None:
-            self.elaboration_done = str(elaboration_done_var)
+        unit = str(self.ui.simTimeCB.currentText())
+        time = float(self._currSimTime.value)
 
-        if in_simulator_control_var is not None:
-            self.in_simulator_control = str(in_simulator_control_var)
+        div = {
+            "ps": 0,
+            "ns": 3,
+            "us": 6,
+            "ms": 9,
+            "s": 12
+            }
 
-        self.updateGui()
+        time /= 10 ** div[unit]
 
-    def updateGui(self):
-        self.comboBoxIndexChanged(self.comboBox.currentText())
-        self.lineEdit_2.setText(str(self.curr_delta_cycles))
-        self.lineEdit_3.setText(str(self.curr_process))
-        self.lineEdit_4.setText(str(self.curr_process_kind))
+        self.ui.simTimeEdit.setText("%g" % time)
+        self._sbInfo.time = "%g %s" % (time, unit)
+        self._updateSbLabel()
 
-        if self.elaboration_done == "false" and self.in_simulator_control == "false":
-            self.progress.setValue(0)
-            self.progress.setFormat("Elaboration")
-        elif self.elaboration_done == "true" and self.in_simulator_control == "true":
-            self.progress.setValue(1)
-            self.progress.setFormat("Simulation")
-        elif self.elaboration_done == "true" and self.in_simulator_control == "false":
-            self.progress.setValue(2)
-            self.progress.setFormat("Finished")
-        else:
-            self.progress.setValue(0)
-            self.progress.setFormat("")
+    def _setDeltaCycle(self, v):
+        self.ui.deltaCycleEdit.setText(str(v))
 
-    def comboBoxIndexChanged(self, text):
-        curr_sim_time = 0
-        if text == "ps":
-            curr_sim_time = self.curr_sim_time_ps
-        elif text == "ns":
-            curr_sim_time = self.curr_sim_time_ps * 1.0 / 1000
-        elif text == "us":
-            curr_sim_time = self.curr_sim_time_ps * 1.0 / 1000 / 1000
-        elif text == "ms":
-            curr_sim_time = self.curr_sim_time_ps * 1.0 / 1000 / 1000 / 1000
-        elif text == "s":
-            curr_sim_time = self.curr_sim_time_ps * 1.0 / 1000 / 1000 / 1000 / 1000
+    def _setWriteCheck(self, v):
+        self.ui.writeCheckBox.setChecked(cpp2py(v))
 
-        self.lineEdit.setText(str(curr_sim_time))
-
-    def parseName(self, name):
-        r = re.search('(?<=\").*(?=\")', name)
-        if r is not None:
-            return r.group(0)
-        else:
-            return name
+    def _updateSbLabel(self):
+        self.sbLabel.setText("<b>SystemC:</b> %s" % str(self._sbInfo))
