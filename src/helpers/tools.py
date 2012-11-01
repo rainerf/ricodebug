@@ -29,3 +29,15 @@ def unBackslashify(s):
     s = s.replace("\\t", "\t")
     s = s.replace("\\\"", "\"")
     return s
+
+
+def cpp2py(v):
+    try:
+        return {"true": True, "false": False}[v]
+    except KeyError:
+        pass
+
+    # raise an error if no conversion above returned a value
+    raise ValueError("No conversion for parameter defined.")
+
+    return None
