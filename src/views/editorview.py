@@ -149,11 +149,9 @@ class EditorView(QWidget):
                     file_ = res.src.fullname
                 except AttributeError:
                     try:
-                        logging.warning("No source for %s found.", res.src.file)
                         raise helpers.excep.SourceFileNotFound(res.src.file)
                     except AttributeError:
-                        logging.warning("No source file found.")
-                        raise helpers.excep.SourceFileNotFound(None)
+                        raise helpers.excep.SourceFileNotFound("<unknown>")
                 line = int(res.src.line) - 1
                 break
 
@@ -166,12 +164,18 @@ class EditorView(QWidget):
             f.clearExecutionPositionMarkers()
 
     def targetStoppedNormally(self, rec):
-        file_, line = self._targetStopped(rec)
-        self.openedFiles[file_].showExecutionPosition(line)
+        try:
+            file_, line = self._targetStopped(rec)
+            self.openedFiles[file_].showExecutionPosition(line)
+        except helpers.excep.SourceFileNotFound as e:
+            logging.warning("No source for %s found.", e.filename)
 
     def targetStoppedWithSignal(self, rec):
-        file_, line = self._targetStopped(rec)
-        self.openedFiles[file_].showSignalPosition(line)
+        try:
+            file_, line = self._targetStopped(rec)
+            self.openedFiles[file_].showSignalPosition(line)
+        except helpers.excep.SourceFileNotFound as e:
+            logging.warning("No source for %s found.", e.filename)
 
     def targetExited(self):
         self.__removeExecutionPositionMarkers()
