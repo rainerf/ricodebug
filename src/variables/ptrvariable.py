@@ -37,3 +37,13 @@ class PtrVariable(Variable):
             return self._vp.getVar(self._childFormat % {"parent": self.uniqueName})
         else:
             return None
+
+    def _getChildrenFromGdb(self):
+        if not self._childs:
+            self._childs = [self.dereference()]
+
+    def __getitem__(self, name):
+        if name != "*":
+            raise ValueError("PtrVariable needs to be dereferenced (index [\"*\"])")
+        assert len(self.childs) == 1
+        return self.childs[0]

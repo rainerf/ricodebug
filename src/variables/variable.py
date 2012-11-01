@@ -35,7 +35,7 @@ class Variable(QObject):
     """
     childFormat = None
 
-    changed = pyqtSignal()
+    changed = pyqtSignal(str)
 
     def __init__(self, variablepool, exp, gdbName,
             uniqueName, type_, value, inScope,
@@ -53,19 +53,19 @@ class Variable(QObject):
         self._gdbName = gdbName
         self._childs = []
 
-    def __getChildrenFromGdb(self):
+    def _getChildrenFromGdb(self):
         """Load the children from GDB, if there are any."""
         if not self.hasChildren:
             raise AttributeError("No children available.")
         if not self._childFormat:
             raise AttributeError("No child format set.")
 
-        if len(self._childs) == 0:
+        if not self._childs:
             self._vp.getChildren(self._gdbName, self._childs, self.access, self.uniqueName, self._childFormat)
 
     def __getChilds(self):
         """Return the lazily loaded list of children."""
-        self.__getChildrenFromGdb()
+        self._getChildrenFromGdb()
         return self._childs
     childs = property(__getChilds)
 
@@ -77,7 +77,7 @@ class Variable(QObject):
         for i in self.childs:
             if i.exp == name:
                 return i
-        print AttributeError("No children %s." % name)
+        raise AttributeError("No child with name '%s'." % name)
 
     def assignValue(self, value):
         self._vp.assignValue(self._gdbName, value)
@@ -95,7 +95,7 @@ class Variable(QObject):
                 str(len(self._childs)) if self._childs else ""]))
 
     def emitChanged(self):
-        self.changed.emit()
+        self.changed.emit(self.value)
 
     def makeWrapper(self, factory):
         return factory.makeWrapper(self)
