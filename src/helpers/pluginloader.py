@@ -63,9 +63,7 @@ class PluginAction(QAction):
     def __togglePlugin(self, checked):
         ''' Load/Unload Plugin by toggling menu entries '''
         if checked:
-            try:
-                self.pluginldr.loadPlugin(self)
-            except:
+            if not self.pluginldr.loadPlugin(self):
                 self.setChecked(False)
         else:
             self.pluginldr.unloadPlugin(self)
@@ -118,21 +116,21 @@ class PluginLoader(QObject):
     def loadPlugin(self, plugin):
         """Load plugin from plugin folder. Name of class and file of plugin must be the same."""
         try:
-            try:
-                pluginmodule = __import__("plugins.%s.%s" % (plugin.modulename, plugin.classname))
-                module = getattr(getattr(pluginmodule, plugin.modulename), plugin.classname)
-                class_ = getattr(module, plugin.classname)
+            pluginmodule = __import__("plugins.%s.%s" % (plugin.modulename, plugin.classname))
+            module = getattr(getattr(pluginmodule, plugin.modulename), plugin.classname)
+            class_ = getattr(module, plugin.classname)
 
-                self.loadedPlugins[plugin] = class_()
-            except AttributeError:
-                logging.error("Error while loading plugin " + plugin.modulename + ". Class " + plugin.classname + " not found")
-            try:
-                self.loadedPlugins[plugin].initPlugin(self.signalproxy)     # init plugin with signal interface
-            except AttributeError:
-                logging.error("Error while loading plugin " + plugin.classname + ". Function initPlugin() not found")
-        except Exception as e:
-            logging.error(e)
-            raise
+            self.loadedPlugins[plugin] = class_()
+        except AttributeError:
+            logging.error("Error while loading plugin " + plugin.modulename + ". Class " + plugin.classname + " not found")
+            return False
+
+        if hasattr(self.loadedPlugins[plugin], "initPlugin"):
+            self.loadedPlugins[plugin].initPlugin(self.signalproxy)     # init plugin with signal interface
+            return True
+        else:
+            logging.error("Error while loading plugin " + plugin.classname + ". Function initPlugin() not found")
+            return False
 
     def unloadPlugin(self, plugin):
         '''Called when user unloads plugin from menu'''
