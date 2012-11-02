@@ -47,3 +47,13 @@ class WatchView(TreeItemView):
     def dropEvent(self, e):
         data = str(e.mimeData().data(variable.MIME_TYPE))
         self.controller.addWatch(data)
+
+    def removeVariable(self, e):
+        self.controller.removeSelected(self.selectionModel().currentIndex())
+
+    def prepareContextMenu(self):
+        menu = TreeItemView.prepareContextMenu(self)
+        if self.selectionModel().currentIndex().parent().internalPointer() is None:
+            menu.addAction("Remove variable").triggered.connect(
+                    self.removeVariable)
+        return menu
