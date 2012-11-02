@@ -350,7 +350,9 @@ class FormWidget(QWidget):
             elif isinstance(value, (str, unicode)):
                 value = unicode(field.text())
             elif isinstance(value, (list, tuple)):
-                index = int(field.currentIndex())
+                # offset index by +1 since the first element in the list is the
+                # default value which is not shown in the combo box
+                index = int(field.currentIndex()) + 1
                 if isinstance(value[0], (list, tuple)):
                     value = value[index][0]
                 else:

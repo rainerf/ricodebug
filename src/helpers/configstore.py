@@ -1,3 +1,27 @@
+# ricodebug - A GDB frontend which focuses on visually supported
+# debugging using data structure graphs and SystemC features.
+#
+# Copyright (C) 2011  The ricodebug project team at the
+# Upper Austrian University Of Applied Sciences Hagenberg,
+# Department Embedded Systems Design
+#
+# This file is part of ricodebug.
+#
+# ricodebug is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further information see <http://syscdbg.hagenberg.servus.at/>.
+
 from lib.formlayout import fedit
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QObject
 
@@ -22,12 +46,36 @@ class ConfigItem(QObject):
             self.valueChanged.emit(self._value)
     value = property(getValue, setValue)
 
+    def getConfigTuple(self):
+        return (self.description, self.value)
+
+
+class SelectionConfigItem(ConfigItem):
+    def __init__(self, context, desc, default, values, value=None):
+        ConfigItem.__init__(self, context, desc, default, value)
+        self.values = values
+        if self._default not in self.values:
+            raise ValueError("Default value '%s' not allowed" % self._default)
+
+    def setValue(self, value):
+        if value not in self.values:
+            raise ValueError("Value '%s' not allowed" % value)
+        ConfigItem.setValue(self, value)
+    value = property(ConfigItem.getValue, setValue)
+
+    def getConfigTuple(self):
+        l = [self.value]
+        l.extend(self.values)
+        return (self.description, l)
+
 
 class Separator:
     def __init__(self, context, name):
         context.appendConfigItem(self)
-        self.description = None
-        self.value = name
+        self.name = name
+
+    def getConfigTuple(self):
+        return (None, self.name)
 
 
 class ConfigSet(QObject):
@@ -41,7 +89,7 @@ class ConfigSet(QObject):
         self.__itemHasChanged = False
 
     def getConfigTuple(self):
-        return ([(v.description, v.value) for v in self.items], self._name, self._comment)
+        return ([v.getConfigTuple() for v in self.items], self._name, self._comment)
 
     def appendConfigItem(self, i):
         self.items.append(i)
