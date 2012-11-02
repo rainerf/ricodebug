@@ -22,24 +22,52 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QToolBar, QLineEdit, QIcon
-from PyQt4.QtCore import QObject
+from PyQt4.QtGui import QToolBar, QComboBox, QIcon, QSizePolicy
+from helpers.configstore import ConfigSet, SelectionConfigItem
+
+
+class QuickWatchConfig(ConfigSet):
+    def __init__(self):
+        ConfigSet.__init__(self, "Quick Watch", "Quick Watch Settings")
+        self.addTo = SelectionConfigItem(self, "Enter adds element to...", "nothing", ["nothing", "Watch View", "Data Graph View"])
 
 
 class QuickWatch(QToolBar):
     def __init__(self, parent, distributedObjects):
-        QObject.__init__(self, "QuickWatch")
+        QToolBar.__init__(self, "QuickWatch")
+        self.config = QuickWatchConfig()
+        distributedObjects.configStore.registerConfigSet(self.config)
+
         self.setObjectName("QuickWatch")
         parent.addToolBar(self)
-        self.watchedit = QLineEdit()
+        self.watchedit = QComboBox()
         self.watchedit.setFixedHeight(28)
+        self.watchedit.setInsertPolicy(QComboBox.NoInsert)
+        self.watchedit.setEditable(True)
+        self.watchedit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.addWidget(self.watchedit)
         self.distributedObjects = distributedObjects
         self.addAction(QIcon(":/icons/images/watch.png"), "Add to Watch", self.addToWatch)
         self.addAction(QIcon(":/icons/images/datagraph.png"), "Add to Data Graph", self.addToDG)
+        self.watchedit.lineEdit().returnPressed.connect(self.returnPressed)
+
+    def __addCurrentText(self):
+        text = self.watchedit.lineEdit().text()
+        idx = self.watchedit.findText(text)
+        if idx == -1:
+            self.watchedit.addItem(text)
+        self.watchedit.setEditText("")
+
+    def returnPressed(self):
+        if self.config.addTo.value == "Watch View":
+            self.addToWatch()
+        elif self.config.addTo.value == "Data Graph View":
+            self.addToDG()
 
     def addToWatch(self):
-        self.distributedObjects.watchController.addWatch(self.watchedit.text())
+        self.distributedObjects.watchController.addWatch(self.watchedit.lineEdit().text())
+        self.__addCurrentText()
 
     def addToDG(self):
-        self.distributedObjects.datagraphController.addWatch(self.watchedit.text())
+        self.distributedObjects.datagraphController.addWatch(self.watchedit.lineEdit().text())
+        self.__addCurrentText()
