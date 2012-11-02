@@ -47,7 +47,6 @@ class TreeItemView(QTreeView):
                 "Set Filter for %s..." % wrapper.exp),  wrapper)
         return context_menu
 
-
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)
         wrapper = self.selectionModel().currentIndex().internalPointer()
