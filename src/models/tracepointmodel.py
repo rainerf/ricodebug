@@ -103,8 +103,8 @@ class Tracepoint(ExtendedBreakpoint):
 
             for varList in self.wave:
                 for v in self.variableList.list:
-                    if v.variable.uniquename == varList.name:
-                        varList.addValue(v.variable.type, v.variable.value)
+                    if v.uniqueName == varList.name:
+                        varList.addValue(v.type, v.value)
 
         if not(self.stop):
             self.stop = True
