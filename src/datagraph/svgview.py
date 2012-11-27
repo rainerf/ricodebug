@@ -24,7 +24,6 @@
 
 
 from .datagraphvw import HtmlTemplateHandler, DataGraphVW
-
 from PyQt4.QtCore import QSize, QSizeF, pyqtSignal
 from PyQt4.QtGui import QGraphicsItem, QCursor, QFileDialog, QIcon
 from PyQt4.QtWebKit import QGraphicsWebView
@@ -32,10 +31,6 @@ from mako.template import Template
 from PyQt4 import QtCore
 import sys
 import logging
-
-import cairo
-import rsvg
-import gtk
 
 
 class SVGView(QGraphicsWebView):
@@ -45,14 +40,16 @@ class SVGView(QGraphicsWebView):
 
     def __init__(self, svgWrapper, distributedObjects):
         """ Constructor
-        @param varWrapper                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
-        @param distributedObjects distributedobjects.DistributedObjects, the DistributedObjects-Instance
+        @param varWrapper          holds the Data of the Variable to show
+        @param distributedObjects  the DistributedObjects-Instance
         """
         QGraphicsWebView.__init__(self, None)
         self.svgWrapper = svgWrapper
         self.distributedObjects = distributedObjects
-        self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsFocusable)
-        self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/templates/svgview.mako')
+        self.setFlags(QGraphicsItem.ItemIsMovable |
+                      QGraphicsItem.ItemIsFocusable)
+        self.htmlTemplate = Template(filename=sys.path[0] +
+                                     '/datagraph/templates/svgview.mako')
         self.page().setPreferredContentsSize(QSize(0, 0))
         self.setPreferredSize(QSizeF(0, 0))
         self.setResizesToContents(True)
@@ -67,7 +64,8 @@ class SVGView(QGraphicsWebView):
 
         self.id = self.getUniqueId(self)
 
-        self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
+        self.distributedObjects.signalProxy.\
+            variableUpdateCompleted.connect(self.render)
 
     def setDirty(self, render_immediately):
         self.dirty = True
@@ -76,21 +74,25 @@ class SVGView(QGraphicsWebView):
 
     def render(self):
         if self.dirty:
-            # the page's viewport will not shrink if new content is set, so set it to it's minimum
+            # the page's viewport will not shrink if new content is set,
+            # so set it to it's minimum
             self.page().setViewportSize(QSize(0, 0))
             try:
-                self.source = self.htmlTemplate.render(svgWrapper=self.svgWrapper, top=True, id=self.id)
+                self.source = \
+                    self.htmlTemplate.render(svgWrapper=self.svgWrapper,
+                                             top=True, id=self.id)
                 self.setHtml(self.source)
 
                 for template, id_ in self.uniqueIds.iteritems():
-                    self.page().mainFrame().addToJavaScriptWindowObject(id_, template)
+                    self.page().mainFrame().\
+                        addToJavaScriptWindowObject(id_, template)
             except Exception as e:
                 logging.error("Rendering failed: %s", str(e))
                 self.setHtml(str(e))
                 raise
 
-            # force an update of the scene that contains us, since sometimes setHtml
-            # will not cause the view to be redrawn immediately
+            # force an update of the scene that contains us, since sometimes
+            # setHtml will not cause the view to be redrawn immediately
             if self.scene():
                 self.scene().update()
 
@@ -100,9 +102,9 @@ class SVGView(QGraphicsWebView):
 
     def openContextMenu(self, menu):
         menu.addAction(QIcon(":/icons/images/minus.png"),
-                "Remove %s" % self.varWrapper.exp, self.remove)
+                       "Remove %s" % self.varWrapper.exp, self.remove)
         menu.addAction(QIcon(":/icons/images/save-html.png"),
-                "Save HTML for %s" % self.varWrapper.exp, self.saveHtml)
+                       "Save HTML for %s" % self.varWrapper.exp, self.saveHtml)
         menu.exec_(QCursor.pos())
 
     @QtCore.pyqtSlot()
@@ -128,24 +130,20 @@ class SVGView(QGraphicsWebView):
             self.uniqueIds[template] = "tmpl%d" % self.lastId
         return self.uniqueIds[template]
 
-    def paint(self, painter, option, widget):
-        from PyQt4.QtGui import QColor
-        painter.setPen(QColor(Qt.red))
-        painter.drawRoundedRect(self.boundingRect(), 5, 5)
-        QGraphicsWebView.paint(self, painter, option, widget)
-
 
 class SVGTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for SVG Images """
 
     def __init__(self, svgWrapper, distributedObjects):
         """ Constructor
-        @param svgWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, svgWrapper, distributedObjects, 'svgview.mako')
+        @param   svgWrapper   holds the Data to show """
+        HtmlTemplateHandler.__init__(self,
+                                     svgWrapper,
+                                     distributedObjects,
+                                     'svgview.mako')
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
-       # filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.varWrapper.exp), self.varWrapper)
 
 
 class SVGDataGraphVW(DataGraphVW):
@@ -154,12 +152,13 @@ class SVGDataGraphVW(DataGraphVW):
     def __init__(self, image, distributedObjects):
         """ Constructor
         @param image               SVG image to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
+        @param distributedObjects  the DistributedObjects-Instance
         """
         DataGraphVW.__init__(self, image, distributedObjects)
         self.image = image
         self.templateHandler = SVGTemplateHandler(self,
                                                   self.distributedObjects)
+
     def showContent(self):
         self.image.refresh()
         return self.image.imageContent
