@@ -161,6 +161,15 @@ class Actions(QtCore.QObject):
         a.triggeredEx.connect(slot)
         return a
 
+    def getAddSVGToDatagraphAction(self, name, slot):
+        a = self.createEx(name)
+        a.setText(str(name))
+        a.setIcon(QtGui.QIcon(":/icons/images/insert.png"))
+        a.setIconVisibleInMenu(True)
+        a.triggeredEx.connect(slot)
+        return a
+
+
     def createEx(self, parameter):
         return self.ActionEx(parameter, self)
 

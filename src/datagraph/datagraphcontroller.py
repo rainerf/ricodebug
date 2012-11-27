@@ -67,6 +67,7 @@ class DataGraphController(QObject):
         ## @var vwFactory
         # datagraph.datagraphvwfactory.DataGraphVWFactory, private, self-created DataGraphVWFactory
         self.vwFactory = DataGraphVWFactory(self.distributedObjects)
+
         ## @var variableList
         # variables.variablelist.VariableList, private, self-created VariableList
         self.variableList = VariableList(self.vwFactory, self.distributedObjects)
@@ -93,6 +94,15 @@ class DataGraphController(QObject):
         except VariableNotFoundException:
             pass
 
+    def addSVG(self, svgWrapper, xPos=0, yPos=0):
+        """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
+            also to the VariableList
+        @param svgWrapper      datagraph.svgwrapper.SVGWrapper class to add
+        @param xPos            Integer, the X-Coordinate of the Position where to add the VariableWrapper
+        @param yPos            Integer, the Y-Coordinate of the Position where to add the VariableWrapper
+        """
+        self.addGraph(svgWrapper, xPos, yPos)
+
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
             also to the VariableList
@@ -101,23 +111,27 @@ class DataGraphController(QObject):
         @param yPos            Integer, the Y-Coordinate of the Position where to add the VariableWrapper
         @param addVarToList    Boolean, tells if varWrapper should be added to the VariableList too
         """
-        varWrapper.createView()
+        self.addGraph(varWrapper, xPos, yPos)
+        if addVarToList:
+            self.variableList.addVar(varWrapper)
+
+    def addGraph(self, wrapper, xPos=0, yPos=0):
+        wrapper.createView()
         try:
-            varWrapper.getView().render()
+            wrapper.getView().render()
         except:
             from mako import exceptions
             logging.error("Caught exception while rendering template: %s", exceptions.text_error_template().render())
-        varWrapper.setXPos(xPos)
-        varWrapper.setYPos(yPos)
-        self.data_graph_view.addItem(varWrapper.getView())
-        if addVarToList:
-            self.variableList.addVar(varWrapper)
+        wrapper.setXPos(xPos)
+        wrapper.setYPos(yPos)
+        self.data_graph_view.addItem(wrapper.getView())
 
     def removeVar(self, varWrapper):
         """ removes the given varWrapper from the DataGraphView and the PointerList
         @param varWrapper    variables.variablewrapper.VariableWrapper, the VariableWrapper to remove
         """
-        self.variableList.removeVar(varWrapper)
+        if varWrapper in self.variableList:
+            self.variableList.removeVar(varWrapper)
         self.data_graph_view.removeItem(varWrapper.getView())
 
     def addPointer(self, fromView, toView):
