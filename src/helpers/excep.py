@@ -25,14 +25,16 @@
 
 class GdbError(Exception):
     def __init__(self, msg):
-        self.msg = msg
+        Exception.__init__(self)
+        self.message = msg
 
     def __str__(self):
-        return self.msg
+        return self.message
 
 
 class SourceFileNotFound(Exception):
     def __init__(self, filename):
+        Exception.__init__(self)
         self.filename = filename
 
     def __str__(self):
