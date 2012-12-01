@@ -49,6 +49,7 @@ class SignalProxy(QObject):
     threadCreated = pyqtSignal('PyQt_PyObject')
     threadExited = pyqtSignal('PyQt_PyObject')
     AddWatch = pyqtSignal('PyQt_PyObject')
+    breakpointModified = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, distributedObjects):
         '''CTOR'''
@@ -130,6 +131,9 @@ class SignalProxy(QObject):
         for this step. Use this signal instead of rerendering stuff on the
         variable's changed() event to avoid multiple renderings."""
         self.variableUpdateCompleted.emit()
+
+    def emitBreakpointModified(self, rec):
+        self.breakpointModified.emit(rec)
 
     # pass on further signals here ...
 

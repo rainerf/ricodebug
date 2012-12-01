@@ -143,16 +143,16 @@ class DebugController(QObject):
         return self.connector.executeCliCommand(cmd)
 
     def handleAsyncRecord(self, rec):
-        if rec.type_ == GdbOutput.EXEC_ASYN:
-            if rec.class_ == GdbOutput.STOPPED:
-                self.handleStoppedRecord(rec)
-            elif rec.class_ == GdbOutput.RUNNING:
-                self.signalProxy.emitInferiorIsRunning(rec)
-        elif rec.type_ == GdbOutput.NOTIFY_ASYN:
-            if rec.class_ == GdbOutput.THREAD_CREATED:
-                self.signalProxy.emitThreadCreated(rec)
-            elif rec.class_ == GdbOutput.THREAD_EXITED:
-                self.signalProxy.emitThreadExited(rec)
+        if rec.type_ == GdbOutput.EXEC_ASYN and rec.class_ == GdbOutput.STOPPED:
+            self.handleStoppedRecord(rec)
+        elif rec.type_ == GdbOutput.EXEC_ASYN and rec.class_ == GdbOutput.RUNNING:
+            self.signalProxy.emitInferiorIsRunning(rec)
+        elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.THREAD_CREATED:
+            self.signalProxy.emitThreadCreated(rec)
+        elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.THREAD_EXITED:
+            self.signalProxy.emitThreadExited(rec)
+        elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.BREAKPOINT_MODIFIED:
+            self.signalProxy.emitBreakpointModified(rec)
 
     def handleStoppedRecord(self, rec):
         # With reverse debugging, some stopped records might not contain a

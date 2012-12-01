@@ -45,12 +45,13 @@ class BreakpointController(QObject):
         self._model = BreakpointModel(self.distributedObjects.gdb_connector)
         self.breakpointView = BreakpointView()
 
-        self.breakpointView.breakpointView.setModel(self._model)
+        self.breakpointView.setModel(self._model)
 
         #register with session manager to save breakpoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
 
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearBreakpoints)
+        self.distributedObjects.signalProxy.breakpointModified.connect(self._model.updateBreakpointFromGdbRecord)
 
         self.distributedObjects.mainwindow.insertDockWidget(self.breakpointView, "Breakpoints", Qt.BottomDockWidgetArea, True)
 
