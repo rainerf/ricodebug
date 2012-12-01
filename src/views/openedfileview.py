@@ -61,7 +61,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
 class OpenedFileView(QObject):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
-    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK = range(8)
+    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK, MARGIN_MARKER_BP_DIS = range(9)
 
     def __init__(self, distributedObjects, filename, parent):
         QObject.__init__(self, parent)
@@ -74,6 +74,7 @@ class OpenedFileView(QObject):
         self.filename = filename
         self.lastContexMenuLine = 0
         self.markerBp = QPixmap(":/markers/bp.png")
+        self.markerBpDisabled = QPixmap(":/markers/bp_dis.png")
         self.markerTp = QPixmap(":/markers/tp.png")
         self.markerExec = QPixmap(":/markers/exec_pos.png")
         self.markerStack = QPixmap(":/markers/stack_pos.png")
@@ -103,6 +104,7 @@ class OpenedFileView(QObject):
         self.edit.setMarginSensitivity(self.MARGIN_MARKER_TP, True)
         # define symbol
         self.edit.markerDefine(self.markerBp, self.MARGIN_MARKER_BP)
+        self.edit.markerDefine(self.markerBpDisabled, self.MARGIN_MARKER_BP_DIS)
         self.edit.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
         self.edit.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
         self.edit.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
@@ -110,7 +112,7 @@ class OpenedFileView(QObject):
         self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
         # define width and mask to show margin
         self.edit.setMarginWidth(self.MARGIN_MARKER_BP, 10)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP)
+        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP | 1 << self.MARGIN_MARKER_BP_DIS)
         self.edit.setMarginWidth(self.MARGIN_MARKER_TP, 10)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_TP, 1 << self.MARGIN_MARKER_TP)
         self.edit.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
@@ -125,8 +127,6 @@ class OpenedFileView(QObject):
 
         self.edit.setReadOnly(False)
         self.gridLayout.addWidget(self.edit, 0, 0, 1, 1)
-
-        self.breakpoints = []
 
         if not (QtCore.QFile.exists(filename)):
             logging.error("could not open file", filename)
@@ -159,6 +159,7 @@ class OpenedFileView(QObject):
         _model = self.breakpointController.model()
         _model.rowsInserted.connect(self.getBreakpointsFromModel)
         _model.rowsRemoved.connect(self.getBreakpointsFromModel)
+        _model.dataChanged.connect(self.getBreakpointsFromModel)
         _model = self.tracepointController.model()
         _model.rowsInserted.connect(self.getTracepointsFromModel)
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
@@ -351,9 +352,13 @@ class OpenedFileView(QObject):
         """Get breakpoints from model."""
         # TODO: don't reload all breakpoints, just the one referenced by parent/start/end
         self.edit.markerDeleteAll(self.MARGIN_MARKER_BP)
+        self.edit.markerDeleteAll(self.MARGIN_MARKER_BP_DIS)
         for bp in self.breakpointController.getBreakpointsFromModel():
             if bp.fullname == self.filename:
-                self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP)
+                if bp.enabled:
+                    self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP)
+                else:
+                    self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP_DIS)
 
     def getTracepointsFromModel(self):
         """Get tracepoints from model."""
