@@ -22,6 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from PyQt4.QtCore import Qt
+
 from controllers.debugcontroller import DebugController
 from .signalproxy import SignalProxy
 from controllers.editorcontroller import EditorController
@@ -29,7 +31,6 @@ from .gdbconnector import GdbConnector
 from controllers.filelistcontroller import FileListController
 from controllers.stackcontroller import StackController
 from controllers.localscontroller import LocalsController
-from controllers.breakpointcontroller import BreakpointController
 from controllers.tracepointcontroller import TracepointController
 from controllers.watchcontroller import WatchController
 from controllers.pyiocontroller import PyIoController
@@ -49,6 +50,8 @@ from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
 from controllers.threadcontroller import ThreadController
 from controllers.micontroller import MiTraceController
+from models.breakpointmodel import BreakpointModel
+from views.breakpointview import BreakpointView
 
 
 class DistributedObjects:
@@ -60,7 +63,13 @@ class DistributedObjects:
         self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
-        self.breakpointController = BreakpointController(self)
+
+        # breakpoints
+        self.breakpointModel = BreakpointModel(self)
+        self.__bpView = BreakpointView()
+        self.__bpView.breakpointView.setModel(self.breakpointModel)
+        self.mainwindow.insertDockWidget(self.__bpView, "Breakpoints", Qt.BottomDockWidgetArea, True)
+
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self)

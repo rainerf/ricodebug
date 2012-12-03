@@ -120,27 +120,15 @@ class ExtendedBreakpoint(QObject):
 
 class BreakpointModel(QAbstractTableModel):
     """ Class provides the breakpointModel for breakpointView """
-    def __init__(self, connector, parent=None):
+    def __init__(self, do, parent=None):
         QAbstractTableModel.__init__(self, parent)
         self.breakpoints = []
-        self.connector = connector
-        #self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
-
-    def getModel(self):
-        return self.bpmodel
+        self.connector = do.gdb_connector
+        do.signalProxy.cleanupModels.connect(self.clearBreakpoints)
+        do.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
 
     def getBreakpoints(self):
         return self.breakpoints
-
-    def setBreakpoints(self, bpList):
-        """ deletes all breakpoints in current list, and fill the list up with all breakpoints in bpList
-        @param bpList: (List<Breakpoint>)
-        """
-        for bp in self.breakpoints:
-            self.deleteBreakpoint(bp.fullname, bp.line)
-        for bp in bpList:
-            self.insertBreakpoint(bp.fullname, bp.line)
-            #TODO    self.emit(SIGNAL('refreshBreakpointView'))
 
     def toggleBreakpoint(self, fullname, line):
         """ toggles the breakpoint in file fullname with linenumber line
@@ -399,3 +387,18 @@ class BreakpointModel(QAbstractTableModel):
             bp.name = str(value.toString())
 
         return True
+
+    def saveSession(self, xmlHandler):
+        """Insert session info to xml file"""
+        bpparent = xmlHandler.createNode("Breakpoints")
+        for bp in self.getBreakpoints():
+            xmlHandler.createNode("Breakpoint", bpparent, {"file": bp.file, "line": bp.line})
+
+    def loadSession(self, xmlHandler):
+        """load session info to xml file"""
+        bpparent = xmlHandler.getNode("Breakpoints")
+        if bpparent != None:
+            childnodes = bpparent.childNodes()
+            for i in range(childnodes.size()):
+                attr = xmlHandler.getAttributes(childnodes.at(i))
+                self.insertBreakpoint(attr["file"], attr["line"])

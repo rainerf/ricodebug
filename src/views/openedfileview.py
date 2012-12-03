@@ -68,7 +68,7 @@ class OpenedFileView(QObject):
         filename = str(filename)
         self.distributedObjects = distributedObjects
         self.debugController = self.distributedObjects.debugController
-        self.breakpointController = self.distributedObjects.breakpointController
+        self.__bpModel = self.distributedObjects.breakpointModel
         self.tracepointController = self.distributedObjects.tracepointController
         self.signalProxy = self.distributedObjects.signalProxy
         self.filename = filename
@@ -151,14 +151,12 @@ class OpenedFileView(QObject):
         self.edit.dwellStart.connect(self.dwellStart)
         self.edit.dwellEnd.connect(self.dwellEnd)
 
-
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
 
-        _model = self.breakpointController.model()
-        _model.rowsInserted.connect(self.getBreakpointsFromModel)
-        _model.rowsRemoved.connect(self.getBreakpointsFromModel)
+        self.__bpModel.rowsInserted.connect(self.getBreakpointsFromModel)
+        self.__bpModel.rowsRemoved.connect(self.getBreakpointsFromModel)
         _model = self.tracepointController.model()
         _model.rowsInserted.connect(self.getTracepointsFromModel)
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
@@ -339,7 +337,7 @@ class OpenedFileView(QObject):
             self.toggleTracepointWithLine(line)
 
     def toggleBreakpointWithLine(self, line):
-        self.breakpointController.toggleBreakpoint(self.filename, line + 1)
+        self.__bpModel.toggleBreakpoint(self.filename, line + 1)
 
     def toggleTracepointWithLine(self, line):
         self.tracepointController.toggleTracepoint(self.filename, line + 1)
@@ -351,7 +349,7 @@ class OpenedFileView(QObject):
         """Get breakpoints from model."""
         # TODO: don't reload all breakpoints, just the one referenced by parent/start/end
         self.edit.markerDeleteAll(self.MARGIN_MARKER_BP)
-        for bp in self.breakpointController.getBreakpointsFromModel():
+        for bp in self.__bpModel.getBreakpoints():
             if bp.fullname == self.filename:
                 self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP)
 

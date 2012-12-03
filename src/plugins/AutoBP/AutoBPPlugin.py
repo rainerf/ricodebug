@@ -47,4 +47,4 @@ class AutoBPPlugin(QObject):
             with open(s) as f:
                 for i, line in enumerate(f):
                     if '// bp' in line:
-                        self.signalproxy.distributedObjects.breakpointController.insertBreakpoint(s, i + 1)
+                        self.signalproxy.distributedObjects.breakpointModel.insertBreakpoint(s, i + 1)
