@@ -33,7 +33,6 @@ from controllers.stackcontroller import StackController
 from controllers.localscontroller import LocalsController
 from controllers.tracepointcontroller import TracepointController
 from controllers.watchcontroller import WatchController
-from controllers.pyiocontroller import PyIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
 from .stlvectorparser import StlVectorParser
@@ -52,6 +51,7 @@ from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
 from views.inferiorioview import InferiorIoView
+from views.pyioview import PyIoView
 
 
 class DistributedObjects:
@@ -85,7 +85,10 @@ class DistributedObjects:
         self.localsController = LocalsController(self, self.localsView)
 
         self.tracepointController = TracepointController(self)
-        self.pyioController = PyIoController(self)
+
+        # python io
+        self.__pyIoView = PyIoView(self.debugController)
+        self.mainwindow.insertDockWidget(self.__pyIoView, "Python Console", Qt.BottomDockWidgetArea, True)
 
         # inferior io
         self.__inferiorIoView = InferiorIoView(self.debugController)
