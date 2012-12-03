@@ -45,13 +45,14 @@ from views.watchview import WatchView
 from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
-from controllers.threadcontroller import ThreadController
 from controllers.micontroller import MiTraceController
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
 from views.inferiorioview import InferiorIoView
 from views.pyioview import PyIoView
+from views.threadview import ThreadView
+from models.threadmodel import ThreadModel
 
 
 class DistributedObjects:
@@ -76,7 +77,12 @@ class DistributedObjects:
         self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
-        self.threadController = ThreadController(self)
+
+        # threads
+        self.threadModel = ThreadModel(self)
+        self.__threadView = ThreadView()
+        self.__threadView.setModel(self.threadModel)
+        self.mainwindow.insertDockWidget(self.__threadView, "Threads", Qt.BottomDockWidgetArea, True)
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
