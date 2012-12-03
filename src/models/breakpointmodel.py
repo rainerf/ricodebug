@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+import logging
 
 """@package breakpointmodel
     there are some classes in this package:\n
@@ -175,9 +176,13 @@ class BreakpointModel(QAbstractTableModel):
 
     def clearBreakpoints(self):
         """ deletes all breakpoints in list """
-        while len(self.breakpoints) > 0:
-            bp = self.breakpoints.pop()
-            self.deleteBreakpoint(bp.fullname, bp.line)
+        # we need to store the numbers in a separate list since self.breakpoints
+        # will be modified in the loop
+        numbers = [bp.number for bp in self.breakpoints]
+        for number in numbers:
+            # delete breakpoints by number to avoid problems where the bp's file
+            # name is unknown
+            self.deleteBreakpointByNumber(number)
 
     def insertBreakpoint(self, file_, line):
         """ inserts a breakpoint in file file_ on linenumber line
@@ -201,12 +206,26 @@ class BreakpointModel(QAbstractTableModel):
         """
         for bp in self.breakpoints:
             if bp.fullname == file_ and int(bp.line) == int(line):
-                self.connector.deleteBreakpoint(bp.number)
-                idx = self.breakpoints.index(bp)
-                self.beginRemoveRows(QModelIndex(), idx, idx)
-                self.breakpoints.remove(bp)
-                self.endRemoveRows()
+                self.deleteBreakpointByNumber(bp.number)
+                return
+        else:
+            logging.error("Cannot delete breakpoint (%s:%s) that is not in the model!", file_, line)
+
+    def deleteBreakpointByNumber(self, number):
+        """ deletes a breakpoint with a given number
+        @param number: (int), number of the breakpoint to delete
+        """
+        for i, bp in enumerate(self.breakpoints):
+            if bp.number == number:
                 break
+        else:
+            logging.error("Cannot delete breakpoint (#%s) that is not in the model!", number)
+            return
+
+        self.connector.deleteBreakpoint(number)
+        self.beginRemoveRows(QModelIndex(), i, i)
+        self.breakpoints.remove(bp)
+        self.endRemoveRows()
 
     def enableBreakpoint(self, number):
         """ enable breakpoint with number number
