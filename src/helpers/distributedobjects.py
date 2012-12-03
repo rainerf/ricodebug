@@ -35,7 +35,6 @@ from controllers.tracepointcontroller import TracepointController
 from controllers.watchcontroller import WatchController
 from controllers.pyiocontroller import PyIoController
 from controllers.inferioriocontroller import InferiorIoController
-from controllers.gdbiocontroller import GdbIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
 from .stlvectorparser import StlVectorParser
@@ -52,6 +51,7 @@ from controllers.threadcontroller import ThreadController
 from controllers.micontroller import MiTraceController
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
+from views.gdbioview import GdbIoView
 
 
 class DistributedObjects:
@@ -87,7 +87,11 @@ class DistributedObjects:
         self.tracepointController = TracepointController(self)
         self.pyioController = PyIoController(self)
         self.inferiorioController = InferiorIoController(self)
-        self.gdbioController = GdbIoController(self)
+
+        # gdb io
+        self.__gdbIoView = GdbIoView(self.debugController)
+        self.mainwindow.insertDockWidget(self.__gdbIoView, "GDB Console", Qt.BottomDockWidgetArea, True)
+
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
