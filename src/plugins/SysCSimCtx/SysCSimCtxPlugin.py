@@ -143,10 +143,15 @@ class SysCSimCtxPlugin:
             self._currDeltaCycles.changed.connect(self._setDeltaCycle)
             self._setDeltaCycle(self._currDeltaCycles.value)
 
-            # FIXME: process_handle might be NULL which will cause its dereference method to return None
-            self._currProcess = self._simContext["m_curr_proc_info"]["process_handle"]["*"]["m_name"]["_M_dataplus"]["_M_p"]
-            self._currProcess.changed.connect(self._setProcess)
-            self._setProcess(self._currProcess.value)
+            if self._simContext["m_curr_proc_info"]["process_handle"]["*"] is not None:
+                self._currProcess = self._simContext["m_curr_proc_info"]["process_handle"]["*"]["m_name"]["_M_dataplus"]["_M_p"]
+                self._currProcess.changed.connect(self._setProcess)
+                self._setProcess(self._currProcess.value)
+            else:
+                self._currProcessHandle = \
+                    self._simContext["m_curr_proc_info"]["process_handle"]
+                self._currProcessHandle.changed.\
+                    connect(self._changedProcessHandle)
 
             self._currProcessKind = self._simContext["m_curr_proc_info"]["kind"]
             self._currProcessKind.changed.connect(self._setProcessKind)
@@ -190,8 +195,15 @@ class SysCSimCtxPlugin:
         self._sbInfo.process = proc
         self._updateSbLabel()
 
+    def _changedProcessHandle(self, v):
+        self._currProcess = self.__sp.distributedObjects.variablePool.\
+            getVar("(sc_core::sc_process_b *)"+str(v))["*"]["m_name"]["_M_dataplus"]["_M_p"]
+        self._currProcess.changed.connect(self._setProcess)
+        self._setProcess(self._currProcess.value)
+
     def _setProcessKind(self, v):
         t = {
+             "sc_core::SC_NO_PROC_": "No Process",
              "sc_core::SC_METHOD_PROC_": "Method",
              "sc_core::SC_THREAD_PROC_": "Thread",
              "sc_core::SC_CTHREAD_PROC_": "CThread",
