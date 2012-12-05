@@ -112,7 +112,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
 
-        graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.children)
+        graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.childrenWrapper)
 
         # we only allow the graphical view if all contained elements are standard variables; also,
         # do not show the menu if the variable view is collapsed
@@ -131,7 +131,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
 
     def plot(self, output):
         _importMatplotlib()        # only import matplotlib if we really need it
-        data = [float(var.getUnfilteredValue()) for var in self.varWrapper.children]
+        data = [float(var.unfilteredValue) for var in self.varWrapper.childrenWrapper]
 
         fig = plt.figure(figsize=(4, 3))
         ax = fig.add_subplot(111)
