@@ -79,6 +79,7 @@ class SysCSimCtxPlugin:
 
         self._currDeltaCycles = None
         self._currProcess = None
+        self._currProcessHandle = None
         self._currProcessKind = None
         self._currSimTime = None
         self._elaborationDone = None
@@ -196,8 +197,11 @@ class SysCSimCtxPlugin:
         self._updateSbLabel()
 
     def _changedProcessHandle(self, v):
+        if self._currProcess:
+            self._currProcess.changed.disconnect()
+            self._currProcess.die()
         self._currProcess = self.__sp.distributedObjects.variablePool.\
-            getVar("(sc_core::sc_process_b *)"+str(v))["*"]["m_name"]["_M_dataplus"]["_M_p"]
+            getVar("(sc_core::sc_process_b *)" + str(v))["*"]["m_name"]["_M_dataplus"]["_M_p"]
         self._currProcess.changed.connect(self._setProcess)
         self._setProcess(self._currProcess.value)
 
