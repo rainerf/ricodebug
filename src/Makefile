@@ -11,7 +11,7 @@ resources_rc.py: resources.qrc
 .PHONY: clean pylint
 clean:
 	rm -f $(TARGETS)
-	find -name '*.pyc' | xargs rm -fr
+	find \( -name '__pycache__' -o -name '*pyc' \) | xargs rm -fr
 
 pylint:
 	pylint --include-ids=y --disable=W0312,C0103,C0111,C0301 *.py
