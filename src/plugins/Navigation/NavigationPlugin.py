@@ -11,7 +11,7 @@ class CTagsRunner(QThread):
     tagsFileAvailable = pyqtSignal()
 
     def __init__(self, tmpFile, parent=None):
-        CTagsRunner.__init__(self, parent)
+        QThread.__init__(self, parent)
         self.tmpFile = tmpFile
         self.sources = None
 
