@@ -23,9 +23,21 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QTextEdit
+from helpers.gdboutput import GdbOutput
 
 
 class MiTraceView(QTextEdit):
-    def __init__(self, parent=None):
+    def __init__(self, do, parent=None):
         QTextEdit.__init__(self, parent)
         self.setReadOnly(True)
+
+        do.gdb_connector.commandExecuted.connect(self.appendCommand)
+        do.gdb_connector.reader.asyncRecordReceived.connect(self.appendAsync)
+
+    def appendCommand(self, cmd, rec):
+        self.append("<b>" + cmd + "</b>")
+        color = 'color="#ff3333"' if rec.class_ == GdbOutput.ERROR else ""
+        self.append("<font %s>%s</font>" % (color, rec.raw))
+
+    def appendAsync(self, rec):
+        self.append('<font color="#777777">%s</font>' % rec.raw)

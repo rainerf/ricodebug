@@ -45,7 +45,6 @@ from views.watchview import WatchView
 from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
-from controllers.micontroller import MiTraceController
 from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
@@ -53,6 +52,7 @@ from views.inferiorioview import InferiorIoView
 from views.pyioview import PyIoView
 from views.threadview import ThreadView
 from models.threadmodel import ThreadModel
+from views.mitraceview import MiTraceView
 
 
 class DistributedObjects:
@@ -92,7 +92,7 @@ class DistributedObjects:
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
 
-        self.miController = MiTraceController(self)
+        self.miView = self.buildView(MiTraceView, "MI Trace")
 
     def buildModelAndView(self, ModelCls, ViewCls, name):
         view = self.buildView(ViewCls, name)
