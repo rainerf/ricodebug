@@ -26,13 +26,12 @@ from PyQt4.QtGui import QTextEdit, QTextCursor
 
 
 class InferiorIoView(QTextEdit):
-    def __init__(self, debug_controller, parent=None):
+    def __init__(self, do, parent=None):
         QTextEdit.__init__(self, parent)
 
-        debug_controller.ptyhandler.dataAvailable.connect(self.outputInferiorData)
+        do.debugController.ptyhandler.dataAvailable.connect(self.outputInferiorData)
 
     def outputInferiorData(self, data):
         self.moveCursor(QTextCursor.End)
         self.insertPlainText(data)
         self.moveCursor(QTextCursor.End)
-

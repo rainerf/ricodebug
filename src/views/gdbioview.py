@@ -31,7 +31,7 @@ from helpers.gdboutput import GdbOutput
 
 
 class GdbIoView(QWidget):
-    def __init__(self, debug_controller, parent=None):
+    def __init__(self, do, parent=None):
         QWidget.__init__(self, parent)
 
         self.gridLayout = QtGui.QGridLayout(self)
@@ -57,7 +57,7 @@ class GdbIoView(QWidget):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        self.debugController = debug_controller
+        self.debugController = do.debugController
         self.gdbInputEdit.lineEdit().returnPressed.connect(self.gdbSendButton.click)
         self.gdbSendButton.clicked.connect(self.executeCliCommand)
         self.debugController.connector.reader.consoleRecordReceived.connect(

@@ -25,8 +25,9 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidget, QTextCursor
 
+
 class PyIoView(QWidget):
-    def __init__(self, debug_controller, parent=None):
+    def __init__(self, do, parent=None):
         QWidget.__init__(self, parent)
 
         self.gridLayout = QtGui.QGridLayout(self)
@@ -51,7 +52,7 @@ class PyIoView(QWidget):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        self.debugController = debug_controller
+        self.debugController = do.debugController
 
         self.pyInputEdit.lineEdit().returnPressed.connect(self.pySendButton.click)
         self.pySendButton.clicked.connect(self.executePythonCode)

@@ -22,28 +22,21 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget
+from PyQt4 import QtGui
+from PyQt4.QtGui import QTableView
 
 
-class BreakpointView(QWidget):
-    def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
+class BreakpointView(QTableView):
+    def __init__(self, do, parent=None):
+        QTableView.__init__(self, parent)
 
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
-
-        self.breakpointView = QtGui.QTableView(self)
-        self.breakpointView.setTabKeyNavigation(False)
-        self.breakpointView.setAlternatingRowColors(True)
-        self.breakpointView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.breakpointView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.breakpointView.setShowGrid(False)
-        self.breakpointView.setSortingEnabled(True)
-        self.breakpointView.setCornerButtonEnabled(False)
-        self.breakpointView.verticalHeader().setVisible(False)
-        self.breakpointView.verticalHeader().setDefaultSectionSize(20)
-        self.breakpointView.horizontalHeader().setStretchLastSection(True)
-        self.gridLayout.addWidget(self.breakpointView, 0, 0, 1, 1)
-
-        QtCore.QMetaObject.connectSlotsByName(self)
+        self.setTabKeyNavigation(False)
+        self.setAlternatingRowColors(True)
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.setShowGrid(False)
+        self.setSortingEnabled(True)
+        self.setCornerButtonEnabled(False)
+        self.verticalHeader().setVisible(False)
+        self.verticalHeader().setDefaultSectionSize(20)
+        self.horizontalHeader().setStretchLastSection(True)

@@ -65,11 +65,7 @@ class DistributedObjects:
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
 
-        # breakpoints
-        self.breakpointModel = BreakpointModel(self)
-        self.__bpView = BreakpointView()
-        self.__bpView.breakpointView.setModel(self.breakpointModel)
-        self.mainwindow.insertDockWidget(self.__bpView, "Breakpoints", Qt.BottomDockWidgetArea, True)
+        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints")
 
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
@@ -78,11 +74,7 @@ class DistributedObjects:
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
 
-        # threads
-        self.threadModel = ThreadModel(self)
-        self.__threadView = ThreadView()
-        self.__threadView.setModel(self.threadModel)
-        self.mainwindow.insertDockWidget(self.__threadView, "Threads", Qt.BottomDockWidgetArea, True)
+        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads")
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
@@ -92,20 +84,23 @@ class DistributedObjects:
 
         self.tracepointController = TracepointController(self)
 
-        # python io
-        self.__pyIoView = PyIoView(self.debugController)
-        self.mainwindow.insertDockWidget(self.__pyIoView, "Python Console", Qt.BottomDockWidgetArea, True)
-
-        # inferior io
-        self.__inferiorIoView = InferiorIoView(self.debugController)
-        self.mainwindow.insertDockWidget(self.__inferiorIoView, "Output", Qt.BottomDockWidgetArea, True)
-
-        # gdb io
-        self.__gdbIoView = GdbIoView(self.debugController)
-        self.mainwindow.insertDockWidget(self.__gdbIoView, "GDB Console", Qt.BottomDockWidgetArea, True)
+        self.buildView(PyIoView, "Python Console")
+        self.buildView(InferiorIoView, "Output")
+        self.buildView(GdbIoView, "GDB Console")
 
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
 
         self.miController = MiTraceController(self)
+
+    def buildModelAndView(self, ModelCls, ViewCls, name):
+        view = self.buildView(ViewCls, name)
+        model = ModelCls(self)
+        view.setModel(model)
+        return model, view
+
+    def buildView(self, ViewCls, name):
+        view = ViewCls(self)
+        self.mainwindow.insertDockWidget(view, name, Qt.BottomDockWidgetArea, True)
+        return view

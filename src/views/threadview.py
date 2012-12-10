@@ -26,7 +26,7 @@ from PyQt4.QtGui import QTableView, QHeaderView, QAbstractItemView
 
 
 class ThreadView(QTableView):
-    def __init__(self, parent=None):
+    def __init__(self, do, parent=None):
         QTableView.__init__(self, parent)
 
         self.setTabKeyNavigation(False)
