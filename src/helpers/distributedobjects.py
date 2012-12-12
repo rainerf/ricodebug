@@ -53,7 +53,7 @@ from views.pyioview import PyIoView
 from views.threadview import ThreadView
 from models.threadmodel import ThreadModel
 from views.mitraceview import MiTraceView
-
+from helpers.gdbinit import GDBInit
 
 class DistributedObjects:
     def __init__(self, mainwindow):
@@ -61,19 +61,17 @@ class DistributedObjects:
         self.settings = QSettings("fh-hagenberg", "ricodebug")
         self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
+        self.gdb_init = GDBInit()
         self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
-
         self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints")
-
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self)
         self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
-
         self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads")
 
         self.watchView = WatchView()

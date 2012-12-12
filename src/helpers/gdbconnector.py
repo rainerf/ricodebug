@@ -25,6 +25,7 @@
 import subprocess
 import signal
 import logging
+import os
 from .gdbreader import GdbReader
 from .gdboutput import GdbOutput
 from PyQt4.QtCore import QObject, pyqtSignal
@@ -41,7 +42,7 @@ class GdbConnector(QObject):
 
     def start(self):
         try:
-            self.gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q'],
+            self.gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q', '-nx'], \
                     shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         except OSError as e:
             logging.critical("Could not start gdb. Error message: %s", e)
@@ -78,6 +79,10 @@ class GdbConnector(QObject):
     def openFile(self, filename):
         self.executeAndRaiseIfFailed("-file-exec-and-symbols " + filename,
                 "Could not open file!")
+
+    def startPrettyPrinting(self):
+        self.execute("-enable-pretty-printing", \
+                     "Enable MI PrettyPrint")
 
     def getSources(self):
         res = self.executeAndRaiseIfFailed("-file-list-exec-source-files",
@@ -268,8 +273,8 @@ class GdbConnector(QObject):
         return self.execute("-var-assign \"" + exp + "\" " + value)
 
     def var_list_children(self, exp):
-        return self.execute("-var-list-children --all-values \"" +
-                str(exp) + "\"")
+        return self.execute("-var-list-children --all-values \"" + \
+                str(exp) + "\" 0 100")
 
     def var_update(self, exp):
         return self.execute("-var-update --all-values \"" + exp + "\"")
@@ -289,3 +294,13 @@ class GdbConnector(QObject):
 
     def selectThread(self, id_):
         return self.executeAndRaiseIfFailed("-thread-select %s" % id_)
+
+    def initPrettyPrinter(self,path):
+        command = "source" + path
+        self.executeAndRaiseIfFailed(command,"Can not load pretty printer module!")
+       
+    def enablePrettyPrinter(self):
+        return self.executeAndRaiseIfFailed("enable pretty-printer", "Enables Initialized Printers")
+       
+    def disablePrettyPrinter(self):
+        return self.executeAndRaiseIfFailed("disable pretty-printer", "Disables Initialized Printers")

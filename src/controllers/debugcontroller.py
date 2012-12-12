@@ -47,13 +47,22 @@ class DebugController(QObject):
         self.distributedObjects = distributedObjects
 
         self.connector = self.distributedObjects.gdb_connector
+        self.gdbinit = self.distributedObjects.gdb_init
         self.signalProxy = self.distributedObjects.signalProxy
 
         self.executableName = None
         self.lastCmdWasStep = False
 
         self.ptyhandler.start()
+        
+        self.gdbinit.writeFile()
+        
         self.connector.start()
+        
+        self.connector.initPrettyPrinter(self.gdbinit.getPath())
+        self.connector.startPrettyPrinting()
+        
+        self.toggleBeautify = True
 
         self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
@@ -131,6 +140,15 @@ class DebugController(QObject):
     def until(self, file_, line):
         self.connector.until(file_, line)
         self.lastCmdWasStep = False
+        
+    def beautify(self):
+        if self.toggleBeautify:
+            self.connector.disablePrettyPrinter()
+        else:
+            self.connector.enablePrettyPrinter()
+        
+        self.toggleBeautify = not self.toggleBeautify
+        self.distributedObjects.localsController.reloadLocals()
 
     def evaluateExpression(self, exp):
         if exp == "":

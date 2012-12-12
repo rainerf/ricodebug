@@ -129,6 +129,12 @@ class Actions(QtCore.QObject):
                 "Del var from Watch", "+",
                 "Remove selected variable from watchview-window")
 
+        ###############################################
+        ## miscellaneous
+        ###############################################
+        self.Beautify = self.__createAction(":/icons/images/beautify.png",
+                "Beautify", None, "Pretty Print of Objects")
+
     def getAddToWatchAction(self, name, slot):
         a = self.createEx(name)
         a.setText("Add '%s' to watch window" % name)

@@ -62,6 +62,7 @@
     <file>images/save-html.png</file>
     <file>images/minus.png</file>
     <file>images/arrow-right.png</file>
+    <file>images/beautify.png</file>
   </qresource>
   <qresource prefix="markers">
     <file alias="exec_pos.png">images/markers/exec_pos.png</file>

@@ -61,6 +61,20 @@ class VariablePool(QObject):
 
         self.variables = {}
 
+    def reloadLocals(self):
+        """ function deletes all variables created within gdb and stored within ricodebug
+            after that the locals are read again
+            function is important for beautify (en/disable)
+            reason :: calling 'disable pretty-printer' disables access to vars with a saved
+            format like var4.4 -> after disable -> var24.private._M_dataplus
+        """
+        for var in self.variables:
+            self.connector.var_delete(var)
+         
+        self.clearVars()    
+        ret = self.addLocals()
+        return ret
+    
     def justUpdateValues(self):
         """ just update variables for tracepoints, dont signal changes to connected views
         this function is connected to the signal SignalProxy::tracepointOccured()
@@ -211,15 +225,24 @@ class VariablePool(QObject):
         # Therefore, if the value looks like a size, treat it as an array.
         # * Everything else with children is a structure.
         # * Again, everything else is a normal variable.
-        if gdbVar.value.startswith('0x'):
+        if value.startswith('0x'):
             logging.debug("Creating a pointer variable for '%s'", exp)
             varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
-        elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
-            logging.debug("Creating a array variable for '%s'", exp)
-            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         elif haschildren:
             logging.debug("Creating a struct variable for '%s'", exp)
             varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+        elif re.match("{...}", value):
+            # NOTE:this solution only works for variables that are not nested
+            # if the vector is uninitialized we get a negative length
+            # additionally we limit the children to 100
+            checkError = self.connector.evaluate(exp);
+            if str(checkError).find("length -") is -1:
+                haschildren = True;
+            else:
+                haschildren = False         
+                
+            logging.debug("Creating an array variable for '%s'", exp)
+            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
         else:
             logging.debug("Creating a normal variable for '%s'", exp)
             varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)

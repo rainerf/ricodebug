@@ -38,3 +38,10 @@ class LocalsController(TreeItemController):
 
         for vw in self.variableList.list:
             self.add(vw)
+
+    def reloadLocals(self):
+        self.clear()
+        self.variableList.reloadLocals()
+
+        for vw in self.variableList.list:
+            self.add(vw)

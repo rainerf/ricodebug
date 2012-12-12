@@ -141,6 +141,7 @@ class MainWindow(QMainWindow):
         self.ui.menuDebug.addAction(self.act.Record)
         self.ui.menuDebug.addAction(self.act.ReverseNext)
         self.ui.menuDebug.addAction(self.act.ReverseStep)
+        self.ui.menuDebug.addAction(self.act.Beautify)
 
         # file actions
         self.ui.menuFile.insertAction(self.ui.actionSaveSession,
@@ -168,6 +169,7 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.ReverseStep)
         self.ui.Main.addAction(self.act.Finish)
         self.ui.Main.addAction(self.act.RunToCursor)
+        self.ui.Main.addAction(self.act.Beautify)
 
         self.ui.Main.addSeparator()
         self.ui.Main.addAction(self.act.Exit)
@@ -190,7 +192,8 @@ class MainWindow(QMainWindow):
         self.act.Record.triggered.connect(self.toggleRecord)
         self.act.ReverseStep.triggered.connect(self.debugController.reverse_step)
         self.act.ReverseNext.triggered.connect(self.debugController.reverse_next)
-
+        self.act.Beautify.triggered.connect(self.debugController.beautify)
+        
         self.act.Interrupt.triggered.connect(self.debugController.interrupt)
         self.act.Finish.triggered.connect(self.debugController.finish)
         self.act.RunToCursor.triggered.connect(self.debugController.inferiorUntil)
@@ -301,6 +304,7 @@ class MainWindow(QMainWindow):
         self.act.Finish.setEnabled(True)
         self.act.RunToCursor.setEnabled(True)
         self.act.Record.setEnabled(True)
+        self.act.Beautify.setEnabled(True)
 
     def disableButtons(self):
         self.act.Continue.setEnabled(False)
@@ -311,6 +315,7 @@ class MainWindow(QMainWindow):
         self.act.RunToCursor.setEnabled(False)
         self.act.Record.setChecked(False)
         self.act.Record.setEnabled(False)
+        self.act.Beautify.setEnabled(False)
 
     def __observeWorkingBinary(self, filename):
         """ Private Method to Observe Debugged Binary """
