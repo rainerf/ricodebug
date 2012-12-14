@@ -48,7 +48,7 @@ def main():
 
     # We use all kinds of loggers here:
     # * a CriticalLogHandler that will abort the program whenever a critical error is received
-    # * a FileHanlder writing to a log in the home directory (all messages, for debugging)
+    # * a FileHandler writing to a log in the home directory (all messages, for debugging)
     # * a LogViewHandler to have the log available in the GUI
     # * a ErrorLabelHandler that visually notifies the user of an error or a warning
     logger = logging.getLogger()
