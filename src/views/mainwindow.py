@@ -288,11 +288,14 @@ class MainWindow(QMainWindow):
     def targetStartedRunning(self):
         self.ui.statusLabel.setText("Running")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/running.png"))
-        self.enableButtons()
+        self.disableButtons()
+        self.act.Interrupt.setEnabled(True)
 
     def targetStopped(self, rec):
         self.ui.statusLabel.setText("Stopped")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/stopped.png"))
+        self.enableButtons()
+        self.act.Interrupt.setEnabled(False)
 
     def targetExited(self):
         self.ui.statusLabel.setText("Not running")
