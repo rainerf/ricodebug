@@ -128,17 +128,16 @@ class BreakpointModel(QAbstractTableModel):
             'name']
     InternalDataRole = Qt.UserRole
 
-    def __init__(self, connector, parent=None):
+    def __init__(self, do, parent=None):
         QAbstractTableModel.__init__(self, parent)
         self.breakpoints = []
-        self.connector = connector
-        # self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
+        self.connector = do.gdb_connector
+        do.signalProxy.cleanupModels.connect(self.clearBreakpoints)
+        do.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
+        do.signalProxy.breakpointModified.connect(self.updateBreakpointFromGdbRecord)
 
         self.enabledBp = QPixmap(":/icons/images/bp.png")
         self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
-
-    def getModel(self):
-        return self.bpmodel
 
     def getBreakpoints(self):
         return self.breakpoints
@@ -386,3 +385,18 @@ class BreakpointModel(QAbstractTableModel):
             self.__emitDataChangedForRow(index.row())
 
         return True
+
+    def saveSession(self, xmlHandler):
+        """Insert session info to xml file"""
+        bpparent = xmlHandler.createNode("Breakpoints")
+        for bp in self.getBreakpoints():
+            xmlHandler.createNode("Breakpoint", bpparent, {"file": bp.file, "line": bp.line})
+
+    def loadSession(self, xmlHandler):
+        """load session info to xml file"""
+        bpparent = xmlHandler.getNode("Breakpoints")
+        if bpparent != None:
+            childnodes = bpparent.childNodes()
+            for i in range(childnodes.size()):
+                attr = xmlHandler.getAttributes(childnodes.at(i))
+                self.insertBreakpoint(attr["file"], attr["line"])

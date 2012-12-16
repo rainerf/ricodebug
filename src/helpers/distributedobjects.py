@@ -22,6 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from PyQt4.QtCore import Qt
+
 from controllers.debugcontroller import DebugController
 from .signalproxy import SignalProxy
 from controllers.editorcontroller import EditorController
@@ -29,12 +31,8 @@ from .gdbconnector import GdbConnector
 from controllers.filelistcontroller import FileListController
 from controllers.stackcontroller import StackController
 from controllers.localscontroller import LocalsController
-from controllers.breakpointcontroller import BreakpointController
 from controllers.tracepointcontroller import TracepointController
 from controllers.watchcontroller import WatchController
-from controllers.pyiocontroller import PyIoController
-from controllers.inferioriocontroller import InferiorIoController
-from controllers.gdbiocontroller import GdbIoController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
 from .stlvectorparser import StlVectorParser
@@ -47,8 +45,14 @@ from views.watchview import WatchView
 from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
-from controllers.threadcontroller import ThreadController
-from controllers.micontroller import MiTraceController
+from models.breakpointmodel import BreakpointModel
+from views.breakpointview import BreakpointView
+from views.gdbioview import GdbIoView
+from views.inferiorioview import InferiorIoView
+from views.pyioview import PyIoView
+from views.threadview import ThreadView
+from models.threadmodel import ThreadModel
+from views.mitraceview import MiTraceView
 
 
 class DistributedObjects:
@@ -60,14 +64,17 @@ class DistributedObjects:
         self.actions = Actions()
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
-        self.breakpointController = BreakpointController(self)
+
+        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints")
+
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self)
         self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
-        self.threadController = ThreadController(self)
+
+        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads")
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
@@ -76,11 +83,24 @@ class DistributedObjects:
         self.localsController = LocalsController(self, self.localsView)
 
         self.tracepointController = TracepointController(self)
-        self.pyioController = PyIoController(self)
-        self.inferiorioController = InferiorIoController(self)
-        self.gdbioController = GdbIoController(self)
+
+        self.buildView(PyIoView, "Python Console")
+        self.buildView(InferiorIoView, "Output")
+        self.buildView(GdbIoView, "GDB Console")
+
         self.datagraphController = DataGraphController(self)
         self.stlvectorParser = StlVectorParser(self)
         self.tracepointwaveController = TracepointWaveController(self)
 
-        self.miController = MiTraceController(self)
+        self.miView = self.buildView(MiTraceView, "MI Trace")
+
+    def buildModelAndView(self, ModelCls, ViewCls, name):
+        view = self.buildView(ViewCls, name)
+        model = ModelCls(self)
+        view.setModel(model)
+        return model, view
+
+    def buildView(self, ViewCls, name):
+        view = ViewCls(self)
+        self.mainwindow.insertDockWidget(view, name, Qt.BottomDockWidgetArea, True)
+        return view

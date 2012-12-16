@@ -43,13 +43,13 @@ class NavigationView(QtGui.QTreeView):
         if not isinstance(x, Function):
             return
 
-        def addBreakpoint(breakpoint_controller, file_, line):
+        def addBreakpoint(file_, line):
             def f():
-                breakpoint_controller.insertBreakpoint(file_, line)
+                self.signalproxy.distributedObjects.breakpointModel.insertBreakpoint(file_, line)
             return f
 
         menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/icons/images/bp.png"), "Break on %s (%s:%s)" % (x.name, x.file_, x.lineNumber), addBreakpoint(self.signalproxy.distributedObjects.breakpointController, x.file_, x.lineNumber))
+        menu.addAction(QtGui.QIcon(":/icons/images/bp.png"), "Break on %s (%s:%s)" % (x.name, x.file_, x.lineNumber), addBreakpoint(x.file_, x.lineNumber))
         menu.exec_(self.viewport().mapToGlobal(e.pos()))
         e.accept()
 

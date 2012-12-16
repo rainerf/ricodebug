@@ -158,8 +158,7 @@ class OpenedFileView(ScintillaWrapper):
         filename = str(filename)
         self.distributedObjects = distributedObjects
         self.debugController = self.distributedObjects.debugController
-        self.breakpointController = self.distributedObjects.breakpointController
-        self.__bpModel = self.breakpointController.model()
+        self.__bpModel = self.distributedObjects.breakpointModel
         self.tracepointController = self.distributedObjects.tracepointController
         self.signalProxy = self.distributedObjects.signalProxy
         self.filename = filename
@@ -429,7 +428,7 @@ class OpenedFileView(ScintillaWrapper):
             self.toggleTracepointWithLine(line)
 
     def toggleBreakpointWithLine(self, line):
-        self.breakpointController.toggleBreakpoint(self.filename, line + 1)
+        self.__bpModel.toggleBreakpoint(self.filename, line + 1)
 
     def toggleTracepointWithLine(self, line):
         self.tracepointController.toggleTracepoint(self.filename, line + 1)
@@ -445,7 +444,7 @@ class OpenedFileView(ScintillaWrapper):
         self.removeAllOverlayWidgets()
         self.breakpointOverlays = {}
 
-        for bp in self.breakpointController.getBreakpointsFromModel():
+        for bp in self.__bpModel.getBreakpoints():
             if bp.fullname == self.filename:
                 self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
                 self.__addBreakpointOverlay(bp)

@@ -47,7 +47,6 @@ class DebugController(QObject):
         self.distributedObjects = distributedObjects
 
         self.connector = self.distributedObjects.gdb_connector
-        self.breakpointController = self.distributedObjects.breakpointController
         self.signalProxy = self.distributedObjects.signalProxy
 
         self.executableName = None
@@ -84,7 +83,7 @@ class DebugController(QObject):
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
             if self.__config.breakAtMain.value:
-                self.distributedObjects.breakpointController.insertBreakpoint("main", None)
+                self.distributedObjects.breakpointModel.insertBreakpoint("main", None)
             self.executableOpened.emit(filename)
             self.executableName = filename
 
@@ -178,7 +177,7 @@ class DebugController(QObject):
                 stop = False
                 tp = self.distributedObjects.tracepointController.model().getTracepointIfAvailable(frame)
 
-                if self.distributedObjects.breakpointController.model().isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
+                if self.distributedObjects.breakpointModel.isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
                     self.signalProxy.emitInferiorStoppedNormally(rec)
                     stop = True
                     self.lastCmdWasStep = False
