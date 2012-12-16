@@ -24,17 +24,20 @@
 
 import re
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QFont, QColor
-from PyQt4.QtCore import QObject, Qt, QFileSystemWatcher, QTimer, pyqtSignal
+from PyQt4.QtGui import QPixmap, QFont, QColor, QLabel, QFrame, QHBoxLayout, QLayout
+from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint
 from math import log, ceil
 import logging
+from helpers.clickablelabel import ClickableLabel
 
 
 class ScintillaWrapper(Qsci.QsciScintilla):
     """
-    A wrapper around QsciScintilla which only emits dwellStart events if the
-    mouse is really dwelling over the widget and not somewhere else. Also, it
-    provides an unfiltered but matching dwellEnd signal.
+    A wrapper around QsciScintilla:
+    * Only emits dwellStart events if the mouse is really dwelling over the
+      widget and not somewhere else. Also, it provides an unfiltered but
+      matching dwellEnd signal.
+    * Allows overlaying inline widgets.
     """
     dwellStart = pyqtSignal(int, int, int)
     dwellEnd = pyqtSignal(int, int, int)
@@ -42,6 +45,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
     def __init__(self, parent):
         Qsci.QsciScintilla.__init__(self, parent)
         self.__mouseInWidget = False
+        self.__overlayWidgets = {}
 
         self.SCN_DWELLSTART.connect(self.__dwellStartEvent)
         self.SCN_DWELLEND.connect(lambda pos, x, y: self.dwellEnd.emit(pos, x, y))
@@ -58,17 +62,104 @@ class ScintillaWrapper(Qsci.QsciScintilla):
         if self.__mouseInWidget:
             self.dwellStart.emit(pos, x, y)
 
+    def addOverlayWidget(self, w, line, col=None, offset=0, minX=0):
+        line -= 1
 
-class OpenedFileView(QObject):
+        if line not in self.__overlayWidgets:
+            cont = QFrame()
+            cont.setStyleSheet("QFrame { background-color : #cccccc; }")
+            cont.setLayout(QHBoxLayout())
+            cont.layout().setSpacing(20)
+            cont.layout().setMargin(0)
+            cont.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
+            cont.setParent(self.viewport())
+
+            if col is None:
+                col = self.lineLength(line) - 1
+            else:
+                col = min(col, self.lineLength(line) - 1)
+
+            pos = self.positionFromLineIndex(int(line), col)
+
+            x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, pos)
+            y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, pos)
+            cont.resize(10, self.textHeight(line))
+            cont.move(max(x + offset, minX), y)
+            cont.show()
+
+            self.__overlayWidgets[line] = cont
+
+        w.setParent(self.__overlayWidgets[line])
+        w.resize(w.size().width(), self.textHeight(line))
+        self.__overlayWidgets[line].layout().addWidget(w)
+
+    def removeOverlayWidget(self, w, line):
+        line -= 1
+        self.__overlayWidgets[line].layout().removeWidget(w)
+        w.setParent(None)
+        self.__overlayWidgets[line].layout().activate()
+        self.__overlayWidgets[line].resize(self.__overlayWidgets[line].layout().minimumSize())
+
+    def removeAllOverlayWidgets(self):
+        for line, w in self.__overlayWidgets.items():
+            self.removeOverlayWidget(w, line)
+
+    def scrollContentsBy(self, dx, dy):
+        for w in self.__overlayWidgets.itervalues():
+            # simply assume that all lines are of equal height
+            p = w.pos() + QPoint(dx, dy * self.textHeight(0))
+            w.move(p)
+
+        return Qsci.QsciScintilla.scrollContentsBy(self, dx, dy)
+
+
+class BreakpointOverlayWidget(QFrame):
+    def __init__(self, parent, bp, bpModel):
+        QFrame.__init__(self, parent)
+        layout = QHBoxLayout(self)
+        layout.setMargin(0)
+        self.markerBp = QPixmap(":/markers/bp.png")
+        self.markerBpDisabled = QPixmap(":/markers/bp_dis.png")
+        self.bp = bp
+        self.__bpModel = bpModel
+        self.__icon = ClickableLabel()
+        self.__icon.clicked.connect(self.toggleEnabled)
+        self.__text = QLabel()
+        self.__text.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.setStyleSheet("QFrame { background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffc0c0, stop: 1 #ff8080); }")
+        layout.addWidget(self.__icon, 0)
+        layout.addWidget(self.__text, 0)
+
+        self.__icon.setCursor(Qt.ArrowCursor)
+
+    def update(self):
+        if self.bp.name:
+            self.__text.setText("Breakpoint '%s', hit %s times" % (self.bp.name, self.bp.times))
+        else:
+            self.__text.setText("Breakpoint #%s, hit %s times" % (self.bp.number, self.bp.times))
+        self.__icon.setPixmap(self.markerBp if self.bp.enabled else self.markerBpDisabled)
+        self.resize(self.sizeHint().width(), self.height())
+
+    def toggleEnabled(self):
+        if self.bp.enabled:
+            self.__bpModel.disableBreakpoint(self.bp.number)
+        else:
+            self.__bpModel.enableBreakpoint(self.bp.number)
+
+
+class OpenedFileView(ScintillaWrapper):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
     MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK, MARGIN_MARKER_BP_DIS = range(9)
 
     def __init__(self, distributedObjects, filename, parent):
-        QObject.__init__(self, parent)
+        ScintillaWrapper.__init__(self, parent)
+        self.breakpointOverlays = {}
+
         filename = str(filename)
         self.distributedObjects = distributedObjects
         self.debugController = self.distributedObjects.debugController
         self.breakpointController = self.distributedObjects.breakpointController
+        self.__bpModel = self.breakpointController.model()
         self.tracepointController = self.distributedObjects.tracepointController
         self.signalProxy = self.distributedObjects.signalProxy
         self.filename = filename
@@ -85,81 +176,76 @@ class OpenedFileView(QObject):
         self.FileWatcher.addPath(self.filename)
         self.FileWatcher.fileChanged.connect(self.fileChanged)
 
-        self.tab = QtGui.QWidget()
-        self.gridLayout = QtGui.QGridLayout(self.tab)
-        self.gridLayout.setMargin(0)
-        self.edit = ScintillaWrapper(self.tab)
         self.font = QFont("DejaVu Sans Mono", 10)
         self.font.setStyleHint(QFont.TypeWriter)
         self.lexer = Qsci.QsciLexerCPP()
         self.lexer.setFont(self.font)
 
-        self.edit.setToolTip("")
-        self.edit.setWhatsThis("")
-        self.edit.setLexer(self.lexer)
-        self.edit.setMarginLineNumbers(self.MARGIN_NUMBERS, True)
+        self.setToolTip("")
+        self.setWhatsThis("")
+        self.setLexer(self.lexer)
+        self.setMarginLineNumbers(self.MARGIN_NUMBERS, True)
         # set sensitivity
-        self.edit.setMarginSensitivity(self.MARGIN_NUMBERS, True)
-        self.edit.setMarginSensitivity(self.MARGIN_MARKER_BP, True)
-        self.edit.setMarginSensitivity(self.MARGIN_MARKER_TP, True)
+        self.setMarginSensitivity(self.MARGIN_NUMBERS, True)
+        self.setMarginSensitivity(self.MARGIN_MARKER_BP, True)
+        self.setMarginSensitivity(self.MARGIN_MARKER_TP, True)
         # define symbol
-        self.edit.markerDefine(self.markerBp, self.MARGIN_MARKER_BP)
-        self.edit.markerDefine(self.markerBpDisabled, self.MARGIN_MARKER_BP_DIS)
-        self.edit.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
-        self.edit.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
-        self.edit.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
-        self.edit.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
-        self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
+        self.markerDefine(self.markerBp, self.MARGIN_MARKER_BP)
+        self.markerDefine(self.markerBpDisabled, self.MARGIN_MARKER_BP_DIS)
+        self.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
+        self.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
+        self.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
+        self.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
+        self.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
         # define width and mask to show margin
-        self.edit.setMarginWidth(self.MARGIN_MARKER_BP, 10)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP | 1 << self.MARGIN_MARKER_BP_DIS)
-        self.edit.setMarginWidth(self.MARGIN_MARKER_TP, 10)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_TP, 1 << self.MARGIN_MARKER_TP)
-        self.edit.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
-        self.edit.setMarginMarkerMask(self.MARGIN_MARKER_EXEC,
+        self.setMarginWidth(self.MARGIN_MARKER_BP, 10)
+        self.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP | 1 << self.MARGIN_MARKER_BP_DIS)
+        self.setMarginWidth(self.MARGIN_MARKER_TP, 10)
+        self.setMarginMarkerMask(self.MARGIN_MARKER_TP, 1 << self.MARGIN_MARKER_TP)
+        self.setMarginWidth(self.MARGIN_MARKER_EXEC, 10)
+        self.setMarginMarkerMask(self.MARGIN_MARKER_EXEC,
                 1 << self.MARGIN_MARKER_EXEC |
                 1 << self.MARGIN_MARKER_EXEC_SIGNAL |
                 1 << self.MARGIN_MARKER_STACK)
-        self.edit.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
-        self.edit.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
+        self.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
+        self.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
 
-        self.INDICATOR_TOOLTIP = self.edit.indicatorDefine(self.edit.BoxIndicator, -1)
+        self.INDICATOR_TOOLTIP = self.indicatorDefine(self.BoxIndicator, -1)
 
-        self.edit.setReadOnly(False)
-        self.gridLayout.addWidget(self.edit, 0, 0, 1, 1)
+        self.setReadOnly(False)
 
         if not (QtCore.QFile.exists(filename)):
             logging.error("could not open file", filename)
         self.file_ = QtCore.QFile(filename)
         self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-        self.edit.read(self.file_)
+        self.read(self.file_)
         self.file_.close()
 
         self.changed = False
-        self.edit.modificationChanged.connect(self.__setFileModified)
+        self.modificationChanged.connect(self.__setFileModified)
 
         self.setMarginWidthByLineNumbers()
-        self.edit.SendScintilla(Qsci.QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
+        self.SendScintilla(Qsci.QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
 
         # override scintillas context menu with our own
-        self.edit.SendScintilla(Qsci.QsciScintilla.SCI_USEPOPUP, 0)
-        self.edit.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.edit.customContextMenuRequested.connect(self.showContextMenu)
+        self.SendScintilla(Qsci.QsciScintilla.SCI_USEPOPUP, 0)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
 
-        self.edit.marginClicked.connect(self.marginClicked)
-        self.edit.SCN_DOUBLECLICK.connect(self.editDoubleClicked)
-        self.edit.dwellStart.connect(self.dwellStart)
-        self.edit.dwellEnd.connect(self.dwellEnd)
-
+        self.marginClicked.connect(self.onMarginClicked)
+        self.SCN_DOUBLECLICK.connect(self.editDoubleClicked)
+        self.dwellStart.connect(self.onDwellStart)
+        self.dwellEnd.connect(self.onDwellEnd)
 
         # initially, read all breakpoints and tracepoints from the model
         self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
 
-        _model = self.breakpointController.model()
-        _model.rowsInserted.connect(self.getBreakpointsFromModel)
-        _model.rowsRemoved.connect(self.getBreakpointsFromModel)
-        _model.dataChanged.connect(self.getBreakpointsFromModel)
+        self.__bpModel.rowsInserted.connect(self.breakpointsInserted)
+        # don't connect to rowsRemoved here since the breakpoint is already gone
+        # from the model when it's emitted
+        self.__bpModel.rowsAboutToBeRemoved.connect(self.breakpointsRemoved)
+        self.__bpModel.dataChanged.connect(self.breakpointsModified)
         _model = self.tracepointController.model()
         _model.rowsInserted.connect(self.getTracepointsFromModel)
         _model.rowsRemoved.connect(self.getTracepointsFromModel)
@@ -173,18 +259,20 @@ class OpenedFileView(QObject):
         self.__allowToolTip = True
         self.__enableToolTip(True)
 
+        self.bpLines = []
+
     def updateConfig(self):
         qs = Qsci.QsciScintilla
         c = self.distributedObjects.editorController.config
-        self.edit.setWhitespaceVisibility(qs.WsVisible if c.showWhiteSpaces.value else qs.WsInvisible)
-        self.edit.setIndentationGuides(c.showIndentationGuides.value)
-        self.edit.setTabWidth(int(c.tabWidth.value))
-        self.edit.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
-        self.edit.setFolding(qs.BoxedTreeFoldStyle if c.folding.value else qs.NoFoldStyle, self.MARGIN_MARKER_FOLD)
+        self.setWhitespaceVisibility(qs.WsVisible if c.showWhiteSpaces.value else qs.WsInvisible)
+        self.setIndentationGuides(c.showIndentationGuides.value)
+        self.setTabWidth(int(c.tabWidth.value))
+        self.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
+        self.setFolding(qs.BoxedTreeFoldStyle if c.folding.value else qs.NoFoldStyle, self.MARGIN_MARKER_FOLD)
         self.lexer.setPaper(QColor(c.backgroundColor.value))
         self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Identifier)
         self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Operator)
-        self.edit.setCaretForegroundColor(QColor(c.identifierColor.value))
+        self.setCaretForegroundColor(QColor(c.identifierColor.value))
         self.lexer.setColor(QColor(c.keywordColor.value), self.lexer.Keyword)
         self.lexer.setColor(QColor(c.stringColor.value), self.lexer.SingleQuotedString)
         self.lexer.setColor(QColor(c.stringColor.value), self.lexer.DoubleQuotedString)
@@ -193,8 +281,8 @@ class OpenedFileView(QObject):
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.Comment)
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentLine)
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
-        self.edit.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
-        self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
+        self.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
+        self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
@@ -204,10 +292,10 @@ class OpenedFileView(QObject):
         ''' Save source file '''
         if (QtCore.QFile.exists(self.filename)):
             f = open(self.filename, 'w')
-            f.write(self.edit.text())
+            f.write(self.text())
             f.close()
             self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
-            self.edit.read(self.file_)
+            self.read(self.file_)
             self.file_.close()
             self.__setFileModified(False)
 
@@ -215,42 +303,42 @@ class OpenedFileView(QObject):
         ''' Method called whenever current file is marked as modified '''
         self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
 
-    def dwellStart(self, pos, x, y):
+    def onDwellStart(self, pos, x, y):
         if self.__allowToolTip:
             exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(pos)
 
             # try evaluating the expression before doing anything else: this will return None if the
             # expression is not valid (ie. something that is not a variable)
             if self.debugController.evaluateExpression(exp.strip()) is not None:
-                self.edit.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
-                startPos = self.edit.positionFromLineIndex(line, start)
-                x = self.edit.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
-                y = self.edit.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
-                self.distributedObjects.toolTipController.showToolTip(exp, QtCore.QPoint(x + 3, y + 3 + self.edit.textHeight(line)), self.edit)
+                self.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
+                startPos = self.positionFromLineIndex(line, start)
+                x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
+                y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
+                self.distributedObjects.toolTipController.showToolTip(exp, QtCore.QPoint(x + 3, y + 3 + self.textHeight(line)), self)
 
-    def dwellEnd(self, position, x, y):
+    def onDwellEnd(self, position, x, y):
         self.distributedObjects.toolTipController.hideToolTip()
-        self.edit.clearIndicatorRange(0, 0, self.edit.lines(), 1, self.INDICATOR_TOOLTIP)
+        self.clearIndicatorRange(0, 0, self.lines(), 1, self.INDICATOR_TOOLTIP)
 
     def showContextMenu(self, point):
-        scipos = self.edit.SendScintilla(
+        scipos = self.SendScintilla(
                 Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
-        point = self.edit.mapToGlobal(point)
+        point = self.mapToGlobal(point)
         exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(scipos)
-        self.edit.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
+        self.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
 
-        # self.edit.lineIndexFromPosition(..) returns tuple. first element is line
-        self.lastContexMenuLine = int(self.edit.lineIndexFromPosition(scipos)[0])
+        # self.lineIndexFromPosition(..) returns tuple. first element is line
+        self.lastContexMenuLine = int(self.lineIndexFromPosition(scipos)[0])
 
         listOfTracepoints = self.tracepointController.getTracepointsFromModel()
 
-        self.subPopupMenu = QtGui.QMenu(self.edit)
+        self.subPopupMenu = QtGui.QMenu(self)
         self.subPopupMenu.setTitle("Add variable " + exp + " to...")
 
         for tp in listOfTracepoints:
             self.subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
 
-        self.popupMenu = QtGui.QMenu(self.edit)
+        self.popupMenu = QtGui.QMenu(self)
         self.popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
         self.popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
         self.popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
@@ -266,8 +354,8 @@ class OpenedFileView(QObject):
         self.__allowToolTip = enable
 
     def isPositionInsideSelection(self, position):
-        lf, cf, lt, ct = self.edit.getSelection()
-        pl, pc = self.edit.lineIndexFromPosition(position)
+        lf, cf, lt, ct = self.getSelection()
+        pl, pc = self.lineIndexFromPosition(position)
 
         if lf < pl and pl < lt:
             return True
@@ -282,21 +370,21 @@ class OpenedFileView(QObject):
 
     def getWordOrSelectionAndRangeFromPosition(self, position):
         if self.isPositionInsideSelection(position):
-            line, start, lineTo, end = self.edit.getSelection()
+            line, start, lineTo, end = self.getSelection()
             if line != lineTo:
-                return ""
+                return "", (None, None, None)
         else:
             line, start, end = self.getWordRangeFromPosition(position)
-        l = str(self.edit.text(line))
+        l = str(self.text(line))
         return l[start:end], (line, start, end)
 
     def getWordRangeFromPosition(self, position):
-        line, col = self.edit.lineIndexFromPosition(position)
-        s = str(self.edit.text(line))
+        line, col = self.lineIndexFromPosition(position)
+        s = str(self.text(line))
         start = col - 1
         end = col
 
-        r = re.compile(r'[\w\d_\.]')    # FIXME: also scan over ->
+        r = re.compile(r'[\w\d_\.]')
         while start >= 0:
             if not r.match(s[start]):
                 break
@@ -311,28 +399,29 @@ class OpenedFileView(QObject):
 
     def editDoubleClicked(self, position, line, modifiers):
         line, start, end = self.getWordRangeFromPosition(position)
-        l = str(self.edit.text(line))
-        self.signalProxy.addWatch(str(l[start:end]))
+        w = str(self.text(line))[start:end]
+        if w:
+            self.signalProxy.addWatch(w)
 
     def showExecutionPosition(self, line):
-        self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC)
+        self.markerAdd(line, self.MARGIN_MARKER_EXEC)
         self.showLine(line)
 
     def showSignalPosition(self, line):
-        self.edit.markerAdd(line, self.MARGIN_MARKER_EXEC_SIGNAL)
+        self.markerAdd(line, self.MARGIN_MARKER_EXEC_SIGNAL)
         self.showLine(line)
 
     def showLine(self, line):
-        self.edit.setCursorPosition(line, 1)
-        self.edit.ensureLineVisible(line)
+        self.setCursorPosition(line, 1)
+        self.ensureLineVisible(line)
 
     def clearExecutionPositionMarkers(self):
-        self.edit.markerDeleteAll(self.MARGIN_MARKER_EXEC)
+        self.markerDeleteAll(self.MARGIN_MARKER_EXEC)
 
     def setMarginWidthByLineNumbers(self):
-        self.edit.setMarginWidth(0, ceil(log(self.edit.lines(), 10)) * 10 + 5)
+        self.setMarginWidth(0, ceil(log(self.lines(), 10)) * 10 + 5)
 
-    def marginClicked(self, margin, line, state):
+    def onMarginClicked(self, margin, line, state):
         # if breakpoint should be toggled
         if margin == self.MARGIN_NUMBERS or margin == self.MARGIN_MARKER_BP:
             self.toggleBreakpointWithLine(line)
@@ -350,28 +439,70 @@ class OpenedFileView(QObject):
 
     def getBreakpointsFromModel(self, parent=None, start=None, end=None):
         """Get breakpoints from model."""
-        # TODO: don't reload all breakpoints, just the one referenced by parent/start/end
-        self.edit.markerDeleteAll(self.MARGIN_MARKER_BP)
-        self.edit.markerDeleteAll(self.MARGIN_MARKER_BP_DIS)
+        self.markerDeleteAll(self.MARGIN_MARKER_BP)
+        self.markerDeleteAll(self.MARGIN_MARKER_BP_DIS)
+
+        self.removeAllOverlayWidgets()
+        self.breakpointOverlays = {}
+
         for bp in self.breakpointController.getBreakpointsFromModel():
             if bp.fullname == self.filename:
-                if bp.enabled:
-                    self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP)
-                else:
-                    self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP_DIS)
+                self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
+                self.__addBreakpointOverlay(bp)
+
+    def __addBreakpointOverlay(self, bp):
+        l = BreakpointOverlayWidget(self.viewport(), bp, self.__bpModel)
+        self.breakpointOverlays[bp.number] = l
+        self.__updateBreakpointOverlay(bp)
+        l.show()
+        self.addOverlayWidget(l, int(bp.line), None, 50, 400)
+
+    def __updateBreakpointOverlay(self, bp):
+        w = self.breakpointOverlays[bp.number]
+        w.update()
+
+    def __removeBreakpointOverlay(self, bp):
+        self.removeOverlayWidget(self.breakpointOverlays[bp.number], bp.line)
+
+    def __validBreakpoints(self, startRow, endRow):
+        for i in xrange(startRow, endRow + 1):
+            # the column has no meaning here, all columns will return the
+            # breakpoint object for role InternalDataRole
+            bp = self.__bpModel.data(self.__bpModel.index(i, 0), self.__bpModel.InternalDataRole)
+            if not bp.fullname == self.filename:
+                continue
+            yield bp
+
+    def breakpointsInserted(self, parent, start, end):
+        for bp in self.__validBreakpoints(start, end):
+            self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
+            self.__addBreakpointOverlay(bp)
+
+    def breakpointsRemoved(self, parent, start, end):
+        for bp in self.__validBreakpoints(start, end):
+            self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP)
+            self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP_DIS)
+            self.__removeBreakpointOverlay(bp)
+
+    def breakpointsModified(self, topLeft, bottomRight):
+        for bp in self.__validBreakpoints(topLeft.row(), bottomRight.row()):
+            self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP)
+            self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP_DIS)
+            self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
+            self.__updateBreakpointOverlay(bp)
 
     def getTracepointsFromModel(self):
         """Get tracepoints from model."""
-        self.edit.markerDeleteAll(self.MARGIN_MARKER_TP)
+        self.markerDeleteAll(self.MARGIN_MARKER_TP)
         for tp in self.tracepointController.getTracepointsFromModel():
             if tp.fullname == self.filename:
-                self.edit.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
+                self.markerAdd(int(tp.line) - 1, self.MARGIN_MARKER_TP)
 
     def highlightLine(self, line):
         self.removeHighlightedLines()
-        self.edit.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE)
+        self.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE)
         QTimer.singleShot(int(self.distributedObjects.editorController.config.highlightingDuration.value),
                           self.removeHighlightedLines)
 
     def removeHighlightedLines(self):
-        self.edit.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)
+        self.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)

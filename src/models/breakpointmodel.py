@@ -42,12 +42,10 @@ class ExtendedBreakpoint(QObject):
     """This class provides all members for basic gdb Breakpoint and extends it with
     more members like condition, name and interval.
     """
-    def __init__(self, breakpoint, counter, connector):
+    def __init__(self, breakpoint, connector):
         """Initializes the Object.
         The breakPoint comes from gdb. Here it will be extended.
         @param breakPoint: type is a struct, provided from gdb, then parsed
-        @param counter: type is integer, every breakpoint becomes a initial name
-        \"Point<nr>\", nr is the counter value
         @param connector: type is GdbConnector, needed to communicate with gdb
         @note     there is a special case when creating breakpoints. for example if
                 a breakpoint is set on end of a \"if{}\" and the \"}\" is the one
@@ -72,7 +70,7 @@ class ExtendedBreakpoint(QObject):
         self.original_location = None
         self.times = None
         self.type = None
-        self.name = "Point %s" % counter
+        self.name = None
         self.condition = "true"
         self.skip = None
 
@@ -83,9 +81,9 @@ class ExtendedBreakpoint(QObject):
         self.addr = rec.addr
         self.disp = rec.disp
         self.enabled = {"y": True, "n": False}[rec.enabled]
-        self.number = rec.number
+        self.number = int(rec.number)
         self.originalLocation = rec.__dict__['original-location']
-        self.times = rec.times
+        self.times = int(rec.times)
         self.type = rec.type
         if hasattr(rec, "cond"):
             self.condition = rec.cond
@@ -103,7 +101,7 @@ class ExtendedBreakpoint(QObject):
             self.func = getattr(rec, "func", None)
             if not self.func:
                 self.func = getattr(rec, "at", None)
-            self.line = getattr(rec, "line", "-1")
+            self.line = int(getattr(rec, "line", "-1"))
 
     def parseOriginalLocation(self, origLoc):
         """ needed for special case of breakpoints <MULTIPLE> address"""
@@ -128,12 +126,13 @@ class BreakpointModel(QAbstractTableModel):
             'skip',
             'times',
             'name']
+    InternalDataRole = Qt.UserRole
 
     def __init__(self, connector, parent=None):
         QAbstractTableModel.__init__(self, parent)
         self.breakpoints = []
         self.connector = connector
-        #self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
+        # self.connector.reader.forwardMultipleBreakpointInfo.connect(self.handleMultipleBreakpointInfo)
 
         self.enabledBp = QPixmap(":/icons/images/bp.png")
         self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
@@ -202,7 +201,7 @@ class BreakpointModel(QAbstractTableModel):
         @return (int), returns the real linenumber that gdb is choosing
         """
         res = self.connector.insertBreakpoint(file_, line)
-        extendedBreakpoint = ExtendedBreakpoint(res.bkpt, len(self.breakpoints), self.connector)
+        extendedBreakpoint = ExtendedBreakpoint(res.bkpt, self.connector)
 
         self.beginInsertRows(QModelIndex(), len(self.breakpoints), len(self.breakpoints))
         self.breakpoints.append(extendedBreakpoint)
@@ -238,42 +237,57 @@ class BreakpointModel(QAbstractTableModel):
         self.breakpoints.remove(bp)
         self.endRemoveRows()
 
+    def __findRowForNumber(self, number):
+        for i, bp in enumerate(self.breakpoints):
+            if bp.number == number:
+                return i, bp
+        else:
+            return None, None
+
     def enableBreakpoint(self, number):
         """ enable breakpoint with number number
         @param number: (int), the number of breakpoint that should be enabled"""
-        self.connector.enableBreakpoint(number)
+        row, bp = self.__findRowForNumber(number)
+        if row is not None:
+            self.connector.enableBreakpoint(number)
+            bp.enabled = True
+            self.__emitDataChangedForRow(row)
 
     def disableBreakpoint(self, number):
         """ disable breakpoint with number number
         @param number: (int), the number of breakpoint that should be disabled"""
-        self.connector.disableBreakpoint(number)
+        row, bp = self.__findRowForNumber(number)
+        if row is not None:
+            self.connector.disableBreakpoint(number)
+            bp.enabled = False
+            self.__emitDataChangedForRow(row)
 
     def changeCondition(self, number, condition):
         """ sets a condition condition to the specified breakpoint with number number
         @param number: (int), the number of breakpoint
         @param condition: (string), a condition like "var == 2" """
-        self.connector.setConditionBreakpoint(number, condition)
+        row, bp = self.__findRowForNumber(number)
+        if row is not None:
+            self.connector.setConditionBreakpoint(number, condition)
+            bp.condition = condition
+            self.__emitDataChangedForRow(row)
 
     def changeSkip(self, number, skip):
         """ gdb will skip the breakpoint number number skip times
         @param number: (int), the number of breakpoint
         @param skip: (int), specifies how often breakpoint should be skipped"""
-        self.connector.setSkipBreakpoint(number, skip)
+        row, bp = self.__findRowForNumber(number)
+        if row is not None:
+            self.connector.setSkipBreakpoint(number, skip)
+            bp.skip = int(skip)
+            self.__emitDataChangedForRow(row)
 
     def updateBreakpointFromGdbRecord(self, rec):
         for info in rec.results:
             assert info.dest == "bkpt"
-            num = info.src.number
-            for i, bp in enumerate(self.breakpoints):
-                if num == bp.number:
-                    break
-            else:
-                # this is not a breakpoint inside our model
-                return
+            row, bp = self.__findRowForNumber(int(info.src.number))
             bp.fromGdbRecord(info.src)
-            firstIndex = self.index(i, 0, QModelIndex())
-            secondIndex = self.index(i, self.columnCount(None), QModelIndex())
-            self.dataChanged.emit(firstIndex, secondIndex)
+            self.__emitDataChangedForRow(row)
 
     def rowCount(self, parent):
         return len(self.breakpoints)
@@ -289,8 +303,11 @@ class BreakpointModel(QAbstractTableModel):
         column = index.column()
 
         bp = self.breakpoints[index.row()]
-        if role == Qt.DisplayRole:
-            return getattr(bp, self.KEYS[column]) if self.KEYS[column] != 'enabled' else None
+
+        if role == self.InternalDataRole:
+            ret = bp
+        elif role == Qt.DisplayRole:
+            ret = getattr(bp, self.KEYS[column]) if self.KEYS[column] != 'enabled' else None
         elif role == Qt.CheckStateRole:
             if self.KEYS[column] == 'enabled':
                 ret = Qt.Checked if bp.enabled else Qt.Unchecked
@@ -305,8 +322,8 @@ class BreakpointModel(QAbstractTableModel):
 
         if orientation == Qt.Horizontal:
             if role == Qt.DisplayRole:
-                ret = ["", # Number
-                       "", # Enabled
+                ret = ["",  # Number
+                       "",  # Enabled
                        "File",
                        "Line",
                        "Address",
@@ -332,6 +349,11 @@ class BreakpointModel(QAbstractTableModel):
 
         return f
 
+    def __emitDataChangedForRow(self, row):
+        firstIndex = self.index(row, 0, QModelIndex())
+        secondIndex = self.index(row, self.columnCount(None) - 1, QModelIndex())
+        self.dataChanged.emit(firstIndex, secondIndex)
+
     def setData(self, index, value, role):
         bp = self.breakpoints[index.row()]
         column = index.column()
@@ -345,28 +367,22 @@ class BreakpointModel(QAbstractTableModel):
             except GdbError as e:
                 logging.error("Could not set condition: %s", str(e))
                 return False
-            bp.condition = cond
         elif self.KEYS[column] == 'skip':
             validSkip = QVariant(value).toInt()
             if not validSkip[1]:
                 logging.error("Invalid value for skip, must be an integer.")
                 return False
-            bp.skip = int(validSkip[0])
-            self.changeSkip(bp.number, str(bp.skip))
+            self.changeSkip(bp.number, int(validSkip[0]))
         elif self.KEYS[column] == 'enabled':
             if role == Qt.CheckStateRole:
                 if not QVariant(value).toBool():
-                    bp.enabled = False
                     self.disableBreakpoint(bp.number)
                 else:
-                    bp.enabled = True
                     self.enableBreakpoint(bp.number)
         elif self.KEYS[column] == 'name':
             bp.name = str(value.toString())
 
-        # make sure the view is updated
-        firstIndex = self.index(index.row(), 0, QModelIndex())
-        secondIndex = self.index(index.row(), self.columnCount(None), QModelIndex())
-        self.dataChanged.emit(firstIndex, secondIndex)
+            # make sure the view is updated
+            self.__emitDataChangedForRow(index.row())
 
         return True

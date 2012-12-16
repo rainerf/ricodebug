@@ -70,9 +70,9 @@ class EditorView(QWidget):
 
         if ret != QMessageBox.Cancel:
             for i in self.openedFiles.values():
-                if w == i.tab:
+                if w == i:
                     if i.shown:
-                        self.tabWidget.removeTab(self.tabWidget.indexOf(i.tab))
+                        self.tabWidget.removeTab(self.tabWidget.indexOf(i))
                         i.shown = False
                     if i.filename in self.openedFiles:
                         del self.openedFiles[i.filename]
@@ -88,7 +88,7 @@ class EditorView(QWidget):
     def getCurrentOpenedFile(self):
         w = self.tabWidget.currentWidget()
         for i in self.openedFiles.values():
-            if w == i.tab:
+            if w == i:
                 return i
 
     def removeAllTabs(self):
@@ -109,14 +109,13 @@ class EditorView(QWidget):
         if not self.isOpen(filename):
             self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename, self)
             self.showFile(filename)
-        self.openedFiles[filename].getBreakpointsFromModel()
-        self.tabWidget.setCurrentWidget(self.openedFiles[filename].tab)
+        self.tabWidget.setCurrentWidget(self.openedFiles[filename])
 
     def showFile(self, filename):
         opened_file = self.openedFiles[filename]
         if not opened_file.shown:
-            self.tabWidget.addTab(opened_file.tab, os.path.basename(filename))
-            self.tabWidget.setCurrentWidget(opened_file.tab)
+            self.tabWidget.addTab(opened_file, os.path.basename(filename))
+            self.tabWidget.setCurrentWidget(opened_file)
             opened_file.shown = True
 
     def setFileModified(self, filename, modified):
@@ -124,12 +123,12 @@ class EditorView(QWidget):
         if filename in self.openedFiles:
             if (modified):
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
-                    self.openedFiles[filename].tab),
+                    self.openedFiles[filename]),
                     os.path.basename(filename) + '*')
                 self.act.SaveFile.setEnabled(True)
             else:
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
-                    self.openedFiles[filename].tab),
+                    self.openedFiles[filename]),
                     os.path.basename(filename))
                 self.act.SaveFile.setEnabled(False)
 
