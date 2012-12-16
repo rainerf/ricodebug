@@ -95,14 +95,30 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
     def removeOverlayWidget(self, w, line):
         line -= 1
+
+        if not line in self.__overlayWidgets:
+            # don't panic if the user requests to remove a non-existing overlay
+            return
+
         self.__overlayWidgets[line].layout().removeWidget(w)
         w.setParent(None)
-        self.__overlayWidgets[line].layout().activate()
-        self.__overlayWidgets[line].resize(self.__overlayWidgets[line].layout().minimumSize())
+        self.__relayoutOverlay(self.__overlayWidgets[line])
+
+    def __relayoutOverlay(self, overlay):
+        overlay.layout().activate()
+        overlay.resize(overlay.layout().minimumSize())
 
     def removeAllOverlayWidgets(self):
-        for line, w in self.__overlayWidgets.items():
-            self.removeOverlayWidget(w, line)
+        for line, cont in self.__overlayWidgets.items():
+            # remove all overlays from the container
+            while True:
+                w = self.__overlayWidgets[line].layout().takeAt(0)
+                if not w:
+                    break
+
+            # remove the container itself
+            cont.setParent(None)
+        self.__overlayWidgets = {}
 
     def scrollContentsBy(self, dx, dy):
         for w in self.__overlayWidgets.itervalues():
@@ -236,10 +252,6 @@ class OpenedFileView(ScintillaWrapper):
         self.dwellStart.connect(self.onDwellStart)
         self.dwellEnd.connect(self.onDwellEnd)
 
-        # initially, read all breakpoints and tracepoints from the model
-        self.getBreakpointsFromModel()
-        self.getTracepointsFromModel()
-
         self.__bpModel.rowsInserted.connect(self.breakpointsInserted)
         # don't connect to rowsRemoved here since the breakpoint is already gone
         # from the model when it's emitted
@@ -254,6 +266,10 @@ class OpenedFileView(ScintillaWrapper):
 
         self.distributedObjects.editorController.config.itemsHaveChanged.connect(self.updateConfig)
         self.updateConfig()
+
+        # initially, read all breakpoints and tracepoints from the model
+        self.getBreakpointsFromModel()
+        self.getTracepointsFromModel()
 
         self.__allowToolTip = True
         self.__enableToolTip(True)
@@ -282,6 +298,11 @@ class OpenedFileView(ScintillaWrapper):
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
         self.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
         self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
+
+        # check whether we're supposed to use overlays and reload everything
+        # that uses them
+        self.__useBreakpointOverlays = c.useBreakpointOverlays.value
+        self.getBreakpointsFromModel()
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
@@ -436,8 +457,7 @@ class OpenedFileView(ScintillaWrapper):
     def toggleTracepoint(self):
         self.toggleTracepointWithLine(self.lastContexMenuLine)
 
-    def getBreakpointsFromModel(self, parent=None, start=None, end=None):
-        """Get breakpoints from model."""
+    def getBreakpointsFromModel(self):
         self.markerDeleteAll(self.MARGIN_MARKER_BP)
         self.markerDeleteAll(self.MARGIN_MARKER_BP_DIS)
 
@@ -450,6 +470,9 @@ class OpenedFileView(ScintillaWrapper):
                 self.__addBreakpointOverlay(bp)
 
     def __addBreakpointOverlay(self, bp):
+        if not self.__useBreakpointOverlays:
+            return
+
         l = BreakpointOverlayWidget(self.viewport(), bp, self.__bpModel)
         self.breakpointOverlays[bp.number] = l
         self.__updateBreakpointOverlay(bp)
@@ -457,10 +480,16 @@ class OpenedFileView(ScintillaWrapper):
         self.addOverlayWidget(l, int(bp.line), None, 50, 400)
 
     def __updateBreakpointOverlay(self, bp):
+        if not self.__useBreakpointOverlays:
+            return
+
         w = self.breakpointOverlays[bp.number]
         w.update()
 
     def __removeBreakpointOverlay(self, bp):
+        if not self.__useBreakpointOverlays:
+            return
+
         self.removeOverlayWidget(self.breakpointOverlays[bp.number], bp.line)
 
     def __validBreakpoints(self, startRow, endRow):
