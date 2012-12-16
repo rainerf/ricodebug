@@ -95,7 +95,7 @@ class ThreadModel(QAbstractTableModel):
 
                     # update the views
                     firstIndex = self.index(i, 0, QModelIndex())
-                    secondIndex = self.index(i, self.columnCount(None), QModelIndex())
+                    secondIndex = self.index(i, self.columnCount(None) - 1, QModelIndex())
                     self.dataChanged.emit(firstIndex, secondIndex)
                     break
 
