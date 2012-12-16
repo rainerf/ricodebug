@@ -285,8 +285,9 @@ class BreakpointModel(QAbstractTableModel):
         for info in rec.results:
             assert info.dest == "bkpt"
             row, bp = self.__findRowForNumber(int(info.src.number))
-            bp.fromGdbRecord(info.src)
-            self.__emitDataChangedForRow(row)
+            if row:
+                bp.fromGdbRecord(info.src)
+                self.__emitDataChangedForRow(row)
 
     def rowCount(self, parent):
         return len(self.breakpoints)

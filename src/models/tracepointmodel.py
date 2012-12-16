@@ -67,9 +67,9 @@ class Tracepoint(ExtendedBreakpoint):
         @param sensitiveVariable: is the sensitive variable.
         Use extendedBreakpoints for this. If extBP occures
         then the variables and their values will be stored.
-        @param nr: needed to initialize ExtendedBreakpoint class
         """
-        ExtendedBreakpoint.__init__(self, sensitiveVariable, nr, distObjects.gdb_connector)
+        ExtendedBreakpoint.__init__(self, sensitiveVariable, distObjects.gdb_connector)
+        self.name = "TP #%s" % nr
         """here are the traced variables stored with their values"""
         self.gdb_connector = distObjects.gdb_connector
         self.distObjects = distObjects

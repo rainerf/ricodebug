@@ -69,21 +69,20 @@ class EditorController(QObject):
     def jumpToLine(self, filename, line):
         line = int(line) - 1
         self.editor_view.openFile(filename)
-        file_ = self.editor_view.openedFiles[filename]
-        file_.showLine(line)
-        file_.highlightLine(line)
+        editor = self.editor_view.openedFiles[filename]
+        editor.showLine(line)
+        editor.highlightLine(line)
 
     def addStackMarker(self, filename, line):
         line = int(line) - 1
         self.editor_view.openFile(filename)
-        file_ = self.editor_view.openedFiles[filename]
-        file_.edit.markerAdd(line, file_.MARGIN_MARKER_STACK)
+        editor = self.editor_view.openedFiles[filename]
+        editor.markerAdd(line, editor.MARGIN_MARKER_STACK)
 
     def delStackMarkers(self, filename):
         if self.editor_view.isOpen(filename):
-            file_ = self.editor_view.openedFiles[filename]
-            editor = file_.edit
-            editor.markerDeleteAll(file_.MARGIN_MARKER_STACK)
+            editor = self.editor_view.openedFiles[filename]
+            editor.markerDeleteAll(editor.MARGIN_MARKER_STACK)
 
     def saveCurrentFile(self):
         self.editor_view.getCurrentOpenedFile().saveFile()
