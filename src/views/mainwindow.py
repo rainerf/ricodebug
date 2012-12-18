@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.editorController = self.distributedObjects.editorController
 
         self.act = self.distributedObjects.actions
-        #init RecentFileHandler
+        # init RecentFileHandler
         self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         self.debugController.executableOpened.connect(self.recentFileHandler.addToRecentFiles)
         self.debugController.executableOpened.connect(self.__observeWorkingBinary)
@@ -77,7 +77,6 @@ class MainWindow(QMainWindow):
 
         self.setWindowFilePath("<none>")
         self.setupUi()
-        self.createInitialWindowPlacement()
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
@@ -230,38 +229,6 @@ class MainWindow(QMainWindow):
         """ show plugin as menu entry """
         self.ui.menuPlugins.addAction(Action)
 
-    def createInitialWindowPlacement(self):
-        """
-        Saves the window and widget placement after first start of program.
-        """
-        #check if settings do not exist
-        initExists = self.settings.contains("InitialWindowPlacement/geometry")
-        if not initExists:
-            self.breakpointWidget = self.findChild(QDockWidget, "BreakpointView")
-            self.fileListWidget = self.findChild(QDockWidget, "FileListView")
-            self.dataGraphWidget = self.findChild(QDockWidget, "DataGraphView")
-            self.watchWidget = self.findChild(QDockWidget, "WatchView")
-            self.localsWidget = self.findChild(QDockWidget, "LocalsView")
-            self.stackWidget = self.findChild(QDockWidget, "StackView")
-            self.tracepointWidget = self.findChild(QDockWidget, "TracepointView")
-            self.gdbIoWidget = self.findChild(QDockWidget, "GdbIoView")
-            self.pyIoWidget = self.findChild(QDockWidget, "PyIoView")
-            self.inferiorIoWidget = self.findChild(QDockWidget, "InferiorIoView")
-
-            #tabify widgets to initial state and save settings
-            self.tabifyDockWidget(self.fileListWidget, self.dataGraphWidget)
-            self.tabifyDockWidget(self.watchWidget, self.localsWidget)
-            self.tabifyDockWidget(self.localsWidget, self.stackWidget)
-            self.tabifyDockWidget(self.stackWidget, self.breakpointWidget)
-            self.tabifyDockWidget(self.breakpointWidget, self.tracepointWidget)
-            self.tabifyDockWidget(self.gdbIoWidget, self.pyIoWidget)
-            self.tabifyDockWidget(self.pyIoWidget, self.inferiorIoWidget)
-
-            self.settings.setValue("InitialWindowPlacement/geometry", \
-                    self.saveGeometry())
-            self.settings.setValue("InitialWindowPlacement/windowState", \
-                    self.saveState())
-
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
@@ -282,7 +249,7 @@ class MainWindow(QMainWindow):
             self.pluginloader.savePluginInfo(filename)
 
     def showExecutableName(self, filename):
-        self.ui.actionSaveSession.setEnabled(True)   # enable saving session
+        self.ui.actionSaveSession.setEnabled(True)  # enable saving session
         self.setWindowFilePath(filename)
 
     def targetStartedRunning(self):
