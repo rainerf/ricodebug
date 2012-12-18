@@ -35,3 +35,8 @@ class InferiorIoView(QTextEdit):
         self.moveCursor(QTextCursor.End)
         self.insertPlainText(data)
         self.moveCursor(QTextCursor.End)
+
+        try:
+            self.parent().setAlerted()
+        except AttributeError:
+            pass

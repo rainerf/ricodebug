@@ -66,7 +66,7 @@ class GdbConnector(QObject):
         if res.class_ == GdbOutput.ERROR:
             logging.error(res.msg)
             if error_msg:
-                logging.error(error_msg)
+                logging.error("%s\n%s", error_msg, res.msg)
             raise helpers.excep.GdbError(res.msg)
 
         return res

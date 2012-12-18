@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap, \
+from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
         QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
 from PyQt4.QtCore import QFileSystemWatcher
 from .ui_mainwindow import Ui_MainWindow
@@ -31,6 +31,7 @@ from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
+from views.alertabledockwidget import AlertableDockWidget
 
 
 class MainWindow(QMainWindow):
@@ -52,7 +53,7 @@ class MainWindow(QMainWindow):
         self.editorController = self.distributedObjects.editorController
 
         self.act = self.distributedObjects.actions
-        #init RecentFileHandler
+        # init RecentFileHandler
         self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         self.debugController.executableOpened.connect(self.recentFileHandler.addToRecentFiles)
         self.debugController.executableOpened.connect(self.__observeWorkingBinary)
@@ -77,7 +78,6 @@ class MainWindow(QMainWindow):
 
         self.setWindowFilePath("<none>")
         self.setupUi()
-        self.createInitialWindowPlacement()
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
         self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
 
     def insertDockWidget(self, widget, name, area, addToggleViewAction):
-        d = QDockWidget(name, self)
+        d = AlertableDockWidget(name, self)
         d.setObjectName(name)
         d.setWidget(widget)
 
@@ -230,38 +230,6 @@ class MainWindow(QMainWindow):
         """ show plugin as menu entry """
         self.ui.menuPlugins.addAction(Action)
 
-    def createInitialWindowPlacement(self):
-        """
-        Saves the window and widget placement after first start of program.
-        """
-        #check if settings do not exist
-        initExists = self.settings.contains("InitialWindowPlacement/geometry")
-        if not initExists:
-            self.breakpointWidget = self.findChild(QDockWidget, "BreakpointView")
-            self.fileListWidget = self.findChild(QDockWidget, "FileListView")
-            self.dataGraphWidget = self.findChild(QDockWidget, "DataGraphView")
-            self.watchWidget = self.findChild(QDockWidget, "WatchView")
-            self.localsWidget = self.findChild(QDockWidget, "LocalsView")
-            self.stackWidget = self.findChild(QDockWidget, "StackView")
-            self.tracepointWidget = self.findChild(QDockWidget, "TracepointView")
-            self.gdbIoWidget = self.findChild(QDockWidget, "GdbIoView")
-            self.pyIoWidget = self.findChild(QDockWidget, "PyIoView")
-            self.inferiorIoWidget = self.findChild(QDockWidget, "InferiorIoView")
-
-            #tabify widgets to initial state and save settings
-            self.tabifyDockWidget(self.fileListWidget, self.dataGraphWidget)
-            self.tabifyDockWidget(self.watchWidget, self.localsWidget)
-            self.tabifyDockWidget(self.localsWidget, self.stackWidget)
-            self.tabifyDockWidget(self.stackWidget, self.breakpointWidget)
-            self.tabifyDockWidget(self.breakpointWidget, self.tracepointWidget)
-            self.tabifyDockWidget(self.gdbIoWidget, self.pyIoWidget)
-            self.tabifyDockWidget(self.pyIoWidget, self.inferiorIoWidget)
-
-            self.settings.setValue("InitialWindowPlacement/geometry", \
-                    self.saveGeometry())
-            self.settings.setValue("InitialWindowPlacement/windowState", \
-                    self.saveState())
-
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
         if (filename != ""):
@@ -282,17 +250,20 @@ class MainWindow(QMainWindow):
             self.pluginloader.savePluginInfo(filename)
 
     def showExecutableName(self, filename):
-        self.ui.actionSaveSession.setEnabled(True)   # enable saving session
+        self.ui.actionSaveSession.setEnabled(True)  # enable saving session
         self.setWindowFilePath(filename)
 
     def targetStartedRunning(self):
         self.ui.statusLabel.setText("Running")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/running.png"))
-        self.enableButtons()
+        self.disableButtons()
+        self.act.Interrupt.setEnabled(True)
 
     def targetStopped(self, rec):
         self.ui.statusLabel.setText("Stopped")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/stopped.png"))
+        self.enableButtons()
+        self.act.Interrupt.setEnabled(False)
 
     def targetExited(self):
         self.ui.statusLabel.setText("Not running")
