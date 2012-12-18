@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QDockWidget, QPixmap, \
+from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
         QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
 from PyQt4.QtCore import QFileSystemWatcher
 from .ui_mainwindow import Ui_MainWindow
@@ -31,6 +31,7 @@ from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
+from views.alertabledockwidget import AlertableDockWidget
 
 
 class MainWindow(QMainWindow):
@@ -201,7 +202,7 @@ class MainWindow(QMainWindow):
         self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
 
     def insertDockWidget(self, widget, name, area, addToggleViewAction):
-        d = QDockWidget(name, self)
+        d = AlertableDockWidget(name, self)
         d.setObjectName(name)
         d.setWidget(widget)
 
