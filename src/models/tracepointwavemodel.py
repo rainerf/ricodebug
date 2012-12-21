@@ -199,12 +199,12 @@ class TracepointWaveModel(QAbstractTableModel):
         i = self.__getTracepointWaveIndex(name, type_)
 
         if i != None:
-            #append value to existing wave
+            # append value to existing wave
             wave = self.data(i, Qt.EditRole)
             wave.scene().appendValue(value, self.duration)
             self.setData(i, wave)
         else:
-            #insert new wave
+            # insert new wave
             waveform = TracepointWaveGraphicsView(name)
             waveform.setScene(TracepointWaveScene(type_, [value], self.duration))
 
@@ -227,7 +227,7 @@ class TracepointWaveModel(QAbstractTableModel):
             waveform.setScene(TracepointWaveScene(prevScene.type, prevScene.values, self.duration))
             self.waveforms[i] = waveform
             index = self.createIndex(i, self.wavecolumn, None)
-            self.dataChanged(index, index)
+            self.dataChanged.emit(index, index)
 
     def zoomOut(self):
         '''Zoom wave horizontally'''
