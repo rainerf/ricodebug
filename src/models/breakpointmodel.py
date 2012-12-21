@@ -139,9 +139,6 @@ class BreakpointModel(QAbstractTableModel):
         self.enabledBp = QPixmap(":/icons/images/bp.png")
         self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
 
-    def getBreakpoints(self):
-        return self.breakpoints
-
     def setBreakpoints(self, bpList):
         """ deletes all breakpoints in current list, and fill the list up with all breakpoints in bpList
         @param bpList: (List<Breakpoint>)

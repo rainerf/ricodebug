@@ -486,7 +486,7 @@ class OpenedFileView(ScintillaWrapper):
         self.removeAllOverlayWidgets()
         self.breakpointOverlays = {}
 
-        for bp in self.__bpModel.getBreakpoints():
+        for bp in self.__bpModel.breakpoints:
             if bp.fullname == self.filename:
                 self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
                 self.__addBreakpointOverlay(bp)
