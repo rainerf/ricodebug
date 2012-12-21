@@ -134,7 +134,8 @@ class BreakpointModel(QAbstractTableModel):
         self.connector = do.gdb_connector
         do.signalProxy.cleanupModels.connect(self.clearBreakpoints)
         do.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
-        do.signalProxy.breakpointModified.connect(self.updateBreakpointFromGdbRecord)
+        do.signalProxy.breakpointModified.connect(self.__updateBreakpointFromGdbRecord)
+        do.signalProxy.runClicked.connect(self.__resetHitCounters)
 
         self.enabledBp = QPixmap(":/icons/images/bp.png")
         self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
@@ -278,13 +279,18 @@ class BreakpointModel(QAbstractTableModel):
             bp.skip = int(skip)
             self.__emitDataChangedForRow(row)
 
-    def updateBreakpointFromGdbRecord(self, rec):
+    def __updateBreakpointFromGdbRecord(self, rec):
         for info in rec.results:
             assert info.dest == "bkpt"
             row, bp = self.__findRowForNumber(int(info.src.number))
             if row is not None:
                 bp.fromGdbRecord(info.src)
                 self.__emitDataChangedForRow(row)
+
+    def __resetHitCounters(self):
+        for row, bp in enumerate(self.breakpoints):
+            bp.times = 0
+            self.__emitDataChangedForRow(row)
 
     def rowCount(self, parent):
         return len(self.breakpoints)
