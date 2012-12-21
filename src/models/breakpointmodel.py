@@ -285,7 +285,7 @@ class BreakpointModel(QAbstractTableModel):
         for info in rec.results:
             assert info.dest == "bkpt"
             row, bp = self.__findRowForNumber(int(info.src.number))
-            if row:
+            if row is not None:
                 bp.fromGdbRecord(info.src)
                 self.__emitDataChangedForRow(row)
 
