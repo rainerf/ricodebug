@@ -28,6 +28,7 @@ from operator import attrgetter
 from .breakpointmodel import ExtendedBreakpoint
 from variables.variablelist import VariableList
 from variables.varwrapperfactory import VarWrapperFactory
+from helpers.tools import cpp2py
 
 
 class ValueList():
@@ -45,7 +46,7 @@ class ValueList():
         if type_ == "int":
             self.values.append(int(val))
         elif type_ == "bool":
-            self.values.append(val == "true")
+            self.values.append(cpp2py(val))
         elif type_ == "float" or self.type == "double":
             self.values.append(float(val))
 
@@ -75,10 +76,6 @@ class Tracepoint(ExtendedBreakpoint):
         self.distObjects = distObjects
         self.vwFactory = VarWrapperFactory()
         self.variableList = VariableList(self.vwFactory, distObjects)
-        self.counter = 0
-        self.hitted = False
-        self.stop = False
-        self.distObjects.signalProxy.dataForTracepointsReady.connect(self.readDataFromVarModel)
         self.wave = []
 
     def addVar(self, variableToTrace):
@@ -88,27 +85,12 @@ class Tracepoint(ExtendedBreakpoint):
         newValueList = ValueList(variableToTrace, vw.type)
         self.wave.append(newValueList)
 
-    def tracePointOccurred(self, stop):
-        """ set if stop is needed or not
-        @param stop: (bool), gdb stops after tracing if True, gdb continues after tracing if False
-        """
-        self.stop = stop
-        self.hitted = True
-
-    def readDataFromVarModel(self):
+    def recordData(self):
         """tracepoint occurred: get values of all traced variables then continue debugging """
-        if self.hitted:
-            self.hitted = False
-            self.counter = self.counter + 1
-
-            for varList in self.wave:
-                for v in self.variableList.list:
-                    if v.variable.uniquename == varList.name:
-                        varList.addValue(v.variable.type, v.variable.value)
-
-        if not(self.stop):
-            self.stop = True
-            self.gdb_connector.cont()
+        for varList in self.wave:
+            for v in self.variableList.list:
+                if v.uniqueName == varList.name:
+                    varList.addValue(v.type, v.value)
 
 
 class TracepointModel(QAbstractTableModel):
@@ -123,13 +105,6 @@ class TracepointModel(QAbstractTableModel):
         self.tracepoints = []
         self.distObjects = distObjects
         self.connector = distObjects.gdb_connector
-        #TODO:     self.emit(SIGNAL('refreshTracepointView'))
-
-    def getModel(self):
-        return self.tpmodel
-
-    def getTracepoint(self):
-        return self.tracepoints
 
     def setTracepoints(self, tpList):
         """adds tp to model for each tp in tpList
@@ -223,17 +198,10 @@ class TracepointModel(QAbstractTableModel):
         """ search for tracepoint in file fullname on linenumber line
         @param fullname: (string), name of file
         @param line: (int), number of line
-        @return: (bool), True if tracepoint found in list, False else
+        @return: tracepoint if tracepoint found in list, None else
         """
         for tp in self.tracepoints:
             if tp.fullname == fullname and int(tp.line) == int(line):
-                return True
-        return False
-
-    def getTracepointIfAvailable(self, bpInfo):
-        """" returns None if not available, Tracepoint itself else"""
-        for tp in self.tracepoints:
-            if tp.fullname == bpInfo.fullname and int(tp.line) == int(bpInfo.line):
                 return tp
         return None
 
@@ -268,7 +236,7 @@ class TracepointModel(QAbstractTableModel):
             elif index.column() == 7:
                 ret = tp.skip
             elif index.column() == 8:
-                #TODO: return value with all elements
+                # TODO: return value with all elements
                 pass
             elif index.column() == 9:
                 ret = tp.name
@@ -366,7 +334,7 @@ class TracepointModel(QAbstractTableModel):
     def setData(self, index, value, role):
         bp = self.tracepoints[index.row()]
 
-        #"""index.column() == 6 -> condition"""
+        # """index.column() == 6 -> condition"""
         if index.column() == 6:
             try:
                 bp.condition = str(value.toString())
@@ -375,7 +343,7 @@ class TracepointModel(QAbstractTableModel):
                 logging.error("setData: data type missmatch bp.condition is str and value is not")
                 return False
 
-        #"""index.column() == 7 -> skip"""
+        # """index.column() == 7 -> skip"""
         elif index.column() == 7:
             validSkip = QVariant(value).toInt()
             if not validSkip[1]:
@@ -384,7 +352,7 @@ class TracepointModel(QAbstractTableModel):
             bp.skip = int(validSkip[0])
             self.changeSkip(bp.number, str(bp.skip))
 
-        #"""index.column() == 4 -> enabled"""
+        # """index.column() == 4 -> enabled"""
         elif index.column() == 4:
             if role == Qt.CheckStateRole:
                 # breakpoint is active, set inactive
@@ -396,7 +364,7 @@ class TracepointModel(QAbstractTableModel):
                     bp.enabled = 'y'
                     self.enableTracepoint(bp.number)
 
-        #"""index.column() == 9 -> name of tracepoint"""
+        # """index.column() == 9 -> name of tracepoint"""
         elif index.column() == 9:
             bp.name = str(value.toString())
 

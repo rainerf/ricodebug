@@ -77,7 +77,7 @@ class DebugController(QObject):
 
         if self.distributedObjects.editorController.closeOpenedFiles():  # closing source files may be canceled by user
             if self.executableName != None:
-                #clear variables, tracepoints, watches,... by connecting to this signal
+                # clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
@@ -158,6 +158,9 @@ class DebugController(QObject):
         # reason. Predefine it as None, since all unknown reasons will be
         # handled as the inferior having stopped normally.
         reason = None
+        frame = None
+        signal_name = None
+        signal_meaning = None
 
         for r in rec.results:
             if r.dest == 'reason':
@@ -168,22 +171,22 @@ class DebugController(QObject):
                 signal_name = r.src
             if r.dest == 'signal-meaning':
                 signal_meaning = r.src
-            if r.dest == "bkptno":
-                bkptno = int(r.src)
 
         if reason in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
         elif reason == 'breakpoint-hit':
-                stop = False
-                tp = self.distributedObjects.tracepointController.model().getTracepointIfAvailable(frame)
+            tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(frame.fullname, frame.line)
 
-                if self.distributedObjects.breakpointModel.isBreakpointByNumber(bkptno) or self.lastCmdWasStep:
-                    self.signalProxy.emitInferiorStoppedNormally(rec)
-                    stop = True
-                    self.lastCmdWasStep = False
-                if tp != None:
-                    tp.tracePointOccurred(stop)
-                    self.distributedObjects.signalProxy.emitTracepointOccurred()
+            if tp:
+                # this will cause the variable pool to update all variables
+                self.distributedObjects.signalProxy.emitTracepointOccurred()
+                tp.recordData()
+
+            if self.distributedObjects.breakpointModel.isBreakpointByLocation(frame.fullname, frame.line) or self.lastCmdWasStep:
+                self.signalProxy.emitInferiorStoppedNormally(rec)
+                self.lastCmdWasStep = False
+            elif tp:
+                self.connector.cont()
         elif reason == "signal-received":
             logging.warning("Signal received: %s (%s) in %s:%s", signal_name, signal_meaning, frame.file, frame.line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
