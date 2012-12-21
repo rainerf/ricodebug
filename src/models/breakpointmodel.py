@@ -167,7 +167,7 @@ class BreakpointModel(QAbstractTableModel):
         @return: (bool), True if breakpoint found in list, False else
         """
         for bp in self.breakpoints:
-            if int(bp.line) == line and bp.fullname == fullname:
+            if int(bp.line) == int(line) and bp.fullname == fullname:
                 return True
         return False
 
