@@ -49,6 +49,23 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
         self.SCN_DWELLSTART.connect(self.__dwellStartEvent)
         self.SCN_DWELLEND.connect(lambda pos, x, y: self.dwellEnd.emit(pos, x, y))
+        self.SCN_MARGINCLICK.connect(self.updateOverlayPositions)
+
+    def ensureLineVisible(self, *args, **kwargs):
+        ret = Qsci.QsciScintilla.ensureLineVisible(self, *args, **kwargs)
+        self.updateOverlayPositions()
+        return ret
+
+    def updateOverlayPositions(self):
+        for line in xrange(0, self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINECOUNT)):
+            if self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINEVISIBLE, line):
+                if line in self.__overlayWidgets:
+                    overlay = self.__overlayWidgets[line]
+                    self.__moveOverlayToLine(overlay, line)
+                    overlay.show()
+            else:
+                if line in self.__overlayWidgets:
+                    self.__overlayWidgets[line].hide()
 
     def enterEvent(self, event):
         self.__mouseInWidget = True
@@ -61,6 +78,11 @@ class ScintillaWrapper(Qsci.QsciScintilla):
     def __dwellStartEvent(self, pos, x, y):
         if self.__mouseInWidget:
             self.dwellStart.emit(pos, x, y)
+
+    def __moveOverlayToLine(self, overlay, line):
+        pos = self.positionFromLineIndex(int(line), 0)
+        y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, pos)
+        overlay.move(overlay.x(), y)
 
     def addOverlayWidget(self, w, line, col=None, offset=0, minX=0):
         line -= 1
@@ -79,12 +101,12 @@ class ScintillaWrapper(Qsci.QsciScintilla):
             else:
                 col = min(col, self.lineLength(line) - 1)
 
+            self.__moveOverlayToLine(cont, line)
             pos = self.positionFromLineIndex(int(line), col)
-
             x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, pos)
-            y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, pos)
+            cont.move(max(x + offset, minX), cont.y())
+
             cont.resize(10, self.textHeight(line))
-            cont.move(max(x + offset, minX), y)
             cont.show()
 
             self.__overlayWidgets[line] = cont
