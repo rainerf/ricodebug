@@ -24,11 +24,11 @@
 
 import re
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QFont, QColor, QLabel, QFrame, QHBoxLayout, QLayout
+from PyQt4.QtGui import QPixmap, QFont, QColor, QFrame, QHBoxLayout, QLayout
 from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint
 from math import log, ceil
 import logging
-from helpers.clickablelabel import ClickableLabel
+from views.overlays import BreakpointOverlayWidget
 
 
 class ScintillaWrapper(Qsci.QsciScintilla):
@@ -149,40 +149,6 @@ class ScintillaWrapper(Qsci.QsciScintilla):
             w.move(p)
 
         return Qsci.QsciScintilla.scrollContentsBy(self, dx, dy)
-
-
-class BreakpointOverlayWidget(QFrame):
-    def __init__(self, parent, bp, bpModel):
-        QFrame.__init__(self, parent)
-        layout = QHBoxLayout(self)
-        layout.setMargin(0)
-        self.markerBp = QPixmap(":/markers/bp.png")
-        self.markerBpDisabled = QPixmap(":/markers/bp_dis.png")
-        self.bp = bp
-        self.__bpModel = bpModel
-        self.__icon = ClickableLabel()
-        self.__icon.clicked.connect(self.toggleEnabled)
-        self.__text = QLabel()
-        self.__text.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        self.setStyleSheet("QFrame { background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffc0c0, stop: 1 #ff8080); }")
-        layout.addWidget(self.__icon, 0)
-        layout.addWidget(self.__text, 0)
-
-        self.__icon.setCursor(Qt.ArrowCursor)
-
-    def update(self):
-        if self.bp.name:
-            self.__text.setText("Breakpoint '%s', hit %s times" % (self.bp.name, self.bp.times))
-        else:
-            self.__text.setText("Breakpoint #%s, hit %s times" % (self.bp.number, self.bp.times))
-        self.__icon.setPixmap(self.markerBp if self.bp.enabled else self.markerBpDisabled)
-        self.resize(self.sizeHint().width(), self.height())
-
-    def toggleEnabled(self):
-        if self.bp.enabled:
-            self.__bpModel.disableBreakpoint(self.bp.number)
-        else:
-            self.__bpModel.enableBreakpoint(self.bp.number)
 
 
 class OpenedFileView(ScintillaWrapper):
