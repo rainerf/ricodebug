@@ -29,6 +29,7 @@ from .breakpointmodel import ExtendedBreakpoint
 from variables.variablelist import VariableList
 from variables.varwrapperfactory import VarWrapperFactory
 from helpers.tools import cpp2py
+import logging
 
 
 class ValueList():
@@ -105,15 +106,6 @@ class TracepointModel(QAbstractTableModel):
         self.tracepoints = []
         self.distObjects = distObjects
         self.connector = distObjects.gdb_connector
-
-    def setTracepoints(self, tpList):
-        """adds tp to model for each tp in tpList
-        @param tpList: (List<Tracepoint>)List of tp to add to model
-        """
-        for tp in self.tracepoints:
-            self.deleteTracepoint(tp.fullname, tp.line)
-        for tp in tpList:
-            self.insertTracepoint(tp.fullname, tp.line)
 
     def insertTracepoint(self, file, line):
         """insert a tracepoint on sepcified place/line
@@ -340,7 +332,7 @@ class TracepointModel(QAbstractTableModel):
                 bp.condition = str(value.toString())
                 self.changeCondition(bp.number, bp.condition)
             except:
-                logging.error("setData: data type missmatch bp.condition is str and value is not")
+                logging.error("setData: data type mismatch bp.condition is str and value is not")
                 return False
 
         # """index.column() == 7 -> skip"""

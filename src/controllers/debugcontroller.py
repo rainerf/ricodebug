@@ -24,7 +24,7 @@
 
 import os
 from helpers.ptyhandler import PtyHandler
-from PyQt4.QtCore import QObject, pyqtSignal, Qt, pyqtSlot
+from PyQt4.QtCore import QObject, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
 from helpers.configstore import ConfigSet, ConfigItem
