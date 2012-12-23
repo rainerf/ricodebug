@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
-        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame, QIcon
+        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
 from PyQt4.QtCore import QFileSystemWatcher, Qt
 from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
@@ -213,12 +213,10 @@ class MainWindow(QMainWindow):
         d = AlertableDockWidget(name, self)
         d.setObjectName(name)
         d.setWidget(widget)
-
         if icon:
             d.setWindowIcon(icon)
 
-        # self.addDockWidget(area, d)
-        self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d, name, QIcon())
+        self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d)
         if addToggleViewAction:
             self.ui.menuShow_View.addAction(d.toggleViewAction())
 
@@ -288,12 +286,14 @@ class MainWindow(QMainWindow):
         else:
             self.settings.setValue("geometry", self.saveGeometry())
             self.settings.setValue("windowState", self.saveState())
+            self.dockToolBarManager.saveState(self.settings)
             QMainWindow.closeEvent(self, event)
             self.pluginloader.savePluginInfo()
 
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
-        # self.restoreState(self.settings.value("windowState").toByteArray())
+        self.restoreState(self.settings.value("windowState").toByteArray())
+        self.dockToolBarManager.restoreState(self.settings)
 
     def toggleRecord(self, check):
         if check:

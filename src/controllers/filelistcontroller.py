@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt
+from PyQt4.QtGui import QIcon
 from models.filelistmodel import FileListModel
 from views.filelistview import FileListView
 
@@ -37,7 +38,7 @@ class FileListController(QObject):
 
         self.fileListView.treeView.setModel(self.fileListModel)
 
-        self.distributedObjects.mainwindow.insertDockWidget(self.fileListView, "Files", Qt.LeftDockWidgetArea, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.fileListView, "Files", Qt.LeftDockWidgetArea, True, QIcon(":/icons/images/files.png"))
 
     def fileInFileListViewActivated(self, index):
         item = index.internalPointer()

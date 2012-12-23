@@ -32,6 +32,13 @@
     <file>images/open.png</file>
     <file>images/session-open.png</file>
     <file>images/run.png</file>
+    <file>images/console.png</file>
+    <file>images/files.png</file>
+    <file>images/thread.png</file>
+    <file>images/python.png</file>
+    <file>images/stack.png</file>
+    <file>images/exclusive.png</file>
+    <file>images/locals.png</file>
     <file>images/22x22/not_running.png</file>
     <file>images/22x22/running.png</file>
     <file>images/22x22/stopped.png</file>
@@ -56,6 +63,7 @@
     <file>images/stop.png</file>
     <file>images/bp.png</file>
     <file>images/bp_dis.png</file>
+    <file>images/tp.png</file>
     <file>images/opened.png</file>
     <file>images/closed.png</file>
     <file>images/collapse.png</file>

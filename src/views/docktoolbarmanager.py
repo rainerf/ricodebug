@@ -1,5 +1,5 @@
-from PyQt4.QtCore import QObject, Qt, QSize
-from PyQt4.QtGui import QIcon, QBoxLayout
+from PyQt4.QtCore import QObject, Qt
+from PyQt4.QtGui import QBoxLayout, QDockWidget
 from views.docktoolbar import DockToolBar
 
 
@@ -8,37 +8,25 @@ class DockToolBarManager(QObject):
         QObject.__init__(self, window)
         assert window
         self.main = window
-        self.settings = 0
         self.bars = {}
 
     def bar(self, area):
         if area not in self.bars:
-            if area == Qt.TopDockWidgetArea:
-                self.bars[area] = DockToolBar(self, Qt.Horizontal, self.main)
-                self.bars[area].setObjectName("DockToolBarTop")
-                self.bars[area].setWindowTitle("Top toolbar")
-                self.bars[area].toggleViewAction().setText("Top toolbar visible")
-            elif area == Qt.BottomToolBarArea:
-                self.bars[area] = DockToolBar(self, Qt.Horizontal, self.main)
-                self.bars[area].setObjectName("DockToolBarBottom")
-                self.bars[area].setWindowTitle("Bottom toolbar")
-                self.bars[area].toggleViewAction().setText("Bottom toolbar visible")
-            elif area == Qt.RightToolBarArea:
-                self.bars[area] = DockToolBar(self, Qt.Vertical, self.main)
-                self.bars[area].setObjectName("DockToolBarRight")
-                self.bars[area].setWindowTitle("Right toolbar")
-                self.bars[area].toggleViewAction().setText("Right toolbar visible")
-            elif area == Qt.LeftToolBarArea:
-                self.bars[area] = DockToolBar(self, Qt.Vertical, self.main)
-                self.bars[area].setObjectName("DockToolBarLeft")
-                self.bars[area].setWindowTitle("Left toolbar")
-                self.bars[area].toggleViewAction().setText("Left toolbar visible")
-            else:
-                return 0
+            direction, name = {
+                    Qt.LeftDockWidgetArea: (Qt.Vertical, "Left"),
+                    Qt.RightDockWidgetArea: (Qt.Vertical, "Right"),
+                    Qt.TopDockWidgetArea: (Qt.Horizontal, "Top"),
+                    Qt.BottomDockWidgetArea: (Qt.Horizontal, "Bottom")}[area]
+
+            self.bars[area] = DockToolBar(self, direction, self.main)
+            self.bars[area].setObjectName("DockToolBar%s" % name)
+            self.bars[area].setWindowTitle("%s toolbar" % name)
+            self.bars[area].toggleViewAction().setText("%s toolbar visible %name")
+
             self.main.addToolBar(area, self.bars[area])
             self.bars[area].hide()
+            self.bars[area].dockWidgetAreaChanged.connect(self.dockWidgetAreaChanged)
 
-        self.bars[area].dockWidgetAreaChanged.connect(self.dockWidgetAreaChanged)
         return self.bars[area]
 
     @staticmethod
@@ -67,10 +55,29 @@ class DockToolBarManager(QObject):
 
     def dockWidgetAreaChanged(self, dock, bar):
         bar.removeDock(dock)
-        self.bar(self.dockWidgetAreaToToolBarArea(self.main.dockWidgetArea(dock))).addDock(dock, dock.windowTitle(), dock.windowIcon().pixmap(QSize(24, 24), QIcon.Normal, QIcon.On))
+        self.bar(self.dockWidgetAreaToToolBarArea(self.main.dockWidgetArea(dock))).addDock(dock)
 
-    def restoreState(self, bar):
-        return
+    def restoreState(self, settings):
+        settings.beginGroup("Mainwindow/Docks")
+        areas = settings.childGroups()
 
-    def saveState(self, bar):
-        return
+        for area in areas:
+            area, ok = area.toInt()
+            assert ok
+
+            bar = self.bar(area)
+            bar.exclusive = settings.value("%s/Exclusive" % area).toBool()
+            names = map(str, list(settings.value("%s/Widgets" % area).toStringList()))
+            for name in names:
+                dock = self.main.findChild(QDockWidget, name)
+                if dock:
+                    bar.addDock(dock)
+
+        settings.endGroup()
+
+    def saveState(self, settings):
+        for bar in self.bars.values():
+            names = [w.objectName() for w in bar.docks]
+
+            settings.setValue("Mainwindow/Docks/%s/Exclusive" % self.main.toolBarArea(bar), bar.exclusive)
+            settings.setValue("Mainwindow/Docks/%s/Widgets" % self.main.toolBarArea(bar), names)

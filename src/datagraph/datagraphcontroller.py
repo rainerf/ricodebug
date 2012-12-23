@@ -26,6 +26,7 @@
 import logging
 from helpers.excep import VariableNotFoundException
 from PyQt4.QtCore import QObject, Qt
+from PyQt4.QtGui import QIcon
 from .datagraphvwfactory import DataGraphVWFactory
 from .datagraphview import DataGraphView
 from variables.variablelist import VariableList
@@ -79,7 +80,7 @@ class DataGraphController(QObject):
         # connect signals
         self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
-        self.distributedObjects.mainwindow.insertDockWidget(self.data_graph_view, "Graph", Qt.LeftDockWidgetArea, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.data_graph_view, "Graph", Qt.LeftDockWidgetArea, True, QIcon(":/icons/images/datagraph.png"))
 
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds the Variable watch to the VariableList and its wrapper to the DataGraph

@@ -1,4 +1,4 @@
-from PyQt4.QtGui import QToolBar, QWidget, QHBoxLayout, QWidgetAction, QAction, QStylePainter, QStyleOptionToolBar, QDockWidget, QStyle, QTransform, QFontMetrics, QIcon
+from PyQt4.QtGui import QToolBar, QWidget, QHBoxLayout, QWidgetAction, QAction, QStylePainter, QStyleOptionToolBar, QDockWidget, QStyle, QTransform, QFontMetrics, QIcon, QFrame, QBoxLayout, QLabel
 from PyQt4.QtCore import QSize, QPointF, Qt, QRect, QPoint, QEvent
 
 
@@ -18,6 +18,20 @@ class DockTitleBar(QToolBar):
         l.setMargin(0)
         l.setSpacing(0)
         l.addStretch()
+
+        self.frame = QFrame()
+        self.__layout = QBoxLayout(QBoxLayout.LeftToRight, self.frame)
+        self.__layout.setContentsMargins(4, 4, 0, 0)
+        self.__layout.setSpacing(2)
+        self.aDockFrame = self.addWidget(self.frame)
+
+        self.__icon = QLabel()
+
+        self.__layout.addWidget(self.__icon)
+        self.__title = QLabel(self.dock.windowTitle())
+        self.__layout.addWidget(self.__title)
+
+        self.dock.windowIconChanged.connect(self.__setWindowIcon)
 
         # fake spacer item
         self.spacer = QWidgetAction(self)
@@ -39,8 +53,15 @@ class DockTitleBar(QToolBar):
         self.dockWidgetFeaturesChanged(self.dock.features())
 
         self.dock.featuresChanged.connect(self.dockWidgetFeaturesChanged)
-        self.aFloat.triggered.connect(self.aFloatTriggered)
+        self.aFloat.triggered.connect(self._floatTriggered)
         self.aClose.triggered.connect(self.dock.close)
+
+    def __setWindowIcon(self, icon):
+        if not icon.isNull():
+            self.__icon.setPixmap(self.dock.windowIcon().pixmap(16))
+
+    def __setWindowTitle(self, title):
+        self.__title.setText(title)
 
     def paintEvent(self, _):
         painter = QStylePainter(self)
@@ -62,11 +83,6 @@ class DockTitleBar(QToolBar):
 
         # draw toolbar
         painter.drawControl(QStyle.CE_ToolBar, options)
-
-        # draw dock title
-        textRect.setWidth(qBound(0, options.rect.width() - msh.width(), textRect.width()))
-        text = painter.fontMetrics().elidedText(self.dock.windowTitle(), Qt.ElideRight, textRect.width())
-        painter.drawText(textRect, Qt.AlignLeft | Qt.AlignVCenter, text)
 
         # restore rotation
         if self.dock.features() & QDockWidget.DockWidgetVerticalTitleBar:
@@ -113,34 +129,7 @@ class DockTitleBar(QToolBar):
 
         return size
 
-#    def addAction(self, action, index= -1):
-#        if index != -1:
-#            index += 1
-#
-#        if index >= 0 and index < self.actions().count():
-#            QToolBar.insertAction(self, self.actions().value(index), action)
-#        else:
-#            QToolBar.addAction(self, action)
-#
-#        return self.widgetForAction(action)
-#
-#    def addSeparator(self, index= -1):
-#        if index != -1:
-#            index += 1
-#
-#        if index >= 0 and index < self.actions().count():
-#            QToolBar.insertSeparator(self, self.actions().value(index))
-#        else:
-#            QToolBar.addSeparator(self)
-
-    def aOrientationTriggered(self):
-        features = self.dock.features()
-        if features & QDockWidget.DockWidgetVerticalTitleBar:
-            self.dock.setFeatures(features ^ QDockWidget.DockWidgetVerticalTitleBar)
-        else:
-            self.dock.setFeatures(features | QDockWidget.DockWidgetVerticalTitleBar)
-
-    def aFloatTriggered(self):
+    def _floatTriggered(self):
         self.dock.setFloating(not self.dock.isFloating())
 
     def dockWidgetFeaturesChanged(self, features):

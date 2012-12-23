@@ -1,11 +1,14 @@
-from PyQt4.QtGui import QDockWidget, QTabBar, QColor
+from PyQt4.QtGui import QDockWidget, QIcon
+from PyQt4.QtCore import pyqtSignal
 from views.docktitlebar import DockTitleBar
 
 
 class AlertableDockWidget(QDockWidget):
-    alertedColor = QColor(255, 0, 0)
+    windowIconChanged = pyqtSignal(QIcon)
+    windowTitleChanged = pyqtSignal(str)
+    alerted = pyqtSignal(bool)
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name, parent):
         QDockWidget.__init__(self, name, parent)
         self.titleBar = DockTitleBar(self)
         self.setTitleBarWidget(self.titleBar)
@@ -15,25 +18,10 @@ class AlertableDockWidget(QDockWidget):
         self.__visible = None
         self.visibilityChanged.connect(self.__updateVisibility)
 
-    def __findInWindow(self):
-        # ok, this is a hack... we search for all QTabBars and see if we find one
-        # tab that has the correct text... everything else is well hidden from
-        # us by Qt
-        for tb in self.parent().findChildren(QTabBar):
-            for i in xrange(tb.count()):
-                if str(tb.tabText(i)) == str(self.windowTitle()):
-                    return (tb, i)
-        return (None, None)
-
     def setAlerted(self):
-        # we use self.__visible here since self.isVisible() will return True
-        # even if the widget is hidden under another dock widget
         if self.__visible:
             return
-
-        tb, i = self.__findInWindow()
-        if tb:
-            tb.setTabTextColor(i, self.alertedColor)
+        self.alerted.emit(True)
 
     def __updateVisibility(self, visible):
         self.__visible = visible
@@ -41,6 +29,12 @@ class AlertableDockWidget(QDockWidget):
             self.setNormal()
 
     def setNormal(self):
-        tb, i = self.__findInWindow()
-        if tb:
-            tb.setTabTextColor(i, self.palette().text().color())
+        self.alerted.emit(False)
+
+    def setWindowIcon(self, icon):
+        QDockWidget.setWindowIcon(self, icon)
+        self.windowIconChanged.emit(icon)
+
+    def setWindowTitle(self, text):
+        QDockWidget.setWindowTitle(self, text)
+        self.windowTitleChanged.emit(text)

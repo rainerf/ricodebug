@@ -23,6 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 """ @package controllers.watchcontroller    the WatchController """
 
+from PyQt4.QtGui import QIcon
+
 from helpers.excep import VariableNotFoundException
 from models.variablemodel import VariableModel
 from .treeitemcontroller import TreeItemController
@@ -37,7 +39,7 @@ class WatchController(TreeItemController):
             Listens to the following Signals: SignalProxy::AddWatch(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
         @param distributedObjects    distributedobjects.DistributedObjects, the DistributedObjects-Instance
         """
-        TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel, True)
+        TreeItemController.__init__(self, distributedObjects, "Watch", view, VariableModel, True, QIcon(":/icons/images/watch.png"))
         self.distributedObjects.signalProxy.AddWatch.connect(self.addWatch)
 
     def removeSelected(self, index):

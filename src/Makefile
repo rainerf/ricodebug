@@ -1,8 +1,8 @@
-TARGETS = views/ui_mainwindow.py resources_rc.py
+TARGETS = views/ui_mainwindow.py views/ui_logviewtab.py resources_rc.py
 
 all: $(TARGETS)
 
-views/ui_mainwindow.py: views/mainwindow.ui
+views/ui_%.py: views/%.ui
 	 pyuic4 $^ > $@
 
 resources_rc.py: resources.qrc

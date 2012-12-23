@@ -75,7 +75,7 @@ class DistributedObjects:
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
 
-        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", QIcon(":/icons/images/watch.png"))
+        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", QIcon(":/icons/images/thread.png"))
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
@@ -85,8 +85,8 @@ class DistributedObjects:
 
         self.tracepointController = TracepointController(self)
 
-        self.buildView(PyIoView, "Python Console")
-        self.buildView(InferiorIoView, "Output")
+        self.buildView(PyIoView, "Python Console", QIcon(":/icons/images/python.png"))
+        self.buildView(InferiorIoView, "Output", QIcon(":/icons/images/console.png"))
         self.buildView(GdbIoView, "GDB Console")
 
         self.datagraphController = DataGraphController(self)

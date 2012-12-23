@@ -23,32 +23,32 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import logging
-from PyQt4.QtGui import QTableView, QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
+from PyQt4.QtGui import QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
 from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
 from PyQt4.QtCore import Qt, pyqtSlot, QTimer
 from models.logmodel import LogModel, FilteredLogModel
+from views.ui_logviewtab import Ui_LogViewTab
 
 
 class LogViewHandler(logging.Handler):
-    def __init__(self, target_widget, filter_slider):
+    def __init__(self, widget):
         logging.Handler.__init__(self)
-        self.target_widget = target_widget
+        self.widget = widget
         self.model = LogModel()
         self.filter_model = FilteredLogModel()
         self.filter_model.setSourceModel(self.model)
-        target_widget.setModel(self.filter_model)
-        self.target_widget = target_widget
-        filter_slider.valueChanged.connect(self.setFilter)
+        self.widget.ui.logView.setModel(self.filter_model)
+        widget.ui.filterSlider.valueChanged.connect(self.setFilter)
 
     def emit(self, record):
         self.model.insertMessage(record)
         self.updateView()
 
     def updateView(self):
-        self.target_widget.resizeColumnsToContents()
-        if self.target_widget.columnWidth(2) > 500:
-            self.target_widget.setColumnWidth(2, 500)
-        self.target_widget.scrollToBottom()
+        self.widget.ui.logView.resizeColumnsToContents()
+        if self.widget.ui.logView.columnWidth(2) > 500:
+            self.widget.ui.logView.setColumnWidth(2, 500)
+        self.widget.ui.logView.scrollToBottom()
 
     def setFilter(self, value):
         self.filter_model.setMinimum(value * 10)
@@ -151,7 +151,17 @@ class ErrorLabelHandler(logging.Handler):
             self.error_label.setWarningMessage("<b>%s</b>" % record.message)
 
 
-class LogView(QTableView):
+class LogView(QWidget):
     def __init__(self, parent=None):
-        QTableView.__init__(self, parent)
+        QWidget.__init__(self, parent)
+        self.ui = Ui_LogViewTab()
+        self.ui.setupUi(self)
+        self.ui.filterSlider.setValue(3)
+
+
+class LogViewTab(QWidget):
+    def __init__(self, parent):
+        QWidget.__init__(self, parent)
+        self.ui = Ui_LogViewTab()
+        self.ui.setupUi(self)
 

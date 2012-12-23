@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, Qt, pyqtSignal
+from PyQt4.QtGui import QIcon
 from models.stackmodel import StackModel
 from views.stackview import StackView
 
@@ -47,7 +48,7 @@ class StackController(QObject):
         self.distributedObjects.signalProxy.inferiorIsRunning.connect(self.removeStackMarkers)
         self.stackView.showStackTrace.stateChanged.connect(self.showStackTraceChanged)
 
-        self.distributedObjects.mainwindow.insertDockWidget(self.stackView, "Stack", Qt.BottomDockWidgetArea, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.stackView, "Stack", Qt.BottomDockWidgetArea, True, QIcon(":/icons/images/stack.png"))
 
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()

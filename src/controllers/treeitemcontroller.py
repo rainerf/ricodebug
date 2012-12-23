@@ -144,7 +144,7 @@ class TreeVWFactory(VarWrapperFactory):
 #####################################################################################
 class TreeItemController(QObject):
     """ the Controller for the TreeView """
-    def __init__(self, distributedObjects, name, view, model, addDockWidget):
+    def __init__(self, distributedObjects, name, view, model, addDockWidget, icon=None):
         """ Constructor <br>
             Create a TreeView, a TreeVWFactory and a VariableList <br>
             Listens to the following Signals: SignalProxy::AddTree(QString), SignalProxy::insertDockWidgets() and SignalProxy::cleanupModels()
@@ -165,7 +165,7 @@ class TreeItemController(QObject):
         self.distributedObjects.signalProxy.cleanupModels.connect(self.clear)
 
         if addDockWidget:
-            self.distributedObjects.mainwindow.insertDockWidget(self.view, name, Qt.BottomDockWidgetArea, True)
+            self.distributedObjects.mainwindow.insertDockWidget(self.view, name, Qt.BottomDockWidgetArea, True, icon)
 
     def clear(self):
         """ clears the TreeView and the VariableList <br>

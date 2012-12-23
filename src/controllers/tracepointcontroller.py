@@ -27,7 +27,7 @@
 """
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QDockWidget
+from PyQt4.QtGui import QIcon
 from models.tracepointmodel import TracepointModel
 from views.tracepointview import TracepointView
 
@@ -52,7 +52,7 @@ class TracepointController(QObject):
         self.tracepointView = TracepointView()
         self.tracepointView.tracepointView.setModel(self._model)
 
-        #register with session manager to save Tracepoints
+        # register with session manager to save Tracepoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
 
         self.tracepointView.tracepointView.clicked.connect(self.updateWaveforms)
@@ -60,7 +60,7 @@ class TracepointController(QObject):
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearTracepoints)
         self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
 
-        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True)
+        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True, QIcon(":/icons/images/tp.png"))
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
