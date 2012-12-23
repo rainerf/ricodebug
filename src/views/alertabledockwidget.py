@@ -1,4 +1,5 @@
 from PyQt4.QtGui import QDockWidget, QTabBar, QColor
+from views.docktitlebar import DockTitleBar
 
 
 class AlertableDockWidget(QDockWidget):
@@ -6,6 +7,8 @@ class AlertableDockWidget(QDockWidget):
 
     def __init__(self, name, parent=None):
         QDockWidget.__init__(self, name, parent)
+        self.titleBar = DockTitleBar(self)
+        self.setTitleBarWidget(self.titleBar)
 
         # we do not know the initial state yet but will get an event on
         # visibilityChanged as soon as the windows are first shown

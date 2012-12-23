@@ -23,8 +23,8 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
-        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
-from PyQt4.QtCore import QFileSystemWatcher
+        QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame, QIcon
+from PyQt4.QtCore import QFileSystemWatcher, Qt
 from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import RecentFileHandler
@@ -32,6 +32,7 @@ from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
 from views.alertabledockwidget import AlertableDockWidget
+from views.docktoolbarmanager import DockToolBarManager
 
 
 class MainWindow(QMainWindow):
@@ -40,6 +41,13 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.dockToolBarManager = DockToolBarManager(self)
+
+        self.dockToolBar(Qt.TopToolBarArea)
+        self.dockToolBar(Qt.BottomToolBarArea)
+        self.dockToolBar(Qt.LeftToolBarArea)
+        self.dockToolBar(Qt.RightToolBarArea)
 
         self.ui.actionSaveSession.setEnabled(False)
 
@@ -206,7 +214,8 @@ class MainWindow(QMainWindow):
         d.setObjectName(name)
         d.setWidget(widget)
 
-        self.addDockWidget(area, d)
+        # self.addDockWidget(area, d)
+        self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d, name, QIcon())
         if addToggleViewAction:
             self.ui.menuShow_View.addAction(d.toggleViewAction())
 
@@ -281,7 +290,7 @@ class MainWindow(QMainWindow):
 
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry").toByteArray())
-        self.restoreState(self.settings.value("windowState").toByteArray())
+        # self.restoreState(self.settings.value("windowState").toByteArray())
 
     def toggleRecord(self, check):
         if check:
@@ -328,3 +337,7 @@ class MainWindow(QMainWindow):
         else:
             self.fileWatcher.removePath(self.binaryName)
             self.fileWatcher.addPath(self.binaryName)
+
+    def dockToolBar(self, area):
+        return self.dockToolBarManager.bar(area)
+
