@@ -27,12 +27,10 @@ class DockTitleBar(QToolBar):
         self.setFloatable(False)
         self.setIconSize(QSize(12, 12))
 
-        self.aOrientation = QAction(self)
         self.aFloat = QAction(self)
         self.aClose = QAction(self)
 
         self.addAction(self.spacer)
-        self.addAction(self.aOrientation)
         self.addAction(self.aFloat)
         self.addAction(self.aClose)
 
@@ -41,7 +39,6 @@ class DockTitleBar(QToolBar):
         self.dockWidgetFeaturesChanged(self.dock.features())
 
         self.dock.featuresChanged.connect(self.dockWidgetFeaturesChanged)
-        self.aOrientation.triggered.connect(self.aOrientationTriggered)
         self.aFloat.triggered.connect(self.aFloatTriggered)
         self.aClose.triggered.connect(self.dock.close)
 
@@ -52,7 +49,7 @@ class DockTitleBar(QToolBar):
         # init style options
         options.initFrom(self.dock)
         options.rect = self.rect()
-        textRect = self.rect().adjusted(3, 0, 0, 0)
+        textRect = self.rect().adjusted(3, 3, 0, 0)
         msh = self.minimumSizeHint()
 
         # need to rotate if vertical state
@@ -87,12 +84,6 @@ class DockTitleBar(QToolBar):
         transform = QTransform()
         transform.rotate(90)
 
-        pixmap = self.style().standardIcon(QStyle.SP_ToolBarHorizontalExtensionButton, None, self.widgetForAction(self.aOrientation)).pixmap(size)
-        rect.moveCenter(pixmap.rect().center())
-        pixmap = pixmap.copy(rect)
-        pixmap = pixmap.transformed(transform, Qt.SmoothTransformation)
-        self.aOrientation.setIcon(QIcon(pixmap))
-
         pixmap = self.style().standardIcon(QStyle.SP_TitleBarNormalButton, None, self.widgetForAction(self.aFloat)).pixmap(size)
         rect.moveCenter(pixmap.rect().center())
         pixmap = pixmap.copy(rect)
@@ -122,25 +113,25 @@ class DockTitleBar(QToolBar):
 
         return size
 
-    def addAction(self, action, index= -1):
-        if index != -1:
-            index += 1
-
-        if index >= 0 and index < self.actions().count():
-            QToolBar.insertAction(self, self.actions().value(index), action)
-        else:
-            QToolBar.addAction(self, action)
-
-        return self.widgetForAction(action)
-
-    def addSeparator(self, index= -1):
-        if index != -1:
-            index += 1
-
-        if index >= 0 and index < self.actions().count():
-            QToolBar.insertSeparator(self, self.actions().value(index))
-        else:
-            QToolBar.addSeparator(self)
+#    def addAction(self, action, index= -1):
+#        if index != -1:
+#            index += 1
+#
+#        if index >= 0 and index < self.actions().count():
+#            QToolBar.insertAction(self, self.actions().value(index), action)
+#        else:
+#            QToolBar.addAction(self, action)
+#
+#        return self.widgetForAction(action)
+#
+#    def addSeparator(self, index= -1):
+#        if index != -1:
+#            index += 1
+#
+#        if index >= 0 and index < self.actions().count():
+#            QToolBar.insertSeparator(self, self.actions().value(index))
+#        else:
+#            QToolBar.addSeparator(self)
 
     def aOrientationTriggered(self):
         features = self.dock.features()

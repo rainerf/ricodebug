@@ -1,5 +1,5 @@
 from PyQt4.QtCore import QObject, Qt, QSize
-from PyQt4.QtGui import QBoxLayout, QIcon
+from PyQt4.QtGui import QIcon, QBoxLayout
 from views.docktoolbar import DockToolBar
 
 
@@ -60,10 +60,10 @@ class DockToolBarManager(QObject):
 
     @staticmethod
     def toolBarAreaToBoxLayoutDirection(area):
-        return {Qt.LeftToolBarArea: Qt.BottomToTop,
-                Qt.RightToolBarArea: Qt.TopToBottom,
-                Qt.TopToolBarArea: Qt.LeftToRight,
-                Qt.BottomToolBarArea: Qt.LeftToRight}[area]
+        return {Qt.LeftToolBarArea: QBoxLayout.BottomToTop,
+                Qt.RightToolBarArea: QBoxLayout.TopToBottom,
+                Qt.TopToolBarArea: QBoxLayout.LeftToRight,
+                Qt.BottomToolBarArea: QBoxLayout.LeftToRight}[area]
 
     def dockWidgetAreaChanged(self, dock, bar):
         bar.removeDock(dock)

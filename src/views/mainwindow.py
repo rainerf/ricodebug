@@ -209,10 +209,13 @@ class MainWindow(QMainWindow):
                 self.distributedObjects.sessionManager.showSaveSessionDialog)
         self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
 
-    def insertDockWidget(self, widget, name, area, addToggleViewAction):
+    def insertDockWidget(self, widget, name, area, addToggleViewAction, icon=None):
         d = AlertableDockWidget(name, self)
         d.setObjectName(name)
         d.setWidget(widget)
+
+        if icon:
+            d.setWindowIcon(icon)
 
         # self.addDockWidget(area, d)
         self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d, name, QIcon())

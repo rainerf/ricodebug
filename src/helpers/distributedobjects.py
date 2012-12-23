@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QIcon
 
 from controllers.debugcontroller import DebugController
 from .signalproxy import SignalProxy
@@ -65,7 +66,7 @@ class DistributedObjects:
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
 
-        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints")
+        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints", QIcon(":/icons/images/bp.png"))
 
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
@@ -74,7 +75,7 @@ class DistributedObjects:
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
 
-        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads")
+        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", QIcon(":/icons/images/watch.png"))
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
@@ -94,13 +95,13 @@ class DistributedObjects:
 
         self.miView = self.buildView(MiTraceView, "MI Trace")
 
-    def buildModelAndView(self, ModelCls, ViewCls, name):
-        view = self.buildView(ViewCls, name)
+    def buildModelAndView(self, ModelCls, ViewCls, name, icon=None):
+        view = self.buildView(ViewCls, name, icon)
         model = ModelCls(self)
         view.setModel(model)
         return model, view
 
-    def buildView(self, ViewCls, name):
+    def buildView(self, ViewCls, name, icon=None):
         view = ViewCls(self)
-        self.mainwindow.insertDockWidget(view, name, Qt.BottomDockWidgetArea, True)
+        self.mainwindow.insertDockWidget(view, name, Qt.BottomDockWidgetArea, True, icon)
         return view
