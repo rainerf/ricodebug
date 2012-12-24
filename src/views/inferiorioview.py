@@ -31,6 +31,9 @@ class InferiorIoView(QTextEdit):
 
         do.debugController.ptyhandler.dataAvailable.connect(self.outputInferiorData)
 
+        self.parent().addClearAction()
+        self.parent().clearRequested.connect(lambda: self.clear())
+
     def outputInferiorData(self, data):
         self.moveCursor(QTextCursor.End)
         self.insertPlainText(data)

@@ -38,17 +38,16 @@ class StackController(QObject):
         self.editorController = distributedObjects.editorController
 
         self.stackModel = StackModel(self, self.distributedObjects.debugController, self.distributedObjects.gdb_connector)
-        self.stackView = StackView(self)
 
-        self.stackView.stackView.setModel(self.stackModel)
+        self.stackView = self.distributedObjects.buildView(StackView, "Stack", QIcon(":/icons/images/stack.png"))
+        self.stackView.setModel(self.stackModel)
+        self.stackView.activated.connect(self.stackInStackViewActivated)
 
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.stackModel.update)
         self.distributedObjects.signalProxy.inferiorHasExited.connect(self.stackModel.clear)
         self.distributedObjects.signalProxy.executableOpened.connect(self.stackModel.clear)
         self.distributedObjects.signalProxy.inferiorIsRunning.connect(self.removeStackMarkers)
-        self.stackView.showStackTrace.stateChanged.connect(self.showStackTraceChanged)
-
-        self.distributedObjects.mainwindow.insertDockWidget(self.stackView, "Stack", Qt.BottomDockWidgetArea, True, QIcon(":/icons/images/stack.png"))
+        self.stackView.showStackTraceChanged.connect(self.showStackTraceChanged)
 
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
@@ -57,10 +56,10 @@ class StackController(QObject):
         self.stackFrameSelected.emit()
 
     def insertStackMarkers(self):
-        if self.stackView.showStackTrace.checkState() == Qt.Checked:
-            for entry in self.stackModel.stack:
-                if int(entry.level) != 0 and hasattr(entry, "fullname") and hasattr(entry, "line"):
-                    self.editorController.addStackMarker(entry.fullname, entry.line)
+        return
+        for entry in self.stackModel.stack:
+            if int(entry.level) != 0 and hasattr(entry, "fullname") and hasattr(entry, "line"):
+                self.editorController.addStackMarker(entry.fullname, entry.line)
 
     def removeStackMarkers(self):
         for entry in self.stackModel.stack:
@@ -68,7 +67,7 @@ class StackController(QObject):
                 self.editorController.delStackMarkers(entry.fullname)
 
     def showStackTraceChanged(self, state):
-        if state == Qt.Checked:
+        if state:
             self.insertStackMarkers()
-        elif state == Qt.Unchecked:
+        else:
             self.removeStackMarkers()

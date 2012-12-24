@@ -1,6 +1,6 @@
-from PyQt4.QtGui import QToolBar, QAction, QFrame, QBoxLayout, QDockWidget, QPushButton, QIcon
+from PyQt4.QtGui import QToolBar, QAction, QFrame, QBoxLayout, QDockWidget, QIcon
 from PyQt4.QtCore import QSize, QEvent, Qt, pyqtSignal
-from views.rotatabletoolbutton import RotatableToolButton
+from .rotatabletoolbutton import RotatableToolButton
 
 
 class DockToolBar(QToolBar):
@@ -110,6 +110,8 @@ class DockToolBar(QToolBar):
 
         dock.toggleViewAction().changed.connect(self.__dockChanged)
         dock.alerted.connect(self.__dockAlerted)
+        dock.windowTitleChanged.connect(self.__dockTitleChanged)
+        dock.windowIconChanged.connect(self.__dockIconChanged)
         dock.destroyed.connect(self.__dockDestroyed)
         pb.clicked.connect(self.__buttonClicked)
 
@@ -125,6 +127,9 @@ class DockToolBar(QToolBar):
         dock.removeEventFilter(self)
 
         dock.toggleViewAction().changed.disconnect(self.__dockChanged)
+        dock.alerted.disconnect(self.__dockAlerted)
+        dock.windowTitleChanged.disconnect(self.__dockTitleChanged)
+        dock.windowIconChanged.disconnect(self.__dockIconChanged)
         dock.destroyed.disconnect(self.__dockDestroyed)
 
         btn = self.__dockToButton[dock]
@@ -212,3 +217,15 @@ class DockToolBar(QToolBar):
                 pb.setStyleSheet("color: red")
             else:
                 pb.setStyleSheet("")
+
+    def __dockTitleChanged(self, title):
+        dock = self.sender()
+        if self.hasDock(dock):
+            pb = self.__dockToButton[dock]
+            pb.setText(title)
+
+    def __dockIconChanged(self, icon):
+        dock = self.sender()
+        if self.hasDock(dock):
+            pb = self.__dockToButton[dock]
+            pb.setIcon(icon)

@@ -29,10 +29,11 @@ from .gdbreader import GdbReader
 from .gdboutput import GdbOutput
 from PyQt4.QtCore import QObject, pyqtSignal
 import helpers
+import time
 
 
 class GdbConnector(QObject):
-    commandExecuted = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
+    commandExecuted = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject', float)
 
     def __init__(self):
         QObject.__init__(self)
@@ -48,6 +49,8 @@ class GdbConnector(QObject):
         self.reader.startReading(self.gdb.stdout)
 
     def execute(self, cmd, error_msg=None):
+        __start = time.time()
+
         logging.debug("Running command %s", cmd)
         self.gdb.stdin.write(cmd + "\n")
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
@@ -56,7 +59,7 @@ class GdbConnector(QObject):
             logging.debug("Command '%s' failed with %s (%s, '%s')", \
                     cmd, res.msg, res.raw, error_msg)
 
-        self.commandExecuted.emit(cmd, res)
+        self.commandExecuted.emit(cmd, res, time.time() - __start)
 
         return res
 
@@ -235,7 +238,7 @@ class GdbConnector(QObject):
     def interrupt(self):
         # TODO: check if it also works in windows
         self.gdb.send_signal(signal.SIGINT)
-        #return self.executeAndRaiseIfFailed("-exec-interrupt")
+        # return self.executeAndRaiseIfFailed("-exec-interrupt")
 
     def finish(self):
         return self.executeAndRaiseIfFailed("-exec-finish")

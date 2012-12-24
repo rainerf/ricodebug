@@ -22,32 +22,28 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QTableView, QAbstractItemView, QAction
+from PyQt4.QtCore import pyqtSignal
 
-class StackView(QWidget):
-    def __init__(self, stack_controller, parent=None):
-        QWidget.__init__(self, parent)
 
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
+class StackView(QTableView):
+    showStackTraceChanged = pyqtSignal(bool)
 
-        self.stackView = QtGui.QTableView(self)
-        self.stackView.setTabKeyNavigation(False)
-        self.stackView.setAlternatingRowColors(True)
-        self.stackView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.stackView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.stackView.setShowGrid(False)
-        self.stackView.setSortingEnabled(True)
-        self.stackView.setCornerButtonEnabled(False)
-        self.stackView.verticalHeader().setVisible(False)
-        self.stackView.verticalHeader().setDefaultSectionSize(20)
-        self.stackView.horizontalHeader().setStretchLastSection(True)
-        self.gridLayout.addWidget(self.stackView, 0, 0, 1, 1)
+    def __init__(self, do, parent):
+        QTableView.__init__(self, parent)
 
-        self.showStackTrace = QtGui.QCheckBox("Highlight stack trace", self)
-        self.gridLayout.addWidget(self.showStackTrace, 1, 0, 1, 1)
+        self.setTabKeyNavigation(False)
+        self.setAlternatingRowColors(True)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.setShowGrid(False)
+        self.setSortingEnabled(True)
+        self.setCornerButtonEnabled(False)
+        self.verticalHeader().setVisible(False)
+        self.verticalHeader().setDefaultSectionSize(20)
+        self.horizontalHeader().setStretchLastSection(True)
 
-        QtCore.QMetaObject.connectSlotsByName(self)
-
-        self.stackView.activated.connect(stack_controller.stackInStackViewActivated)
+        self.showStackTrace = QAction("Highlight stack trace", self)
+        self.showStackTrace.setCheckable(True)
+        self.parent().titleBarWidget().addAction(self.showStackTrace)
+        self.showStackTrace.triggered.connect(lambda value: self.showStackTraceChanged.emit(value))

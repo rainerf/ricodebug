@@ -62,10 +62,10 @@ class SignalProxy(QObject):
     # passing on signals
     ###################################################
     """ ============================================  WATCH  ============================================ """
-    #def addWatchFixed(self, watch):
+    # def addWatchFixed(self, watch):
     #    self.fixedWatchAdded.emit(watch)
 
-    #def addWatchFloating(self, watch):
+    # def addWatchFloating(self, watch):
     #    self.floatingWatchAdded.emit(watch)
 
     def addWatch(self, watch):

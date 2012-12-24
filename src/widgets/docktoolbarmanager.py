@@ -1,6 +1,6 @@
 from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QBoxLayout, QDockWidget
-from views.docktoolbar import DockToolBar
+from .docktoolbar import DockToolBar
 
 
 class DockToolBarManager(QObject):

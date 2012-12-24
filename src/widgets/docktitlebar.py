@@ -44,9 +44,10 @@ class DockTitleBar(QToolBar):
         self.aFloat = QAction(self)
         self.aClose = QAction(self)
 
-        self.addAction(self.spacer)
-        self.addAction(self.aFloat)
-        self.addAction(self.aClose)
+        QToolBar.addAction(self, self.spacer)
+        self.separator = QToolBar.addSeparator(self)
+        QToolBar.addAction(self, self.aFloat)
+        QToolBar.addAction(self, self.aClose)
 
         self.updateStandardIcons()
 
@@ -55,6 +56,10 @@ class DockTitleBar(QToolBar):
         self.dock.featuresChanged.connect(self.dockWidgetFeaturesChanged)
         self.aFloat.triggered.connect(self._floatTriggered)
         self.aClose.triggered.connect(self.dock.close)
+
+    def addAction(self, action):
+        self.insertAction(self.separator, action)
+        return action
 
     def __setWindowIcon(self, icon):
         if not icon.isNull():

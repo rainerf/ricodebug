@@ -22,20 +22,28 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QTextEdit, QAction, QIcon
 from helpers.gdboutput import GdbOutput
 
 
 class MiTraceView(QTextEdit):
-    def __init__(self, do, parent=None):
+    def __init__(self, do, parent):
         QTextEdit.__init__(self, parent)
         self.setReadOnly(True)
 
         do.gdb_connector.commandExecuted.connect(self.appendCommand)
         do.gdb_connector.reader.asyncRecordReceived.connect(self.appendAsync)
 
-    def appendCommand(self, cmd, rec):
-        self.append("<b>" + cmd + "</b>")
+        self.parent().addClearAction()
+        self.parent().clearRequested.connect(lambda: self.clear())
+
+        self.__timeAction = QAction(QIcon(":/icons/images/time.png"), "Show Time", self)
+        self.__timeAction.setCheckable(True)
+        self.parent().titleBarWidget().addAction(self.__timeAction)
+
+    def appendCommand(self, cmd, rec, time):
+        timestr = "[<i>%.3f</i>] " % time if self.__timeAction.isChecked() else ""
+        self.append("%s<b>%s</b>" % (timestr, cmd))
         color = 'color="#ff3333"' if rec.class_ == GdbOutput.ERROR else ""
         self.append("<font %s>%s</font>" % (color, rec.raw))
 

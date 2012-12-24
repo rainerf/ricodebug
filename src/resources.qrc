@@ -39,6 +39,8 @@
     <file>images/stack.png</file>
     <file>images/exclusive.png</file>
     <file>images/locals.png</file>
+    <file>images/clear.png</file>
+    <file>images/time.png</file>
     <file>images/22x22/not_running.png</file>
     <file>images/22x22/running.png</file>
     <file>images/22x22/stopped.png</file>

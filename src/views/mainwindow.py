@@ -31,8 +31,8 @@ from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
-from views.alertabledockwidget import AlertableDockWidget
-from views.docktoolbarmanager import DockToolBarManager
+from widgets.alertabledockwidget import AlertableDockWidget
+from widgets.docktoolbarmanager import DockToolBarManager
 
 
 class MainWindow(QMainWindow):
@@ -216,6 +216,15 @@ class MainWindow(QMainWindow):
         if icon:
             d.setWindowIcon(icon)
 
+        self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d)
+        if addToggleViewAction:
+            self.ui.menuShow_View.addAction(d.toggleViewAction())
+
+        return d
+
+    def newDockWidget(self, name, area, addToggleViewAction):
+        d = AlertableDockWidget(name, self)
+        d.setObjectName(name)
         self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d)
         if addToggleViewAction:
             self.ui.menuShow_View.addAction(d.toggleViewAction())

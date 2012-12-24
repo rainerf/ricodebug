@@ -1,14 +1,15 @@
-from PyQt4.QtGui import QDockWidget, QIcon
+from PyQt4.QtGui import QDockWidget, QIcon, QAction
 from PyQt4.QtCore import pyqtSignal
-from views.docktitlebar import DockTitleBar
+from .docktitlebar import DockTitleBar
 
 
 class AlertableDockWidget(QDockWidget):
     windowIconChanged = pyqtSignal(QIcon)
     windowTitleChanged = pyqtSignal(str)
     alerted = pyqtSignal(bool)
+    clearRequested = pyqtSignal()
 
-    def __init__(self, name, parent):
+    def __init__(self, name, parent, clearAction=False):
         QDockWidget.__init__(self, name, parent)
         self.titleBar = DockTitleBar(self)
         self.setTitleBarWidget(self.titleBar)
@@ -17,6 +18,12 @@ class AlertableDockWidget(QDockWidget):
         # visibilityChanged as soon as the windows are first shown
         self.__visible = None
         self.visibilityChanged.connect(self.__updateVisibility)
+
+    def addClearAction(self):
+        self.addAction(QAction(QIcon(":/icons/images/clear.png"), "Clear", self)).triggered.connect(lambda: self.clearRequested.emit())
+
+    def addAction(self, action):
+        return self.titleBarWidget().addAction(action)
 
     def setAlerted(self):
         if self.__visible:
