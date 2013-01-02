@@ -24,7 +24,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-## @package debugger
+# # @package debugger
 # ricodebug's main file.
 #
 # Execute this file to run ricodebug.
@@ -38,6 +38,7 @@ from views.mainwindow import MainWindow
 from views import logview
 from helpers import criticalloghandler
 from views.logview import LogView
+from helpers.icons import Icons
 
 
 def main():
@@ -46,6 +47,8 @@ def main():
 
     app = QApplication(sys.argv)
     app.setApplicationName("ricodebug")
+
+    Icons()
 
     # We use all kinds of loggers here:
     # * a CriticalLogHandler that will abort the program whenever a critical error is received

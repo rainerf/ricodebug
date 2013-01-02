@@ -22,10 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject, Qt, pyqtSignal
-from PyQt4.QtGui import QIcon
+from PyQt4.QtCore import QObject, pyqtSignal
 from models.stackmodel import StackModel
 from views.stackview import StackView
+from helpers.icons import Icons
 
 
 class StackController(QObject):
@@ -34,12 +34,13 @@ class StackController(QObject):
     def __init__(self, distributedObjects):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
+        self.__showMarkers = False
 
         self.editorController = distributedObjects.editorController
 
         self.stackModel = StackModel(self, self.distributedObjects.debugController, self.distributedObjects.gdb_connector)
 
-        self.stackView = self.distributedObjects.buildView(StackView, "Stack", QIcon(":/icons/images/stack.png"))
+        self.stackView = self.distributedObjects.buildView(StackView, "Stack", Icons.stack)
         self.stackView.setModel(self.stackModel)
         self.stackView.activated.connect(self.stackInStackViewActivated)
 
@@ -49,6 +50,8 @@ class StackController(QObject):
         self.distributedObjects.signalProxy.inferiorIsRunning.connect(self.removeStackMarkers)
         self.stackView.showStackTraceChanged.connect(self.showStackTraceChanged)
 
+        self.stackModel.layoutChanged.connect(self.__updateStackMarkers)
+
     def stackInStackViewActivated(self, index):
         item = index.internalPointer()
         self.distributedObjects.gdb_connector.selectStackFrame(item.level)
@@ -56,7 +59,6 @@ class StackController(QObject):
         self.stackFrameSelected.emit()
 
     def insertStackMarkers(self):
-        return
         for entry in self.stackModel.stack:
             if int(entry.level) != 0 and hasattr(entry, "fullname") and hasattr(entry, "line"):
                 self.editorController.addStackMarker(entry.fullname, entry.line)
@@ -67,7 +69,12 @@ class StackController(QObject):
                 self.editorController.delStackMarkers(entry.fullname)
 
     def showStackTraceChanged(self, state):
-        if state:
+        self.__showMarkers = state
+        if self.__showMarkers:
             self.insertStackMarkers()
         else:
             self.removeStackMarkers()
+
+    def __updateStackMarkers(self):
+        if self.__showMarkers:
+            self.insertStackMarkers()

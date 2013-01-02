@@ -24,10 +24,11 @@
 
 import logging
 from PyQt4.QtGui import QLabel, QTextEdit, QWidget, QGridLayout, QProgressBar
-from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton, QPixmap, QIcon
+from PyQt4.QtGui import QApplication, QStyle, QFrame, QPalette, QBrush, QPushButton
 from PyQt4.QtCore import Qt, pyqtSlot, QTimer
 from models.logmodel import LogModel, FilteredLogModel
 from views.ui_logviewtab import Ui_LogViewTab
+from helpers.icons import Icons
 
 
 class LogViewHandler(logging.Handler):
@@ -75,10 +76,10 @@ class ErrorLabel(QWidget):
         self.time_bar.setOrientation(Qt.Vertical)
         self.time_bar.setMaximum(self.ticks)
         self.time_bar.setTextVisible(False)
-        self.pauseButton = QPushButton(QIcon(QPixmap(":/icons/images/pause.png")), "")
+        self.pauseButton = QPushButton(Icons.pause, "")
         self.pauseButton.setFixedSize(32, 32)
         self.pauseButton.clicked.connect(self.stopTimer)
-        self.stopButton = QPushButton(QIcon(QPixmap(":/icons/images/stop.png")), "")
+        self.stopButton = QPushButton(Icons.stop, "")
         self.stopButton.setFixedSize(32, 32)
         self.stopButton.clicked.connect(self.closeWidget)
         self.layout = QGridLayout(self)

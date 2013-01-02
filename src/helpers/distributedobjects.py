@@ -23,7 +23,6 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QIcon
 
 from controllers.debugcontroller import DebugController
 from .signalproxy import SignalProxy
@@ -54,6 +53,7 @@ from views.pyioview import PyIoView
 from views.threadview import ThreadView
 from models.threadmodel import ThreadModel
 from views.mitraceview import MiTraceView
+from helpers.icons import Icons
 
 
 class DistributedObjects:
@@ -66,7 +66,7 @@ class DistributedObjects:
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
 
-        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints", QIcon(":/icons/images/bp.png"))
+        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints", Icons.bp)
 
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
@@ -75,7 +75,7 @@ class DistributedObjects:
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
 
-        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", QIcon(":/icons/images/thread.png"))
+        self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", Icons.thread)
 
         self.watchView = WatchView()
         self.watchController = WatchController(self, self.watchView)
@@ -85,8 +85,8 @@ class DistributedObjects:
 
         self.tracepointController = TracepointController(self)
 
-        self.buildView(PyIoView, "Python Console", QIcon(":/icons/images/python.png"))
-        self.buildView(InferiorIoView, "Output", QIcon(":/icons/images/console.png"))
+        self.buildView(PyIoView, "Python Console", Icons.python)
+        self.buildView(InferiorIoView, "Output", Icons.console)
         self.buildView(GdbIoView, "GDB Console")
 
         self.datagraphController = DataGraphController(self)

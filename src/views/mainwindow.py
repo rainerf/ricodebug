@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.dockToolBarManager = DockToolBarManager(self)
 
         self.dockToolBar(Qt.TopToolBarArea)
-        self.dockToolBar(Qt.BottomToolBarArea)
+        self.__bottomDockBar = self.dockToolBar(Qt.BottomToolBarArea)
         self.dockToolBar(Qt.LeftToolBarArea)
         self.dockToolBar(Qt.RightToolBarArea)
 

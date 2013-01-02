@@ -22,8 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QTextEdit, QAction, QIcon
+from PyQt4.QtGui import QTextEdit, QAction
 from helpers.gdboutput import GdbOutput
+from helpers.icons import Icons
 
 
 class MiTraceView(QTextEdit):
@@ -34,12 +35,12 @@ class MiTraceView(QTextEdit):
         do.gdb_connector.commandExecuted.connect(self.appendCommand)
         do.gdb_connector.reader.asyncRecordReceived.connect(self.appendAsync)
 
-        self.parent().addClearAction()
-        self.parent().clearRequested.connect(lambda: self.clear())
-
-        self.__timeAction = QAction(QIcon(":/icons/images/time.png"), "Show Time", self)
+        self.__timeAction = QAction(Icons.time, "Show Elapsed Time", self)
         self.__timeAction.setCheckable(True)
-        self.parent().titleBarWidget().addAction(self.__timeAction)
+        parent.titleBarWidget().addAction(self.__timeAction)
+
+        parent.addClearAction()
+        parent.clearRequested.connect(lambda: self.clear())
 
     def appendCommand(self, cmd, rec, time):
         timestr = "[<i>%.3f</i>] " % time if self.__timeAction.isChecked() else ""

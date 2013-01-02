@@ -43,7 +43,7 @@ class StackView(QTableView):
         self.verticalHeader().setDefaultSectionSize(20)
         self.horizontalHeader().setStretchLastSection(True)
 
-        self.showStackTrace = QAction("Highlight stack trace", self)
+        self.showStackTrace = QAction("Show stack trace", self)
         self.showStackTrace.setCheckable(True)
         self.parent().titleBarWidget().addAction(self.showStackTrace)
         self.showStackTrace.triggered.connect(lambda value: self.showStackTraceChanged.emit(value))

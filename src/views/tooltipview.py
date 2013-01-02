@@ -24,8 +24,9 @@
 
 from .treeitemview import TreeItemView
 from PyQt4.QtCore import Qt, QTimer, QModelIndex
-from PyQt4.QtGui import QWidget, QPushButton, QIcon, QHBoxLayout, QVBoxLayout, \
+from PyQt4.QtGui import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, \
         QSizeGrip, QSpacerItem, QSizePolicy, QStylePainter, QStyleOptionFrame, QStyle, QToolTip
+from helpers.icons import Icons
 
 
 class ToolTipView(QWidget):
@@ -42,12 +43,12 @@ class ToolTipView(QWidget):
 
         self.exp = None
 
-        self.addToWatchButton = QPushButton(QIcon(":/icons/images/watch.png"), "")
+        self.addToWatchButton = QPushButton(Icons.watch, "")
         self.addToWatchButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
         self.addToWatchButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
         self.addToWatchButton.setToolTip("Add to Watch")
         self.addToWatchButton.clicked.connect(self.__addToWatch)
-        self.addToDatagraphButton = QPushButton(QIcon(":/icons/images/datagraph.png"), "")
+        self.addToDatagraphButton = QPushButton(Icons.datagraph, "")
         self.addToDatagraphButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
         self.addToDatagraphButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
         self.addToDatagraphButton.setToolTip("Add to Data Graph")

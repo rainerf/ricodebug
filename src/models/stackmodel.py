@@ -129,5 +129,3 @@ class StackModel(QAbstractTableModel):
         self.layoutChanged.emit()
 
         self.sort(self.sortColumn, self.sortOrder)
-
-        self.controller.insertStackMarkers()

@@ -44,7 +44,7 @@ class TreeItemView(QTreeView):
         wrapper = self.selectionModel().currentIndex().internalPointer()
         if isinstance(wrapper, TreeStdVarWrapper):
             filters.add_actions_for_all_filters(context_menu.addMenu(
-                "Set Filter for %s..." % wrapper.exp),  wrapper)
+                "Set Filter for %s..." % wrapper.exp), wrapper)
         return context_menu
 
     def contextMenuEvent(self, event):

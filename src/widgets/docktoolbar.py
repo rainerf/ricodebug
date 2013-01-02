@@ -1,6 +1,7 @@
-from PyQt4.QtGui import QToolBar, QAction, QFrame, QBoxLayout, QDockWidget, QIcon
+from PyQt4.QtGui import QToolBar, QAction, QDockWidget
 from PyQt4.QtCore import QSize, QEvent, Qt, pyqtSignal
 from .rotatabletoolbutton import RotatableToolButton
+from helpers.icons import Icons
 
 
 class DockToolBar(QToolBar):
@@ -14,6 +15,7 @@ class DockToolBar(QToolBar):
 
         self.__dockToButton = {}
         self.__buttonToDock = {}
+        self.__buttonToAction = {}
 
         self.toggleViewAction().setEnabled(False)
         self.toggleViewAction().setVisible(False)
@@ -25,21 +27,14 @@ class DockToolBar(QToolBar):
         self.aToggleExclusive = QAction(self)
         self.aToggleExclusive.setCheckable(True)
         self.aToggleExclusive.setChecked(True)
-        self.aToggleExclusive.setIcon(QIcon(":/icons/images/exclusive.png"))
+        self.aToggleExclusive.setIcon(Icons.exclusive)
+        self.aToggleExclusive.setText("%s exclusive" % self.windowTitle())
+        self.aToggleExclusive.toggled.connect(self.__setExclusive)
         self.addAction(self.aToggleExclusive)
 
         self.setIconSize(QSize(16, 16))
 
-        self.frame = QFrame()
-
-        self.__layout = QBoxLayout(QBoxLayout.LeftToRight, self.frame)
-        self.__layout.setMargin(0)
-        self.__layout.setSpacing(0)
-
-        self.aDockFrame = self.addWidget(self.frame)
-
         self.setOrientation(orientation)
-        self.__layout.setDirection(QBoxLayout.LeftToRight if orientation == Qt.Horizontal else QBoxLayout.TopToBottom)
 
     docks = property(lambda self: self.__dockToButton.iterkeys())
     count = property(lambda self: len(self.__dockToButton))
@@ -74,7 +69,6 @@ class DockToolBar(QToolBar):
             return
 
         tb = self.manager.bar(self.manager.dockWidgetAreaToToolBarArea(self.manager.main.dockWidgetArea(dock)))
-
         if tb and tb.hasDock(dock):
             tb.removeDock(dock)
 
@@ -88,7 +82,7 @@ class DockToolBar(QToolBar):
         pb.setIcon(dock.windowIcon())
         pb.show()
 
-        self.__layout.addWidget(pb)
+        action = self.addWidget(pb)
 
         da = self.manager.main.dockWidgetArea(dock)
         ta = self.manager.toolBarAreaToDockWidgetArea(self.manager.main.toolBarArea(self))
@@ -105,6 +99,7 @@ class DockToolBar(QToolBar):
 
         self.__buttonToDock[pb] = dock
         self.__dockToButton[dock] = pb
+        self.__buttonToAction[pb] = action
 
         dock.installEventFilter(self)
 
@@ -133,6 +128,7 @@ class DockToolBar(QToolBar):
         dock.destroyed.disconnect(self.__dockDestroyed)
 
         btn = self.__dockToButton[dock]
+        self.removeAction(self.__buttonToAction[btn])
         btn.deleteLater()
 
         del self.__dockToButton[dock]
@@ -140,16 +136,18 @@ class DockToolBar(QToolBar):
 
         self.__checkVisibility()
 
-    def setExclusive(self, exclusive):
-        if self.exclusive == exclusive:
-            return
-        self.aToggleExclusive.setChecked(exclusive)
-        if self.exclusive and self.count:
-            self.__hideAllDocksBut(None)
+    def __setExclusive(self, exclusive):
+        toShow = None
+        for dw in self.docks:
+            if dw.visible:
+                if toShow:
+                    toShow = None
+                    break
+                else:
+                    toShow = dw
 
-    def toggleExclusiveAction(self):
-        self.aToggleExclusive.setText("%s exclusive" % self.windowTitle())
-        return self.aToggleExclusive
+        if self.exclusive:
+            self.__hideAllDocksBut(toShow)
 
     def __checkVisibility(self):
         # two actions will always be here: the widget with the buttons and the exclusive action

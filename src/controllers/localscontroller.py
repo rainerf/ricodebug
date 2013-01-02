@@ -22,15 +22,14 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QIcon
-
 from models.localsmodel import LocalsModel
 from .treeitemcontroller import TreeItemController
+from helpers.icons import Icons
 
 
 class LocalsController(TreeItemController):
     def __init__(self, distributedObjects, view):
-        TreeItemController.__init__(self, distributedObjects, "Locals", view, LocalsModel, True, QIcon(":/icons/images/locals.png"))
+        TreeItemController.__init__(self, distributedObjects, "Locals", view, LocalsModel, True, Icons.locals)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
         self.distributedObjects.stackController.stackFrameSelected.connect(self.getLocals)
 

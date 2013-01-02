@@ -1,6 +1,7 @@
-from PyQt4.QtGui import QDockWidget, QIcon, QAction
+from PyQt4.QtGui import QDockWidget, QAction, QIcon
 from PyQt4.QtCore import pyqtSignal
 from .docktitlebar import DockTitleBar
+from helpers.icons import Icons
 
 
 class AlertableDockWidget(QDockWidget):
@@ -19,8 +20,10 @@ class AlertableDockWidget(QDockWidget):
         self.__visible = None
         self.visibilityChanged.connect(self.__updateVisibility)
 
+    visible = property(lambda self: self.__visible)
+
     def addClearAction(self):
-        self.addAction(QAction(QIcon(":/icons/images/clear.png"), "Clear", self)).triggered.connect(lambda: self.clearRequested.emit())
+        self.addAction(QAction(Icons.clear, "Clear", self)).triggered.connect(lambda: self.clearRequested.emit())
 
     def addAction(self, action):
         return self.titleBarWidget().addAction(action)

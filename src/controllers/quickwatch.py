@@ -22,8 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QToolBar, QComboBox, QIcon, QSizePolicy
+from PyQt4.QtGui import QToolBar, QComboBox, QSizePolicy
 from helpers.configstore import ConfigSet, SelectionConfigItem
+from helpers.icons import Icons
 
 
 class QuickWatchConfig(ConfigSet):
@@ -47,8 +48,8 @@ class QuickWatch(QToolBar):
         self.watchedit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.addWidget(self.watchedit)
         self.distributedObjects = distributedObjects
-        self.addAction(QIcon(":/icons/images/watch.png"), "Add to Watch", self.addToWatch)
-        self.addAction(QIcon(":/icons/images/datagraph.png"), "Add to Data Graph", self.addToDG)
+        self.addAction(Icons.watch, "Add to Watch", self.addToWatch)
+        self.addAction(Icons.datagraph, "Add to Data Graph", self.addToDG)
         self.watchedit.lineEdit().returnPressed.connect(self.returnPressed)
 
     def __addCurrentText(self):

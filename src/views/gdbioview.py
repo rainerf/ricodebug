@@ -28,6 +28,7 @@ from PyQt4.QtGui import QWidget, QTextCursor
 from .stylesheets import STYLESHEET
 from helpers.tools import unBackslashify
 from helpers.gdboutput import GdbOutput
+from helpers.icons import Icons
 
 
 class GdbIoView(QWidget):
@@ -55,13 +56,13 @@ class GdbIoView(QWidget):
         self.gdbIoEdit.setReadOnly(True)
         self.gridLayout.addWidget(self.gdbIoEdit, 1, 0, 1, 2)
 
-        QtCore.QMetaObject.connectSlotsByName(self)
-
         self.debugController = do.debugController
         self.gdbInputEdit.lineEdit().returnPressed.connect(self.gdbSendButton.click)
         self.gdbSendButton.clicked.connect(self.executeCliCommand)
         self.debugController.connector.reader.consoleRecordReceived.connect(
                 self.handleConsoleRecord, Qt.QueuedConnection)
+
+        self.parent().setWindowIcon(Icons.gdb)
 
     def executeCliCommand(self):
         cmd = str(self.gdbInputEdit.lineEdit().text())

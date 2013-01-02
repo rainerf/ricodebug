@@ -21,13 +21,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+from helpers.icons import Icons
 
 """@package tracepointcontroller
     the tracepoint controller
 """
 
 from PyQt4.QtCore import QObject, Qt
-from PyQt4.QtGui import QIcon
 from models.tracepointmodel import TracepointModel
 from views.tracepointview import TracepointView
 
@@ -60,7 +60,7 @@ class TracepointController(QObject):
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearTracepoints)
         self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
 
-        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True, QIcon(":/icons/images/tp.png"))
+        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True, Icons.tp)
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
