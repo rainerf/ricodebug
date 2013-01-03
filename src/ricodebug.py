@@ -32,12 +32,10 @@
 import logging
 import sys
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import pyqtRemoveInputHook, QDir, Qt
+from PyQt4.QtCore import pyqtRemoveInputHook, QDir
 
 from views.mainwindow import MainWindow
-from views import logview
 from helpers import criticalloghandler
-from views.logview import LogView
 from helpers.icons import Icons
 
 
@@ -67,11 +65,8 @@ def main():
 
     window = MainWindow()
 
-    logviewhandler = logview.LogViewHandler(LogView())
-    window.insertDockWidget(logviewhandler.widget, "Log View", Qt.BottomDockWidgetArea, True)
-    logger.addHandler(logviewhandler)
-    errormsghandler = logview.ErrorLabelHandler(window)
-    logger.addHandler(errormsghandler)
+    logger.addHandler(window.logviewhandler)
+    logger.addHandler(window.errormsghandler)
 
     if (len(sys.argv) > 1):
         window.debugController.openExecutable(sys.argv[1])
