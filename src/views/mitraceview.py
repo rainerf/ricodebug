@@ -37,6 +37,7 @@ class MiTraceView(QTextEdit):
 
         self.__timeAction = QAction(Icons.time, "Show Elapsed Time", self)
         self.__timeAction.setCheckable(True)
+        self.__timeAction.setChecked(True)
         parent.titleBarWidget().addAction(self.__timeAction)
 
         parent.addClearAction()
