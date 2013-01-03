@@ -1,38 +1,106 @@
 import ctags
-from PyQt4.QtGui import QStandardItemModel, QStandardItem, QPixmap, QIcon
+from PyQt4.QtGui import QIcon
 from PyQt4.QtCore import Qt
+from operator import attrgetter
+from helpers.treemodelhelper import TreeNode, TreeModel
+import os.path
+from helpers.tools import sort_and_group
+from helpers.icons import Icons
 
 
-class EntryList:
+class Entry:
+    STRUCT, CLASS, FUNCTION, MEMBER_PUB, MEMBER_PRIV, MEMBER_PROT, FILE, OTHER = range(8)
+
+    def __init__(self, name, file_, line=None, scope=None, type_=None, extra=None):
+        self.name = name
+        self.file = file_
+        self.line = line
+        self.scope = scope
+        self.type_ = type_
+        self.extra = extra
+        self.childs = []
+
+
+class EntryNode(Entry, TreeNode):
+    def __init__(self, model, name, file_, line=None, scope=None, type_=None, extra=None):
+        assert model
+        Entry.__init__(self, name, file_, line, scope, type_, extra)
+        TreeNode.__init__(self, None, model)
+
+    def _getChildren(self):
+        return self.childs
+
+    def data(self, c, role):
+        def name():
+            if self.type_ == self.FILE:
+                return "%s (%s)" % (self.name, self.file)
+            elif self.type_ == self.FUNCTION:
+                return "%s%s" % (self.name, self.extra)
+            else:
+                return self.name
+
+        if role == Qt.DisplayRole:
+            return name()
+        elif role == Qt.ToolTipRole:
+            info = {
+                    self.MEMBER_PRIV: "Private Member",
+                    self.MEMBER_PUB: "Public Member",
+                    self.MEMBER_PROT: "Protected Member",
+                    self.CLASS: "Class",
+                    self.STRUCT: "Struct",
+                    self.FUNCTION: "Function",
+                    self.FILE: "File",
+                    self.OTHER: "Other"
+                }[self.type_]
+            if self.line is not None:
+                loc = "%s:%s" % (self.file, self.line)
+            else:
+                loc = self.file
+            return "\n".join([name(), info, loc])
+        elif role == Qt.DecorationRole:
+            try:
+                return {
+                        self.MEMBER_PRIV: Icons.private_var,
+                        self.MEMBER_PUB: Icons.var,
+                        self.MEMBER_PROT: Icons.protected_var,
+                        self.CLASS: Icons.struct,
+                        self.STRUCT: Icons.struct,
+                        self.FUNCTION: Icons.sc_process,
+                        self.FILE: Icons.file,
+                        self.OTHER: None
+                    }[self.type_]
+            except KeyError:
+                return None
+
+
+class EntryModel(TreeModel):
+    InternalDataRole = Qt.UserRole
+
     def __init__(self, filename=None):
-        self.scopes = {}
-        self.topLevelEntries = []
-        self.model = QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(["Name", "File", "Line", "Type"])
-
+        TreeModel.__init__(self)
+        self.__entries = []
         if filename:
             self.readFromFile(filename)
 
-    def readFromFile(self, filename):
-        self.scopes = {}
-        self.topLevelEntries = []
-        self.model.clear()
-        self.model.setHorizontalHeaderLabels(["Name", "File", "Line", "Type"])
+    def readFromFile(self, filename, groupByFile, ignorePaths):
+        self.__entries = []
 
         e = ctags.TagEntry()
         tf = ctags.CTags(filename)
         while tf.next(e):
-            self.addFromTagEntry(e)
+            self.__addFromTagEntry(e, ignorePaths)
 
-    def getScope(self, scope):
-        hier = scope.split("::")
-        for s in range(len(hier)):
-            scopename = "::".join(hier[0:s + 1])
-            if scopename not in self.scopes:
-                self.scopes[scopename] = Struct(self)
-        return self.scopes[scope]
+        if groupByFile:
+            self.__entries = self.__sortByFile(self.__entries)
+        else:
+            self.__entries = self.__sortByScope(self.__entries, None)
+        self.reset()
 
-    def addFromTagEntry(self, e):
+    def clear(self):
+        self.__entries = []
+        self.reset()
+
+    def __addFromTagEntry(self, e, ignorePaths):
         kind = e['kind']
         name = e['name']
         file_ = e['file']
@@ -41,131 +109,88 @@ class EntryList:
             scope = e['struct']
         elif e['class']:
             scope = e['class']
+        elif e['namespace']:
+            scope = e['namespace']
         else:
             scope = None
 
-        # Only add a class/struct if it wasn't present in the file before; this
-        # can happen if there are template specializations such as myclass and
-        # myclass<T>, which are both represented as myclass in the file. If the
-        # entry is present, it will have a line number, so use that as a
-        # heuristic ;).
+        # allow the user to ignore some paths (system includes, etc.)
+        for ip in ignorePaths:
+            if ip and file_.startswith(ip):
+                return
+
         add = True
         if kind == "class":
-            n = self.getScope(scope + "::" + name if scope else name)
-            if n.lineNumber == None:
-                n.setValues(name, file_, lineNumber, scope, Struct.CLASS)
-            else:
-                add = False
+            n = EntryNode(self, name, file_, lineNumber, scope, Entry.CLASS)
         elif kind == "struct":
-            n = self.getScope(scope + "::" + name if scope else name)
-            if n.lineNumber == None:
-                n.setValues(name, file_, lineNumber, scope, Struct.STRUCT)
-            else:
-                add = False
+            n = EntryNode(self, name, file_, lineNumber, scope, Entry.STRUCT)
         elif kind == "function":
-            n = Function(self)
-            n.setValues(name, file_, lineNumber, scope, e['signature'])
-        elif kind == "member" and scope:    # namespace members are declared as member, but don't have a scope
-            n = Member(self)
-            n.setValues(name, file_, lineNumber, scope, {"private": Member.PRIVATE, "protected": Member.PROTECTED, "public": Member.PUBLIC, None: None}[e['access']])
+            n = EntryNode(self, name, file_, lineNumber, scope, Entry.FUNCTION, e['signature'])
+        elif kind == "member" and scope:  # namespace members are declared as member, but don't have a scope
+            n = EntryNode(self, name, file_, lineNumber, scope, {"private": Entry.MEMBER_PRIV, "protected": Entry.MEMBER_PROT, "public": Entry.MEMBER_PUB, None: None}[e['access']])
         else:
-            n = Entry(self)
-            n.setValues(name, file_, lineNumber, scope)
+            n = EntryNode(self, name, file_, lineNumber, scope, Entry.OTHER)
+
         if add:
-            n.addToParent()
+            self.__entries.append(n)
 
+    def __sortByFile(self, entries):
+        res = []
+        for file_, elements in sort_and_group(entries, attrgetter("file")):
+            entry = EntryNode(self, os.path.basename(file_), file_, type_=EntryNode.FILE)
+            entry.childs = self.__sortByScope(elements, entry)
+            for c in entry.childs:
+                c.parent = entry
 
-class EntryItem(QStandardItem):
-    ENTRYROLE = Qt.UserRole + 1
+            res.append(entry)
 
-    def __init__(self, entry):
-        QStandardItem.__init__(self)
-        self.entry = entry
+        return res
 
-    def data(self, role):
-        ret = QStandardItem.data(self, role)
-        if role == self.ENTRYROLE:
-            return self.entry
+    def __sortByScope(self, entries, parent):
+        def __findParentForScope(scope, parent):
+            elem = None
+
+            toSearch = entries
+            for part in scope.split("::"):
+                for e in toSearch:
+                    if e.name == part:
+                        elem = e
+                        toSearch = e.childs
+                        parent = e
+                        break
+                else:
+                    elem = EntryNode(self, part, part)
+                    toSearch.append(elem)
+                    elem.parent = parent
+                    toSearch = elem.childs
+                    parent = elem
+            return elem
+
+        groups = sort_and_group(entries, attrgetter("scope"))
+
+        # the first group is "None", ie. the top one
+        _, x = groups.next()
+        entries = list(x)
+
+        for name, elements in groups:
+            p = __findParentForScope(name, parent)
+            p.childs = list(elements)
+            for c in p.childs:
+                c.parent = p
+        return entries
+
+    def _getRootNodes(self):
+        return self.__entries
+
+    def columnCount(self, _):
+        return 1
+
+    def data(self, index, role):
+        if not index.isValid():
+            return None
+
+        t = index.internalPointer()
+        if role == self.InternalDataRole:
+            return t
         else:
-            return ret
-
-
-class Entry:
-    def __init__(self, entrylist):
-        self.entrylist = entrylist
-        self.scope = None
-        self.name = None
-        self.file_ = None
-        self.lineNumber = None
-        self.items = [EntryItem(self), EntryItem(self), EntryItem(self), EntryItem(self)]
-
-    def setValues(self, name, file_, lineNumber, scope):
-        self.name = name
-        self.file_ = file_
-        self.lineNumber = lineNumber
-        assert not self.scope
-        self.scope = scope
-
-        self.items[0].setText(name)
-        self.items[0].setIcon(QIcon(QPixmap(":/icons/images/var.png")))
-        self.items[1].setText(file_)
-        self.items[2].setText(str(lineNumber))
-        self.items[3].setText("")
-        for i in self.items:
-            i.setEditable(False)
-
-    def addToParent(self):
-        if self.scope:
-            self.entrylist.getScope(self.scope).children.append(self)
-            self.entrylist.getScope(self.scope).items[0].appendRow(self.items)
-        else:
-            self.entrylist.topLevelEntries.append(self)
-            self.entrylist.model.invisibleRootItem().appendRow(self.items)
-
-    def __str__(self):
-        return "%s %s %s @ %s:%d" % (self.__class__, self.scope, self.name, self.file_, self.lineNumber)
-
-
-class Struct(Entry):
-    STRUCT, CLASS = range(2)
-
-    def __init__(self, entrylist):
-        Entry.__init__(self, entrylist)
-        self.children = []
-        self.kind = None
-
-    def setValues(self, name, file_, lineNumber, scope, kind):
-        Entry.setValues(self, name, file_, lineNumber, scope)
-        self.kind = kind
-        self.items[0].setIcon(QIcon(QPixmap(":/icons/images/struct.png")))
-        self.items[3].setText(["struct", "class"][kind])
-
-    def __str__(self):
-        return "\n".join([Entry.__str__(self)] + ["    " + str(c).replace("\n", "\n    ") for c in self.children])
-
-
-class Function(Entry):
-    def __init__(self, entrylist):
-        Entry.__init__(self, entrylist)
-        self.signature = None
-
-    def setValues(self, name, file_, lineNumber, scope, signature):
-        Entry.setValues(self, name, file_, lineNumber, scope)
-        self.signature = signature if signature else '()'
-        self.items[0].setText(self.name + self.signature)
-        self.items[0].setIcon(QIcon(QPixmap(":/icons/images/sc_process.png")))
-        self.items[3].setText("Function")
-
-
-class Member(Entry):
-    PRIVATE, PROTECTED, PUBLIC = range(3)
-
-    def __init__(self, entrylist):
-        Entry.__init__(self, entrylist)
-        self.items[3].setText("Member")
-        self.access = None
-
-    def setValues(self, name, file_, lineNumber, scope, access):
-        Entry.setValues(self, name, file_, lineNumber, scope)
-        self.access = access
-        self.items[0].setIcon(QIcon(QPixmap(":/icons/images/var.png")))
+            return t.data(index.column(), role)
