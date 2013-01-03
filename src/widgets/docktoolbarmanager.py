@@ -55,7 +55,9 @@ class DockToolBarManager(QObject):
 
     def dockWidgetAreaChanged(self, dock, bar):
         bar.removeDock(dock)
-        self.bar(self.dockWidgetAreaToToolBarArea(self.main.dockWidgetArea(dock))).addDock(dock)
+        # only re-add the dock widget if it was placed inside some new area
+        if self.main.dockWidgetArea(dock):
+            self.bar(self.dockWidgetAreaToToolBarArea(self.main.dockWidgetArea(dock))).addDock(dock)
 
     def restoreState(self, settings):
         settings.beginGroup("Mainwindow/Docks")
