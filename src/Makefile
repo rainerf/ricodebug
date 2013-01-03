@@ -14,7 +14,7 @@ clean:
 	find . \( -name '__pycache__' -o -name '*.pyc' \) -prune -exec rm -fr {} \;
 
 pylint:
-	pylint --include-ids=y --disable=W0312,C0103,C0111,C0301 *.py
+	pylint --include-ids=y --disable=W0312,C0103,C0111,C0301 --ignored-classes=Icons --output=colorized **/*.py
 
 coverage:
 	python-coverage run ricodebug.py

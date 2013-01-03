@@ -262,6 +262,8 @@ class OpenedFileView(ScintillaWrapper):
         self.__allowToolTip = True
         self.__enableToolTip(True)
 
+        self.__popupMenu = None
+
         self.bpLines = []
 
     def updateConfig(self):
@@ -324,7 +326,7 @@ class OpenedFileView(ScintillaWrapper):
                 y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
                 self.distributedObjects.toolTipController.showToolTip(exp, QtCore.QPoint(x + 3, y + 3 + self.textHeight(line)), self)
 
-    def onDwellEnd(self, position, x, y):
+    def onDwellEnd(self, _1, _2, _3):
         self.distributedObjects.toolTipController.hideToolTip()
         self.clearIndicatorRange(0, 0, self.lines(), 1, self.INDICATOR_TOOLTIP)
 
@@ -340,23 +342,23 @@ class OpenedFileView(ScintillaWrapper):
 
         listOfTracepoints = self.tracepointController.getTracepointsFromModel()
 
-        self.subPopupMenu = QtGui.QMenu(self)
-        self.subPopupMenu.setTitle("Add variable " + exp + " to...")
+        subPopupMenu = QtGui.QMenu(self)
+        subPopupMenu.setTitle("Add variable " + exp + " to...")
 
         for tp in listOfTracepoints:
             self.subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
 
-        self.popupMenu = QtGui.QMenu(self)
-        self.popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
-        self.popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
-        self.popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
-        self.popupMenu.addSeparator()
-        self.popupMenu.addMenu(self.subPopupMenu)
-        self.popupMenu.popup(point)
+        self.__popupMenu = QtGui.QMenu(self)
+        self.__popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
+        self.__popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
+        self.__popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
+        self.__popupMenu.addSeparator()
+        self.__popupMenu.addMenu(subPopupMenu)
+        self.__popupMenu.popup(point)
 
         # disable the tooltips while the menu is shown
         self.__enableToolTip(False)
-        self.popupMenu.aboutToHide.connect(lambda: self.__enableToolTip(True))
+        self.__popupMenu.aboutToHide.connect(lambda: self.__enableToolTip(True))
 
     def __enableToolTip(self, enable):
         self.__allowToolTip = enable
@@ -429,7 +431,7 @@ class OpenedFileView(ScintillaWrapper):
     def setMarginWidthByLineNumbers(self):
         self.setMarginWidth(0, ceil(log(self.lines(), 10)) * 10 + 5)
 
-    def onMarginClicked(self, margin, line, state):
+    def onMarginClicked(self, margin, line, _):
         # if breakpoint should be toggled
         if margin == self.MARGIN_NUMBERS or margin == self.MARGIN_MARKER_BP:
             self.toggleBreakpointWithLine(line)
@@ -489,12 +491,12 @@ class OpenedFileView(ScintillaWrapper):
                 continue
             yield bp
 
-    def breakpointsInserted(self, parent, start, end):
+    def breakpointsInserted(self, _, start, end):
         for bp in self.__validBreakpoints(start, end):
             self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
             self.__addBreakpointOverlay(bp)
 
-    def breakpointsRemoved(self, parent, start, end):
+    def breakpointsRemoved(self, _, start, end):
         for bp in self.__validBreakpoints(start, end):
             self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP)
             self.markerDelete(bp.line - 1, self.MARGIN_MARKER_BP_DIS)

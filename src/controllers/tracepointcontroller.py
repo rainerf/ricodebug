@@ -67,6 +67,7 @@ class TracepointController(QObject):
         index = self.tracepointView.getSelectedRow()
         if index != None:
             self._model.selectionMade(index)
+
     def toggleTracepoint(self, file_, line):
         """ toggles the breakpoint in file file_ with linenumber line
         @param file_: (string), fullname of file

@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
         self.disableButtons()
         self.act.Interrupt.setEnabled(True)
 
-    def targetStopped(self, rec):
+    def targetStopped(self, _):
         self.ui.statusLabel.setText("Stopped")
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/stopped.png"))
         self.enableButtons()

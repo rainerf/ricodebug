@@ -29,7 +29,7 @@ from PyQt4.QtCore import pyqtSignal
 class StackView(QTableView):
     showStackTraceChanged = pyqtSignal(bool)
 
-    def __init__(self, do, parent):
+    def __init__(self, _, parent):
         QTableView.__init__(self, parent)
 
         self.setTabKeyNavigation(False)

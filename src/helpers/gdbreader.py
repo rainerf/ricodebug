@@ -125,4 +125,3 @@ class GdbReader(QThread):
         res = q.popleft()
         m.unlock()
         return res
-

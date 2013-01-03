@@ -82,14 +82,14 @@ class ToolTipView(QWidget):
     def __setDisallowHide(self, x):
         self.__allowHide = not x
 
-    def enterEvent(self, event):
+    def enterEvent(self, _):
         self.__hideTimer.stop()
 
     def hideLater(self):
         self.__hideTimer.start(250)
 
     # hide the widget when the mouse leaves it
-    def leaveEvent(self, event):
+    def leaveEvent(self, _):
         self.hideLater()
 
     def __addToWatch(self):
@@ -113,7 +113,7 @@ class ToolTipView(QWidget):
     def setModel(self, model):
         self.treeItemView.setModel(model)
 
-    def paintEvent(self, event):
+    def paintEvent(self, _):
         # this makes the tool tip use the system's tool tip color as its background
         painter = QStylePainter(self)
         opt = QStyleOptionFrame()

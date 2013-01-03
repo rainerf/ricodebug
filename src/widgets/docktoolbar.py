@@ -1,3 +1,30 @@
+# ricodebug - A GDB frontend which focuses on visually supported
+# debugging using data structure graphs and SystemC features.
+#
+# Copyright (C) 2012  he ricodebug project team at the
+# Upper Austrian University Of Applied Sciences Hagenberg,
+# Department Embedded Systems Design
+#
+# Copyright (C) 2005 - 2011  Filipe AZEVEDO & The Monkey Studio Team
+# http://monkeystudio.org licensing under the GNU GPL.
+#
+# This file is part of ricodebug.
+#
+# ricodebug is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further information see <http://syscdbg.hagenberg.servus.at/>.
+
 from PyQt4.QtGui import QToolBar, QAction, QDockWidget
 from PyQt4.QtCore import QSize, QEvent, Qt, pyqtSignal
 from .rotatabletoolbutton import RotatableToolButton
@@ -50,7 +77,6 @@ class DockToolBar(QToolBar):
 
                 btn = self.__dockToButton[dock]
                 btn.setChecked(type_ == QEvent.Show)
-                self.__checkButtonText(btn)
                 self.__checkVisibility()
             elif type_ == QEvent.KeyPress:
                 if event.key() == Qt.Key_Escape:
@@ -95,8 +121,6 @@ class DockToolBar(QToolBar):
 
         pb.setChecked(dock.isVisible())
 
-        self.__checkButtonText(pb)
-
         self.__buttonToDock[pb] = dock
         self.__dockToButton[dock] = pb
         self.__buttonToAction[pb] = action
@@ -136,7 +160,7 @@ class DockToolBar(QToolBar):
 
         self.__checkVisibility()
 
-    def __setExclusive(self, exclusive):
+    def __setExclusive(self):
         toShow = None
         for dw in self.docks:
             if dw.visible:
@@ -155,14 +179,6 @@ class DockToolBar(QToolBar):
             self.show()
         else:
             self.hide()
-
-    def __checkButtonText(self, b):
-        return
-
-        if not b:
-            return
-        # FIXME
-        return
 
     def __dockChanged(self):
         a = self.sender()
@@ -196,8 +212,6 @@ class DockToolBar(QToolBar):
 
         if self.exclusive:
             self.__hideAllDocksBut(dock)
-
-        self.__checkButtonText(btn)
 
         if dock.isVisible() != b:
             dock.setVisible(b)

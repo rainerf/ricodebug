@@ -36,6 +36,7 @@ from PyQt4.QtCore import QThread, pyqtSignal
 
 class PtyHandler(QThread):
     dataAvailable = pyqtSignal('QString')
+
     def __init__(self, parent=None):
         """Initialise Linux pseudo terminal
         """
@@ -61,4 +62,3 @@ class PtyHandler(QThread):
         """Writes to the pseudo terminal
         """
         self.master.write(s)
-

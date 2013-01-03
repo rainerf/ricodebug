@@ -1,4 +1,33 @@
-from PyQt4.QtGui import QToolBar, QWidget, QHBoxLayout, QWidgetAction, QAction, QStylePainter, QStyleOptionToolBar, QDockWidget, QStyle, QTransform, QFontMetrics, QIcon, QFrame, QBoxLayout, QLabel
+# ricodebug - A GDB frontend which focuses on visually supported
+# debugging using data structure graphs and SystemC features.
+#
+# Copyright (C) 2012  he ricodebug project team at the
+# Upper Austrian University Of Applied Sciences Hagenberg,
+# Department Embedded Systems Design
+#
+# Copyright (C) 2005 - 2011  Filipe AZEVEDO & The Monkey Studio Team
+# http://monkeystudio.org licensing under the GNU GPL.
+#
+# This file is part of ricodebug.
+#
+# ricodebug is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further information see <http://syscdbg.hagenberg.servus.at/>.
+
+from PyQt4.QtGui import QToolBar, QWidget, QHBoxLayout, QWidgetAction, \
+        QAction, QStylePainter, QStyleOptionToolBar, QDockWidget, QStyle, \
+        QTransform, QFontMetrics, QIcon, QFrame, QBoxLayout, QLabel
 from PyQt4.QtCore import QSize, QPointF, Qt, QRect, QPoint, QEvent
 
 
@@ -19,23 +48,22 @@ class DockTitleBar(QToolBar):
         l.setSpacing(0)
         l.addStretch()
 
-        self.frame = QFrame()
-        self.__layout = QBoxLayout(QBoxLayout.LeftToRight, self.frame)
-        self.__layout.setContentsMargins(4, 4, 0, 0)
-        self.__layout.setSpacing(2)
-        self.aDockFrame = self.addWidget(self.frame)
+        frame = QFrame()
+        layout = QBoxLayout(QBoxLayout.LeftToRight, frame)
+        layout.setContentsMargins(4, 4, 0, 0)
+        layout.setSpacing(2)
+        self.aDockFrame = self.addWidget(frame)
 
         self.__icon = QLabel()
 
-        self.__layout.addWidget(self.__icon)
-        self.__title = QLabel(self.dock.windowTitle())
-        self.__layout.addWidget(self.__title)
+        layout.addWidget(self.__icon)
+        layout.addWidget(QLabel(self.dock.windowTitle()))
 
         self.dock.windowIconChanged.connect(self.__setWindowIcon)
 
         # fake spacer item
-        self.spacer = QWidgetAction(self)
-        self.spacer.setDefaultWidget(w)
+        spacer = QWidgetAction(self)
+        spacer.setDefaultWidget(w)
 
         self.setMovable(False)
         self.setFloatable(False)
@@ -44,7 +72,7 @@ class DockTitleBar(QToolBar):
         self.aFloat = QAction(self)
         self.aClose = QAction(self)
 
-        QToolBar.addAction(self, self.spacer)
+        QToolBar.addAction(self, spacer)
         self.separator = QToolBar.addSeparator(self)
         QToolBar.addAction(self, self.aFloat)
         QToolBar.addAction(self, self.aClose)
@@ -93,7 +121,8 @@ class DockTitleBar(QToolBar):
         if self.dock.features() & QDockWidget.DockWidgetVerticalTitleBar:
             painter.rotate(90)
 
-    def transposeSize(self, rect):
+    @staticmethod
+    def transposeSize(rect):
         size = rect.size()
         size.transpose()
         rect.setSize(size)

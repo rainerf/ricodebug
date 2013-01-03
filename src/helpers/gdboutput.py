@@ -26,6 +26,7 @@
 Predefined constants for the gdb output
 """
 
+
 class GdbOutput:
     RESULT_RECORD, \
     EXEC_ASYN, \
@@ -50,10 +51,9 @@ class GdbOutput:
     EXIT, \
     CONNECTED, \
     ERROR \
-    = range(23)
+ = range(23)
 
     def __init__(self):
-        self.class_ = None     # done, running,...
-        self.string = None     # the string of a stream output
-        self.type_ = None     # the type of a async response
-
+        self.class_ = None  # done, running,...
+        self.string = None  # the string of a stream output
+        self.type_ = None  # the type of a async response

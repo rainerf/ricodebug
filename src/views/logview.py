@@ -158,11 +158,3 @@ class LogView(QWidget):
         self.ui = Ui_LogViewTab()
         self.ui.setupUi(self)
         self.ui.filterSlider.setValue(3)
-
-
-class LogViewTab(QWidget):
-    def __init__(self, parent):
-        QWidget.__init__(self, parent)
-        self.ui = Ui_LogViewTab()
-        self.ui.setupUi(self)
-

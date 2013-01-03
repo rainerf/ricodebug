@@ -21,11 +21,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-
 """Lexical parser for the gdb output
 
 For futher information see the ply python module documentation.
 """
+
 
 import ply.lex as lex
 import ply.yacc as yacc
@@ -89,16 +89,13 @@ t_AMP = r'&'
 def t_STRING(t):
     r'[\w\d_-]+'
     t.type = reserved.get(t.value, "STRING")
-#    print t.type, "                                      ", t
     return t
 
 
 def t_C_STRING(t):
-    #r'".*?[^\\|^\\\\]?"(?=(,|\}|\]|$))'
     r'".*?(?<!\\)"(?=(,|\}|\]|$))'
     t.value = unBackslashify(t.value)
     t.value = t.value[1:-1]  # strip the "
-    #print "...", t
     return t
 
 
@@ -139,7 +136,6 @@ def p_async_output(p):
 
     if len(p) == 4:
         p[0].results = p[3]
-#    print "async_output                                ", p[0]
 
 
 def p_result_class(p):
@@ -158,7 +154,6 @@ def p_result_class(p):
         p[0] = GdbOutput.ERROR
     elif p[1] == "exit":
         p[0] = GdbOutput.EXIT
-#    print "result_class                                ", p[0]
 
 
 def p_async_class(p):
@@ -205,13 +200,11 @@ def p_async_class(p):
 def p_result(p):
     '''result : variable ASSIGN value'''
     p[0] = Assignment(p[1], p[3])
-#    print "result                                      ", p[0]
 
 
 def p_variable(p):
     '''variable : STRING'''
     p[0] = p[1]
-#    print "variable                                    ", p[0]
 
 
 def p_value(p):
@@ -219,13 +212,11 @@ def p_value(p):
              | tuple_
              | list_'''
     p[0] = p[1]
-#    print "value                                       ", p[0]
 
 
 def p_const(p):
     '''const : C_STRING'''
     p[0] = p[1]
-#    print "const                                       ", p[0]
 
 
 def p_tuple_(p):
@@ -237,7 +228,6 @@ def p_tuple_(p):
             setattr(p[0], a.dest, a.src)
     else:
         p[0] = []
-#    print "tuple                                       ", p[0]
 
 
 def p_list_(p):
@@ -248,7 +238,6 @@ def p_list_(p):
         p[0] = p[2]
     else:
         p[0] = []
-#    print "list                                        ", p[0]
 
 
 def p_stream_output(p):
@@ -264,7 +253,6 @@ def p_result_list(p):
         p[0] = [p[1]] + p[3]
     else:
         p[0] = [p[1]]
-#    print "result_list                                 ", p[0]
 
 
 def p_value_list(p):
@@ -274,7 +262,6 @@ def p_value_list(p):
         p[0] = [p[1]] + p[3]
     else:
         p[0] = [p[1]]
-#    print "value_list                                  ", p[0]
 
 
 def p_error(p):
@@ -283,7 +270,7 @@ def p_error(p):
             p.lineno, p.lexpos, p.type)
     else:
         logging.error("Syntax error in input!")
-    
+
     raise helpers.excep.GdbError("SYNTAX ERROR")
 
 
@@ -328,4 +315,3 @@ class GdbResultParser:
             r[-1].raw = line
 
         return r
-

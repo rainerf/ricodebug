@@ -26,7 +26,7 @@ from PyQt4.QtGui import QTableView, QHeaderView, QAbstractItemView
 
 
 class BreakpointView(QTableView):
-    def __init__(self, do, parent=None):
+    def __init__(self, _, parent=None):
         QTableView.__init__(self, parent)
 
         self.setTabKeyNavigation(False)
@@ -39,4 +39,3 @@ class BreakpointView(QTableView):
         self.verticalHeader().setDefaultSectionSize(20)
         self.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         self.horizontalHeader().setStretchLastSection(True)
-

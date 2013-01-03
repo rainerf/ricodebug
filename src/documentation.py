@@ -22,16 +22,15 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-## \mainpage ricodebug - A GDB frontend 
+# \mainpage ricodebug - A GDB frontend
 #
-# \section sec_intro Introduction 
+# \section sec_intro Introduction
 #
 # ricodebug is a GDB frontend which focuses on visually supported
 # debugging using data structure graphs and SystemC features.
 #
-
-
-# a running package-configuration on Ubuntu is:
+#
+# a working package-configuration on Ubuntu is:
 # - python 2.6.6
 # - python-qt4 4.8.1
 # - python-qt4-dev 4.8.1
