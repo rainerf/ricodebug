@@ -31,25 +31,32 @@ from views.ui_logviewtab import Ui_LogViewTab
 from helpers.icons import Icons
 
 
-class LogViewHandler(logging.Handler):
-    def __init__(self, widget):
+class LogViewHandler(logging.Handler, QWidget):
+    def __init__(self, parent):
         logging.Handler.__init__(self)
-        self.widget = widget
+        QWidget.__init__(self, parent)
+
+        self.ui = Ui_LogViewTab()
+        self.ui.setupUi(self)
         self.model = LogModel()
         self.filter_model = FilteredLogModel()
         self.filter_model.setSourceModel(self.model)
-        self.widget.ui.logView.setModel(self.filter_model)
-        widget.ui.filterSlider.valueChanged.connect(self.setFilter)
+        self.ui.logView.setModel(self.filter_model)
+        self.ui.filterSlider.valueChanged.connect(self.setFilter)
+        self.ui.filterSlider.setValue(3)
+
+        self.parent().addClearAction()
+        self.parent().clearRequested.connect(self.model.clear)
 
     def emit(self, record):
         self.model.insertMessage(record)
         self.updateView()
 
     def updateView(self):
-        self.widget.ui.logView.resizeColumnsToContents()
-        if self.widget.ui.logView.columnWidth(2) > 500:
-            self.widget.ui.logView.setColumnWidth(2, 500)
-        self.widget.ui.logView.scrollToBottom()
+        self.ui.logView.resizeColumnsToContents()
+        if self.ui.logView.columnWidth(2) > 500:
+            self.ui.logView.setColumnWidth(2, 500)
+        self.ui.logView.scrollToBottom()
 
     def setFilter(self, value):
         self.filter_model.setMinimum(value * 10)
@@ -150,11 +157,3 @@ class ErrorLabelHandler(logging.Handler):
             self.error_label.setErrorMessage("<b>%s</b>" % record.message)
         elif record.levelno >= logging.WARNING:
             self.error_label.setWarningMessage("<b>%s</b>" % record.message)
-
-
-class LogView(QWidget):
-    def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
-        self.ui = Ui_LogViewTab()
-        self.ui.setupUi(self)
-        self.ui.filterSlider.setValue(3)

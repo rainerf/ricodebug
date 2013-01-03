@@ -33,7 +33,7 @@ from controllers.quickwatch import QuickWatch
 from PyQt4 import QtGui
 from widgets.alertabledockwidget import AlertableDockWidget
 from widgets.docktoolbarmanager import DockToolBarManager
-from views.logview import LogView, LogViewHandler, ErrorLabelHandler
+from views.logview import LogViewHandler, ErrorLabelHandler
 
 
 class MainWindow(QMainWindow):
@@ -81,8 +81,10 @@ class MainWindow(QMainWindow):
 
         # Add editor to main window.
         self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
-        self.logviewhandler = LogViewHandler(LogView())
-        self.insertDockWidget(self.logviewhandler.widget, "Log View", Qt.BottomDockWidgetArea, True)
+
+        dw = self.newDockWidget("Log View", Qt.BottomDockWidgetArea, True)
+        self.logviewhandler = LogViewHandler(dw)
+        dw.setWidget(self.logviewhandler)
         self.errormsghandler = ErrorLabelHandler(self)
 
         self.pluginloader.addAvailablePlugins()

@@ -81,6 +81,10 @@ class LogModel(QAbstractTableModel):
         self.records.append(record)
         self.endInsertRows()
 
+    def clear(self):
+        self.records = []
+        self.reset()
+
 
 class FilteredLogModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
