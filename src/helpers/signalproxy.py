@@ -30,8 +30,6 @@ class SignalProxy(QObject):
     class presenting signal interface for plugins
     plugins only need this class to communicate with main program
     '''
-
-    removeDockWidget = pyqtSignal('QDockWidget')
     addDockWidget = pyqtSignal('PyQt_PyObject', 'QDockWidget', 'PyQt_PyObject')
     variableUpdateCompleted = pyqtSignal()
     registerWithSessionManager = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
