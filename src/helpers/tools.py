@@ -22,6 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from itertools import groupby
+
 
 def unBackslashify(s):
     s = s.replace("\\\\", "\\")
@@ -41,3 +43,7 @@ def cpp2py(v):
     raise ValueError("No conversion for parameter defined.")
 
     return None
+
+
+def sort_and_group(cont, key):
+    return groupby(sorted(cont, key=key), key=key)
