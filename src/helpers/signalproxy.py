@@ -139,8 +139,8 @@ class SignalProxy(QObject):
     # functions for plugin placement in the mainwindow
     ###################################################
 
-    def insertDockWidget(self, plugin, widget, name, area, addToggleViewAction):
-        d = self.distributedObjects.mainwindow.insertDockWidget(widget, name, area, addToggleViewAction)
+    def insertDockWidget(self, plugin, widget, name, area, addToggleViewAction, icon=None):
+        d = self.distributedObjects.mainwindow.insertDockWidget(widget, name, area, addToggleViewAction, icon)
         self.pluginDocks[plugin] = d
 
     def removeDockWidget(self, plugin):

@@ -1,14 +1,11 @@
-from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from ctags_support import EntryModel
+from PyQt4.QtCore import Qt, pyqtSignal, QThread, QObject, QDir
+from PyQt4.QtGui import QTreeView, QMenu, QIcon
 import os
 
-from PyQt4.QtCore import QThread
-from helpers.modeltest import ModelTest
 from helpers.configstore import ConfigSet, ConfigItem
-from plugins.Navigation.ctags_support import Entry
 from helpers.icons import Icons
+from .ctags_support import Entry, EntryModel
+from . import PluginIcon
 
 
 class CTagsRunner(QThread):
@@ -28,9 +25,9 @@ class CTagsRunner(QThread):
         self.tagsFileAvailable.emit()
 
 
-class NavigationView(QtGui.QTreeView):
+class NavigationView(QTreeView):
     def __init__(self, signalproxy, parent=None):
-        QtGui.QTreeView.__init__(self, parent)
+        QTreeView.__init__(self, parent)
         self.signalproxy = signalproxy
         self.doubleClicked.connect(self.openEntry)
         self.setHeaderHidden(True)
@@ -54,7 +51,7 @@ class NavigationView(QtGui.QTreeView):
                 self.signalproxy.distributedObjects.breakpointModel.insertBreakpoint(file_, line)
             return f
 
-        menu = QtGui.QMenu()
+        menu = QMenu()
         menu.addAction(Icons.bp, "Break on %s (%s:%s)" % (x.name, x.file, x.line), addBreakpoint(x.file, x.line))
         menu.exec_(self.viewport().mapToGlobal(e.pos()))
         e.accept()
@@ -67,11 +64,11 @@ class NavigationPluginConfig(ConfigSet):
         self.ignorePaths = ConfigItem(self, "Ignore Files in Paths", "/usr:/opt")
 
 
-class NavigationPlugin(QtCore.QObject):
+class NavigationPlugin(QObject):
     ''' CTags-based navigation plugin Widget '''
 
     def __init__(self):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.dockwidget = None
 
     def initPlugin(self, signalproxy):
@@ -88,11 +85,11 @@ class NavigationPlugin(QtCore.QObject):
         self.view.setModel(self.model)
 
         # create and place DockWidget in mainwindow using signalproxy
-        self.signalproxy.insertDockWidget(self, self.view, "Navigation", Qt.BottomDockWidgetArea, True)
+        self.signalproxy.insertDockWidget(self, self.view, "Navigation", Qt.BottomDockWidgetArea, True, QIcon(PluginIcon))
 
         self.signalproxy.distributedObjects.debugController.executableOpened.connect(self.update)
 
-        self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QtCore.QDir.tempPath()), os.getpid()))
+        self.ctagsRunner = CTagsRunner("%s/tags%d" % (str(QDir.tempPath()), os.getpid()))
         self.ctagsRunner.tagsFileAvailable.connect(self.tagsFileReady, Qt.QueuedConnection)
 
         # load the tags if the plugin was loaded after the executable

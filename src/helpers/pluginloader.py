@@ -24,7 +24,7 @@
 
 import os
 from PyQt4.QtCore import QObject, QIODevice, QFile, pyqtSignal
-from PyQt4.QtGui import QAction
+from PyQt4.QtGui import QAction, QIcon
 from PyQt4.QtXml import QDomDocument
 import logging
 
@@ -57,7 +57,12 @@ class PluginAction(QAction):
             # if PluginName is not defined, name plugin like file
             self.setText(os.path.basename(path))
 
-        #connect action to initPlugin() and deInitPlugin methods
+        try:
+            self.setIcon(QIcon(module.PluginIcon))
+        except AttributeError:
+            pass
+
+        # connect action to initPlugin() and deInitPlugin methods
         self.triggered.connect(self.__togglePlugin)
 
     def __togglePlugin(self, checked):
@@ -126,7 +131,7 @@ class PluginLoader(QObject):
             return False
 
         if hasattr(self.loadedPlugins[plugin], "initPlugin"):
-            self.loadedPlugins[plugin].initPlugin(self.signalproxy)     # init plugin with signal interface
+            self.loadedPlugins[plugin].initPlugin(self.signalproxy)  # init plugin with signal interface
             return True
         else:
             logging.error("Error while loading plugin " + plugin.classname + ". Function initPlugin() not found")
