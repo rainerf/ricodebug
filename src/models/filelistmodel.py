@@ -21,7 +21,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-
 """ @package filelistmodel
 A tree model that provides data for the file list view.
 """
@@ -29,13 +28,13 @@ A tree model that provides data for the file list view.
 import os
 from operator import attrgetter
 from PyQt4.QtCore import Qt, QAbstractItemModel, QModelIndex
-from PyQt4.QtGui import QPixmap
+from helpers.icons import Icons
 
 
 class FileListItem():
     """ Class that represents a source file in the file list view. """
 
-    def __init__(self, data, imageIndex, parent=None):
+    def __init__(self, data, icon, parent=None):
         """ The constructor.
         @param data The item's data.
         @param imageIndex The index of the item's icon.
@@ -45,7 +44,7 @@ class FileListItem():
         self.childItems = []
         self.itemData = data
         self.parentItem = parent
-        self.imageIndex = imageIndex
+        self.icon = icon
 
     def appendChild(self, child):
         """ Append child to current item.
@@ -102,11 +101,10 @@ class FileListModel(QAbstractItemModel):
         QAbstractItemModel.__init__(self, parent)
         self.connector = connector
         self.debugController = debugger
-        self.imgs = [QPixmap(":/icons/images/folder.png"), QPixmap(":/icons/images/file.png")]
-        self.root = FileListItem(["Name", "Path"], 0)
-        self.sources = FileListItem(["Sources", ""], 0, self.root)
-        self.headers = FileListItem(["Headers", ""], 0, self.root)
-        self.others = FileListItem(["Others", ""], 0, self.root)
+        self.root = FileListItem(["Name", "Path"], None)
+        self.sources = FileListItem(["Sources", ""], Icons.folder, self.root)
+        self.headers = FileListItem(["Headers", ""], Icons.folder, self.root)
+        self.others = FileListItem(["Others", ""], Icons.folder, self.root)
 
         self.debugController.executableOpened.connect(self.update)
 
@@ -125,7 +123,7 @@ class FileListModel(QAbstractItemModel):
             ret = item.data(index.column())
         elif role == Qt.DecorationRole:
             if index.column() == 0:
-                ret = self.imgs[item.imageIndex]
+                ret = item.icon
 
         return ret
 
@@ -221,17 +219,17 @@ class FileListModel(QAbstractItemModel):
             if ext == ".cpp" or ext == ".c":
                 if not self.sources in self.root.childItems:
                     self.root.appendChild(self.sources)
-                item = FileListItem([name, path], 1, self.sources)
+                item = FileListItem([name, path], Icons.file, self.sources)
                 self.sources.appendChild(item)
             elif ext == ".hpp" or ext == ".h":
                 if not self.headers in self.root.childItems:
                     self.root.appendChild(self.headers)
-                item = FileListItem([name, path], 1, self.headers)
+                item = FileListItem([name, path], Icons.file, self.headers)
                 self.headers.appendChild(item)
             else:
                 if not self.others in self.root.childItems:
                     self.root.appendChild(self.others)
-                item = FileListItem([name, path], 1, self.others)
+                item = FileListItem([name, path], Icons.file, self.others)
                 self.others.appendChild(item)
 
         self.sources.childItems.sort(key=attrgetter("itemData"), reverse=False)

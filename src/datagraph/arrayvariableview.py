@@ -25,10 +25,10 @@
 from .datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
 from .stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
-from PyQt4.QtGui import QIcon
 import sys
 import importlib
-plt = None      # this will be imported lazily
+from helpers.icons import Icons
+plt = None  # this will be imported lazily
 
 
 def _importMatplotlib():
@@ -117,7 +117,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         # we only allow the graphical view if all contained elements are standard variables; also,
         # do not show the menu if the variable view is collapsed
         if self.varWrapper.isOpen and graphicalViewPossible:
-            action = menu.addAction(QIcon(":/icons/images/graph.png"), "Graphical view for %s" % self.varWrapper.exp, self.toggleGraphicalView)
+            action = menu.addAction(Icons.graph, "Graphical view for %s" % self.varWrapper.exp, self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)
 
@@ -130,7 +130,7 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         self.varWrapper.setDirty(True)
 
     def plot(self, output):
-        _importMatplotlib()        # only import matplotlib if we really need it
+        _importMatplotlib()  # only import matplotlib if we really need it
         data = [float(var.unfilteredValue) for var in self.varWrapper.childrenWrapper]
 
         fig = plt.figure(figsize=(4, 3))
