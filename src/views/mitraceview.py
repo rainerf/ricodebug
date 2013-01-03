@@ -40,7 +40,7 @@ class MiTraceView(QTextEdit):
         parent.titleBarWidget().addAction(self.__timeAction)
 
         parent.addClearAction()
-        parent.clearRequested.connect(lambda: self.clear())
+        parent.clearRequested.connect(self.clear)
 
     def appendCommand(self, cmd, rec, time):
         timestr = "[<i>%.3f</i>] " % time if self.__timeAction.isChecked() else ""
