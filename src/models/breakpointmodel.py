@@ -156,7 +156,7 @@ class BreakpointModel(QAbstractTableModel):
         """
         if self.isBreakpointByLocation(fullname, line):
             self.deleteBreakpoint(fullname, line)
-            return -1
+            return None
         else:
             return self.insertBreakpoint(fullname, line)
 
@@ -204,7 +204,7 @@ class BreakpointModel(QAbstractTableModel):
         self.breakpoints.append(extendedBreakpoint)
         self.endInsertRows()
 
-        return int(extendedBreakpoint.line)
+        return extendedBreakpoint
 
     def deleteBreakpoint(self, file_, line):
         """ deletes breakpoint in file file_ on linenumber line
