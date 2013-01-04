@@ -32,7 +32,7 @@ from helpers.icons import Icons
 
 
 class Entry:
-    STRUCT, CLASS, FUNCTION, MEMBER_PUB, MEMBER_PRIV, MEMBER_PROT, FILE, OTHER = range(8)
+    STRUCT, CLASS, FUNCTION, FUNCTION_PRIV, FUNCTION_PROT, MEMBER_PUB, MEMBER_PRIV, MEMBER_PROT, FILE, NAMESPACE, OTHER = range(11)
 
     def __init__(self, name, file_, line=None, scope=None, type_=None, extra=None):
         self.name = name
@@ -71,8 +71,12 @@ class EntryNode(Entry, TreeNode):
                     self.CLASS: "Class",
                     self.STRUCT: "Struct",
                     self.FUNCTION: "Function",
+                    self.FUNCTION_PRIV: "Private Function",
+                    self.FUNCTION_PROT: "Protected Function",
                     self.FILE: "File",
+                    self.NAMESPACE: "Namespace",
                     self.OTHER: "Other"
+
                 }[self.type_]
             if self.line is not None:
                 loc = "%s:%s" % (self.file, self.line)
@@ -87,8 +91,11 @@ class EntryNode(Entry, TreeNode):
                         self.MEMBER_PROT: Icons.protected_var,
                         self.CLASS: Icons.struct,
                         self.STRUCT: Icons.struct,
-                        self.FUNCTION: Icons.sc_process,
+                        self.FUNCTION: Icons.function,
+                        self.FUNCTION_PRIV: Icons.private_function,
+                        self.FUNCTION_PROT: Icons.protected_function,
                         self.FILE: Icons.file,
+                        self.NAMESPACE: Icons.namespace,
                         self.OTHER: None
                     }[self.type_]
             except KeyError:
@@ -145,9 +152,11 @@ class EntryModel(TreeModel):
         elif kind == "struct":
             n = EntryNode(self, name, file_, lineNumber, scope, Entry.STRUCT)
         elif kind == "function":
-            n = EntryNode(self, name, file_, lineNumber, scope, Entry.FUNCTION, e['signature'])
+            n = EntryNode(self, name, file_, lineNumber, scope, {"private": Entry.FUNCTION_PRIV, "protected": Entry.FUNCTION_PROT, "public": Entry.FUNCTION, None: Entry.FUNCTION}[e['access']], e['signature'])
         elif kind == "member" and scope:  # namespace members are declared as member, but don't have a scope
             n = EntryNode(self, name, file_, lineNumber, scope, {"private": Entry.MEMBER_PRIV, "protected": Entry.MEMBER_PROT, "public": Entry.MEMBER_PUB, None: None}[e['access']])
+        elif kind == "namespace":
+            n = EntryNode(self, name, file_, lineNumber, scope, Entry.NAMESPACE)
         else:
             n = EntryNode(self, name, file_, lineNumber, scope, Entry.OTHER)
 
