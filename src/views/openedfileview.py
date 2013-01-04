@@ -218,7 +218,8 @@ class OpenedFileView(ScintillaWrapper):
         self.setReadOnly(False)
 
         if not (QtCore.QFile.exists(filename)):
-            logging.error("could not open file", filename)
+            logging.error("Could not open file %s", filename)
+
         self.file_ = QtCore.QFile(filename)
         self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
         self.read(self.file_)
@@ -256,15 +257,12 @@ class OpenedFileView(ScintillaWrapper):
         self.updateConfig()
 
         # initially, read all breakpoints and tracepoints from the model
-        self.getBreakpointsFromModel()
         self.getTracepointsFromModel()
 
         self.__allowToolTip = True
         self.__enableToolTip(True)
 
         self.__popupMenu = None
-
-        self.bpLines = []
 
     def updateConfig(self):
         qs = Qsci.QsciScintilla
