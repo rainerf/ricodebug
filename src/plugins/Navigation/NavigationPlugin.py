@@ -58,7 +58,7 @@ class NavigationView(QTreeView):
 
     def openEntry(self, index):
         x = self.model().data(index, EntryModel.InternalDataRole)
-        self.signalproxy.openFile(x.file, x.line)
+        self.signalproxy.openFile(x.file, x.line if x.line is not None else 1)
         pass
 
     def contextMenuEvent(self, e):
