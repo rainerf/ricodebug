@@ -89,7 +89,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
         if line not in self.__overlayWidgets:
             cont = QFrame()
-            cont.setStyleSheet("QFrame { background-color : #cccccc; }")
+            cont.setStyleSheet("QFrame { background-color : transparent; }")
             cont.setLayout(QHBoxLayout())
             cont.layout().setSpacing(20)
             cont.layout().setMargin(0)

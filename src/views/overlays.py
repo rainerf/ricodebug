@@ -22,9 +22,32 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QPixmap, QLabel, QFrame, QHBoxLayout, QColor
-from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QPixmap, QLabel, QFrame, QHBoxLayout, QColor, QPainter, QPolygon, QPen, QLinearGradient
+from PyQt4.QtCore import Qt, QPoint, QSize
 from helpers.clickablelabel import ClickableLabel
+
+
+class PointyLabel(QLabel):
+    def __init__(self, parent, color1, color2):
+        QLabel.__init__(self, parent)
+        self.resize(self.sizeHint())
+        self.setStyleSheet("QLabel { background-color: rgba(0, 0, 0, 0) }")
+        self.color1 = QColor(color1)
+        self.color2 = QColor(color2)
+
+    def sizeHint(self):
+        return QSize(10, 10)
+
+    def paintEvent(self, _):
+        p = QPainter(self)
+        points = [QPoint(self.width(), -1), QPoint(self.width(), self.height()),
+                  QPoint(0, self.height() / 2), QPoint(0, self.height() / 2 - 1)]
+        grad = QLinearGradient(0, 0, 0, self.height())
+        grad.setColorAt(0, self.color1)
+        grad.setColorAt(1, self.color2)
+        p.setBrush(grad)
+        p.setPen(QPen(Qt.NoPen))
+        p.drawPolygon(QPolygon(points))
 
 
 class OverlayWidget(QFrame):
@@ -32,15 +55,17 @@ class OverlayWidget(QFrame):
         QFrame.__init__(self, parent)
         layout = QHBoxLayout(self)
         layout.setMargin(0)
-        color1 = QColor(color2).lighter(110).name()
-        self.setStyleSheet("QFrame { background-color : qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %s, stop: 1 %s); }" % (color1, color2))
+        layout.setSpacing(0)
+        color1 = QColor(color2).lighter(150).name()
+        layout.addWidget(PointyLabel(self, color1, color2))
+        self.setStyleSheet("QLabel { background-color : QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %s, stop: 1 %s) }" % (color1, color2))
 
     def update(self):
         raise NotImplementedError()
 
 
 class BreakpointOverlayWidget(OverlayWidget):
-    color = "#ff8080"
+    color = "#ff6060"
 
     def __init__(self, parent, bp, bpModel):
         OverlayWidget.__init__(self, parent, self.color)
