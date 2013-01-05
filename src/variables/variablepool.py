@@ -107,6 +107,7 @@ class VariablePool(QObject):
 
         for x in reversed(res):
             var = self.getVar(x.name)
+            var.arg = x.arg
             ret.append(var)
         return ret
 

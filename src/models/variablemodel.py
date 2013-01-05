@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QObject, QMimeData, QStringList
-from PyQt4.QtGui import QPixmap, QBrush
+from PyQt4.QtGui import QPixmap, QBrush, QPainter
 from variables import variable
 import logging
 
@@ -294,12 +294,20 @@ class VariableModel(QAbstractItemModel):
                 else:
                     iconprefix = ""
 
+                icon = None
                 if not item.inScope:
                     return QPixmap(":/icons/images/outofscope.png")
-                elif item.getChildCount() != 0:     # child item
-                    return QPixmap(":/icons/images/" + iconprefix + "struct.png")
-                else:                               # leave item
-                    return QPixmap(":/icons/images/" + iconprefix + "var.png")
+                elif item.getChildCount() != 0:  # child item
+                    icon = QPixmap(":/icons/images/" + iconprefix + "struct.png")
+                else:  # leave item
+                    icon = QPixmap(":/icons/images/" + iconprefix + "var.png")
+
+                # overlay for arguments
+                if icon and item._v.arg:
+                    ol = QPixmap(":/icons/images/overlay_arg.png")
+                    p = QPainter(icon)
+                    p.drawPixmap(ol.rect(), ol)
+                return icon
             elif index.column() == 2:
                 if item.inScope:
                     return QPixmap(":/icons/images/edit.png")

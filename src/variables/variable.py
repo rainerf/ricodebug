@@ -48,6 +48,7 @@ class Variable(QObject):
         self.uniqueName = uniqueName
         self.value = value
         self.hasChildren = hasChildren
+        self.arg = False
 
         self._vp = variablepool
         self._gdbName = gdbName

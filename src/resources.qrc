@@ -79,6 +79,7 @@
     <file>images/private_function.png</file>
     <file>images/protected_function.png</file>
     <file>images/namespace.png</file>
+    <file>images/overlay_arg.png</file>
   </qresource>
   <qresource prefix="markers">
     <file alias="exec_pos.png">images/markers/exec_pos.png</file>
