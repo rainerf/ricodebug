@@ -28,8 +28,9 @@ import os
 
 class GDBInit(QObject):
     def __init__(self):
-        self.path = "./third_party/"
         self.fileName = "load_pretty_printer"
+        filePath =  repr(__file__) 
+        self.path = filePath[1:filePath.find("helpers/gdbinit.py")] + "third_party/"
         
         self.file_content = []
         self.file_content.append("python\n")
