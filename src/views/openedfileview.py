@@ -338,20 +338,24 @@ class OpenedFileView(ScintillaWrapper):
         # self.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContexMenuLine = int(self.lineIndexFromPosition(scipos)[0])
 
-        listOfTracepoints = self.tracepointController.getTracepointsFromModel()
-
-        subPopupMenu = QtGui.QMenu(self)
-        subPopupMenu.setTitle("Add variable " + exp + " to...")
-
-        for tp in listOfTracepoints:
-            self.subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
-
         self.__popupMenu = QtGui.QMenu(self)
-        self.__popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
         self.__popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
-        self.__popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
-        self.__popupMenu.addSeparator()
-        self.__popupMenu.addMenu(subPopupMenu)
+
+        if exp:
+            self.__popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
+            self.__popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
+
+            listOfTracepoints = self.tracepointController.getTracepointsFromModel()
+            if listOfTracepoints:
+                subPopupMenu = QtGui.QMenu(self)
+                subPopupMenu.setTitle("Add variable " + exp + " to tracepoint...")
+
+                for tp in listOfTracepoints:
+                    subPopupMenu.addAction(self.distributedObjects.actions.getAddToTracepointAction(exp, tp.name, tp.addVar))
+
+                self.__popupMenu.addSeparator()
+                self.__popupMenu.addMenu(subPopupMenu)
+
         self.__popupMenu.popup(point)
 
         # disable the tooltips while the menu is shown
