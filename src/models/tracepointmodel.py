@@ -80,6 +80,7 @@ class Tracepoint(ExtendedBreakpoint):
         self.stop = False
         self.distObjects.signalProxy.dataForTracepointsReady.connect(self.readDataFromVarModel)
         self.wave = []
+        self.tracedVariables = []
 
     def addVar(self, variableToTrace):
         """ add a var to trace its value
@@ -87,6 +88,7 @@ class Tracepoint(ExtendedBreakpoint):
         vw = self.variableList.addVarByName(variableToTrace)
         newValueList = ValueList(variableToTrace, vw.type)
         self.wave.append(newValueList)
+        self.tracedVariables.append(variableToTrace)
 
     def tracePointOccurred(self, stop):
         """ set if stop is needed or not
@@ -103,8 +105,8 @@ class Tracepoint(ExtendedBreakpoint):
 
             for varList in self.wave:
                 for v in self.variableList.list:
-                    if v.variable.uniquename == varList.name:
-                        varList.addValue(v.variable.type, v.variable.value)
+                    if v.uniqueName == varList.name:
+                        varList.addValue(v.type, v.value)
 
         if not(self.stop):
             self.stop = True
@@ -268,8 +270,7 @@ class TracepointModel(QAbstractTableModel):
             elif index.column() == 7:
                 ret = tp.skip
             elif index.column() == 8:
-                #TODO: return value with all elements
-                pass
+                ret = ", ".join(tp.tracedVariables)
             elif index.column() == 9:
                 ret = tp.name
         elif role == Qt.CheckStateRole:
