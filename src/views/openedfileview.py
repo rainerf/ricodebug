@@ -60,8 +60,9 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
 
 class OpenedFileView(QObject):
-    MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
-    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK = range(8)
+    MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, \
+        MARGIN_MARKER_EXEC, MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, \
+        MARKER_HIGHLIGHTED_LINE_PERMANENT, MARGIN_MARKER_STACK = range(9)
 
     def __init__(self, distributedObjects, filename, parent):
         QObject.__init__(self, parent)
@@ -106,8 +107,12 @@ class OpenedFileView(QObject):
         self.edit.markerDefine(self.markerTp, self.MARGIN_MARKER_TP)
         self.edit.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
         self.edit.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
-        self.edit.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
-        self.edit.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
+        self.edit.markerDefine(self.markerExecSignal,
+                               self.MARGIN_MARKER_EXEC_SIGNAL)
+        self.edit.markerDefine(Qsci.QsciScintilla.Background,
+                               self.MARKER_HIGHLIGHTED_LINE)
+        self.edit.markerDefine(Qsci.QsciScintilla.Background,
+                               self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
         # define width and mask to show margin
         self.edit.setMarginWidth(self.MARGIN_MARKER_BP, 10)
         self.edit.setMarginMarkerMask(self.MARGIN_MARKER_BP, 1 << self.MARGIN_MARKER_BP)
@@ -119,7 +124,10 @@ class OpenedFileView(QObject):
                 1 << self.MARGIN_MARKER_EXEC_SIGNAL |
                 1 << self.MARGIN_MARKER_STACK)
         self.edit.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
+        self.edit.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE_PERMANENT, 0)
         self.edit.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
+        self.edit.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE_PERMANENT,
+                                      1 << self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
         self.INDICATOR_TOOLTIP = self.edit.indicatorDefine(self.edit.BoxIndicator, -1)
 
@@ -192,6 +200,8 @@ class OpenedFileView(QObject):
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
         self.edit.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
         self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
+        self.edit.setMarkerBackgroundColor(QColor(c.highlightColor.value),
+                self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
     def fileChanged(self):
         logging.warning("Source file %s modified. Recompile executable for \
@@ -333,6 +343,10 @@ class OpenedFileView(QObject):
         # if breakpoint should be toggled
         if margin == self.MARGIN_NUMBERS or margin == self.MARGIN_MARKER_BP:
             self.toggleBreakpointWithLine(line)
+            if self.__bpModel.isBreakpointByLocation(self.filename, line+1):
+                self.highlightLinePermanent(line)
+            else:
+                self.removeHighlightLinePermanent(line)
         elif margin == self.MARGIN_MARKER_TP:
             self.toggleTracepointWithLine(line)
 
@@ -349,9 +363,11 @@ class OpenedFileView(QObject):
         """Get breakpoints from model."""
         # TODO: don't reload all breakpoints, just the one referenced by parent/start/end
         self.edit.markerDeleteAll(self.MARGIN_MARKER_BP)
+        self.removeHighlightLinesPermanent()
         for bp in self.__bpModel.getBreakpoints():
             if bp.fullname == self.filename:
                 self.edit.markerAdd(int(bp.line) - 1, self.MARGIN_MARKER_BP)
+                self.highlightLinePermanent(int(bp.line) - 1)
 
     def getTracepointsFromModel(self):
         """Get tracepoints from model."""
@@ -363,8 +379,17 @@ class OpenedFileView(QObject):
     def highlightLine(self, line):
         self.removeHighlightedLines()
         self.edit.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE)
-        QTimer.singleShot(int(self.distributedObjects.editorController.config.highlightingDuration.value),
-                          self.removeHighlightedLines)
+        QTimer.singleShot(int(self.distributedObjects.editorController.config.highlightingDuration.value), self.removeHighlightedLines)
 
     def removeHighlightedLines(self):
         self.edit.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)
+
+    def highlightLinePermanent(self, line):
+        self.removeHighlightedLines()
+        self.edit.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
+
+    def removeHighlightLinePermanent(self, line):
+        self.edit.markerDelete(line, self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
+
+    def removeHighlightLinesPermanent(self):
+        self.edit.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
