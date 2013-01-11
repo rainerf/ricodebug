@@ -198,7 +198,7 @@ class DebugController(QObject):
 
     def inferiorUntil(self):
         current_opened_file = self.distributedObjects.editorController.editor_view.getCurrentOpenedFile()
-        line, _ = current_opened_file.edit.getCursorPosition()
+        line, _ = current_opened_file.getCursorPosition()
         self.until(current_opened_file.filename, line + 1)
 
     def getExecutableName(self):
