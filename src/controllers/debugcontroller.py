@@ -28,6 +28,7 @@ from PyQt4.QtCore import QObject, pyqtSignal, Qt
 from helpers.gdboutput import GdbOutput
 import logging
 from helpers.configstore import ConfigSet, ConfigItem
+from collections import defaultdict
 
 
 class DebugConfig(ConfigSet):
@@ -157,38 +158,30 @@ class DebugController(QObject):
         # With reverse debugging, some stopped records might not contain a
         # reason. Predefine it as None, since all unknown reasons will be
         # handled as the inferior having stopped normally.
-        reason = None
-        frame = None
-        signal_name = None
-        signal_meaning = None
+        fields = ["reason", "frame", "signal-name", "signal-meaning"]
+        field = defaultdict(None)
 
         for r in rec.results:
-            if r.dest == 'reason':
-                reason = r.src
-            if r.dest == 'frame':
-                frame = r.src
-            if r.dest == 'signal-name':
-                signal_name = r.src
-            if r.dest == 'signal-meaning':
-                signal_meaning = r.src
+            if r.dest in fields:
+                field[r.dest] = r.src
 
-        if reason in ['exited-normally', 'exited']:
+        if field["reason"] in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
-        elif reason == 'breakpoint-hit':
-            tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(frame.fullname, frame.line)
+        elif field["reason"] == 'breakpoint-hit':
+            tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(field["frame"].fullname, field["frame"].line)
 
             if tp:
                 # this will cause the variable pool to update all variables
                 self.distributedObjects.signalProxy.emitTracepointOccurred()
                 tp.recordData()
 
-            if self.distributedObjects.breakpointModel.isBreakpointByLocation(frame.fullname, frame.line) or self.lastCmdWasStep:
+            if self.distributedObjects.breakpointModel.isBreakpointByLocation(field["frame"].fullname, field["frame"].line) or self.lastCmdWasStep:
                 self.signalProxy.emitInferiorStoppedNormally(rec)
                 self.lastCmdWasStep = False
             elif tp:
                 self.connector.cont()
-        elif reason == "signal-received":
-            logging.warning("Signal received: %s (%s) in %s:%s", signal_name, signal_meaning, frame.file, frame.line)
+        elif field["reason"] == "signal-received":
+            logging.warning("Signal received: %s (%s) in %s:%s", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
         else:
             self.signalProxy.emitInferiorStoppedNormally(rec)
