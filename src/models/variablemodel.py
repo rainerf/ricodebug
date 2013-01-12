@@ -307,6 +307,10 @@ class VariableModel(QAbstractItemModel):
                     ol = QPixmap(":/icons/images/overlay_arg.png")
                     p = QPainter(icon)
                     p.drawPixmap(ol.rect(), ol)
+                elif icon and item._v.exp == "Return value":
+                    ol = QPixmap(":/icons/images/overlay_ret.png")
+                    p = QPainter(icon)
+                    p.drawPixmap(ol.rect(), ol)
                 return icon
             elif index.column() == 2:
                 if item.inScope:
