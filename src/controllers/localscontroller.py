@@ -30,12 +30,44 @@ from helpers.icons import Icons
 class LocalsController(TreeItemController):
     def __init__(self, distributedObjects, view):
         TreeItemController.__init__(self, distributedObjects, "Locals", view, LocalsModel, True, Icons.locals)
+
+        self.returnWrapper = None
+
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
         self.distributedObjects.stackController.stackFrameSelected.connect(self.getLocals)
 
-    def getLocals(self):
-        self.clear()
-        self.variableList.addLocals()
+    def getLocals(self, rec):
+        # if we previously showed some return value, remove it; getLocals will
+        # be called after the user steps/conts/... the program, most probably
+        # making it out of date
+        if self.returnWrapper:
+            self.variableList.removeVar(self.returnWrapper)
+            self.returnWrapper = None
 
-        for vw in self.variableList.list:
-            self.add(vw)
+        # now, check if there was a return value of a function in this record;
+        # if so, add it to the locals and give it a meaningful name
+        for r in rec.results:
+            if r.dest == "gdb-result-var":
+                self.returnWrapper = self.variableList.addVarByName(r.src)
+                self.returnWrapper._v.exp = "Return value"
+
+        # we're doing some sorting magic here: tuples will be sorted by the
+        # second element if the first is equal; also, False < True, therefore
+        # invert the boolean arg to have arguments first
+        locals_ = sorted(self.distributedObjects.gdb_connector.getLocals(), key=lambda x: (not x.arg, x.name))
+        current = [x for x in self.variableList.list]
+
+        for l in locals_:
+            for c in current:
+                if l.name == c.exp:
+                    current.remove(c)
+                    break
+            else:
+                vw = self.variableList.addVarByName(l.name)
+                vw._v.arg = l.arg
+                self.add(vw)
+
+        # we removed everything from current that's still there; therefore,
+        # everything that's left here is out of scope
+        for old in current:
+            self.variableList.removeVar(old)

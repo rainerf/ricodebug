@@ -53,11 +53,6 @@ class VariableList(QObject):
         @param varWrapper    variables.variablewrapper.VariableWrapper, VariableWrapper to add to the list """
         self.list.append(varWrapper)
 
-    def addLocals(self):
-        for var in self.varPool.addLocals():
-            vw = var.makeWrapper(self.factory)
-            self.list.append(vw)
-
     def removeVar(self, varWrapper):
         """ removes VariableWrapper varWrapper from the list
         @param varWrapper    variables.variablewrapper.VariableWrapper, VariableWrapper to remove from the list """
