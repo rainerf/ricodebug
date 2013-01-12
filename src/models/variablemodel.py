@@ -425,10 +425,15 @@ class VariableModel(QAbstractItemModel):
         """
         success = True
         parentItem = self.getItem(parent)
-        if parentItem != None:
-            self.beginRemoveRows(parent, position, position + rows - 1)
-            del self.root.childItems[position]
-            self.endRemoveRows()
+        assert parentItem is not None
+        if parentItem != self.root:
+            logging.error("Cannot remove a child variable.")
+            return
+
+        self.beginRemoveRows(parent, position, position + rows - 1)
+        for p in xrange(position, position + rows):
+            del self.root.childItems[p]
+        self.endRemoveRows()
         return success
 
     def mimeTypes(self):
