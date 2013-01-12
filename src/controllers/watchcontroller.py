@@ -44,6 +44,8 @@ class WatchController(TreeItemController):
         @param row     int, selected row
         @param parent  TreeItem, parent item from selectected item
         """
+        if not index.isValid():
+            return
         vw = index.internalPointer()
         vw.dataChanged.disconnect(vw.hasChanged)
         self.variableList.removeVar(vw)
