@@ -116,9 +116,6 @@ class VariablePool(QObject):
 
         self.variables[varReturn._gdbName] = varReturn
 
-        logging.debug("Returning internal variable %s for expression %s",
-                varReturn._gdbName, exp)
-
         return varReturn
 
     def removeVar(self, variable):
