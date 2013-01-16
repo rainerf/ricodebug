@@ -26,17 +26,6 @@ from helpers.excep import GdbError
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
 from PyQt4.QtGui import QPixmap
 
-"""@package breakpointmodel
-    there are some classes in this package:\n
-    * BpInfo: a simple class that provides all really necessary information to select a breakpoint\n
-    * ExtendedBreakpoint:     gdb breakpoints has some information like filename, line, ...
-                            for special functionality there have to be more information like
-                            name, condition, skip, ... This class extends the gdb breakpoints with
-                            this informations\n
-
-    * BreakpointModel: the model for breakpoints
-"""
-
 
 class ExtendedBreakpoint(QObject):
     """This class provides all members for basic gdb Breakpoint and extends it with
@@ -140,27 +129,7 @@ class BreakpointModel(QAbstractTableModel):
         self.enabledBp = QPixmap(":/icons/images/bp.png")
         self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
 
-    def setBreakpoints(self, bpList):
-        """ deletes all breakpoints in current list, and fill the list up with all breakpoints in bpList
-        @param bpList: (List<Breakpoint>)
-        """
-        for bp in self.breakpoints:
-            self.deleteBreakpoint(bp.fullname, bp.line)
-        for bp in bpList:
-            self.insertBreakpoint(bp.fullname, bp.line)
-
-    def toggleBreakpoint(self, fullname, line):
-        """ toggles the breakpoint in file fullname with linenumber line
-        @param fullname: (string), fullname of file
-        @param line: (int), linenumber where the breakpoint should be toggled
-        """
-        if self.isBreakpointByLocation(fullname, line):
-            self.deleteBreakpoint(fullname, line)
-            return None
-        else:
-            return self.insertBreakpoint(fullname, line)
-
-    def isBreakpointByLocation(self, fullname, line):
+    def breakpointByLocation(self, fullname, line):
         """ search for breakpoint in file fullname on linenumber line
         @param fullname: (string), name of file
         @param line: (int), number of line
@@ -171,10 +140,9 @@ class BreakpointModel(QAbstractTableModel):
                 return bp
         return None
 
-    def isBreakpointByNumber(self, number):
-        """ search for breakpoint in file bpInfo.fullname on line bpInfo.line
+    def breakpointByNumber(self, number):
+        """ search for breakpoint with given number
         @param number: (int), gdb's internal breakpoint number
-        @return: (bool), True if can find breakpoint in list, False else
         """
         for bp in self.breakpoints:
             if int(bp.number) == int(number):
@@ -206,7 +174,18 @@ class BreakpointModel(QAbstractTableModel):
 
         return extendedBreakpoint
 
-    def deleteBreakpoint(self, file_, line):
+    def toggleBreakpoint(self, fullname, line):
+        """ toggles the breakpoint in file fullname with linenumber line
+        @param fullname: (string), fullname of file
+        @param line: (int), linenumber where the breakpoint should be toggled
+        """
+        if self.breakpointByLocation(fullname, line):
+            self.deleteBreakpoint(fullname, line)
+            return None
+        else:
+            return self.insertBreakpoint(fullname, line)
+
+    def deleteBreakpointByLocation(self, file_, line):
         """ deletes breakpoint in file file_ on linenumber line
         @param file_: (string), name of file
         @param line: (int), number of line

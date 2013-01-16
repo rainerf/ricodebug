@@ -188,14 +188,14 @@ class DebugController(QObject):
             # on yet another line), but that's about as good as our guessing
             # currently gets.
             tp = self.distributedObjects.tracepointController.model().isTracepointByNumber(int(field["bkptno"]))
-            bp = self.distributedObjects.breakpointModel.isBreakpointByNumber(int(field["bkptno"]))
+            bp = self.distributedObjects.breakpointModel.breakpointByNumber(int(field["bkptno"]))
             assert tp or bp  # either a TP or a BP must have been hit
 
             # now that we have one, check if the other is here too
             if bp and not tp:
                 tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(bp.fullname, bp.line)
             elif tp and not bp:
-                bp = self.distributedObjects.breakpointModel.isBreakpointByLocation(tp.fullname, tp.line)
+                bp = self.distributedObjects.breakpointModel.breakpointByLocation(tp.fullname, tp.line)
 
             if tp:
                 # this will cause the variable pool to update all variables
