@@ -32,7 +32,10 @@ class ToolTipController(TreeItemController):
         TreeItemController.__init__(self, distributedObjects, "Tooltip", view, VariableModel, False)
 
     def __setVar(self, watch):
-        self.clear()
+        try:
+            self.clear()
+        except:
+            self.model.clear()
         try:
             self.add(self.variableList.addVarByName(watch))
         except VariableNotFoundException:
@@ -46,3 +49,4 @@ class ToolTipController(TreeItemController):
 
     def hideToolTip(self):
         self.view.hideLater()
+        

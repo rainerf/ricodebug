@@ -80,4 +80,8 @@ class WatchController(TreeItemController):
             childnodes = watchParent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))
-                self.addWatch(attr["exp"])
+                self.addWatch(attr["exp"]) 
+                
+    def clearModel(self):
+        self.model.clear()
+        

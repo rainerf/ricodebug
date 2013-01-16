@@ -130,6 +130,8 @@ class MainWindow(QMainWindow):
         self.act.ReverseNext.setEnabled(False)
         self.act.ReverseStep.setEnabled(False)
         self.act.SaveFile.setEnabled(False)
+        self.act.Beautify.setCheckable(True)
+        self.act.Beautify.setChecked(True)
         # debug actions
         self.ui.menuDebug.addAction(self.act.Run)
         self.ui.menuDebug.addAction(self.act.Continue)
@@ -192,7 +194,7 @@ class MainWindow(QMainWindow):
         self.act.Record.triggered.connect(self.toggleRecord)
         self.act.ReverseStep.triggered.connect(self.debugController.reverse_step)
         self.act.ReverseNext.triggered.connect(self.debugController.reverse_next)
-        self.act.Beautify.triggered.connect(self.debugController.beautify)
+        self.act.Beautify.triggered.connect(self.__askBeautify)
         
         self.act.Interrupt.triggered.connect(self.debugController.interrupt)
         self.act.Finish.triggered.connect(self.debugController.finish)
@@ -333,3 +335,16 @@ class MainWindow(QMainWindow):
         else:
             self.fileWatcher.removePath(self.binaryName)
             self.fileWatcher.addPath(self.binaryName)
+            
+    def __askBeautify(self):
+        """ Warn user before Beautify - Using QtMessagebox for interaction"""
+        box = QtGui.QMessageBox()
+        if box.question(self, "Warning!", "This deletes the objects in watch and datagraphview.",
+                        QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
+            self.debugController.beautify()
+        else:
+            self.act.Beautify.toggle()
+              
+            
+
+        

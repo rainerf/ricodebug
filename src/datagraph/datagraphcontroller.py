@@ -142,6 +142,13 @@ class DataGraphController(QObject):
         """
         self.variableList.clear()
         self.data_graph_view.clear()
+        
+    def clearDataGraphOnBeautify(self):
+        """ clears the DataGraphView <br>
+            in case pretty printer gets en/disabled we can't clear
+            the variableList, as it already contains new variables.
+        """
+        self.data_graph_view.clear()
 
     def saveSession(self, xmlHandler):
         """ Insert session info to xml file
