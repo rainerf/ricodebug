@@ -36,8 +36,3 @@ class ArrayVariableWrapper(VariableWrapper):
         @param variable    variables.variable.Variable, the variable to wrap
         """
         VariableWrapper.__init__(self, variable)
-
-    def getChildren(self):
-        """ Returns a List with all Members of the struct.
-        @return    List of Variables, Members of the struct. """
-        return self.variable.getChildren()

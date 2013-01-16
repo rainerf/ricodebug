@@ -36,9 +36,3 @@ class PtrVariableWrapper(VariableWrapper):
         @param variable    variables.variable.Variable, the variable to wrap
         """
         VariableWrapper.__init__(self, variable)
-
-    def dereference(self):
-        """ Dereferences the Variable, if possible.
-        @return    dereferenced Variable
-        """
-        return self.variable.dereference()

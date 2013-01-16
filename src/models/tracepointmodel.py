@@ -77,6 +77,7 @@ class Tracepoint(ExtendedBreakpoint):
         self.vwFactory = VarWrapperFactory()
         self.variableList = VariableList(self.vwFactory, distObjects)
         self.wave = []
+        self.tracedVariables = []
 
     def addVar(self, variableToTrace):
         """ add a var to trace its value
@@ -84,6 +85,7 @@ class Tracepoint(ExtendedBreakpoint):
         vw = self.variableList.addVarByName(variableToTrace)
         newValueList = ValueList(variableToTrace, vw.type)
         self.wave.append(newValueList)
+        self.tracedVariables.append(variableToTrace)
 
     def recordData(self):
         """tracepoint occurred: get values of all traced variables then continue debugging """
@@ -236,8 +238,7 @@ class TracepointModel(QAbstractTableModel):
             elif index.column() == 7:
                 ret = tp.skip
             elif index.column() == 8:
-                # TODO: return value with all elements
-                pass
+                ret = ", ".join(tp.tracedVariables)
             elif index.column() == 9:
                 ret = tp.name
         elif role == Qt.CheckStateRole:
