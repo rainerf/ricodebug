@@ -150,9 +150,10 @@ class VariablePool(QObject):
         """ remove variable from variable pool
         @param variable Variable type instance
         """
-        self.variables.pop(variable._gdbName)
-        self.connector.var_delete(variable._gdbName)
-        del variable
+        if variable._gdbName in self.variables:
+            self.variables.pop(variable._gdbName)
+            self.connector.var_delete(variable._gdbName)
+            del variable
 
     def getChildren(self, name, childList, access, parentName, childformat):
         """

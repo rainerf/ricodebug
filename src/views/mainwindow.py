@@ -344,7 +344,3 @@ class MainWindow(QMainWindow):
             self.debugController.beautify()
         else:
             self.act.Beautify.toggle()
-              
-            
-
-        

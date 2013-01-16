@@ -67,8 +67,9 @@ class VariableList(QObject):
     def removeVar(self, varWrapper):
         """ removes VariableWrapper varWrapper from the list
         @param varWrapper    variables.variablewrapper.VariableWrapper, VariableWrapper to remove from the list """
-        self.list.remove(varWrapper)
-        varWrapper.die()
+        if varWrapper in self.list:
+            self.list.remove(varWrapper)
+            varWrapper.die()
 
     def clear(self):
         """ Clears the whole VariableList. """

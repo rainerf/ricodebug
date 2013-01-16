@@ -150,7 +150,7 @@ class DebugController(QObject):
         self.toggleBeautify = not self.toggleBeautify
         self.distributedObjects.localsController.reloadLocals()
         self.distributedObjects.watchController.clearModel()
-        self.distributedObjects.datagraphController.clearDataGraphOnBeautify()
+        self.distributedObjects.datagraphController.clearDataGraph()
         
     def evaluateExpression(self, exp):
         if exp == "":
