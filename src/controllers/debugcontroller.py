@@ -158,7 +158,7 @@ class DebugController(QObject):
         # With reverse debugging, some stopped records might not contain a
         # reason. Predefine it as None, since all unknown reasons will be
         # handled as the inferior having stopped normally.
-        fields = ["reason", "frame", "signal-name", "signal-meaning"]
+        fields = ["reason", "frame", "signal-name", "signal-meaning", "bkptno"]
         field = defaultdict(None)
 
         for r in rec.results:
@@ -168,17 +168,45 @@ class DebugController(QObject):
         if field["reason"] in ['exited-normally', 'exited']:
             self.signalProxy.emitInferiorHasExited(rec)
         elif field["reason"] == 'breakpoint-hit':
-            tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(field["frame"].fullname, field["frame"].line)
+            # Ok, we're kind of frantically trying to cover all bases here. We
+            # cannot simply check for file:line combination reported in the
+            # stopped message, since breakpoints may be set to a certain line
+            # (which GDB also reports back as the line where the breakpoint is
+            # really located), but one of the following lines may be reported in
+            # the stopped message (eg., if the breakpoint is set to a function
+            # header, the line reported here will be the first line of the
+            # function's body).
+
+            # Therefore, we're checking what was hit using the reported
+            # breakpoint number. However, if the user sets both a breakpoint and
+            # a tracepoint in the same line, only one number will be reported
+            # here, but we need to handle both. Therefore, check the location
+            # where what we found was supposed to be, and check if something
+            # else was supposed to be there too. This still might be a problem
+            # (eg. setting a breakpoint and a tracepoint in the line following
+            # the breakpoint, both of which would cause the program to suspend
+            # on yet another line), but that's about as good as our guessing
+            # currently gets.
+            tp = self.distributedObjects.tracepointController.model().isTracepointByNumber(int(field["bkptno"]))
+            bp = self.distributedObjects.breakpointModel.isBreakpointByNumber(int(field["bkptno"]))
+            assert tp or bp  # either a TP or a BP must have been hit
+
+            # now that we have one, check if the other is here too
+            if bp and not tp:
+                tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(bp.fullname, bp.line)
+            elif tp and not bp:
+                bp = self.distributedObjects.breakpointModel.isBreakpointByLocation(tp.fullname, tp.line)
 
             if tp:
                 # this will cause the variable pool to update all variables
                 self.distributedObjects.signalProxy.emitTracepointOccurred()
                 tp.recordData()
 
-            if self.distributedObjects.breakpointModel.isBreakpointByLocation(field["frame"].fullname, field["frame"].line) or self.lastCmdWasStep:
+            if self.lastCmdWasStep or bp:
                 self.signalProxy.emitInferiorStoppedNormally(rec)
                 self.lastCmdWasStep = False
-            elif tp:
+            else:
+                assert tp  # if this was not a breakpoint, it must have been a tracepoint
                 self.connector.cont()
         elif field["reason"] == "signal-received":
             logging.warning("Signal received: %s (%s) in %s:%s", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)

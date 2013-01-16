@@ -168,8 +168,8 @@ class BreakpointModel(QAbstractTableModel):
         """
         for bp in self.breakpoints:
             if int(bp.line) == int(line) and bp.fullname == fullname:
-                return True
-        return False
+                return bp
+        return None
 
     def isBreakpointByNumber(self, number):
         """ search for breakpoint in file bpInfo.fullname on line bpInfo.line
@@ -177,9 +177,9 @@ class BreakpointModel(QAbstractTableModel):
         @return: (bool), True if can find breakpoint in list, False else
         """
         for bp in self.breakpoints:
-            if int(bp.number) == number:
-                return True
-        return False
+            if int(bp.number) == int(number):
+                return bp
+        return None
 
     def clearBreakpoints(self):
         """ deletes all breakpoints in list """

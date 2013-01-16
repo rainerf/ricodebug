@@ -186,6 +186,12 @@ class TracepointModel(QAbstractTableModel):
             if tp.fullname == bpInfo.fullname and int(tp.line) == int(bpInfo.line):
                 tp.tracePointOccured()
 
+    def isTracepointByNumber(self, number):
+        for tp in self.tracepoints:
+            if int(tp.number) == int(number):
+                return tp
+        return None
+
     def isTracepointByLocation(self, fullname, line):
         """ search for tracepoint in file fullname on linenumber line
         @param fullname: (string), name of file
