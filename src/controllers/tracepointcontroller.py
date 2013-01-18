@@ -49,15 +49,15 @@ class TracepointController(QObject):
         """@var self._model: (TracepointModel), this class provides the model for tracepointView"""
         self._model = TracepointModel(self.distributedObjects)
         """@var self.tracepointView: (TracepointView), this class presents data from _model"""
-        self.tracepointView = TracepointView()
-        self.tracepointView.tracepointView.setModel(self._model)
+        self.tracepointView = TracepointView(self.distributedObjects)
+        self.tracepointView.setModel(self._model)
 
         # register with session manager to save Tracepoints
         self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
 
-        self.tracepointView.tracepointView.clicked.connect(self.updateWaveforms)
+        self.tracepointView.clicked.connect(self.updateWaveforms)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateWaveforms)
-        self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearTracepoints)
+        self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearBreakpoints)
         self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
 
         self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True, Icons.tp)
@@ -73,13 +73,13 @@ class TracepointController(QObject):
         @param file_: (string), fullname of file
         @param line: (int), linenumber where the breakpoint should be toggled
         """
-        return self._model.toggleTracepoint(file_, line)
+        return self._model.toggleBreakpoint(file_, line)
 
     def getTracepointsFromModel(self):
         """returns a list of tracepoints
         @return tracepoints: a list of tracepoints
         """
-        return self._model.getTracepoints()
+        return self._model.breakpoints
 
     def saveSession(self, xmlHandler):
         """Insert session info to xml file"""

@@ -187,13 +187,13 @@ class DebugController(QObject):
             # the breakpoint, both of which would cause the program to suspend
             # on yet another line), but that's about as good as our guessing
             # currently gets.
-            tp = self.distributedObjects.tracepointController.model().isTracepointByNumber(int(field["bkptno"]))
+            tp = self.distributedObjects.tracepointController.model().breakpointByNumber(int(field["bkptno"]))
             bp = self.distributedObjects.breakpointModel.breakpointByNumber(int(field["bkptno"]))
             assert tp or bp  # either a TP or a BP must have been hit
 
             # now that we have one, check if the other is here too
             if bp and not tp:
-                tp = self.distributedObjects.tracepointController.model().isTracepointByLocation(bp.fullname, bp.line)
+                tp = self.distributedObjects.tracepointController.model().breakpointByLocation(bp.fullname, bp.line)
             elif tp and not bp:
                 bp = self.distributedObjects.breakpointModel.breakpointByLocation(tp.fullname, tp.line)
 

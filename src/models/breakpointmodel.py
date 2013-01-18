@@ -25,9 +25,10 @@ import logging
 from helpers.excep import GdbError
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
 from PyQt4.QtGui import QPixmap
+from helpers.icons import Icons
 
 
-class ExtendedBreakpoint(QObject):
+class Breakpoint(QObject):
     """This class provides all members for basic gdb Breakpoint and extends it with
     more members like condition, name and interval.
     """
@@ -78,11 +79,11 @@ class ExtendedBreakpoint(QObject):
             self.condition = rec.cond
         self.skip = rec.ignore if hasattr(rec, "ignore") else 0
 
-        """ proof if it is a special multiple address breakpoint"""
+        # check if it is a special multiple address breakpoint
         if rec.addr == "<MULTIPLE>":
             """ start special handling"""
-            self.multipleBreakPointInit(rec.number)
-            self.parseOriginalLocation(rec.__dict__['original-location'])
+            rec2 = self.gdbConnector.getMultipleBreakpoints(rec.number)
+            self.parseOriginalLocation(rec2.__dict__['original-location'])
             self.func = "unknown"
         else:
             self.file = getattr(rec, "file", "<unknown>")
@@ -100,21 +101,17 @@ class ExtendedBreakpoint(QObject):
         origLoc = origLoc[0].split('/')
         self.file = origLoc[len(origLoc[0]) - 1]
 
-    def multipleBreakPointInit(self, breakPointNumber):
-        """ needed for special case of breakpoints <MULTIPLE> address"""
-        self.gdbConnector.getMultipleBreakpoints(breakPointNumber)
-
 
 class BreakpointModel(QAbstractTableModel):
-    KEYS = ['number',
-            'enabled',
-            'file',
-            'line',
-            'addr',
-            'condition',
-            'skip',
-            'times',
-            'name']
+    LAYOUT = [('number', ''),
+              ('enabled', ''),
+              ('file', 'File'),
+              ('line', 'Line'),
+              ('addr', 'Address'),
+              ('condition', 'Condition'),
+              ('skip', 'Skip'),
+              ('times', 'Hits'),
+              ('name', 'Name')]
     InternalDataRole = Qt.UserRole
 
     def __init__(self, do, parent=None):
@@ -126,8 +123,11 @@ class BreakpointModel(QAbstractTableModel):
         do.signalProxy.breakpointModified.connect(self.__updateBreakpointFromGdbRecord)
         do.signalProxy.runClicked.connect(self.__resetHitCounters)
 
-        self.enabledBp = QPixmap(":/icons/images/bp.png")
-        self.disabledBp = QPixmap(":/icons/images/bp_dis.png")
+        self.enabledBp = Icons.bp
+        self.disabledBp = Icons.bp_dis
+
+    def _newBreakpoint(self, breakpoint, connector, **kwargs):
+        return Breakpoint(breakpoint, connector)
 
     def breakpointByLocation(self, fullname, line):
         """ search for breakpoint in file fullname on linenumber line
@@ -166,13 +166,13 @@ class BreakpointModel(QAbstractTableModel):
         @return (int), returns the real linenumber that gdb is choosing
         """
         res = self.connector.insertBreakpoint(file_, line)
-        extendedBreakpoint = ExtendedBreakpoint(res.bkpt, self.connector)
+        bp = self._newBreakpoint(res.bkpt, self.connector)
 
         self.beginInsertRows(QModelIndex(), len(self.breakpoints), len(self.breakpoints))
-        self.breakpoints.append(extendedBreakpoint)
+        self.breakpoints.append(bp)
         self.endInsertRows()
 
-        return extendedBreakpoint
+        return bp
 
     def toggleBreakpoint(self, fullname, line):
         """ toggles the breakpoint in file fullname with linenumber line
@@ -289,12 +289,12 @@ class BreakpointModel(QAbstractTableModel):
         if role == self.InternalDataRole:
             ret = bp
         elif role == Qt.DisplayRole:
-            ret = getattr(bp, self.KEYS[column]) if self.KEYS[column] != 'enabled' else None
+            ret = getattr(bp, self.LAYOUT[column][0]) if self.LAYOUT[column][0] != 'enabled' else None
         elif role == Qt.CheckStateRole:
-            if self.KEYS[column] == 'enabled':
+            if self.LAYOUT[column][0] == 'enabled':
                 ret = Qt.Checked if bp.enabled else Qt.Unchecked
         elif role == Qt.DecorationRole:
-            if self.KEYS[column] == 'number':
+            if self.LAYOUT[column][0] == 'number':
                 ret = self.enabledBp if bp.enabled else self.disabledBp
 
         return ret
@@ -304,15 +304,7 @@ class BreakpointModel(QAbstractTableModel):
 
         if orientation == Qt.Horizontal:
             if role == Qt.DisplayRole:
-                ret = ["",  # Number
-                       "",  # Enabled
-                       "File",
-                       "Line",
-                       "Address",
-                       "Condition",
-                       "Skip",
-                       "Hits",
-                       "Name"][section]
+                ret = self.LAYOUT[section][1]
         return ret
 
     def flags(self, index):
@@ -320,13 +312,13 @@ class BreakpointModel(QAbstractTableModel):
 
         column = index.column()
 
-        if self.KEYS[column] == 'enabled':
+        if self.LAYOUT[column][0] == 'enabled':
             f |= Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
-        elif self.KEYS[column] == 'condition':
+        elif self.LAYOUT[column][0] == 'condition':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
-        elif self.KEYS[column] == 'skip':
+        elif self.LAYOUT[column][0] == 'skip':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
-        elif self.KEYS[column] == 'name':
+        elif self.LAYOUT[column][0] == 'name':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
 
         return f
@@ -340,7 +332,7 @@ class BreakpointModel(QAbstractTableModel):
         bp = self.breakpoints[index.row()]
         column = index.column()
 
-        if self.KEYS[column] == 'condition':
+        if self.LAYOUT[column][0] == 'condition':
             cond = str(value.toString())
             if cond == "":
                 cond = "true"
@@ -349,19 +341,19 @@ class BreakpointModel(QAbstractTableModel):
             except GdbError as e:
                 logging.error("Could not set condition: %s", str(e))
                 return False
-        elif self.KEYS[column] == 'skip':
+        elif self.LAYOUT[column][0] == 'skip':
             validSkip = QVariant(value).toInt()
             if not validSkip[1]:
                 logging.error("Invalid value for skip, must be an integer.")
                 return False
             self.changeSkip(bp.number, int(validSkip[0]))
-        elif self.KEYS[column] == 'enabled':
+        elif self.LAYOUT[column][0] == 'enabled':
             if role == Qt.CheckStateRole:
                 if not QVariant(value).toBool():
                     self.disableBreakpoint(bp.number)
                 else:
                     self.enableBreakpoint(bp.number)
-        elif self.KEYS[column] == 'name':
+        elif self.LAYOUT[column][0] == 'name':
             bp.name = str(value.toString())
 
             # make sure the view is updated

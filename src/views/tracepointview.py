@@ -22,34 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget
+from views.breakpointview import BreakpointView
 
 
-class TracepointView(QWidget):
-    def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
-
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
-
-        self.tracepointView = QtGui.QTableView(self)
-        self.tracepointView.setTabKeyNavigation(False)
-        self.tracepointView.setAlternatingRowColors(True)
-        self.tracepointView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.tracepointView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        self.tracepointView.setShowGrid(False)
-        self.tracepointView.setSortingEnabled(True)
-        self.tracepointView.setCornerButtonEnabled(False)
-        self.tracepointView.verticalHeader().setVisible(False)
-        self.tracepointView.verticalHeader().setDefaultSectionSize(20)
-        self.tracepointView.horizontalHeader().setStretchLastSection(True)
-        self.tracepointView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.gridLayout.addWidget(self.tracepointView, 0, 0, 1, 1)
-
-        QtCore.QMetaObject.connectSlotsByName(self)
-
+class TracepointView(BreakpointView):
     def getSelectedRow(self):
-        if len(self.tracepointView.selectionModel().selectedIndexes()) > 0:
-            return self.tracepointView.selectionModel().selectedIndexes()[0]
+        if len(self.selectionModel().selectedIndexes()) > 0:
+            return self.selectionModel().selectedIndexes()[0]
         return None
