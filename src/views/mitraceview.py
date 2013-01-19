@@ -22,18 +22,25 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QTextEdit, QAction
+from PyQt4.QtGui import QWidget, QAction
 from helpers.gdboutput import GdbOutput
 from helpers.icons import Icons
+from views.ui_mitraceview import Ui_MiTraceView
 
 
-class MiTraceView(QTextEdit):
+class MiTraceView(QWidget):
     def __init__(self, do, parent):
-        QTextEdit.__init__(self, parent)
-        self.setReadOnly(True)
+        QWidget.__init__(self, parent)
 
-        do.gdb_connector.commandExecuted.connect(self.appendCommand)
-        do.gdb_connector.reader.asyncRecordReceived.connect(self.appendAsync)
+        self.ui = Ui_MiTraceView()
+        self.ui.setupUi(self)
+
+        self.__do = do
+
+        self.ui.commandEdit.lineEdit().returnPressed.connect(self.executeMiCommand)
+
+        self.__do.gdb_connector.commandExecuted.connect(self.appendCommand)
+        self.__do.gdb_connector.reader.asyncRecordReceived.connect(self.appendAsync)
 
         self.__timeAction = QAction(Icons.time, "Show Elapsed Time", self)
         self.__timeAction.setCheckable(True)
@@ -41,13 +48,18 @@ class MiTraceView(QTextEdit):
         parent.titleBarWidget().addAction(self.__timeAction)
 
         parent.addClearAction()
-        parent.clearRequested.connect(self.clear)
+        parent.clearRequested.connect(self.ui.traceView.clear)
 
     def appendCommand(self, cmd, rec, time):
         timestr = "[<i>%.3f</i>] " % time if self.__timeAction.isChecked() else ""
-        self.append("%s<b>%s</b>" % (timestr, cmd))
+        self.ui.traceView.append("%s<b>%s</b>" % (timestr, cmd))
         color = 'color="#ff3333"' if rec.class_ == GdbOutput.ERROR else ""
-        self.append("<font %s>%s</font>" % (color, rec.raw))
+        self.ui.traceView.append("<font %s>%s</font>" % (color, rec.raw))
 
     def appendAsync(self, rec):
-        self.append('<font color="#777777">%s</font>' % rec.raw)
+        self.ui.traceView.append('<font color="#777777">%s</font>' % rec.raw)
+
+    def executeMiCommand(self):
+        cmd = str(self.ui.commandEdit.lineEdit().text())
+        self.ui.commandEdit.lineEdit().setText("")
+        self.__do.gdb_connector.execute(cmd)
