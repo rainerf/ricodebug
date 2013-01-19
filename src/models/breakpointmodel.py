@@ -24,7 +24,6 @@
 import logging
 from helpers.excep import GdbError
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
-from PyQt4.QtGui import QPixmap
 from helpers.icons import Icons
 
 
@@ -67,6 +66,8 @@ class Breakpoint(QObject):
         if breakpoint:
             self.fromGdbRecord(breakpoint)
 
+    where = property(lambda self: "%s:%d" % (self.file, self.line))
+
     def fromGdbRecord(self, rec):
         self.addr = rec.addr
         self.disp = rec.disp
@@ -105,8 +106,7 @@ class Breakpoint(QObject):
 class BreakpointModel(QAbstractTableModel):
     LAYOUT = [('number', ''),
               ('enabled', ''),
-              ('file', 'File'),
-              ('line', 'Line'),
+              ('where', 'Where'),
               ('addr', 'Address'),
               ('condition', 'Condition'),
               ('skip', 'Skip'),
@@ -275,7 +275,7 @@ class BreakpointModel(QAbstractTableModel):
         return len(self.breakpoints)
 
     def columnCount(self, parent):
-        return 9
+        return len(self.LAYOUT)
 
     def data(self, index, role):
         assert(index.row() < len(self.breakpoints))

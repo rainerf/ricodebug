@@ -22,14 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
-from PyQt4.QtGui import QItemDelegate
-from operator import attrgetter
+from PyQt4.QtCore import Qt
 from .breakpointmodel import Breakpoint
 from variables.variablelist import VariableList
 from variables.varwrapperfactory import VarWrapperFactory
 from helpers.tools import cpp2py
-import logging
 from models.breakpointmodel import BreakpointModel
 from helpers.icons import Icons
 
@@ -93,16 +90,6 @@ class Tracepoint(Breakpoint):
 
 
 class TracepointModel(BreakpointModel):
-    KEYS = ['number',
-            'enabled',
-            'file',
-            'line',
-            'addr',
-            'condition',
-            'skip',
-            'times',
-            'name']
-
     def __init__(self, do, parent=None):
         BreakpointModel.__init__(self, do, parent)
         self.do = do
@@ -133,7 +120,7 @@ class TracepointModel(BreakpointModel):
                 tp.tracePointOccured()
 
     def columnCount(self, parent):
-        return 10
+        return BreakpointModel.columnCount(self, parent) + 1
 
     def data(self, index, role):
         if index.column() < BreakpointModel.columnCount(self, None):
@@ -144,13 +131,12 @@ class TracepointModel(BreakpointModel):
         tp = self.breakpoints[index.row()]
 
         if role == Qt.DisplayRole:
-            if index.column() == 9:
+            if index.column() == self.columnCount(None) - 1:
                 ret = ", ".join(tp.tracedVariables)
 
         return ret
 
     def headerData(self, section, orientation, role):
-
         if section < BreakpointModel.columnCount(self, None):
             return BreakpointModel.headerData(self, section, orientation, role)
 
@@ -158,7 +144,7 @@ class TracepointModel(BreakpointModel):
 
         if orientation == Qt.Horizontal:
             if role == Qt.DisplayRole:
-                if section == 9:
+                if section == self.columnCount(None) - 1:
                     ret = "Traced Variables"
 
         return ret
