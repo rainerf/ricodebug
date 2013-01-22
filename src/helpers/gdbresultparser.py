@@ -52,7 +52,8 @@ reserved = {
     "thread-selected": "THREAD_SELECTED",
     "library-loaded": "LIBRARY_LOADED",
     "library-unloaded": "LIBRARY_UNLOADED",
-    "breakpoint-modified": "BREAKPOINT_MODIFIED"
+    "breakpoint-modified": "BREAKPOINT_MODIFIED",
+    "breakpoint-created": "BREAKPOINT_CREATED"
 }
 
 tokens = [
@@ -173,7 +174,8 @@ def p_async_class(p):
                    | THREAD_SELECTED
                    | LIBRARY_LOADED
                    | LIBRARY_UNLOADED
-                   | BREAKPOINT_MODIFIED'''
+                   | BREAKPOINT_MODIFIED
+                   | BREAKPOINT_CREATED'''
     if p[1] == "stopped":
         p[0] = GdbOutput.STOPPED
     elif p[1] == "running":
@@ -198,6 +200,8 @@ def p_async_class(p):
         p[0] = GdbOutput.LIBRARY_UNLOADED
     elif p[1] == "breakpoint-modified":
         p[0] = GdbOutput.BREAKPOINT_MODIFIED
+    elif p[1] == "breakpoint-created":
+        p[0] = GdbOutput.BREAKPOINT_CREATED
     else:
         raise helpers.excep.GdbError("Got " + p[1] + " which cannot occur here!")
 
