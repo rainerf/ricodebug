@@ -34,7 +34,6 @@ import helpers.excep
 import re
 from .tools import unBackslashify
 from PyQt4.QtCore import QDir
-import logging
 
 reserved = {
     "done": "DONE",
@@ -283,12 +282,10 @@ def p_value_list(p):
 
 def p_error(p):
     if p:
-        logging.error("Syntax error in input, line %d, col %d: %s", \
+        raise helpers.excep.GdbError("Syntax error in input, line %d, col %d: %s", \
             p.lineno, p.lexpos, p.type)
     else:
-        logging.error("Syntax error in input!")
-    
-    raise helpers.excep.GdbError("SYNTAX ERROR")
+        raise helpers.excep.GdbError("Syntax error in input!")
 
 
 def p_top(p):
