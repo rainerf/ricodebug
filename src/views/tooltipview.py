@@ -43,22 +43,28 @@ class ToolTipView(QWidget):
 
         self.exp = None
 
-        self.addToWatchButton = QPushButton(Icons.watch, "")
-        self.addToWatchButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
-        self.addToWatchButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
-        self.addToWatchButton.setToolTip("Add to Watch")
-        self.addToWatchButton.clicked.connect(self.__addToWatch)
-        self.addToDatagraphButton = QPushButton(Icons.datagraph, "")
-        self.addToDatagraphButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
-        self.addToDatagraphButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
-        self.addToDatagraphButton.setToolTip("Add to Data Graph")
-        self.addToDatagraphButton.clicked.connect(self.__addToDatagraph)
+        addToWatchButton = QPushButton(Icons.watch, "")
+        addToWatchButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
+        addToWatchButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
+        addToWatchButton.setToolTip("Add to Watch")
+        addToWatchButton.clicked.connect(self.__addToWatch)
+        addToDatagraphButton = QPushButton(Icons.datagraph, "")
+        addToDatagraphButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
+        addToDatagraphButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
+        addToDatagraphButton.setToolTip("Add to Data Graph")
+        addToDatagraphButton.clicked.connect(self.__addToDatagraph)
+        setWatchpointButton = QPushButton(Icons.wp, "")
+        setWatchpointButton.setMinimumSize(self.ICON_SIZE, self.ICON_SIZE)
+        setWatchpointButton.setMaximumSize(self.ICON_SIZE, self.ICON_SIZE)
+        setWatchpointButton.setToolTip("Set Watchpoint")
+        setWatchpointButton.clicked.connect(self.__setWatchpoint)
 
         self.__layout = QHBoxLayout(self)
         self.__layout.addWidget(self.treeItemView)
         l = QVBoxLayout()
-        l.addWidget(self.addToWatchButton)
-        l.addWidget(self.addToDatagraphButton)
+        l.addWidget(addToWatchButton)
+        l.addWidget(addToDatagraphButton)
+        l.addWidget(setWatchpointButton)
         l.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
         # show a size grip in the corner to allow the user to resize the window
         l.addWidget(QSizeGrip(self))
@@ -97,6 +103,9 @@ class ToolTipView(QWidget):
 
     def __addToDatagraph(self):
         self.__do.datagraphController.addWatch(self.exp)
+
+    def __setWatchpoint(self):
+        self.__do.breakpointModel.insertWatchpoint(self.exp)
 
     def show(self, exp):
         self.resize(300, 90)

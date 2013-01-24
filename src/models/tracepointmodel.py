@@ -31,9 +31,8 @@ from models.breakpointmodel import BreakpointModel
 from helpers.icons import Icons
 
 
-class ValueList():
-    """This class provides a name and a list of
-    Values
+class ValueList:
+    """This class provides a name and a list of values
     """
     def __init__(self, name, type_):
         self.name = name
@@ -70,6 +69,9 @@ class Tracepoint(Breakpoint):
         self.variableList = VariableList(self.vwFactory, do)
         self.wave = []
 
+        self.tooltip = "Tracepoint"
+
+    icon = property(lambda self: Icons.tp if self.enabled else Icons.bp_dis)
     tracedVariables = property(lambda self: [v.exp for v in self.variableList])
 
     def addVar(self, variableToTrace):
@@ -93,7 +95,6 @@ class TracepointModel(BreakpointModel):
     def __init__(self, do, parent=None):
         BreakpointModel.__init__(self, do, parent)
         self.do = do
-        self.enabledBp = Icons.tp
 
     def _newBreakpoint(self, bkpt, connector, **kwargs):
         return Tracepoint(bkpt, connector, self.do, self.__getTpNumber(0))

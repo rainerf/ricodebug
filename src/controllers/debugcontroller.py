@@ -158,7 +158,7 @@ class DebugController(QObject):
         # With reverse debugging, some stopped records might not contain a
         # reason. Predefine it as None, since all unknown reasons will be
         # handled as the inferior having stopped normally.
-        fields = ["reason", "frame", "signal-name", "signal-meaning", "bkptno"]
+        fields = ["reason", "frame", "signal-name", "signal-meaning", "bkptno", "wpt", "value"]
         field = defaultdict(None)
 
         for r in rec.results:
@@ -211,6 +211,9 @@ class DebugController(QObject):
         elif field["reason"] == "signal-received":
             logging.warning("Signal received: %s (%s) in %s:%s", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
+        elif field["reason"] == "watchpoint-trigger":
+            logging.warning("Watchpoint %s on expression '%s' triggered; old value: %s, new value: %s", field["wpt"].number, self.distributedObjects.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
+            self.signalProxy.emitInferiorStoppedNormally(rec)
         else:
             self.signalProxy.emitInferiorStoppedNormally(rec)
 

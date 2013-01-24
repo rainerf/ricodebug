@@ -45,7 +45,6 @@ from views.watchview import WatchView
 from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
-from models.breakpointmodel import BreakpointModel
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
 from views.inferiorioview import InferiorIoView
@@ -54,6 +53,7 @@ from views.threadview import ThreadView
 from models.threadmodel import ThreadModel
 from views.mitraceview import MiTraceView
 from helpers.icons import Icons
+from models.stoppointmodel import StoppointModel
 
 
 class DistributedObjects:
@@ -66,7 +66,7 @@ class DistributedObjects:
         self.signalProxy = SignalProxy(self)
         self.sessionManager = SessionManager(self)
 
-        self.breakpointModel, _ = self.buildModelAndView(BreakpointModel, BreakpointView, "Breakpoints", Icons.bp)
+        self.breakpointModel, _ = self.buildModelAndView(StoppointModel, BreakpointView, "Breakpoints", Icons.bp)
 
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)

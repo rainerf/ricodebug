@@ -344,6 +344,7 @@ class OpenedFileView(ScintillaWrapper):
         if exp:
             self.__popupMenu.addAction(self.distributedObjects.actions.getAddToWatchAction(exp, self.signalProxy.addWatch))
             self.__popupMenu.addAction(self.distributedObjects.actions.getAddToDatagraphAction(exp, self.distributedObjects.datagraphController.addWatch))
+            self.__popupMenu.addAction(self.distributedObjects.actions.getAddWatchpointAction(exp, self.distributedObjects.breakpointModel.insertWatchpoint))
 
             listOfTracepoints = self.tracepointController.getTracepointsFromModel()
             if listOfTracepoints:

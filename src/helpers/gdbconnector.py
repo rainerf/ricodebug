@@ -158,6 +158,13 @@ class GdbConnector(QObject):
 
         return stack
 
+    def insertWatchpoint(self, exp):
+        addr = self.evaluate("&" + exp)
+        if not addr:
+            logging.error("Cannot set watchpoint for '%s'." % exp)
+        else:
+            return self.executeAndRaiseIfFailed("-break-watch *" + addr)
+
     def insertBreakpoint(self, loc, line):
         if line is not None:
             loc = "%s:%s" % (loc, str(line))

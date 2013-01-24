@@ -23,11 +23,30 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 import logging
 from helpers.excep import GdbError
-from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant, QObject
+from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
 from helpers.icons import Icons
 
 
-class Breakpoint(QObject):
+class AbstractBreakpoint(object):
+    def __init__(self):
+        self.addr = None
+        self.condition = None
+        self.skip = -1
+        self.enabled = True
+        self.number = -1
+        self.times = None
+        self.name = None
+        self.fullname = None
+        self.tooltip = None
+
+    def fromGdbRecord(self, _):
+        raise NotImplementedError()
+
+    where = property(lambda: None)
+    icon = property(lambda: None)
+
+
+class Breakpoint(AbstractBreakpoint):
     """This class provides all members for basic gdb Breakpoint and extends it with
     more members like condition, name and interval.
     """
@@ -43,29 +62,23 @@ class Breakpoint(QObject):
                 ask gdb via usual interface (not mi interface) for breakpoint information.
                 parsing this information the address can be figured out.
         """
-
-        QObject.__init__(self)
+        AbstractBreakpoint.__init__(self)
 
         self.gdbConnector = connector
         self.file = None
         self.fullname = None
         self.func = None
         self.line = -1
-
-        self.addr = None
         self.disp = None
-        self.enabled = None
-        self.number = None
         self.original_location = None
-        self.times = None
         self.type = None
-        self.name = None
         self.condition = "true"
-        self.skip = None
+        self.tooltip = "Breakpoint"
 
         if breakpoint:
             self.fromGdbRecord(breakpoint)
 
+    icon = property(lambda self: Icons.bp if self.enabled else Icons.bp_dis)
     where = property(lambda self: "%s:%d" % (self.file, self.line))
 
     def fromGdbRecord(self, rec):
@@ -123,9 +136,6 @@ class BreakpointModel(QAbstractTableModel):
         do.signalProxy.breakpointModified.connect(self.__updateBreakpointFromGdbRecord)
         do.signalProxy.runClicked.connect(self.__resetHitCounters)
 
-        self.enabledBp = Icons.bp
-        self.disabledBp = Icons.bp_dis
-
     def _newBreakpoint(self, breakpoint, connector, **kwargs):
         return Breakpoint(breakpoint, connector)
 
@@ -136,7 +146,7 @@ class BreakpointModel(QAbstractTableModel):
         @return: (bool), True if breakpoint found in list, False else
         """
         for bp in self.breakpoints:
-            if int(bp.line) == int(line) and bp.fullname == fullname:
+            if bp.line == int(line) and bp.fullname == fullname:
                 return bp
         return None
 
@@ -295,7 +305,10 @@ class BreakpointModel(QAbstractTableModel):
                 ret = Qt.Checked if bp.enabled else Qt.Unchecked
         elif role == Qt.DecorationRole:
             if self.LAYOUT[column][0] == 'number':
-                ret = self.enabledBp if bp.enabled else self.disabledBp
+                ret = bp.icon
+        elif role == Qt.ToolTipRole:
+            if self.LAYOUT[column][0] == 'number':
+                ret = bp.tooltip
 
         return ret
 
