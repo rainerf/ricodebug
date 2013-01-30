@@ -118,25 +118,12 @@ class SysCDiagramPlugin(QThread):
 
         # prepare for easy information collection
         object_vec = self.ctx["m_child_objects"]
-        module_vec = self.ctx["m_module_registry"]["*"]["m_module_vec"]
-        port_vec = self.ctx["m_port_registry"]["*"]["m_port_vec"]
-        prim_channel_vec = self.ctx["m_prim_channel_registry"]["*"]\
-            ["m_prim_channel_vec"]
 
         # find all relevant information
         self.__findSysCObjects(object_vec, self.object_type, self.sysc_objects)
-        self.__findSysCObjects(module_vec, self.module_type, self.sysc_modules)
-        self.__findSysCObjects(port_vec, self.port_type, self.sysc_ports)
-        self.__findSysCObjects(prim_channel_vec,
-                               self.prim_channel_type,
-                               self.sysc_prim_channels)
-
-        # build hierachy
-        # pydot  data
 
         clusters = {}
         nodes = {}
-        edges = {}
 
         # build pydot hierachy and add all subgraphs and nodes to the main
         # graph
