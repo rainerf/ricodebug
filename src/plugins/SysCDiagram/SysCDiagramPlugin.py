@@ -185,8 +185,6 @@ class SysCDiagramPlugin(QThread):
                                            obj_type,
                                            children)
                     dst_dict[ptr]["children"] = children
-                   # for obj in member.childs:
-                   #     dst_dict[ptr]["child_ptrs"].append(obj.value)
 
                 elif member.exp == "m_parent":
                     dst_dict[ptr]["parent_ptr"] = member.value
