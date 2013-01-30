@@ -45,5 +45,8 @@ class SVGImage(QObject):
         self.fileObject.seek(0)
         self.imageContent = self.fileObject.read()
 
+    def die(self):
+        pass
+
     def __str__(self):
         return self.name

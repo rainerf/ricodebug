@@ -82,7 +82,7 @@ class SysCDiagramPlugin(QThread):
         self.action = self.do.actions.\
             getAddSVGToDatagraphAction(self.image_wrapper,
                                        self.do.
-                                       datagraphController.addSVG)
+                                       datagraphController.addVar)
 
         # pydot graph visualization library
         self.block_diagram = Dot(graph_type='digraph')

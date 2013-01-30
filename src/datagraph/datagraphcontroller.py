@@ -94,15 +94,6 @@ class DataGraphController(QObject):
         except VariableNotFoundException:
             pass
 
-    def addSVG(self, svgWrapper, xPos=0, yPos=0):
-        """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
-            also to the VariableList
-        @param svgWrapper      datagraph.svgwrapper.SVGWrapper class to add
-        @param xPos            Integer, the X-Coordinate of the Position where to add the VariableWrapper
-        @param yPos            Integer, the Y-Coordinate of the Position where to add the VariableWrapper
-        """
-        self.addGraph(svgWrapper, xPos, yPos)
-
     def addVar(self, varWrapper, xPos=0, yPos=0, addVarToList=True):
         """ adds the given VariableWrapper varWrapper to the DataGraph and - if addVarToList is true -
             also to the VariableList
