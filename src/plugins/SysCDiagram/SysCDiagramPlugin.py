@@ -106,12 +106,6 @@ class SysCDiagramPlugin(QThread):
         self.action.commit()
 
     def update(self):
-        if self.analysis_done:
-            # disconnect update function to stop calling it
-            self.signalproxy.inferiorStoppedNormally.disconnect(self.update)
-            return
-
-    def update(self):
         self.start()
 
     def run(self):
