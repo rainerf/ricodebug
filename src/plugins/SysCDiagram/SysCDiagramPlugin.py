@@ -22,9 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QThread
 from datagraph.svgview import SVGDataGraphVW
-from datagraph.SVGImage import SVGImage
+from datagraph.svgimage import SVGImage
 from StringIO import StringIO
 from pydot import Dot, Cluster, Node
 
@@ -32,10 +31,7 @@ from variables.varwrapperfactory import VarWrapperFactory
 from variables.variablelist import VariableList
 
 
-class SysCDiagramPlugin(QThread):
-
-    def __init__(self):
-        QThread.__init__(self, None)
+class SysCDiagramPlugin():
 
     def initPlugin(self, signalproxy):
         """Initialise the systemc block diagram plugin"""
@@ -106,9 +102,6 @@ class SysCDiagramPlugin(QThread):
         self.action.commit()
 
     def update(self):
-        self.start()
-
-    def run(self):
         if not self.ctx_found:
             self.__findSimContext()
         else:
