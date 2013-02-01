@@ -111,7 +111,7 @@ class SVGView(QGraphicsWebView):
     def saveHtml(self):
         name = QFileDialog.getSaveFileName(filter="HTML (*.html)")
         if name != "":
-            out = file(name, 'w')
+            out = open(name, 'w')
             out.write(self.source)
             out.close()
 
@@ -131,21 +131,6 @@ class SVGView(QGraphicsWebView):
         return self.uniqueIds[template]
 
 
-class SVGTemplateHandler(HtmlTemplateHandler):
-    """ TemplateHandler for SVG Images """
-
-    def __init__(self, svgWrapper, distributedObjects):
-        """ Constructor
-        @param   svgWrapper   holds the Data to show """
-        HtmlTemplateHandler.__init__(self,
-                                     svgWrapper,
-                                     distributedObjects,
-                                     'svgview.mako')
-
-    def prepareContextMenu(self, menu):
-        HtmlTemplateHandler.prepareContextMenu(self, menu)
-
-
 class SVGDataGraphVW(DataGraphVW):
     """ Wrapper for SVG Images """
 
@@ -156,8 +141,9 @@ class SVGDataGraphVW(DataGraphVW):
         """
         DataGraphVW.__init__(self, image, distributedObjects)
         self.image = image
-        self.templateHandler = SVGTemplateHandler(self,
-                                                  self.distributedObjects)
+        self.templateHandler = HtmlTemplateHandler(self,
+                                                   self.distributedObjects,
+                                                   "svgview.mako")
 
     def showContent(self):
         self.image.refresh()
