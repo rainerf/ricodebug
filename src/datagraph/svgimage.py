@@ -25,9 +25,6 @@
 from PyQt4.QtCore import QObject, pyqtSignal
 
 
-MIME_TYPE = "application/x-variableexpresssion"
-
-
 class SVGImage(QObject):
     changed = pyqtSignal(str)
 
@@ -37,9 +34,6 @@ class SVGImage(QObject):
         self.fileObject = fileObject
         self.imageContent = fileObject.read()
         self.inScope = True
-
-    def setFileObject(self, fo):
-        self.fileObject = fo
 
     def refresh(self):
         self.fileObject.seek(0)
