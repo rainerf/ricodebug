@@ -145,7 +145,8 @@ class SysCSimCtxPlugin:
             self._setDeltaCycle(self._currDeltaCycles.value)
 
             if self._simContext["m_curr_proc_info"]["process_handle"]["*"] is not None:
-                self._currProcess = self._simContext["m_curr_proc_info"]["process_handle"]["*"]["m_name"]["_M_dataplus"]["_M_p"]
+                self._currProcess = self._simContext["m_curr_proc_info"]\
+                    ["process_handle"]["*"]["m_name"]
                 self._currProcess.changed.connect(self._setProcess)
                 self._setProcess(self._currProcess.value)
             else:
@@ -201,17 +202,17 @@ class SysCSimCtxPlugin:
             self._currProcess.changed.disconnect()
             self._currProcess.die()
         self._currProcess = self.__sp.distributedObjects.variablePool.\
-            getVar("(sc_core::sc_process_b *)" + str(v))["*"]["m_name"]["_M_dataplus"]["_M_p"]
+            getVar("(sc_core::sc_process_b *)" + str(v))["*"]["m_name"]
         self._currProcess.changed.connect(self._setProcess)
         self._setProcess(self._currProcess.value)
 
     def _setProcessKind(self, v):
         t = {
-             "sc_core::SC_NO_PROC_": "No Process",
-             "sc_core::SC_METHOD_PROC_": "Method",
-             "sc_core::SC_THREAD_PROC_": "Thread",
-             "sc_core::SC_CTHREAD_PROC_": "CThread",
-            }
+            "sc_core::SC_NO_PROC_": "No Process",
+            "sc_core::SC_METHOD_PROC_": "Method",
+            "sc_core::SC_THREAD_PROC_": "Thread",
+            "sc_core::SC_CTHREAD_PROC_": "CThread",
+        }
 
         self.ui.processKindEdit.setText(t[str(v)])
 
@@ -228,7 +229,7 @@ class SysCSimCtxPlugin:
             "us": 6,
             "ms": 9,
             "s": 12
-            }
+        }
 
         time /= 10 ** div[unit]
 
