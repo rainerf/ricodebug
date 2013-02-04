@@ -137,10 +137,8 @@ class SysCDiagramPlugin():
         for sptr in nodes:
             self.block_diagram.add_node(nodes[sptr])
 
-        self.block_diagram.write_raw("bd.gv")
         self._file_obj.write(self.block_diagram.create_svg())
         self.signalproxy.inferiorStoppedNormally.disconnect(self.update)
-
         self.showDiagram()
 
     def __buildHierachy(self, obj_dict, clusters, nodes):
