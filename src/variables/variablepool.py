@@ -60,7 +60,7 @@ class VariablePool(QObject):
         """
 
         self.variables = {}
-
+        
     def reloadLocals(self):
         """ function deletes all variables created within gdb and stored within ricodebug
             after that the locals are read again
@@ -106,6 +106,10 @@ class VariablePool(QObject):
         for changed in res:
             var = self.variables[changed.name]
             var.inScope = (changed.in_scope == "true")
+            if hasattr(changed, "new_num_children"):
+                var.removeChildren()
+                var.numChild = changed.new_num_children
+                self.getChildren(var._gdbName, var._childs, var.access, var.uniqueName, var._childFormat)
             if hasattr(changed, "value"):
                 var.value = changed.value
             if not isTracePoint:
@@ -215,7 +219,7 @@ class VariablePool(QObject):
         type_ = gdbVar.type
         value = gdbVar.value
         inScope = True
-        haschildren = (int(gdbVar.numchild) > 0)
+        numChild = int(gdbVar.numchild)
         access = access
 
         # We use some heuristics to find out whether a type is a pointer, an
@@ -228,25 +232,16 @@ class VariablePool(QObject):
         # * Again, everything else is a normal variable.
         if value.startswith('0x'):
             logging.debug("Creating a pointer variable for '%s'", exp)
-            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
-        elif haschildren:
+            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, numChild, access)
+        elif numChild > 0:
             logging.debug("Creating a struct variable for '%s'", exp)
-            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inScope, numChild, access)
         elif re.match("{...}", value):
-            # NOTE:this solution only works for variables that are not nested
-            # if the vector is uninitialized we get a negative length
-            # additionally we limit the children to 100
-            checkError = self.connector.evaluate(exp);
-            if str(checkError).find("length -") is -1:
-                haschildren = True;
-            else:
-                haschildren = False         
-                
             logging.debug("Creating an array variable for '%s'", exp)
-            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, numChild, access)
         else:
             logging.debug("Creating a normal variable for '%s'", exp)
-            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inScope, numChild, access)
 
         return varReturn
 

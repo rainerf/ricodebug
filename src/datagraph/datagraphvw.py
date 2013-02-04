@@ -127,6 +127,7 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
             action.setChecked(self.vertical)
 
     def render(self, role, **kwargs):
+        self.varWrapper.getChildren()
         return HtmlTemplateHandler.render(self, role, vertical=self.vertical, **kwargs)
 
 
@@ -204,7 +205,7 @@ class DataGraphVW(VariableWrapper):
     def setFilter(self, f):
         VariableWrapper.setFilter(self, f)
         self.setDirty(True)
-
+    
 
 class ComplexDataGraphVW(DataGraphVW):
     def __init__(self, variable, distributedObjects, vwFactory, templateHandler):
@@ -221,14 +222,13 @@ class ComplexDataGraphVW(DataGraphVW):
     def setOpen(self, open_):
         self.isOpen = open_
         self.setDirty(True)
-
+        
     def getChildren(self):
         """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been
         @return    list of datagraph.datagraphvw.DataGraphVW """
-        if not self.childrenWrapper:
-            self.childrenWrapper = []
-            for childVar in self.childs:
-                wrapper = childVar.makeWrapper(self.vwFactory)
-                wrapper.setExistingView(self.getView(), self)
-                self.childrenWrapper.append(wrapper)
+        self.childrenWrapper = []
+        for childVar in self.childs:
+            wrapper = childVar.makeWrapper(self.vwFactory)
+            wrapper.setExistingView(self.getView(), self)
+            self.childrenWrapper.append(wrapper)
         return self.childrenWrapper

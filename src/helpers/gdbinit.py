@@ -31,26 +31,32 @@ class GDBInit(QObject):
         self.fileName = "load_pretty_printer"
         filePath =  repr(__file__) 
         self.path = filePath[1:filePath.find("helpers/gdbinit.py")] + "third_party/"
+         
+    @staticmethod
+    def writeFile(path,fileName):
+        init = path + fileName
         
-        self.file_content = []
-        self.file_content.append("python\n")
-        self.file_content.append("import sys\n")
-        self.file_content.append("path=\"" + self.path + "pretty_printer\"\n")
-        self.file_content.append("sys.path.insert(0, path)\n")
-        self.file_content.append("from libstdcxx.v6.printers import register_libstdcxx_printers\n")
-        self.file_content.append("register_libstdcxx_printers (None)\n")
-        self.file_content.append("end\n")
-          
-    def writeFile(self):
-        if os.path.exists(self.path + self.fileName):
-            os.remove(self.path + self.fileName)
+        file_content = []
+        file_content.append("python\n")
+        file_content.append("import sys\n")
+        file_content.append("path=\"" + path + "pretty_printer\"\n")
+        file_content.append("sys.path.insert(0, path)\n")
+        file_content.append("from libstdcxx.v6.printers import register_libstdcxx_printers\n")
+        file_content.append("register_libstdcxx_printers (None)\n")
+        file_content.append("end\n")
+       
+        if os.path.exists(init):
+            os.remove(init)
     
-        init_script = open(self.path + self.fileName,'w')
+        init_script = open(init,'w')
         
-        for i in self.file_content:
+        for i in file_content:
             init_script.write(i)
 
         init_script.close()
         
     def getPath(self):
-        return self.path + self.fileName
+        return self.path
+
+    def getFileName(self):
+        return self.fileName

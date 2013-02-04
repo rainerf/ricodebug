@@ -39,7 +39,7 @@ class Variable(QObject):
 
     def __init__(self, variablepool, exp, gdbName,
             uniqueName, type_, value, inScope,
-            hasChildren, access):
+            numChild, access):
         QObject.__init__(self)
         self.exp = exp
         self.type = type_
@@ -47,11 +47,13 @@ class Variable(QObject):
         self.access = access
         self.uniqueName = uniqueName
         self.value = value
-        self.hasChildren = hasChildren
+        self.numChild = numChild
 
         self._vp = variablepool
         self._gdbName = gdbName
         self._childs = []
+    
+        self.hasChildren = property(lambda self: self.numChild > 0)
 
     def _getChildrenFromGdb(self):
         """Load the children from GDB, if there are any."""
@@ -99,6 +101,11 @@ class Variable(QObject):
 
     def makeWrapper(self, factory):
         return factory.makeWrapper(self)
+    
+    def removeChildren(self):
+        for child in self._childs:
+            child.removeChildren()
+        del self._childs[:]
 
     def die(self):
         self._vp.removeVar(self)

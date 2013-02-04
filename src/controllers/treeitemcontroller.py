@@ -90,12 +90,14 @@ class TreeStructVarWrapper(VariableWrapper, TreeItem):
             Get Children from VariableList for StructVariable
         @param factory   derived from VarWrapperFactory, factory to look in VariableList for children
         """
-        if len(self.childItems) == 0:
+        if (len(self.childItems) == 0) or (self._v.numChild != len(self.childItems)):
+            self.removeChildren()
             for child in self._v.childs:
                 vwChild = child.makeWrapper(factory)
                 vwChild.parent = self
-                vwChild.dataChanged.connect(vwChild.hasChanged)
+                vwChild.dataChanged.connect(vwChild.hasChanged)                    
                 self.addChild(vwChild)
+                self._v.numChild = len(self.childItems)
 
         return self.childItems
 

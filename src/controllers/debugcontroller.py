@@ -28,6 +28,7 @@ from PyQt4.QtCore import QObject, pyqtSignal, Qt, pyqtSlot
 from helpers.gdboutput import GdbOutput
 import logging
 from helpers.configstore import ConfigSet, ConfigItem
+from helpers.gdbinit import GDBInit
 
 
 class DebugConfig(ConfigSet):
@@ -55,11 +56,11 @@ class DebugController(QObject):
 
         self.ptyhandler.start()
         
-        self.gdbinit.writeFile()
+        GDBInit.writeFile(self.gdbinit.getPath(),self.gdbinit.getFileName())
         
         self.connector.start()
         
-        self.connector.initPrettyPrinter(self.gdbinit.getPath())
+        self.connector.initPrettyPrinter(self.gdbinit.getPath() + self.gdbinit.getFileName())
         self.connector.startPrettyPrinting()
         
         self.toggleBeautify = True
