@@ -27,6 +27,8 @@ from datagraph.svgimage import SVGImage
 from StringIO import StringIO
 from pydot import Dot, Cluster, Node
 
+from helpers.tools import cpp2py
+
 from variables.varwrapperfactory import VarWrapperFactory
 from variables.variablelist import VariableList
 
@@ -102,11 +104,13 @@ class SysCDiagramPlugin():
         self.action.commit()
 
     def update(self):
-        if not self.ctx_found:
+        if not self.ctx_found and self.ctx is None:
             self.__findSimContext()
+            if self.ctx is None:
+                return
         else:
             # don't try to analyze if elaboration is not done
-            if not self.ctx["m_elaboration_done"]:
+            if not cpp2py(self.ctx["m_elaboration_done"].value):
                 return
 
         # prepare for easy information collection
@@ -114,6 +118,13 @@ class SysCDiagramPlugin():
 
         # find all relevant information
         self.__findSysCObjects(object_vec, self.object_type, self.sysc_objects)
+
+        # if there are no objects to draw than skip the drawing part
+        # this might happen if you set the breakpoint before any objects are
+        # created. This is actually catched above, but there might also be a
+        # design with no objects.
+        if len(self.sysc_objects.keys()) == 0:
+            return
 
         clusters = {}
         nodes = {}
@@ -195,6 +206,7 @@ class SysCDiagramPlugin():
                 self.ctx_pointer = self.evaluateExp(self.ctx_func)
             else:
                 if self.ctx_pointer is None:
+                    self.ctx_found = False
                     return
                 else:
                     self.ctx_found = True
