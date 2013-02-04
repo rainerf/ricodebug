@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.svgview import SVGDataGraphVW
+from datagraph.svgvw import SVGDataGraphVW
 from datagraph.svgimage import SVGImage
 from StringIO import StringIO
 from pydot import Dot, Cluster, Node
