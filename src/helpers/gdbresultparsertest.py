@@ -1,5 +1,5 @@
 import unittest
-import .gdbresultparser
+import gdbresultparser
 
 
 class Test(unittest.TestCase):
@@ -77,6 +77,11 @@ class Test(unittest.TestCase):
     def test12(self):
         self.parser.parse(["""
         ^done,files=[{file="main.cpp",fullname="/home/rainer/tmp/testprog/bigarray/main.cpp"}]
+        """])
+
+    def test13(self):
+        self.parser.parse(["""
+        =breakpoint-created,bkpt={number="2",type="breakpoint",disp="keep",enabled="y",addr="0x00000000004004d7",func="main()",file="main.cpp",fullname="/home/rainer/tmp/testprog/macro/main.cpp",line="6",times="0",original-location="main.cpp:6"}
         """])
 
 if __name__ == "__main__":

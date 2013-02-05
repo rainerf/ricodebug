@@ -88,7 +88,6 @@ class MainWindow(QMainWindow):
 
         self.__runWithArgumentsMenu = None
         self.__argumentsEdit = None
-        self.__makeRunWithArgumentsMenu()
 
     def __makeRunWithArgumentsMenu(self):
         self.__runWithArgumentsMenu = QMenu(self)
@@ -158,6 +157,7 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.Open)
         self.ui.Main.addAction(self.act.SaveFile)
         self.ui.Main.addSeparator()
+        self.__makeRunWithArgumentsMenu()
         self.ui.Main.addAction(self.act.Run)
         self.ui.Main.addAction(self.act.Continue)
         self.ui.Main.addAction(self.act.Interrupt)

@@ -33,7 +33,7 @@ class VariableWrapper(QObject):
 
     def __init__(self, variable):
         """ Constructor
-        @param variable    variables.variable.Variable, Variable to wrap with the new DataGraphVW
+        @param  variable    Variable to wrap
         """
         QObject.__init__(self)
         self._v = variable
@@ -44,12 +44,22 @@ class VariableWrapper(QObject):
     def varChanged(self):
         self.dataChanged.emit()
 
+    def __getitem__(self, item):
+        return self._v[item]
+
     def __getattr__(self, name):
         # delegate the accesses to the wrapped variable
-        if name in ["exp", "type", "inScope", "access", "uniqueName", "assignValue", "childs", "__getitem__"]:
+        if name in ["exp",
+                    "type",
+                    "inScope",
+                    "access",
+                    "uniqueName",
+                    "assignValue",
+                    "childs"]:
             return getattr(self._v, name)
         else:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, name))
+            raise AttributeError("%s instance has no attribute '%s'" %
+                                 (self.__class__.__name__, name))
 
     def die(self):
         self._v.changed.disconnect()

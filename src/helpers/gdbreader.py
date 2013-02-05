@@ -21,6 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+from helpers.excep import GdbError
 
 """GdbReader that listens to the gnu debugger output
 """
@@ -70,6 +71,8 @@ class GdbReader(QThread):
                     for line in lines:
                         asString += line
                     self.forwardMultipleBreakPointInfo(asString)
+                # FIXME: the line below might throw an execption; we should
+                # handle this gracefully
                 results = GdbResultParser.parse(lines)
                 lines = []
                 for res in results:
