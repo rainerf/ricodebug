@@ -86,9 +86,6 @@ class MainWindow(QMainWindow):
         self.fileWatcher = QFileSystemWatcher()
         self.fileWatcher.fileChanged.connect(self.__binaryChanged)
 
-        self.__runWithArgumentsMenu = None
-        self.__argumentsEdit = None
-
     def __makeRunWithArgumentsMenu(self):
         self.__runWithArgumentsMenu = QMenu(self)
         self.__argumentsEdit = QLineEdit()
