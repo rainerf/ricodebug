@@ -28,15 +28,14 @@ from variables import variable
 
 
 class WatchView(TreeItemView):
-    def __init__(self, parent=None):
-        TreeItemView.__init__(self, parent)
+    def __init__(self, do, parent=None):
+        TreeItemView.__init__(self, do, parent)
         self.setAcceptDrops(True)
 
     def keyPressEvent(self, event):
         key = event.key()
         if (int(key) == Qt.Key_Delete):
-            selectionModel = self.selectionModel()
-            self.controller.removeSelected(selectionModel.currentIndex())
+            self.removeSelection()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat(variable.MIME_TYPE):
@@ -46,14 +45,15 @@ class WatchView(TreeItemView):
 
     def dropEvent(self, e):
         data = str(e.mimeData().data(variable.MIME_TYPE))
-        self.controller.addWatch(data)
-
-    def removeVariable(self, e):
-        self.controller.removeSelected(self.selectionModel().currentIndex())
+        self.model().addVar(data)
 
     def prepareContextMenu(self):
         menu = TreeItemView.prepareContextMenu(self)
         if self.selectionModel().currentIndex().parent().internalPointer() is None:
             menu.addAction("Remove variable").triggered.connect(
-                    self.removeVariable)
+                    self.removeSelection)
         return menu
+
+    def removeSelection(self):
+        index = self.selectionModel().currentIndex()
+        self.model().removeRows(index.row(), 1, index.parent())

@@ -1,4 +1,4 @@
 <%namespace name="common" file="/common.mako"/>\
-<%call expr="common.simple_entry(role, id, 'var.png', varWrapper)">
-	${varWrapper.value | h}
+<%call expr="common.simple_entry(role, id, 'var.png', var)">
+	${var.value | h}
 </%call>

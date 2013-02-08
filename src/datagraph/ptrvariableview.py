@@ -22,70 +22,59 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
-from PyQt4 import QtCore
+from .datagraphvariables import HtmlTemplateHandler, ComplexDataGraphVariableBase
+from PyQt4.QtCore import pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QWidgetAction, QLineEdit
-import logging
+from variables.ptrvariable import PtrVariable
 
 
 class PtrVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Pointer-Variables """
 
-    def __init__(self, varWrapper, distributedObjects):
-        """ Constructor
-        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'ptrvariableview.mako')
+    def __init__(self, var):
+        HtmlTemplateHandler.__init__(self, var, 'ptrvariableview.mako')
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def dereference(self):
-        dgvw = self.varWrapper.dereference()
-        if (dgvw != None):
-            logging.debug("dereferenced variable wrapper: new expression is %s", dgvw.exp)
-            self.distributedObjects.datagraphController.addVar(dgvw)
-            self.distributedObjects.datagraphController.addPointer(self.varWrapper.getView(), dgvw.getView())
-        else:
-            logging.error("Null-Pointer wasn't dereferenced.")
+        self.var.dereference()
 
-    @QtCore.pyqtSlot()
+    @pyqtSlot()
     def showCustom(self):
-        vw = self.distributedObjects.datagraphController.addWatch(self.showCustomEdit.text())
-        self.distributedObjects.datagraphController.addPointer(self.varWrapper.getView(), vw.getView())
+        name = self.showCustomEdit.text()
         self.showCustomEdit.parent().hide()
+        self.var.dereference(name)
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
-        menu.addAction("Dereference %s" % self.varWrapper.exp, self.dereference)
+        menu.addAction("Dereference %s" % self.var.exp, self.dereference)
         submenu = menu.addMenu("Show custom...")
 
         # we cannot construct the lineedit in our ctor since it will be automatically deleted once the menu is closed
         self.showCustomEdit = QLineEdit()
         self.showCustomEdit.returnPressed.connect(self.showCustom)
-        self.showCustomEdit.setText("*(%s)" % self.varWrapper.exp)
+        self.showCustomEdit.setText("*(%s)" % self.var.exp)
         we = QWidgetAction(menu)
         we.setDefaultWidget(self.showCustomEdit)
         submenu.addAction(we)
 
 
-class PtrDataGraphVW(DataGraphVW):
-    """ VariableWrapper for Pointer-Variables """
+class DataGraphPtrVariable(PtrVariable, ComplexDataGraphVariableBase):
+    pointerDereferenceRequested = pyqtSignal('PyQt_PyObject', str)
 
-    def __init__(self, variable, distributedObjects, vwFactory):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        DataGraphVW.__init__(self, variable, distributedObjects)
-        self.factory = vwFactory
-        self.templateHandler = PtrVariableTemplateHandler(self, self.distributedObjects)
+    def __init__(self, *args):
+        PtrVariable.__init__(self, *args)
+        ComplexDataGraphVariableBase.__init__(self, PtrVariableTemplateHandler(self))
 
-    def dereference(self):
-        """ dereferences the Variable
-        @return     datagraph.datagraphvw.DataGraphVW or None,
-                    the Wrapper of the dereferenced Variable if the Variable can be dereferenced,
-                    None otherwise
-        """
-        dereferencedVar = self._v.dereference()
-        if dereferencedVar is not None:
-            return dereferencedVar.makeWrapper(self.factory)
-        else:
-            return None
+    def _loadChildrenFromGdb(self):
+        raise AttributeError("Use dereference instead.")
+
+    def dereference(self, name=None):
+        if self._pointerValid():
+            if name is not None:
+                self.pointerDereferenceRequested.emit(self, name)
+            else:
+                self.pointerDereferenceRequested.emit(self, self._childFormat % {"parent": self.uniqueName})
+
+    def setData(self, do):
+        ComplexDataGraphVariableBase.setData(self, do)
+        self.pointerDereferenceRequested.connect(self.do.datagraphController.addDereferencedPointer)

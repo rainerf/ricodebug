@@ -33,34 +33,21 @@ class DataGraphView(QGraphicsView):
     """ the View that shows the DataGraph <br>
         holds all VariableViews (datagraph.htmlvariableview.HtmlVariableView) on its scene (QGraphicsScene)
     """
-    def __init__(self, parent, datagraphcontroller):
-        """    Constructor
-        @param parent                parent for the QGraphicsView-Constructor, can be None
-        @param datagraphcontroller    datagraph.datagraphcontroller.DataGraphController, Reference to the DataGraphController
-        """
+    def __init__(self, parent):
         QGraphicsView.__init__(self, parent)
         self.setScene(QGraphicsScene())
-        self.topLevelItems = []
-        self.leafItems = {}
-        self.model = None
-        self.data_graph_controller = datagraphcontroller
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
     def clear(self):
         """ deletes all VariableViews from the DataGraph """
         self.scene().clear()
 
-    def addItem(self, var):
-        """    adds var to the DataGraphView
-        @param var    datagraph.htmlvariableview.HtmlVariableView, VariableView to add """
-        self.scene().addItem(var)
+    def addItem(self, item):
+        self.scene().addItem(item)
 
-    def removeItem(self, var):
-        """    removes var from the DataGraphView
-        @param var    datagraph.htmlvariableview.HtmlVariableView, VariableView to remove
-        """
-        if var in self.scene().items():
-            self.scene().removeItem(var)
+    def removeItem(self, item):
+        if item in self.scene().items():
+            self.scene().removeItem(item)
 
     @pyqtSlot()
     def zoomIn(self):

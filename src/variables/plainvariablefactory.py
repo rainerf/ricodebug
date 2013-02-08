@@ -22,8 +22,14 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from .treeitemview import TreeItemView
+from variables.stdvariable import StdVariable
+from variables.arrayvariable import ArrayVariable
+from variables.ptrvariable import PtrVariable
+from variables.structvariable import StructVariable
 
 
-class LocalsView(TreeItemView):
-    pass
+class PlainVariableFactory:
+    StdVariable = StdVariable
+    ArrayVariable = ArrayVariable
+    PtrVariable = PtrVariable
+    StructVariable = StructVariable

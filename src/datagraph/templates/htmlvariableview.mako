@@ -1,5 +1,5 @@
 <%!
-  from datagraph.datagraphvw import Role
+  from datagraph.datagraphvariables import Role
 %>\
 <html>
 <body>
@@ -44,9 +44,9 @@ function setValue(obj, td) {
 }
 </script>
 <% assert(top) %>\
-%  if varWrapper.inScope:
+%  if var.inScope:
 <table class="variabletop">
-${varWrapper.render(Role.INCLUDE_HEADER)}
+${var.render(Role.INCLUDE_HEADER)}
 </table>
 <div class="removediv">
 <img onclick="${id}.remove()" src="qrc:icons/images/exit.png" width="16px" height="16px">

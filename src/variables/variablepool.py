@@ -24,13 +24,10 @@
 
 from PyQt4.QtCore import QObject
 from helpers.gdboutput import GdbOutput
-from .stdvariable import StdVariable
-from .ptrvariable import PtrVariable
-from .structvariable import StructVariable
-from .arrayvariable import ArrayVariable
 import logging
 import re
 from helpers.excep import VariableNotFoundException
+from pprint import pprint
 
 
 class VariablePool(QObject):
@@ -45,21 +42,12 @@ class VariablePool(QObject):
         self.distributedObjects = distributedObjects
         self.debugcontroller = distributedObjects.debugController
         self.connector = distributedObjects.gdb_connector
-        #self.list = {}
         self.variables = {}
 
         # signalproxy
         self.signalProxy = distributedObjects.signalProxy
         self.distributedObjects.signalProxy.tracepointOccurred.connect(self.justUpdateValues)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateVars)
-        self.distributedObjects.signalProxy.cleanupModels.connect(self.clearVars)
-
-    def clearVars(self):
-        """ delete all variables stored in pool
-            this function is connected to the signal SignalProxy::cleanupModels()
-        """
-
-        self.variables = {}
 
     def justUpdateValues(self):
         """ just update variables for tracepoints, dont signal changes to connected views
@@ -86,6 +74,8 @@ class VariablePool(QObject):
             return
         res = res.changelist
 
+        self.signalProxy.emitAboutToUpdateVariables()
+
         # update the variable
         # dont use setter method to apply changes because this will cause update to gdb
         # just update value in pool
@@ -93,13 +83,13 @@ class VariablePool(QObject):
             var = self.variables[changed.name]
             var.inScope = (changed.in_scope == "true")
             if hasattr(changed, "value"):
-                var.value = changed.value
+                var._value = changed.value
             if not isTracePoint:
                 var.emitChanged()
 
         self.signalProxy.emitVariableUpdateCompleted()
 
-    def getVar(self, exp):
+    def getVar(self, factory, exp):
         """ return variable from pool if already existing <br>
             if variable is not existing in pool, create new GDB variable and add to pool
         @param exp       string, expression from variable to return
@@ -112,7 +102,7 @@ class VariablePool(QObject):
             raise VariableNotFoundException()
 
         # create variable
-        varReturn = self.__createVariable(gdbVar, None, exp, None)
+        varReturn = self.__createVariable(factory, gdbVar, None, exp, None)
 
         self.variables[varReturn._gdbName] = varReturn
 
@@ -126,7 +116,7 @@ class VariablePool(QObject):
         self.connector.var_delete(variable._gdbName)
         del variable
 
-    def getChildren(self, name, childList, access, parentName, childformat):
+    def getChildren(self, factory, name, childList, access, parentName, childformat):
         """
         Appends the children of the variable with name to childList (and to internal list).
         These children are Variables.
@@ -143,11 +133,11 @@ class VariablePool(QObject):
 
                 if not hasattr(child.src, "type"):  # public, private, protected
                     access = child.src.exp
-                    self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
-                elif child.src.exp == child.src.type:   # base classes
-                    self.getChildren(child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
+                    self.getChildren(factory, child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
+                elif child.src.exp == child.src.type:  # base classes
+                    self.getChildren(factory, child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
-                    var = self.__createVariable(child.src, parentName, None, access, childformat)
+                    var = self.__createVariable(factory, child.src, parentName, None, access, childformat)
                     self.variables[var._gdbName] = var
                     childList.append(var)
 
@@ -165,7 +155,7 @@ class VariablePool(QObject):
         # on what we just changed!
         self.updateVars()
 
-    def __createVariable(self, gdbVar, parentName=None, exp=None, access=None, childformat=None):
+    def __createVariable(self, factory, gdbVar, parentName=None, exp=None, access=None, childformat=None):
         """ create Variable with value from gdb variable
         @param gdbVar        variable read from gdb
         @param parentName    string, name of the parent item
@@ -186,7 +176,7 @@ class VariablePool(QObject):
         type_ = gdbVar.type
         value = gdbVar.value
         inScope = True
-        haschildren = (int(gdbVar.numchild) > 0)
+        numChildren = int(gdbVar.numchild)
         access = access
 
         # We use some heuristics to find out whether a type is a pointer, an
@@ -199,19 +189,18 @@ class VariablePool(QObject):
         # * Again, everything else is a normal variable.
         if gdbVar.value.startswith('0x'):
             logging.debug("Creating a pointer variable for '%s'", exp)
-            varReturn = PtrVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = factory.PtrVariable(self, factory, exp, gdbName, uniqueName, type_, value, inScope, numChildren, access)
         elif re.match("\[\d+\]", gdbVar.value) and int(gdbVar.numchild) >= 1:
             logging.debug("Creating a array variable for '%s'", exp)
-            varReturn = ArrayVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
-        elif haschildren:
+            varReturn = factory.ArrayVariable(self, factory, exp, gdbName, uniqueName, type_, value, inScope, numChildren, access)
+        elif numChildren > 0:
             logging.debug("Creating a struct variable for '%s'", exp)
-            varReturn = StructVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = factory.StructVariable(self, factory, exp, gdbName, uniqueName, type_, value, inScope, numChildren, access)
         else:
             logging.debug("Creating a normal variable for '%s'", exp)
-            varReturn = StdVariable(self, exp, gdbName, uniqueName, type_, value, inScope, haschildren, access)
+            varReturn = factory.StdVariable(self, factory, exp, gdbName, uniqueName, type_, value, inScope, numChildren, access)
 
         return varReturn
 
-    #def dump(self):
-    #    for exp, var in self.list.items():
-    #        print exp, var
+    def dump(self):
+        pprint(self.variables)

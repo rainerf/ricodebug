@@ -22,24 +22,20 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
+from .datagraphvariables import ComplexDataGraphVariableBase, ComplexTemplateHandler
+from variables.structvariable import StructVariable
 
 
 class StructVariableTemplateHandler(ComplexTemplateHandler):
-    """ TemplateHandler for Struct-Variables """
-
-    def __init__(self, varWrapper, distributedObjects):
-        """ Constructor
-        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        ComplexTemplateHandler.__init__(self, varWrapper, distributedObjects, 'structvariableview.mako')
+    def __init__(self, var):
+        ComplexTemplateHandler.__init__(self, var, 'structvariableview.mako')
 
 
-class StructDataGraphVW(ComplexDataGraphVW):
-    """ VariableWrapper for Structs """
+class DataGraphStructVariable(StructVariable, ComplexDataGraphVariableBase):
+    def __init__(self, *args):
+        StructVariable.__init__(self, *args)
+        ComplexDataGraphVariableBase.__init__(self, StructVariableTemplateHandler(self))
 
-    def __init__(self, variable, distributedObjects, vwFactory):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        ComplexDataGraphVW.__init__(self, variable, distributedObjects, vwFactory, StructVariableTemplateHandler(self, distributedObjects))
+    def _loadChildrenFromGdb(self):
+        StructVariable._loadChildrenFromGdb(self)
+        self._setDataForChilds()

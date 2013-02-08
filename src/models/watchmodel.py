@@ -22,23 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from variables.variablewrapper import VariableWrapper
+from .variablemodel import VariableModel
 
 
-class PtrVariableWrapper(VariableWrapper):
-    """ VariableWrapper for Pointer-Variables. <br>
-        This is only an Example of a Wrapper! <br>
-        You can use it directly, but normally you will need to write your own Wrapper for your own Needs.
-    """
-
-    def __init__(self, variable):
-        """ Constructor
-        @param variable    variables.variable.Variable, the variable to wrap
-        """
-        VariableWrapper.__init__(self, variable)
-
-    def dereference(self):
-        """ Dereferences the Variable, if possible.
-        @return    dereferenced Variable
-        """
-        return self.variable.dereference()
+class WatchModel(VariableModel):
+    def __init__(self, do, parent=None):
+        VariableModel.__init__(self, do, parent)
+        do.signalProxy.AddWatch.connect(self.addVar)

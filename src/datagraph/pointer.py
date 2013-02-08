@@ -46,7 +46,6 @@ class Pointer(QGraphicsLineItem):
         fromView.addOutgoingPointer(self)
         self.toView = toView
         toView.addIncomingPointer(self)
-        #self.setBrush( QBrush( self.bgcolor  ) )
         self.setPen(QPen(self.fgcolor, 1))
 
         self.distributedObjects = distributedObjects

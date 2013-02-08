@@ -26,7 +26,6 @@ from mako.template import Template
 from mako.lookup import TemplateLookup
 import sys
 from PyQt4.QtCore import QObject
-from variables.variablewrapper import VariableWrapper
 from .htmlvariableview import HtmlVariableView
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QWidgetAction, QLabel, QIcon
@@ -38,16 +37,13 @@ class Role:
 
 class HtmlTemplateHandler(QObject):
     """ Parent of all TemplateHandler-Classes. <br>
-    renders the htmlTemplate and handles linkClicked-Events
+    renders the htmlTemplate
     """
 
-    def __init__(self, varWrapper, distributedObjects, template):
-        """ Constructor
-        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
+    def __init__(self, var, template):
         QObject.__init__(self)
-        self.varWrapper = varWrapper
-        self.distributedObjects = distributedObjects
-        self.id = None              # our unique id which we can use inside the rendered HTML/JS
+        self.var = var
+        self.id = None  # our unique id which we can use inside the rendered HTML/JS
 
         self._templateLookup = TemplateLookup(directories=[sys.path[0] + "/datagraph/templates/"])
 
@@ -62,20 +58,20 @@ class HtmlTemplateHandler(QObject):
         @return rendered html-Code
         """
         assert self._htmlTemplate != None
-        assert self.varWrapper.getView()
+        assert self.var.getView()
 
         if not self.id:
-            self.id = self.varWrapper.getView().getUniqueId(self)
+            self.id = self.var.getView().getUniqueId(self)
 
-        return self._htmlTemplate.render(varWrapper=self.varWrapper, role=role, id=self.id, **kwargs)
+        return self._htmlTemplate.render(var=self.var, role=role, id=self.id, **kwargs)
 
     @QtCore.pyqtSlot()
     def openContextMenu(self):
-        self.varWrapper.openContextMenu()
+        self.var.openContextMenu()
 
     @QtCore.pyqtSlot(str)
     def setValue(self, value):
-        self.varWrapper.assignValue(value)
+        self.var.assignValue(value)
 
     def prepareContextMenu(self, menu):
         menu.addSeparator()
@@ -83,7 +79,7 @@ class HtmlTemplateHandler(QObject):
 
     # insert a "header" into the menu for the current element
     def addContextMenuLabel(self, menu):
-        label = QLabel("Actions for %s" % (self.varWrapper.exp))
+        label = QLabel("Actions for %s" % (self.var.exp))
         label.setStyleSheet("color:palette(light); background-color:palette(dark); margin-top:2px; margin-bottom:2px; margin-left:2px; margin-right:2px;")
         we = QWidgetAction(menu)
         we.setDefaultWidget(label)
@@ -91,17 +87,17 @@ class HtmlTemplateHandler(QObject):
 
     @QtCore.pyqtSlot()
     def remove(self):
-        self.distributedObjects.datagraphController.removeVar(self.varWrapper)
+        self.die()
 
 
 class ComplexTemplateHandler(HtmlTemplateHandler):
-    def __init__(self, varWrapper, distributedObjects, template):
-        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, template)
+    def __init__(self, var, template):
+        HtmlTemplateHandler.__init__(self, var, template)
         self.vertical = True
 
     @QtCore.pyqtSlot()
     def toggleCollapsed(self):
-        self.varWrapper.setOpen(not self.varWrapper.isOpen)
+        self.var.setOpen(not self.var.isOpen)
 
     @QtCore.pyqtSlot()
     def toggleVertical(self):
@@ -110,19 +106,19 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
         # the way our children will be rendered will change too (include/skip
         # <tr> etc), so mark them as dirty, but do not force immediate rerendering;
         # this will be done when we mark ourselves as dirty
-        for child in self.varWrapper.getChildren():
+        for child in self.var.getChildren():
             child.setDirty(False)
-        self.varWrapper.setDirty(True)
+        self.var.setDirty(True)
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
 
-        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.varWrapper.exp, self.toggleCollapsed)
+        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.var.exp, self.toggleCollapsed)
         action.setCheckable(True)
-        action.setChecked(not self.varWrapper.isOpen)
+        action.setChecked(not self.var.isOpen)
 
-        if self.varWrapper.isOpen:
-            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.varWrapper.exp, self.toggleVertical)
+        if self.var.isOpen:
+            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.var.exp, self.toggleVertical)
             action.setCheckable(True)
             action.setChecked(self.vertical)
 
@@ -130,45 +126,32 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
         return HtmlTemplateHandler.render(self, role, vertical=self.vertical, **kwargs)
 
 
-class DataGraphVW(VariableWrapper):
-    """ Parent of all VariableWrappers for the DataGraph. <br>
-        Specifies all important Functions for a VariableWrapper needed in the DataGraph-Module.
-    """
-
-    def __init__(self, variable, distributedObjects):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        VariableWrapper.__init__(self, variable)
-        self.distributedObjects = distributedObjects
+class DataGraphVariableBase:
+    def __init__(self, templateHandler):
         self._view = None
-        self.templateHandler = None
-        self.parentWrapper = None
-
-        self.dirty = True           # true if we need to rerender our stuff
-        self.dataChanged.connect(self.setDirty)
-
+        self.templateHandler = templateHandler
+        self.parent = None
+        self.dirty = True  # true if we need to rerender our stuff
+        self.changed.connect(lambda: self.setDirty(True))
         self.source = ""
+        self.do = None
 
     def createView(self):
-        self._view = HtmlVariableView(self, self.distributedObjects)
-        self.parentWrapper = self._view
+        self._view = HtmlVariableView(self)
+        self.parent = self._view
 
-    def setExistingView(self, view, parentWrapper):
+    def setExistingView(self, view, parent):
         self._view = view
-        self.parentWrapper = parentWrapper
+        self.parent = parent
 
     def getView(self):
-        """ returns the view of the Variable
-        @return    datagraph.htmlvariableview.HtmlVariableView, the view of the Variable """
         return self._view
 
     def openContextMenu(self, menu=None):
         if not menu:
             menu = QtGui.QMenu()
         self.templateHandler.prepareContextMenu(menu)
-        self.parentWrapper.openContextMenu(menu)
+        self.parent.openContextMenu(menu)
 
     def changeTemplateHandler(self, type_):
         self.templateHandler = type_(self, self.distributedObjects)
@@ -177,17 +160,11 @@ class DataGraphVW(VariableWrapper):
     @QtCore.pyqtSlot()
     def setDirty(self, render_immediately=False):
         self.dirty = True
-        if self.parentWrapper:
-            self.parentWrapper.setDirty(render_immediately)
-
-    def getXPos(self):
-        return self.getView().x()
+        if self.parent:
+            self.parent.setDirty(render_immediately)
 
     def setXPos(self, xPos):
         self.getView().setX(xPos)
-
-    def getYPos(self):
-        return self.getView().y()
 
     def setYPos(self, yPos):
         self.getView().setY(yPos)
@@ -202,33 +179,26 @@ class DataGraphVW(VariableWrapper):
         return self.source
 
     def setFilter(self, f):
-        VariableWrapper.setFilter(self, f)
+        Variable.setFilter(self, f)
         self.setDirty(True)
 
+    def setData(self, do):
+        self.do = do
 
-class ComplexDataGraphVW(DataGraphVW):
-    def __init__(self, variable, distributedObjects, vwFactory, templateHandler):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        DataGraphVW.__init__(self, variable, distributedObjects)
+
+class ComplexDataGraphVariableBase(DataGraphVariableBase):
+    def __init__(self, templateHandler):
+        DataGraphVariableBase.__init__(self, templateHandler)
         self.isOpen = True
-        self.vwFactory = vwFactory
-        self.childrenWrapper = None        # will be lazily evaluated once we need them
-        self.templateHandler = templateHandler
 
     def setOpen(self, open_):
         self.isOpen = open_
         self.setDirty(True)
 
     def getChildren(self):
-        """ returns list of children as DataGraphVWs; creates the wrappers if they haven't yet been
-        @return    list of datagraph.datagraphvw.DataGraphVW """
-        if not self.childrenWrapper:
-            self.childrenWrapper = []
-            for childVar in self.childs:
-                wrapper = childVar.makeWrapper(self.vwFactory)
-                wrapper.setExistingView(self.getView(), self)
-                self.childrenWrapper.append(wrapper)
-        return self.childrenWrapper
+        return self.childs
+
+    def _setDataForChilds(self):
+        for c in self.childs:
+            c.setExistingView(self.getView(), self)
+            c.setData(self.do)

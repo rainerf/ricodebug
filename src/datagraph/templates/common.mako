@@ -1,11 +1,11 @@
 <%!
-	from datagraph.datagraphvw import Role
+	from datagraph.datagraphvariables import Role
 %>\
 ##
 ###############################################################################
 ##
-<%def name="open_close_entry(id_, varWrapper)">
-%	if varWrapper.isOpen:
+<%def name="open_close_entry(id_, var)">
+%	if var.isOpen:
 		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png">
 %	else:
 		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png">
@@ -14,29 +14,29 @@
 ##
 ###############################################################################
 ##
-<%def name="simple_entry(role, id_, icon, varWrapper, openclose=False, allowEdit=True)">
+<%def name="simple_entry(role, id_, icon, var, openclose=False, allowEdit=True)">
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
 		<td nowrap class="varaccess">
-<%	if varWrapper.access in ['private', 'protected']:
-		iconprefix = varWrapper.access + "_"
+<%	if var.access in ['private', 'protected']:
+		iconprefix = var.access + "_"
 	else:
 		iconprefix = ""
 %>\
 			<img src="qrc:icons/images/${iconprefix}${icon}">
-%		if varWrapper.access:
-			<span class="varaccess"> ${varWrapper.access | h}</span>
+%		if var.access:
+			<span class="varaccess"> ${var.access | h}</span>
 %		endif
 		</td>
 		<td nowrap class="vartype">
-			<span class="vartype"> ${varWrapper.type | h}</span>
+			<span class="vartype"> ${var.type | h}</span>
 		</td>
 		<td nowrap class="varname">
-			<span class="varname"> ${varWrapper.exp | h}</span>
+			<span class="varname"> ${var.exp | h}</span>
 		</td>
 		<td nowrap class="open_close">
 %		if openclose:
-			${open_close_entry(id_, varWrapper)}
+			${open_close_entry(id_, var)}
 %		else:
 			=
 %		endif
@@ -56,17 +56,17 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 ##
 ###############################################################################
 ##
-<%def name="complex_entry(role, id_, icon, varWrapper)">
+<%def name="complex_entry(role, id_, icon, var)">
 %	if role == Role.INCLUDE_HEADER:
 	<tr class="header" id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td nowrap>
 			<img src="qrc:icons/images/${icon}">
-			<span class="vartype"> ${varWrapper.type | h}</span> 
-			<span class="varname"> ${varWrapper.exp | h}</span>
-			${open_close_entry(id_, varWrapper)}
+			<span class="vartype"> ${var.type | h}</span> 
+			<span class="varname"> ${var.exp | h}</span>
+			${open_close_entry(id_, var)}
 		</td>
 	</tr>
-%		if varWrapper.isOpen:
+%		if var.isOpen:
 	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')";>
 		<td nowrap>
 			<table>
@@ -78,9 +78,9 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 ##
 %	else:
 ##
-<%call expr="simple_entry(role, id, 'struct.png', varWrapper, True)">
+<%call expr="simple_entry(role, id, 'struct.png', var, True)">
 			<table class="variablechild">
-%		if varWrapper.isOpen:
+%		if var.isOpen:
 			${caller.body()}
 %		else:
 			<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')"><td>...</td></tr>

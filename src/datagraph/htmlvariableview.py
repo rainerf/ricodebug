@@ -36,14 +36,9 @@ class HtmlVariableView(QGraphicsWebView):
 
     removing = pyqtSignal()
 
-    def __init__(self, varWrapper, distributedObjects):
-        """ Constructor
-        @param varWrapper                datagraph.datagraphvw.DataGraphVW, holds the Data of the Variable to show
-        @param distributedObjects distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
+    def __init__(self, var):
         QGraphicsWebView.__init__(self, None)
-        self.varWrapper = varWrapper
-        self.distributedObjects = distributedObjects
+        self.var = var
         self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsFocusable)
         self.htmlTemplate = Template(filename=sys.path[0] + '/datagraph/templates/htmlvariableview.mako')
         self.page().setPreferredContentsSize(QSize(0, 0))
@@ -62,13 +57,8 @@ class HtmlVariableView(QGraphicsWebView):
 
         self.id = self.getUniqueId(self)
 
-        self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
-
-    def getIncomingPointers(self):
-        return self.incomingPointers
-
-    def getOutgoingPointers(self):
-        return self.outgoingPointers
+        # FIXME
+        # self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
 
     def addIncomingPointer(self, pointer):
         self.incomingPointers.append(pointer)
@@ -86,7 +76,7 @@ class HtmlVariableView(QGraphicsWebView):
             # the page's viewport will not shrink if new content is set, so set it to it's minimum
             self.page().setViewportSize(QSize(0, 0))
             try:
-                self.source = self.htmlTemplate.render(varWrapper=self.varWrapper, top=True, id=self.id)
+                self.source = self.htmlTemplate.render(var=self.var, top=True, id=self.id)
                 self.setHtml(self.source)
 
                 for template, id_ in self.uniqueIds.iteritems():
@@ -107,9 +97,9 @@ class HtmlVariableView(QGraphicsWebView):
 
     def openContextMenu(self, menu):
         menu.addAction(QIcon(":/icons/images/minus.png"),
-                "Remove %s" % self.varWrapper.exp, self.remove)
+                "Remove %s" % self.var.exp, self.remove)
         menu.addAction(QIcon(":/icons/images/save-html.png"),
-                "Save HTML for %s" % self.varWrapper.exp, self.saveHtml)
+                "Save HTML for %s" % self.var.exp, self.saveHtml)
         menu.exec_(QCursor.pos())
 
     @QtCore.pyqtSlot()
@@ -125,9 +115,9 @@ class HtmlVariableView(QGraphicsWebView):
 
     @QtCore.pyqtSlot()
     def remove(self):
-        """remove the varWrapper from the datagraph"""
+        """remove ourselves from the datagraph"""
         self.removing.emit()
-        self.distributedObjects.datagraphController.removeVar(self.varWrapper)
+        self.distributedObjects.datagraphController.removeVar(self.var)
 
     def getUniqueId(self, template):
         if not template in self.uniqueIds:

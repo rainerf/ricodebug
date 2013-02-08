@@ -22,19 +22,23 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from controllers.treeitemcontroller import TreeItemController
-from models.variablemodel import VariableModel
+from PyQt4.QtCore import QObject
 from helpers.excep import VariableNotFoundException
+from models.variablemodel import VariableModel
 
 
-class ToolTipController(TreeItemController):
-    def __init__(self, distributedObjects, view):
-        TreeItemController.__init__(self, distributedObjects, "Tooltip", view, VariableModel, False)
+class ToolTipController(QObject):
+    def __init__(self, do, view, parent=None):
+        QObject.__init__(self, parent)
 
-    def __setVar(self, watch):
-        self.clear()
+        self.model = VariableModel(do)
+        self.view = view
+        self.view.setModel(self.model)
+
+    def __setVar(self, name):
+        self.model.clear()
         try:
-            self.add(self.variableList.addVarByName(watch))
+            self.model.addVar(name)
         except VariableNotFoundException:
             pass
 

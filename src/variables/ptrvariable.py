@@ -28,19 +28,22 @@ from variables.variable import Variable
 class PtrVariable(Variable):
     _childFormat = "(*%(parent)s)"
 
+    def _pointerValid(self):
+        return self.value != "0x0"
+
     def dereference(self):
         """ Dereferences the Variable, if possible.
         @return    dereferenced Variable if the Variable can be dereferenced
         """
         # avoid null-pointer dereference
-        if self.value != "0x0":
-            return self._vp.getVar(self._childFormat % {"parent": self.uniqueName})
+        if self._pointerValid():
+            return self._vp.getVar(self.factory, self._childFormat % {"parent": self.uniqueName})
         else:
             return None
 
-    def _getChildrenFromGdb(self):
-        if not self._childs:
-            self._childs = [self.dereference()]
+    def _loadChildrenFromGdb(self):
+        if len(self._childs) == 0 and self._pointerValid():
+            self._childs = [self._vp.getVar(self.factory, self._childFormat % {"parent": self.uniqueName})]
 
     def __getitem__(self, name):
         if name != "*":

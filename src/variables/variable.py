@@ -23,38 +23,44 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, pyqtSignal
+from variables import filters
 
 
 MIME_TYPE = "application/x-variableexpresssion"
 
 
 class Variable(QObject):
-    """ Class holding a Variable. <br>
-        This is the Parent of all Variable-Classes and the Core of all VariableWrappers.
-        It holds the most basic Elements of a Variable-Object, that are useful for all (or at least the most) purposes.
+    """
+    Class holding a Variable. This is the Parent of all Variable-Classes.
     """
     childFormat = None
 
     changed = pyqtSignal(str)
 
-    def __init__(self, variablepool, exp, gdbName,
+    def __init__(self, variablepool, factory, exp, gdbName,
             uniqueName, type_, value, inScope,
-            hasChildren, access):
+            numChildren, access):
         QObject.__init__(self)
         self.exp = exp
         self.type = type_
         self.inScope = inScope
         self.access = access
         self.uniqueName = uniqueName
-        self.value = value
-        self.hasChildren = hasChildren
+        self._value = value
+        self.numChildren = numChildren
         self.arg = False
+        self.factory = factory
+
+        self.__filter = filters.Empty
 
         self._vp = variablepool
         self._gdbName = gdbName
         self._childs = []
 
-    def _getChildrenFromGdb(self):
+    hasChildren = property(lambda self: self.numChildren > 0)
+    value = property(lambda self: self.__filter.toDisplay(self._value))
+
+    def _loadChildrenFromGdb(self):
         """Load the children from GDB, if there are any."""
         if not self.hasChildren:
             raise AttributeError("No children available.")
@@ -62,17 +68,14 @@ class Variable(QObject):
             raise AttributeError("No child format set.")
 
         if not self._childs:
-            self._vp.getChildren(self._gdbName, self._childs, self.access, self.uniqueName, self._childFormat)
+            self._vp.getChildren(self.factory, self._gdbName, self._childs, self.access, self.uniqueName, self._childFormat)
 
-    def __getChilds(self):
+    @property
+    def childs(self):
         """Return the lazily loaded list of children."""
-        self._getChildrenFromGdb()
+        if not self._childs:
+            self._loadChildrenFromGdb()
         return self._childs
-    childs = property(__getChilds)
-
-    def getChildrenNames(self):
-        """Return the names of all children."""
-        return [i.exp for i in self.childs]
 
     def __getitem__(self, name):
         for i in self.childs:
@@ -81,25 +84,29 @@ class Variable(QObject):
         raise AttributeError("No child with name '%s'." % name)
 
     def assignValue(self, value):
-        self._vp.assignValue(self._gdbName, value)
+        self._vp.assignValue(self._gdbName, self.__filter.fromDisplay(value))
 
-    def __str__(self):
+    def __repr__(self):
         # we use self._childs instead of self.childs to make sure printing the
         # variable does not load its children if they are not already
         return "%s [%s]" % (self.__class__.__name__, " ".join([
-                self._gdbName,
                 self.type,
-                str(self.value),
+                self.exp,
+                str(self._value),
+                self._gdbName,
+                "children: %s" % str(self.numChildren),
                 "in scope" if self.inScope else "",
-                "has children" if self.hasChildren else "",
                 self.access if self.access else "",
                 str(len(self._childs)) if self._childs else ""]))
 
     def emitChanged(self):
         self.changed.emit(self.value)
 
-    def makeWrapper(self, factory):
-        return factory.makeWrapper(self)
-
     def die(self):
+        for c in self._childs:
+            c.die()
         self._vp.removeVar(self)
+
+    def setFilter(self, f):
+        self.__filter = f
+        self.emitChanged()

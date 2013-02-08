@@ -22,31 +22,24 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from datagraph.datagraphvw import DataGraphVW, HtmlTemplateHandler
+from .datagraphvariables import DataGraphVariableBase, HtmlTemplateHandler
 from variables import filters
 from PyQt4.QtGui import QIcon
+from variables.stdvariable import StdVariable
 
 
 class StdVariableTemplateHandler(HtmlTemplateHandler):
     """ TemplateHandler for Standard-Variables """
 
-    def __init__(self, varWrapper, distributedObjects):
-        """ Constructor
-        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        HtmlTemplateHandler.__init__(self, varWrapper, distributedObjects, 'stdvariableview.mako')
+    def __init__(self, var):
+        HtmlTemplateHandler.__init__(self, var, 'stdvariableview.mako')
 
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
-        filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.varWrapper.exp), self.varWrapper)
+        filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.var.exp), self.var)
 
 
-class StdDataGraphVW(DataGraphVW):
-    """ VariableWrapper for Standard-Variables """
-
-    def __init__(self, variable, distributedObjects):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        DataGraphVW.__init__(self, variable, distributedObjects)
-        self.templateHandler = StdVariableTemplateHandler(self, self.distributedObjects)
+class DataGraphStdVariable(StdVariable, DataGraphVariableBase):
+    def __init__(self, *args):
+        StdVariable.__init__(self, *args)
+        DataGraphVariableBase.__init__(self, StdVariableTemplateHandler(self))

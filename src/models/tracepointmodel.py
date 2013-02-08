@@ -25,10 +25,10 @@
 from PyQt4.QtCore import Qt
 from .breakpointmodel import Breakpoint
 from variables.variablelist import VariableList
-from variables.varwrapperfactory import VarWrapperFactory
 from helpers.tools import cpp2py
 from models.breakpointmodel import BreakpointModel
 from helpers.icons import Icons
+from variables.plainvariablefactory import PlainVariableFactory
 
 
 class ValueList:
@@ -65,8 +65,7 @@ class Tracepoint(Breakpoint):
     def __init__(self, breakpoint, connector, do, nr):
         Breakpoint.__init__(self, breakpoint, connector)
         self.name = "TP #%s" % nr
-        self.vwFactory = VarWrapperFactory()
-        self.variableList = VariableList(self.vwFactory, do)
+        self.variableList = VariableList(PlainVariableFactory, do)
         self.wave = []
 
         self.tooltip = "Tracepoint"
@@ -86,7 +85,7 @@ class Tracepoint(Breakpoint):
     def recordData(self):
         """tracepoint occurred: get values of all traced variables then continue debugging """
         for varList in self.wave:
-            for v in self.variableList.list:
+            for v in self.variableList.items():
                 if v.uniqueName == varList.name:
                     varList.addValue(v.type, v.value)
 

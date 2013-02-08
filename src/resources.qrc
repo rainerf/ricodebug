@@ -1,7 +1,6 @@
 <RCC>
   <qresource prefix="icons">
     <file>images/arrow.png</file>
-    <file>images/edit.png</file>
     <file>images/file.png</file>
     <file>images/folder.png</file>
     <file>images/watch.png</file>

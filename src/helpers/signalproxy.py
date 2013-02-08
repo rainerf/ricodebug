@@ -32,6 +32,7 @@ class SignalProxy(QObject):
     '''
     addDockWidget = pyqtSignal('PyQt_PyObject', 'QDockWidget', 'PyQt_PyObject')
     variableUpdateCompleted = pyqtSignal()
+    aboutToUpdateVariables = pyqtSignal()
     registerWithSessionManager = pyqtSignal('PyQt_PyObject', 'PyQt_PyObject')
     runClicked = pyqtSignal()
     cleanupModels = pyqtSignal()
@@ -129,6 +130,9 @@ class SignalProxy(QObject):
         for this step. Use this signal instead of rerendering stuff on the
         variable's changed() event to avoid multiple renderings."""
         self.variableUpdateCompleted.emit()
+
+    def emitAboutToUpdateVariables(self):
+        self.aboutToUpdateVariables.emit()
 
     def emitBreakpointModified(self, rec):
         self.breakpointModified.emit(rec)

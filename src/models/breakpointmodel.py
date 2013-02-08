@@ -355,14 +355,14 @@ class BreakpointModel(QAbstractTableModel):
                 logging.error("Could not set condition: %s", str(e))
                 return False
         elif self.LAYOUT[column][0] == 'skip':
-            validSkip = QVariant(value).toInt()
+            validSkip = QVariant(_value).toInt()
             if not validSkip[1]:
-                logging.error("Invalid value for skip, must be an integer.")
+                logging.error("Invalid _value for skip, must be an integer.")
                 return False
             self.changeSkip(bp.number, int(validSkip[0]))
         elif self.LAYOUT[column][0] == 'enabled':
             if role == Qt.CheckStateRole:
-                if not QVariant(value).toBool():
+                if not QVariant(_value).toBool():
                     self.disableBreakpoint(bp.number)
                 else:
                     self.enableBreakpoint(bp.number)

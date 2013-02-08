@@ -46,6 +46,16 @@ class TreeNode:
         else:
             return self.model._getRootNodes().index(self)
 
+    def _rowCount(self):
+        raise NotImplementedError()
+
+    def _index(self, column=0):
+        if self.parent:
+            pi = self.parent._index()
+        else:
+            pi = QModelIndex()
+        return self.model.index(self._rowInParent(), column, pi)
+
 
 class TreeModel(QAbstractItemModel):
     def __init__(self):
@@ -77,7 +87,13 @@ class TreeModel(QAbstractItemModel):
         if not parent.isValid():
             return len(self._getRootNodes())
         node = parent.internalPointer()
-        return len(node._getChildren())
+
+        # of the node knows how many rows it has, use that value; otherwise,
+        # count them ourselves
+        try:
+            return node._rowCount()
+        except NotImplementedError:
+            return len(node._getChildren())
 
     def _getChildren(self):
         return self._getRootNodes()

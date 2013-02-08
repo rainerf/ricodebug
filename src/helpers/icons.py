@@ -33,7 +33,7 @@ class Icons:
     "console", "bp", "bp_dis", "clear", "local", "tp", "watch", "files",
     "datagraph", "pause", "stop", "folder", "file", "var", "wp", "wp_dis",
     "private_var", "protected_var", "struct", "function", "private_function",
-    "protected_function", "namespace"]
+    "protected_function", "namespace", "graph"]
 
     def __init__(self):
         for i in self.icons:

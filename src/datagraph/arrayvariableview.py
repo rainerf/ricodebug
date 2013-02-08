@@ -22,12 +22,13 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from .datagraphvw import ComplexDataGraphVW, ComplexTemplateHandler
-from .stdvariableview import StdDataGraphVW
 from PyQt4 import QtCore
 import sys
 import importlib
 from helpers.icons import Icons
+from variables.arrayvariable import ArrayVariable
+from .datagraphvariables import ComplexTemplateHandler, ComplexDataGraphVariableBase
+from .stdvariableview import DataGraphStdVariable
 plt = None  # this will be imported lazily
 
 
@@ -92,10 +93,8 @@ class Steps:
 
 class ArrayVariableTemplateHandler(ComplexTemplateHandler):
     """ TemplateHandler for Arrays """
-    def __init__(self, varWrapper, distributedObjects):
-        """ Constructor
-        @param varWrapper    datagraph.datagraphvw.DataGraphVW, holds the Data to show """
-        ComplexTemplateHandler.__init__(self, varWrapper, distributedObjects, 'structvariableview.mako')
+    def __init__(self, var):
+        ComplexTemplateHandler.__init__(self, var, 'structvariableview.mako')
         self.graphicalView = False
         self.style = Bar
 
@@ -107,17 +106,17 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         else:
             self.graphicalView = True
             self.setTemplate('arrayview.mako')
-        self.varWrapper.setDirty(True)
+        self.var.setDirty(True)
 
     def prepareContextMenu(self, menu):
         ComplexTemplateHandler.prepareContextMenu(self, menu)
 
-        graphicalViewPossible = all(isinstance(var, StdDataGraphVW) for var in self.varWrapper.childrenWrapper)
+        graphicalViewPossible = all(isinstance(var, DataGraphStdVariable) for var in self.var.childs)
 
         # we only allow the graphical view if all contained elements are standard variables; also,
         # do not show the menu if the variable view is collapsed
-        if self.varWrapper.isOpen and graphicalViewPossible:
-            action = menu.addAction(Icons.graph, "Graphical view for %s" % self.varWrapper.exp, self.toggleGraphicalView)
+        if self.var.isOpen and graphicalViewPossible:
+            action = menu.addAction(Icons.graph, "Graphical view for %s" % self.var.exp, self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)
 
@@ -127,11 +126,11 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
 
     def setPlotStyle(self, style):
         self.style = style
-        self.varWrapper.setDirty(True)
+        self.var.setDirty(True)
 
     def plot(self, output):
         _importMatplotlib()  # only import matplotlib if we really need it
-        data = [float(var.unfilteredValue) for var in self.varWrapper.childrenWrapper]
+        data = [float(var._value) for var in self.var.childs]
 
         fig = plt.figure(figsize=(4, 3))
         ax = fig.add_subplot(111)
@@ -139,12 +138,11 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
         fig.savefig(output, format='svg', transparent=True, bbox_inches='tight')
 
 
-class ArrayDataGraphVW(ComplexDataGraphVW):
-    """ VariableWrapper for Arrays """
+class DataGraphArrayVariable(ArrayVariable, ComplexDataGraphVariableBase):
+    def __init__(self, *args):
+        ArrayVariable.__init__(self, *args)
+        ComplexDataGraphVariableBase.__init__(self, ArrayVariableTemplateHandler(self))
 
-    def __init__(self, variable, distributedObjects, vwFactory):
-        """ Constructor
-        @param variable            variables.variable.Variable, Variable to wrap with the new DataGraphVW
-        @param distributedObjects  distributedobjects.DistributedObjects, the DistributedObjects-Instance
-        """
-        ComplexDataGraphVW.__init__(self, variable, distributedObjects, vwFactory, ArrayVariableTemplateHandler(self, distributedObjects))
+    def _loadChildrenFromGdb(self):
+        ArrayVariable._loadChildrenFromGdb(self)
+        self._setDataForChilds()

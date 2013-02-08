@@ -37,22 +37,28 @@ class GdbConnector(QObject):
 
     def __init__(self):
         QObject.__init__(self)
-        self.gdb = None
+        self.__gdb = None
         self.reader = GdbReader(self)
 
     def start(self):
+        self.kill()
+
         try:
-            self.gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q'], \
+            self.__gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q', '-nx'], \
                     shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         except OSError as e:
-            logging.critical("Could not start gdb. Error message: %s", e)
-        self.reader.startReading(self.gdb.stdout)
+            logging.critical("Could not start _gdb. Error message: %s", e)
+        self.reader.startReading(self.__gdb.stdout)
+
+    def kill(self):
+        if self.__gdb:
+            self.__gdb.kill()
 
     def execute(self, cmd, error_msg=None):
         __start = time.time()
 
         logging.debug("Running command %s", cmd)
-        self.gdb.stdin.write(cmd + "\n")
+        self.__gdb.stdin.write(cmd + "\n")
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
 
         if res.class_ == GdbOutput.ERROR:
@@ -244,7 +250,7 @@ class GdbConnector(QObject):
 
     def interrupt(self):
         # TODO: check if it also works in windows
-        self.gdb.send_signal(signal.SIGINT)
+        self.__gdb.send_signal(signal.SIGINT)
         # return self.executeAndRaiseIfFailed("-exec-interrupt")
 
     def finish(self):

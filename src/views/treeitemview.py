@@ -24,14 +24,14 @@
 
 from PyQt4.Qt import pyqtSignal
 from PyQt4.QtGui import QTreeView, QMenu, QAbstractItemView, QHeaderView
-from controllers.treeitemcontroller import TreeStdVarWrapper
 from variables import filters
+from models.variablemodel import TreeStdVariable
 
 
 class TreeItemView(QTreeView):
     contextMenuOpen = pyqtSignal(bool)
 
-    def __init__(self, parent=None):
+    def __init__(self, _=None, parent=None):
         QTreeView.__init__(self, parent)
         self.setAlternatingRowColors(True)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
@@ -41,16 +41,16 @@ class TreeItemView(QTreeView):
 
     def prepareContextMenu(self):
         context_menu = QMenu(self)
-        wrapper = self.selectionModel().currentIndex().internalPointer()
-        if isinstance(wrapper, TreeStdVarWrapper):
+        var = self.selectionModel().currentIndex().internalPointer()
+        if isinstance(var, TreeStdVariable):
             filters.add_actions_for_all_filters(context_menu.addMenu(
-                "Set Filter for %s..." % wrapper.exp), wrapper)
+                "Set Filter for %s..." % var.exp), var)
         return context_menu
 
     def contextMenuEvent(self, event):
         QTreeView.contextMenuEvent(self, event)
-        wrapper = self.selectionModel().currentIndex().internalPointer()
-        if not event.isAccepted() and wrapper is not None:
+        var = self.selectionModel().currentIndex().internalPointer()
+        if not event.isAccepted() and var is not None:
             menu = self.prepareContextMenu()
             self.contextMenuOpen.emit(True)
             menu.exec_(event.globalPos())

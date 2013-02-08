@@ -75,15 +75,16 @@ class ToolTipView(QWidget):
 
         self.__hideTimer = QTimer()
         self.__hideTimer.setSingleShot(True)
-        self.__hideTimer.timeout.connect(self.hide)
+        self.__hideTimer.timeout.connect(self.hideNow)
 
         self.treeItemView.contextMenuOpen.connect(self.__setDisallowHide)
         self.treeItemView.setRootIsDecorated(False)
         self.treeItemView.setHeaderHidden(True)
 
-    def hide(self):
+    def hideNow(self):
         if self.__allowHide:
             QWidget.hide(self)
+            self.treeItemView.model().clear()
 
     def __setDisallowHide(self, x):
         self.__allowHide = not x

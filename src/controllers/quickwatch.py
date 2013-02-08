@@ -66,7 +66,7 @@ class QuickWatch(QToolBar):
             self.addToDG()
 
     def addToWatch(self):
-        self.distributedObjects.watchController.addWatch(self.watchedit.lineEdit().text())
+        self.distributedObjects.watchModel.addVar(self.watchedit.lineEdit().text())
         self.__addCurrentText()
 
     def addToDG(self):

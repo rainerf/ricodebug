@@ -21,23 +21,36 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
+from PyQt4.QtCore import QModelIndex
 
-from variables.variablewrapper import VariableWrapper
+from helpers.icons import Icons
+from models.breakpointmodel import BreakpointModel, AbstractBreakpoint
 
 
-class ArrayVariableWrapper(VariableWrapper):
-    """ VariableWrapper for Arrays. <br>
-        This is only an Example of a Wrapper! <br>
-        You can use it directly, but normally you will need to write your own Wrapper for your own Needs.
-    """
+class Watchpoint(AbstractBreakpoint):
+    def __init__(self, res, exp, addr):
+        AbstractBreakpoint.__init__(self)
+        self.exp = exp
+        self.addr = addr
+        self.condition = "true"
+        self.skip = 0
+        self.number = int(res.wpt.number)
 
-    def __init__(self, variable):
-        """ Constructor
-        @param variable    variables.variable.Variable, the variable to wrap
-        """
-        VariableWrapper.__init__(self, variable)
+        self.tooltip = "Watchpoint"
 
-    def getChildren(self):
-        """ Returns a List with all Members of the struct.
-        @return    List of Variables, Members of the struct. """
-        return self.variable.getChildren()
+    where = property(lambda self: self.exp)
+    icon = property(lambda self: Icons.wp if self.enabled else Icons.wp_dis)
+
+    def fromGdbRecord(self, rec):
+        pass
+
+
+class StoppointModel(BreakpointModel):
+    def insertWatchpoint(self, exp):
+        addr = self.connector.evaluate("&" + exp)
+        res = self.connector.insertWatchpoint("*" + addr)
+        bp = Watchpoint(res, exp, addr)
+
+        self.beginInsertRows(QModelIndex(), len(self.breakpoints), len(self.breakpoints))
+        self.breakpoints.append(bp)
+        self.endInsertRows()

@@ -30,9 +30,7 @@ from controllers.editorcontroller import EditorController
 from .gdbconnector import GdbConnector
 from controllers.filelistcontroller import FileListController
 from controllers.stackcontroller import StackController
-from controllers.localscontroller import LocalsController
 from controllers.tracepointcontroller import TracepointController
-from controllers.watchcontroller import WatchController
 from datagraph.datagraphcontroller import DataGraphController
 from variables.variablepool import VariablePool
 from .stlvectorparser import StlVectorParser
@@ -42,7 +40,6 @@ from helpers.actions import Actions
 from helpers.configstore import ConfigStore
 from PyQt4.QtCore import QSettings
 from views.watchview import WatchView
-from views.localsview import LocalsView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView
 from views.breakpointview import BreakpointView
@@ -54,6 +51,9 @@ from models.threadmodel import ThreadModel
 from views.mitraceview import MiTraceView
 from helpers.icons import Icons
 from models.stoppointmodel import StoppointModel
+from models.watchmodel import WatchModel
+from models.localsmodel import LocalsModel
+from views.treeitemview import TreeItemView
 
 
 class DistributedObjects:
@@ -71,17 +71,22 @@ class DistributedObjects:
         self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self)
-        self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
+
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
 
         self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", Icons.thread)
 
-        self.watchView = WatchView()
-        self.watchController = WatchController(self, self.watchView)
+        self.watchModel, _ = self.buildModelAndView(WatchModel, WatchView, "Watch", Icons.watch)
+        # watchView = WatchView()
+        # watchController = WatchController(self, watchView)
+        # self.watchModel = watchController.model
 
-        self.localsView = LocalsView()
-        self.localsController = LocalsController(self, self.localsView)
+        _1, _2 = self.buildModelAndView(LocalsModel, TreeItemView, "Locals", Icons.locals)
+        # localsView = LocalsView()
+        # localsController = LocalsController(self, localsView)
+
+        self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
 
         self.tracepointController = TracepointController(self)
 

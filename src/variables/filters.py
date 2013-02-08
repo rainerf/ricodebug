@@ -27,15 +27,15 @@ def _getAvailableFilters():
     return [Empty, Hex, Bin]
 
 
-def add_actions_for_all_filters(menu, varWrapper):
-    def setFilter(varWrapper, filter_):
+def add_actions_for_all_filters(menu, var):
+    def setFilter(var, filter_):
         def f():
-            varWrapper.filter = filter_
+            var.setFilter(filter_)
         return f
 
     for cls in _getAvailableFilters():
         name = cls.__doc__
-        menu.addAction(name, setFilter(varWrapper, cls))
+        menu.addAction(name, setFilter(var, cls))
 
 
 class Empty:

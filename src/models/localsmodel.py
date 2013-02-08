@@ -26,4 +26,46 @@ from .variablemodel import VariableModel
 
 
 class LocalsModel(VariableModel):
-    pass
+    def __init__(self, do, parent=None):
+        VariableModel.__init__(self, do, parent)
+        self._returnVar = None
+
+        self.do = do
+        self.do.signalProxy.inferiorStoppedNormally.connect(self.getLocals)
+        self.do.stackController.stackFrameSelected.connect(self.getLocals)
+
+    def getLocals(self, rec):
+        # if we previously showed some return value, remove it; getLocals will
+        # be called after the user steps/conts/... the program, most probably
+        # making it out of date
+        if self._returnVar:
+            self.variableList.removeVar(self._returnVar)
+            self._returnVar = None
+
+        # now, check if there was a return value of a function in this record;
+        # if so, add it to the locals and give it a meaningful name
+        for r in rec.results:
+            if r.dest == "gdb-result-var":
+                self._returnVar = self.addVar(r.src)
+                self._returnVar._v.exp = "Return value"
+
+        # we're doing some sorting magic here: tuples will be sorted by the
+        # second element if the first is equal; also, False < True, therefore
+        # invert the boolean arg to have arguments first
+        locals_ = sorted(self.do.gdb_connector.getLocals(), key=lambda x: (not x.arg, x.name))
+        current = [x for x in self._vars.items()]
+
+        for l in locals_:
+            for c in current:
+                if l.name == c.exp:
+                    current.remove(c)
+                    break
+            else:
+                # var = self.variableList.addVarByName(l.name)
+                var = self.addVar(l.name)
+                var.arg = l.arg
+
+        # we removed everything from current that's still there; therefore,
+        # everything that's left here is out of scope
+        for old in current:
+            self.removeVar(old)
