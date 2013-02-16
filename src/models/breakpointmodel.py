@@ -190,7 +190,7 @@ class BreakpointModel(QAbstractTableModel):
         @param line: (int), linenumber where the breakpoint should be toggled
         """
         if self.breakpointByLocation(fullname, line):
-            self.deleteBreakpoint(fullname, line)
+            self.deleteBreakpointByLocation(fullname, line)
             return None
         else:
             return self.insertBreakpoint(fullname, line)

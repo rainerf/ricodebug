@@ -48,10 +48,11 @@ class GdbOutput:
     LIBRARY_LOADED, \
     LIBRARY_UNLOADED, \
     BREAKPOINT_MODIFIED, \
+    BREAKPOINT_CREATED, \
     EXIT, \
     CONNECTED, \
     ERROR \
- = range(23)
+ = range(24)
 
     def __init__(self):
         self.class_ = None  # done, running,...

@@ -26,8 +26,11 @@ from PyQt4.QtGui import QTableView, QHeaderView, QAbstractItemView
 
 
 class BreakpointView(QTableView):
-    def __init__(self, _, parent=None):
+    def __init__(self, do, parent=None):
         QTableView.__init__(self, parent)
+
+        self.do = do
+        self.doubleClicked.connect(self.onDoubleClicked)
 
         self.setTabKeyNavigation(False)
         self.setAlternatingRowColors(True)
@@ -40,3 +43,7 @@ class BreakpointView(QTableView):
         self.verticalHeader().setDefaultSectionSize(20)
         self.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         self.horizontalHeader().setStretchLastSection(True)
+
+    def onDoubleClicked(self, index):
+        bp = self.model().breakpoints[index.row()]
+        self.do.signalProxy.openFile(bp.fullname, int(bp.line))
