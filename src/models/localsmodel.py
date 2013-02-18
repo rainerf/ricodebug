@@ -28,6 +28,7 @@ from .variablemodel import VariableModel
 class LocalsModel(VariableModel):
     def __init__(self, do, parent=None):
         VariableModel.__init__(self, do, parent)
+        self._stackTop = None
         self._returnVar = None
 
         self.do = do
@@ -49,6 +50,11 @@ class LocalsModel(VariableModel):
                 self._returnVar = self.addVar(r.src)
                 self._returnVar._v.exp = "Return value"
 
+        stackTop = self.do.gdb_connector.getStack()[0]
+        if not self._stackTop or self._stackTop.func != stackTop.func or self._stackTop.level != stackTop.level:
+            self.clear()
+            self._stackTop = stackTop
+
         # we're doing some sorting magic here: tuples will be sorted by the
         # second element if the first is equal; also, False < True, therefore
         # invert the boolean arg to have arguments first
@@ -69,3 +75,8 @@ class LocalsModel(VariableModel):
         # everything that's left here is out of scope
         for old in current:
             self.removeVar(old)
+
+    def clear(self):
+        VariableModel.clear(self)
+        self._stackTop = None
+        self._returnVar = None
