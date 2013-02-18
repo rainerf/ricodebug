@@ -120,19 +120,6 @@ class GdbConnector(QObject):
 
         return breakpoints
 
-    def getVariables(self):
-        res = self.executeAndRaiseIfFailed("-stack-list-variables --all-values")
-
-        variables = []
-        for v in res.variables:
-            if not hasattr(v, "arg"):
-                v.arg = False
-            else:
-                v.arg = True
-            variables.append(v)
-
-        return variables
-
     def getLocals(self):
         res = self.executeAndRaiseIfFailed("-stack-list-variables --no-values")
 
