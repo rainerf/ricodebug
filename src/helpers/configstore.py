@@ -22,8 +22,9 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from lib.formlayout import fedit
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QObject
+
+from lib.formlayout import fedit
 
 
 class ConfigItem(QObject):

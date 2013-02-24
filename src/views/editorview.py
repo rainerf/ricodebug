@@ -22,11 +22,13 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget, QMessageBox
-from .openedfileview import OpenedFileView
 import os
 import logging
+
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import QWidget, QMessageBox
+
+from .openedfileview import OpenedFileView
 import helpers.excep
 
 

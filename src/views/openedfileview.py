@@ -23,11 +23,13 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import re
+from math import log, ceil
+import logging
+
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.QtGui import QPixmap, QFont, QColor, QFrame, QHBoxLayout, QLayout
 from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint
-from math import log, ceil
-import logging
+
 from views.overlays import BreakpointOverlayWidget
 
 

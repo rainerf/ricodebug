@@ -23,10 +23,11 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QAction
 from os.path import exists
 import logging
+
+from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtGui import QAction
 
 
 class OpenRecentFileAction(QAction):

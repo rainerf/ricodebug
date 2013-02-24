@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from operator import attrgetter
+
 from PyQt4.QtCore import Qt, QAbstractTableModel, QModelIndex, QPointF, QLineF, QRectF
 from PyQt4 import QtGui
-from operator import attrgetter
 
 
 class TracepointWaveDelegate(QtGui.QItemDelegate):

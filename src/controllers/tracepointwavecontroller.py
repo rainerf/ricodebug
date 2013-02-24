@@ -22,10 +22,12 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import logging
+
 from PyQt4.QtCore import QObject, Qt
+
 from models.tracepointwavemodel import TracepointWaveModel, TracepointWaveDelegate
 from views.tracepointwaveview import TracepointWaveView
-import logging
 
 
 class TracepointWaveController(QObject):

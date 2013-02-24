@@ -22,8 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 import logging
-from helpers.excep import GdbError
+
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
+
+from helpers.excep import GdbError
 from helpers.icons import Icons
 
 

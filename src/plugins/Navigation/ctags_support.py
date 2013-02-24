@@ -22,11 +22,13 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-import ctags
-from PyQt4.QtCore import Qt
 from operator import attrgetter
-from helpers.treemodelhelper import TreeNode, TreeModel
 import os.path
+
+from PyQt4.QtCore import Qt
+
+import ctags
+from helpers.treemodelhelper import TreeNode, TreeModel
 from helpers.tools import sort_and_group
 from helpers.icons import Icons
 

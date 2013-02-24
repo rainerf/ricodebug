@@ -25,12 +25,13 @@
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
         QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
 from PyQt4.QtCore import QFileSystemWatcher, Qt
+from PyQt4 import QtGui
+
 from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
 from helpers.recentfilehandler import RecentFileHandler
 from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
-from PyQt4 import QtGui
 from widgets.alertabledockwidget import AlertableDockWidget
 from widgets.docktoolbarmanager import DockToolBarManager
 from views.logview import LogViewHandler, ErrorLabelHandler

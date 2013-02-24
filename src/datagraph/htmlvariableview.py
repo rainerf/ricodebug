@@ -22,13 +22,14 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import sys
+import logging
+
 from PyQt4.QtCore import QSize, QSizeF, pyqtSignal
 from PyQt4.QtGui import QGraphicsItem, QCursor, QFileDialog, QIcon
 from PyQt4.QtWebKit import QGraphicsWebView
 from mako.template import Template
 from PyQt4 import QtCore
-import sys
-import logging
 
 
 class HtmlVariableView(QGraphicsWebView):

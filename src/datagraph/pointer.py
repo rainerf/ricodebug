@@ -22,10 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem, QPainter
-from PyQt4.QtCore import QPointF, QLineF, QRectF, QSizeF
 import math
 import logging
+
+from PyQt4.QtGui import QColor, QPolygonF, QBrush, QPen, QGraphicsLineItem, QPainter
+from PyQt4.QtCore import QPointF, QLineF, QRectF, QSizeF
 
 
 class Pointer(QGraphicsLineItem):

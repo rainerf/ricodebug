@@ -21,9 +21,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-from helpers.excep import VariableNotFoundException
 from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QIcon
+
+from helpers.excep import VariableNotFoundException
 from .datagraphview import DataGraphView
 from variables.variablelist import VariableList
 from .pointer import Pointer

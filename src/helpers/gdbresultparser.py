@@ -26,14 +26,16 @@
 For futher information see the ply python module documentation.
 """
 
+import re
 
 import ply.lex as lex
 import ply.yacc as yacc
+from PyQt4.QtCore import QDir
+
 from .gdboutput import GdbOutput
 import helpers.excep
-import re
 from .tools import unBackslashify
-from PyQt4.QtCore import QDir
+
 
 reserved = {
     "done": "DONE",

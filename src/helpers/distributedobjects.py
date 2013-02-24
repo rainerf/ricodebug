@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import Qt
+from PyQt4.QtCore import QSettings
 
 from controllers.debugcontroller import DebugController
 from .signalproxy import SignalProxy
@@ -38,7 +39,6 @@ from controllers.tracepointwavecontroller import TracepointWaveController
 from .sessionmanager import SessionManager
 from helpers.actions import Actions
 from helpers.configstore import ConfigStore
-from PyQt4.QtCore import QSettings
 from views.watchview import WatchView
 from controllers.tooltipcontroller import ToolTipController
 from views.tooltipview import ToolTipView

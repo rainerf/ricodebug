@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from PyQt4.QtGui import QIcon
+
 from .datagraphvariables import DataGraphVariableBase, HtmlTemplateHandler
 from variables import filters
-from PyQt4.QtGui import QIcon
 from variables.stdvariable import StdVariable
 
 

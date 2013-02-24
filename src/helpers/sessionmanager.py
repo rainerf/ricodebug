@@ -22,11 +22,12 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from os.path import exists
+import logging
+
 from PyQt4.QtCore import QObject, QIODevice, QFile
 from PyQt4.QtGui import QDialog, QGridLayout, QCheckBox, QPushButton, QFileDialog
-from os.path import exists
 from PyQt4.QtXml import QDomDocument, QDomElement, QDomNode
-import logging
 
 
 class SessionManager(QObject):

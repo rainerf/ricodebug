@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import os
+
 from PyQt4.QtCore import Qt, pyqtSignal, QThread, QObject, QDir
 from PyQt4.QtGui import QTreeView, QMenu, QIcon
-import os
 
 from helpers.configstore import ConfigSet, ConfigItem
 from helpers.icons import Icons

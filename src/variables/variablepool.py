@@ -22,12 +22,14 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import QObject
-from helpers.gdboutput import GdbOutput
 import logging
 import re
-from helpers.excep import VariableNotFoundException
 from pprint import pprint
+
+from PyQt4.QtCore import QObject
+
+from helpers.gdboutput import GdbOutput
+from helpers.excep import VariableNotFoundException
 
 
 class VariablePool(QObject):

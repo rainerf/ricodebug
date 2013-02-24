@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+from operator import attrgetter
+
 from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex
 from PyQt4.QtGui import QPixmap
-from operator import attrgetter
 
 
 class ThreadInfo:

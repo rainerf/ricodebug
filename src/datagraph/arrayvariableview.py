@@ -22,13 +22,16 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore
 import sys
 import importlib
+
+from PyQt4 import QtCore
+
 from helpers.icons import Icons
 from variables.arrayvariable import ArrayVariable
 from .datagraphvariables import ComplexTemplateHandler, ComplexDataGraphVariableBase
 from .stdvariableview import DataGraphStdVariable
+
 plt = None  # this will be imported lazily
 
 

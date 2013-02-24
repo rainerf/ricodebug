@@ -23,10 +23,11 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
+import logging
+
 from PyQt4.QtCore import QObject, QIODevice, QFile, pyqtSignal
 from PyQt4.QtGui import QAction, QIcon
 from PyQt4.QtXml import QDomDocument
-import logging
 
 
 class PluginAction(QAction):

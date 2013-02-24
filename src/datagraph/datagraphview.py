@@ -22,9 +22,11 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import logging
+
 from PyQt4.QtCore import Qt, pyqtSlot
 from PyQt4.QtGui import QGraphicsView, QGraphicsScene, QMenu, QIcon
-import logging
+
 from . import pointer
 from . import htmlvariableview
 

@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
+import logging
+
 from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QStringList, QMimeData
 from PyQt4.QtGui import QPixmap, QBrush, QPainter
-
 
 from variables.ptrvariable import PtrVariable
 from variables.structvariable import StructVariable
@@ -32,7 +33,6 @@ from variables.arrayvariable import ArrayVariable
 from variables.stdvariable import StdVariable
 from variables.variablelist import VariableList
 from variables import variable
-import logging
 
 
 class NodeBase(object):

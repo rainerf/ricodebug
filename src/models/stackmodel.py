@@ -26,8 +26,9 @@
 A model that provides data about the GDB's call stack.
 """
 
-from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel
 from operator import attrgetter
+
+from PyQt4.QtCore import Qt, QModelIndex, QAbstractTableModel
 
 
 class StackModel(QAbstractTableModel):

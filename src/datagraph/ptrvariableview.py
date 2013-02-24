@@ -22,9 +22,10 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from .datagraphvariables import HtmlTemplateHandler, ComplexDataGraphVariableBase
 from PyQt4.QtCore import pyqtSignal, pyqtSlot
 from PyQt4.QtGui import QWidgetAction, QLineEdit
+
+from .datagraphvariables import HtmlTemplateHandler, ComplexDataGraphVariableBase
 from variables.ptrvariable import PtrVariable
 
 

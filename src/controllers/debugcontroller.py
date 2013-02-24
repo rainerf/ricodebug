@@ -23,12 +23,14 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import os
-from helpers.ptyhandler import PtyHandler
-from PyQt4.QtCore import QObject, pyqtSignal, Qt
-from helpers.gdboutput import GdbOutput
 import logging
-from helpers.configstore import ConfigSet, ConfigItem
 from collections import defaultdict
+
+from PyQt4.QtCore import QObject, pyqtSignal, Qt
+
+from helpers.ptyhandler import PtyHandler
+from helpers.gdboutput import GdbOutput
+from helpers.configstore import ConfigSet, ConfigItem
 
 
 class DebugConfig(ConfigSet):
