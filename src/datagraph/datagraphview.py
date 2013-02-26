@@ -109,7 +109,7 @@ class DataGraphView(QGraphicsView):
             if isinstance(i, htmlvariableview.HtmlVariableView):
                 n = pydot.Node(str(index))
                 items.append(i)
-                index = index + 1
+                index += 1
                 nodes[i] = n
 
                 g.add_node(n)

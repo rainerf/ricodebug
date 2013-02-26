@@ -48,10 +48,9 @@ class FileListView(QWidget):
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.gridLayout.addWidget(self.treeView, 0, 0, 1, 1)
-        QtCore.QMetaObject.connectSlotsByName(self)
 
         self.treeView.activated.connect(
-                filelist_controller.fileInFileListViewActivated)
+            filelist_controller.fileInFileListViewActivated)
         self.treeView.expanded.connect(self.resizeColumn)
 
     def resizeColumn(self, index):

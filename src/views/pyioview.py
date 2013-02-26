@@ -50,8 +50,6 @@ class PyIoView(QWidget):
         self.pySendButton.setText("Send")
         self.gridLayout.addWidget(self.pySendButton, 1, 1, 1, 1)
 
-        QtCore.QMetaObject.connectSlotsByName(self)
-
         self.debugController = do.debugController
 
         self.pyInputEdit.lineEdit().returnPressed.connect(self.pySendButton.click)

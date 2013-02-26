@@ -171,7 +171,7 @@ class VariablePool(QObject):
         if hasattr(gdbVar, "exp"):
             exp = gdbVar.exp
         gdbName = gdbVar.name
-        if parentName == None:
+        if parentName is None:
             uniqueName = exp
         else:
             uniqueName = childformat % {"parent": parentName, "child": exp}

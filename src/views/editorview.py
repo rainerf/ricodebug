@@ -47,7 +47,6 @@ class EditorView(QWidget):
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
         self.tabWidget.setCurrentIndex(-1)
-        QtCore.QMetaObject.connectSlotsByName(self)
 
         self.distributedObjects = distributedObjects
         self.tabWidget.tabCloseRequested.connect(self.hideTab)
@@ -101,7 +100,7 @@ class EditorView(QWidget):
         success = True
         while i > 0 and success:
             success = self.hideTab(i - 1)
-            i = i - 1
+            i -= 1
         return success
 
     def isOpen(self, filename):
@@ -123,16 +122,15 @@ class EditorView(QWidget):
     def setFileModified(self, filename, modified):
         """ Adds a '*' to name of modified file in the editors tab widget.  """
         if filename in self.openedFiles:
-            if (modified):
+            if modified:
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
                     self.openedFiles[filename]),
                     os.path.basename(filename) + '*')
-                self.act.SaveFile.setEnabled(True)
             else:
                 self.tabWidget.setTabText(self.tabWidget.indexOf(
                     self.openedFiles[filename]),
                     os.path.basename(filename))
-                self.act.SaveFile.setEnabled(False)
+            self.act.SaveFile.setEnabled(modified)
 
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """

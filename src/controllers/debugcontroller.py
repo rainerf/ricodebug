@@ -79,7 +79,7 @@ class DebugController(QObject):
             return
 
         if self.distributedObjects.editorController.closeOpenedFiles():  # closing source files may be canceled by user
-            if self.executableName != None:
+            if self.executableName is not None:
                 # clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
 

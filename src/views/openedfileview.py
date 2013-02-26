@@ -168,7 +168,7 @@ class OpenedFileView(ScintillaWrapper):
         self.tracepointController = self.distributedObjects.tracepointController
         self.signalProxy = self.distributedObjects.signalProxy
         self.filename = filename
-        self.lastContexMenuLine = 0
+        self.lastContextMenuLine = 0
         self.markerBp = QPixmap(":/markers/bp.png")
         self.markerBpDisabled = QPixmap(":/markers/bp_dis.png")
         self.markerTp = QPixmap(":/markers/tp.png")
@@ -343,7 +343,7 @@ class OpenedFileView(ScintillaWrapper):
         self.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
 
         # self.lineIndexFromPosition(..) returns tuple. first element is line
-        self.lastContexMenuLine = int(self.lineIndexFromPosition(scipos)[0])
+        self.lastContextMenuLine = int(self.lineIndexFromPosition(scipos)[0])
 
         self.__popupMenu = QtGui.QMenu(self)
         self.__popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
@@ -459,7 +459,7 @@ class OpenedFileView(ScintillaWrapper):
         self.tracepointController.toggleTracepoint(self.filename, line + 1)
 
     def toggleTracepoint(self):
-        self.toggleTracepointWithLine(self.lastContexMenuLine)
+        self.toggleTracepointWithLine(self.lastContextMenuLine)
 
     def getBreakpointsFromModel(self):
         self.markerDeleteAll(self.MARGIN_MARKER_BP)

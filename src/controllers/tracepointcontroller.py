@@ -21,13 +21,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
-from helpers.icons import Icons
-
-"""@package tracepointcontroller
-    the tracepoint controller
-"""
-
 from PyQt4.QtCore import QObject, Qt
+
+from helpers.icons import Icons
 from models.tracepointmodel import TracepointModel
 from views.tracepointview import TracepointView
 
@@ -46,9 +42,7 @@ class TracepointController(QObject):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
 
-        """@var self._model: (TracepointModel), this class provides the model for tracepointView"""
         self._model = TracepointModel(self.distributedObjects)
-        """@var self.tracepointView: (TracepointView), this class presents data from _model"""
         self.tracepointView = TracepointView(self.distributedObjects)
         self.tracepointView.setModel(self._model)
 
@@ -92,7 +86,7 @@ class TracepointController(QObject):
     def loadSession(self, xmlHandler):
         """load session info to xml file"""
         tpparent = xmlHandler.getNode("Tracepoints")
-        if tpparent != None:
+        if tpparent is not None:
             childnodes = tpparent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))

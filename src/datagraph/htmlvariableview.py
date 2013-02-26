@@ -58,9 +58,6 @@ class HtmlVariableView(QGraphicsWebView):
 
         self.id = self.getUniqueId(self)
 
-        # FIXME
-        # self.distributedObjects.signalProxy.variableUpdateCompleted.connect(self.render)
-
     def addIncomingPointer(self, pointer):
         self.incomingPointers.append(pointer)
 

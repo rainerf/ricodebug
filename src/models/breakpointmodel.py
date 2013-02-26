@@ -385,7 +385,7 @@ class BreakpointModel(QAbstractTableModel):
     def loadSession(self, xmlHandler):
         """load session info to xml file"""
         bpparent = xmlHandler.getNode("Breakpoints")
-        if bpparent != None:
+        if bpparent is not None:
             childnodes = bpparent.childNodes()
             for i in range(childnodes.size()):
                 attr = xmlHandler.getAttributes(childnodes.at(i))

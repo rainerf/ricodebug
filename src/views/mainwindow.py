@@ -254,21 +254,21 @@ class MainWindow(QMainWindow):
 
     def showOpenExecutableDialog(self):
         filename = str(QFileDialog.getOpenFileName(self, "Open Executable", self.recentFileHandler.getDirOfLastFile()))
-        if (filename != ""):
+        if filename != "":
             self.debugController.openExecutable(filename)
 
     def showLoadPluginsDialog(self):
         dialog = QFileDialog()
         dialog.setNameFilter("*.xml")
         filename = str(dialog.getOpenFileName(self, "Load plugin configuration"))
-        if (filename != ""):
+        if filename != "":
             self.pluginloader.getActivePlugins(filename)
 
     def showSavePluginsDialog(self):
         dialog = QFileDialog()
         dialog.setNameFilter("*.xml")
         filename = str(dialog.getSaveFileName(self, "Save plugin configuration"))
-        if (filename != ""):
+        if filename != "":
             self.pluginloader.savePluginInfo(filename)
 
     def showExecutableName(self, filename):
@@ -338,7 +338,7 @@ class MainWindow(QMainWindow):
 
     def __observeWorkingBinary(self, filename):
         """ Private Method to Observe Debugged Binary """
-        if self.binaryName != None:
+        if self.binaryName is not None:
             self.fileWatcher.removePath(self.binaryName)
         self.fileWatcher.addPath(filename)
         self.binaryName = filename

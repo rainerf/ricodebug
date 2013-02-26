@@ -59,7 +59,7 @@ class HtmlTemplateHandler(QObject):
         """ renders the html-Template and saves and returns the rendered html-Code
         @return rendered html-Code
         """
-        assert self._htmlTemplate != None
+        assert self._htmlTemplate is not None
         assert self.var.getView()
 
         if not self.id:
@@ -81,7 +81,7 @@ class HtmlTemplateHandler(QObject):
 
     # insert a "header" into the menu for the current element
     def addContextMenuLabel(self, menu):
-        label = QLabel("Actions for %s" % (self.var.exp))
+        label = QLabel("Actions for %s" % self.var.exp)
         label.setStyleSheet("color:palette(light); background-color:palette(dark); margin-top:2px; margin-bottom:2px; margin-left:2px; margin-right:2px;")
         we = QWidgetAction(menu)
         we.setDefaultWidget(label)

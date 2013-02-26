@@ -74,8 +74,6 @@ class SysCModulesPlugin():
         self.view.setHeaderLabels(self.viewHeaders)
         self.gridLayout.addWidget(self.view, 1, 0, 1, 2)
 
-        QtCore.QMetaObject.connectSlotsByName(self.w)
-
         self.signalproxy.inferiorStoppedNormally.connect(self.update)
         self.signalproxy.inferiorHasExited.connect(self.clear)
         self.view.expanded.connect(self.resizeColumn)
