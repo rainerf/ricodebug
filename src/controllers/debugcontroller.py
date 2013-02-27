@@ -215,10 +215,10 @@ class DebugController(QObject):
                 assert tp  # if this was not a breakpoint, it must have been a tracepoint
                 self.connector.cont()
         elif field["reason"] == "signal-received":
-            logging.warning("Signal received: %s (%s) in %s:%s", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
+            logging.warning("Inferior received signal <b>%s</b> (%s) at <b>%s:%s</b>.", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
         elif field["reason"] == "watchpoint-trigger":
-            logging.warning("Watchpoint %s on expression '%s' triggered; old value: %s, new value: %s", field["wpt"].number, self.distributedObjects.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
+            logging.warning("Watchpoint %s on expression <b>%s</b> triggered; old value: %s, new value: %s.", field["wpt"].number, self.distributedObjects.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
             self.signalProxy.emitInferiorStoppedNormally(rec)
         else:
             self.signalProxy.emitInferiorStoppedNormally(rec)

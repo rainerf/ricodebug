@@ -36,6 +36,7 @@ from widgets.alertabledockwidget import AlertableDockWidget
 from widgets.docktoolbarmanager import DockToolBarManager
 from views.notificationframe import NotificationFrameHandler
 from views.logview import LogViewHandler
+import logging
 
 
 class MainWindow(QMainWindow):
@@ -292,6 +293,7 @@ class MainWindow(QMainWindow):
         self.ui.statusLabel.setText("Not running")
         self.disableButtons()
         self.ui.statusIcon.setPixmap(QPixmap(":/icons/images/22x22/not_running.png"))
+        logging.info("Inferior exited.")
 
     def closeEvent(self, event):
         if not self.distributedObjects.editorController.closeOpenedFiles():
