@@ -5,17 +5,23 @@ from views.ui_notificationframe import Ui_NotificationFrame
 
 
 class NotificationFrame(QFrame):
-    POSITIVE, INFO, WARNING, ERROR = range(4)
+    INFO, WARNING, ERROR = range(3)
 
     def __init__(self, parent):
         QFrame.__init__(self, parent)
         self.ui = Ui_NotificationFrame()
 
         self._data = {
-            self.POSITIVE: ("#6ebe8a", None),
-            self.INFO: ("#4398c8", QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation).pixmap(36, 36)),
-            self.WARNING: ("#d0b05f", QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(36, 36)),
-            self.ERROR: ("#cda8a8", QApplication.style().standardIcon(QStyle.SP_MessageBoxCritical).pixmap(36, 36))
+            # self.POSITIVE: ("#6ebe8a", None),
+            self.INFO: ("#4398c8",
+                        self.palette().base().color().name(),
+                        QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation).pixmap(36, 36)),
+            self.WARNING: ("#d0b05f",
+                           self.palette().text().color().name(),
+                           QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(36, 36)),
+            self.ERROR: ("#cda8a8",
+                         self.palette().text().color().name(),
+                         QApplication.style().standardIcon(QStyle.SP_MessageBoxCritical).pixmap(36, 36))
             }
 
         self.ui.setupUi(self)
@@ -23,11 +29,11 @@ class NotificationFrame(QFrame):
 
     def setMessage(self, msg, severity):
         self.ui.messageLabel.setText(msg)
-        self.setColor(self._data[severity][0])
-        self.ui.iconLabel.setPixmap(self._data[severity][1])
+        self.setColor(self._data[severity][0], self._data[severity][1])
+        self.ui.iconLabel.setPixmap(self._data[severity][2])
         self.show()
 
-    def setColor(self, color):
+    def setColor(self, bgcolor, fgcolor):
         stylesheet = \
         """
         #notificationFrame {
@@ -35,6 +41,9 @@ class NotificationFrame(QFrame):
           padding: 2px;
           background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %s, stop: 0.1 %s, stop: 1 %s);
           border: 1px solid %s;
+        }
+        #messageLabel {
+          color: %s;
         }"""
 
         def lighter(c):
@@ -43,7 +52,7 @@ class NotificationFrame(QFrame):
         def darker(c):
             return QColor(c).darker(110).name()
 
-        self.setStyleSheet(stylesheet % (lighter(color), color, darker(color), "black"))
+        self.setStyleSheet(stylesheet % (lighter(bgcolor), bgcolor, darker(bgcolor), "black", fgcolor))
 
 
 class NotificationFrameHandler(logging.Handler):
@@ -56,3 +65,5 @@ class NotificationFrameHandler(logging.Handler):
             self._notificationFrame.setMessage(record.message, self._notificationFrame.ERROR)
         elif record.levelno >= logging.WARNING:
             self._notificationFrame.setMessage(record.message, self._notificationFrame.WARNING)
+        elif record.levelno >= logging.INFO:
+            self._notificationFrame.setMessage(record.message, self._notificationFrame.INFO)
