@@ -177,10 +177,6 @@ class OpenedFileView(ScintillaWrapper):
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
 
-        self.FileWatcher = QFileSystemWatcher()
-        self.FileWatcher.addPath(self.filename)
-        self.FileWatcher.fileChanged.connect(self.fileChanged)
-
         self.font = QFont("DejaVu Sans Mono", 10)
         self.font.setStyleHint(QFont.TypeWriter)
         self.lexer = Qsci.QsciLexerCPP()
@@ -270,6 +266,17 @@ class OpenedFileView(ScintillaWrapper):
 
         self.__popupMenu = None
 
+        self.__fileWatcher = QFileSystemWatcher([self.filename])
+        self.__fileWatcher.fileChanged.connect(self.__fileChanged)
+
+        # this timer is used for a workaround: QFileSystemWatcher will sometimes
+        # report a change multiple times; therefore, in self.__fileChanged, we
+        # simply start the timer on a notification and discard all notifications
+        # while the timer is running
+        self.__fileChangedTimer = QTimer()
+        self.__fileChangedTimer.setSingleShot(True)
+        self.__fileChangedTimer.setInterval(100)
+
     def updateConfig(self):
         qs = Qsci.QsciScintilla
         c = self.distributedObjects.editorController.config
@@ -299,8 +306,10 @@ class OpenedFileView(ScintillaWrapper):
         self.__useBreakpointOverlays = c.useBreakpointOverlays.value
         self.getBreakpointsFromModel()
 
-    def fileChanged(self):
-        logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
+    def __fileChanged(self):
+        if not self.__fileChangedTimer.isActive():
+            logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
+            self.__fileChangedTimer.start()
 
     def saveFile(self):
         ''' Save source file '''
