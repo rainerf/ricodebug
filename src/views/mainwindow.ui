@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1674</width>
-    <height>1080</height>
+    <width>881</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="dockNestingEnabled">
@@ -17,10 +17,23 @@
    <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>2</number>
+    </property>
     <property name="margin">
      <number>0</number>
     </property>
+    <item>
+     <widget class="NotificationFrame" name="notificationFrame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -28,8 +41,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1674</width>
-     <height>18</height>
+     <width>881</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -159,6 +172,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NotificationFrame</class>
+   <extends>QFrame</extends>
+   <header>notificationframe</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>

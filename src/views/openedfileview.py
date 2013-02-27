@@ -300,8 +300,7 @@ class OpenedFileView(ScintillaWrapper):
         self.getBreakpointsFromModel()
 
     def fileChanged(self):
-        logging.warning("Source file %s modified. Recompile executable for \
-                correct debugging.", self.filename)
+        logging.warning("Source file %s modified. Recompile executable for correct debugging.", self.filename)
 
     def saveFile(self):
         ''' Save source file '''

@@ -1,4 +1,4 @@
-TARGETS = views/ui_mainwindow.py views/ui_logviewtab.py views/ui_mitraceview.py resources_rc.py
+TARGETS = views/ui_mainwindow.py views/ui_logviewtab.py views/ui_mitraceview.py views/ui_notificationframe.py resources_rc.py
 
 all: $(TARGETS)
 

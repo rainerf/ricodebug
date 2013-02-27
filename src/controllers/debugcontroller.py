@@ -31,6 +31,7 @@ from PyQt4.QtCore import QObject, pyqtSignal, Qt
 from helpers.ptyhandler import PtyHandler
 from helpers.gdboutput import GdbOutput
 from helpers.configstore import ConfigSet, ConfigItem
+from helpers.excep import GdbError
 
 
 class DebugConfig(ConfigSet):
@@ -93,9 +94,12 @@ class DebugController(QObject):
     def run(self, args=None):
         self.connector.setTty(self.ptyhandler.ptyname)
         self.connector.setArgs(args)
-        self.connector.run()
-        self.lastCmdWasStep = False
-        self.signalProxy.emitRunClicked()
+        try:
+            self.connector.run()
+            self.lastCmdWasStep = False
+            self.signalProxy.emitRunClicked()
+        except GdbError:
+            pass
 
     def record_start(self):
         self.connector.record_start()

@@ -34,7 +34,8 @@ from helpers.pluginloader import PluginLoader
 from controllers.quickwatch import QuickWatch
 from widgets.alertabledockwidget import AlertableDockWidget
 from widgets.docktoolbarmanager import DockToolBarManager
-from views.logview import LogViewHandler, ErrorLabelHandler
+from views.notificationframe import NotificationFrameHandler
+from views.logview import LogViewHandler
 
 
 class MainWindow(QMainWindow):
@@ -81,12 +82,12 @@ class MainWindow(QMainWindow):
         self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)
 
         # Add editor to main window.
-        self.ui.gridLayout.addWidget(self.distributedObjects.editorController.editor_view, 0, 0, 1, 1)
+        self.ui.verticalLayout.addWidget(self.distributedObjects.editorController.editor_view)
 
         dw = self.newDockWidget("Log View", Qt.BottomDockWidgetArea, True)
         self.logviewhandler = LogViewHandler(dw)
         dw.setWidget(self.logviewhandler)
-        self.errormsghandler = ErrorLabelHandler(self)
+        self.errormsghandler = NotificationFrameHandler(self.ui.notificationFrame)
 
         self.pluginloader.addAvailablePlugins()
 
@@ -355,4 +356,3 @@ class MainWindow(QMainWindow):
 
     def dockToolBar(self, area):
         return self.dockToolBarManager.bar(area)
-
