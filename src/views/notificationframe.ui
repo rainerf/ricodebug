@@ -73,15 +73,15 @@
    <sender>closeButton</sender>
    <signal>clicked()</signal>
    <receiver>NotificationFrame</receiver>
-   <slot>hide()</slot>
+   <slot>deleteLater()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>725</x>
-     <y>53</y>
+     <x>476</x>
+     <y>43</y>
     </hint>
     <hint type="destinationlabel">
-     <x>743</x>
-     <y>80</y>
+     <x>488</x>
+     <y>66</y>
     </hint>
    </hints>
   </connection>
