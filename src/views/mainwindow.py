@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         dw = self.newDockWidget("Log View", Qt.BottomDockWidgetArea, True)
         self.logviewhandler = LogViewHandler(dw)
         dw.setWidget(self.logviewhandler)
-        self.errormsghandler = NotificationFrameHandler(self.ui.notificationFrame)
+        self.notificationFrameHandler = NotificationFrameHandler(self.ui.notificationArea)
 
         self.pluginloader.addAvailablePlugins()
 

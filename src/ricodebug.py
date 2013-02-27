@@ -66,7 +66,7 @@ def main():
     window = MainWindow()
 
     logger.addHandler(window.logviewhandler)
-    logger.addHandler(window.errormsghandler)
+    logger.addHandler(window.notificationFrameHandler)
 
     if (len(sys.argv) > 1):
         window.debugController.openExecutable(sys.argv[1])
