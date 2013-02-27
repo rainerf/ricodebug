@@ -25,7 +25,7 @@
 import os
 import logging
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from PyQt4.QtGui import QWidget, QMessageBox
 
 from .openedfileview import OpenedFileView
