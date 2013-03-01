@@ -170,10 +170,10 @@ class Actions(QObject):
         return self.ActionEx(parameter, self)
 
     def __createAction(self, icon, text, shortcut, statustip):
-        if isinstance(icon, basestring):
-            icon = QIcon(icon)
-        else:
+        if isinstance(icon, QStyle.StandardPixmap):
             icon = QApplication.style().standardIcon(icon)
+        else:
+            icon = QIcon(icon)
 
         newAction = QAction(icon, text, self)
 
