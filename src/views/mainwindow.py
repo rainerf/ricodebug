@@ -73,6 +73,7 @@ class MainWindow(QMainWindow):
         self.signalproxy.inferiorStoppedNormally.connect(self.targetStopped)
         self.signalproxy.inferiorReceivedSignal.connect(self.targetStopped)
         self.signalproxy.inferiorHasExited.connect(self.targetExited)
+        self.signalproxy.recordStateChanged.connect(self.setReverseDebugButtonsState)
 
         # Plugin Loader
         self.pluginloader.insertPluginAction.connect(self.addPluginAction)
@@ -113,9 +114,6 @@ class MainWindow(QMainWindow):
 
         self.act.Run.setMenu(self.__runWithArgumentsMenu)
 
-    def __runTriggered(self):
-        self.debugController.run()
-
     def __runWithArgumentsTriggered(self):
         self.__runWithArgumentsMenu.close()
         self.debugController.run(str(self.__argumentsEdit.text()))
@@ -134,6 +132,7 @@ class MainWindow(QMainWindow):
         self.act.Record.setCheckable(True)
         self.act.ReverseNext.setEnabled(False)
         self.act.ReverseStep.setEnabled(False)
+        self.act.ReverseFinish.setEnabled(False)
         self.act.SaveFile.setEnabled(False)
         # debug actions
         self.ui.menuDebug.addAction(self.act.Run)
@@ -169,9 +168,10 @@ class MainWindow(QMainWindow):
         self.ui.Main.addAction(self.act.Interrupt)
         self.ui.Main.addAction(self.act.Next)
         self.ui.Main.addAction(self.act.Step)
-        self.ui.Main.addAction(self.act.Record)
-        self.ui.Main.addAction(self.act.ReverseNext)
-        self.ui.Main.addAction(self.act.ReverseStep)
+        self.ui.reverseBar.addAction(self.act.Record)
+        self.ui.reverseBar.addAction(self.act.ReverseNext)
+        self.ui.reverseBar.addAction(self.act.ReverseStep)
+        self.ui.reverseBar.addAction(self.act.ReverseFinish)
         self.ui.Main.addAction(self.act.Finish)
         self.ui.Main.addAction(self.act.RunToCursor)
 
@@ -181,26 +181,6 @@ class MainWindow(QMainWindow):
         self.__connectActions()
 
     def __connectActions(self):
-        # file menu
-        self.act.Open.triggered.connect(self.showOpenExecutableDialog)
-        self.act.OpenMenu.triggered.connect(self.showOpenExecutableDialog)
-        self.act.Exit.triggered.connect(self.close)
-        self.act.SaveFile.triggered.connect(self.signalproxy.emitSaveCurrentFile)
-        # debug menu
-
-        self.act.Run.triggered.connect(self.__runTriggered)
-
-        self.act.Next.triggered.connect(self.debugController.next_)
-        self.act.Step.triggered.connect(self.debugController.step)
-        self.act.Continue.triggered.connect(self.debugController.cont)
-        self.act.Record.triggered.connect(self.toggleRecord)
-        self.act.ReverseStep.triggered.connect(self.debugController.reverse_step)
-        self.act.ReverseNext.triggered.connect(self.debugController.reverse_next)
-
-        self.act.Interrupt.triggered.connect(self.debugController.interrupt)
-        self.act.Finish.triggered.connect(self.debugController.finish)
-        self.act.RunToCursor.triggered.connect(self.debugController.inferiorUntil)
-
         self.ui.actionRestoreSession.triggered.connect(
                 self.do.sessionManager.showRestoreSessionDialog)
         self.ui.actionSaveSession.triggered.connect(
@@ -303,15 +283,10 @@ class MainWindow(QMainWindow):
         self.restoreState(self.settings.value("windowState").toByteArray())
         self.dockToolBarManager.restoreState(self.settings)
 
-    def toggleRecord(self, check):
-        if check:
-            self.debugController.record_start()
-            self.act.ReverseNext.setEnabled(True)
-            self.act.ReverseStep.setEnabled(True)
-        else:
-            self.debugController.record_stop()
-            self.act.ReverseNext.setEnabled(False)
-            self.act.ReverseStep.setEnabled(False)
+    def setReverseDebugButtonsState(self, check):
+        self.act.ReverseNext.setEnabled(check)
+        self.act.ReverseStep.setEnabled(check)
+        self.act.ReverseFinish.setEnabled(check)
 
     def enableButtons(self):
         self.act.Continue.setEnabled(True)

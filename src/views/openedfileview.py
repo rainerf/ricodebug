@@ -324,7 +324,7 @@ class OpenedFileView(ScintillaWrapper):
 
     def __setFileModified(self, modified):
         ''' Method called whenever current file is marked as modified '''
-        self.distributedObjects.signalProxy.emitFileModified(self.filename, modified)
+        self.distributedObjects.signalProxy.fileModified.emit(self.filename, modified)
 
     def onDwellStart(self, pos, x, y):
         if self.__allowToolTip:

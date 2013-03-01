@@ -97,7 +97,7 @@ class DebugController(QObject):
         if self.do.editorController.closeOpenedFiles():  # closing source files may be canceled by user
             if self.executableName is not None:
                 # clear variables, tracepoints, watches,... by connecting to this signal
-                self.signalProxy.emitCleanupModels()
+                self.signalProxy.cleanupModels.emit()
                 self.__binaryWatcher.removePath(self.executableName)
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
@@ -114,22 +114,23 @@ class DebugController(QObject):
         try:
             self.connector.run()
             self.lastCmdWasStep = False
-            self.signalProxy.emitRunClicked()
+            self.signalProxy.runClicked.emit()
         except GdbError:
             pass
 
-    def record_start(self):
-        self.connector.record_start()
-
-    def record_stop(self):
-        self.connector.record_stop()
+    def setRecord(self, state):
+        if state:
+            self.connector.record_start()
+        else:
+            self.connector.record_stop()
+        self.signalProxy.recordStateChanged.emit(state)
 
     def next_(self):
         self.connector.next_()
         self.lastCmdWasStep = True
 
     def reverse_next(self):
-        self.connector.reverse_next()
+        self.connector.next_(True)
         self.lastCmdWasStep = True
 
     def step(self):
@@ -137,7 +138,7 @@ class DebugController(QObject):
         self.lastCmdWasStep = True
 
     def reverse_step(self):
-        self.connector.reverse_step()
+        self.connector.step(True)
         self.lastCmdWasStep = True
 
     def cont(self):
@@ -150,6 +151,10 @@ class DebugController(QObject):
 
     def finish(self):
         self.connector.finish()
+        self.lastCmdWasStep = False
+
+    def reverse_finish(self):
+        self.connector.finish(True)
         self.lastCmdWasStep = False
 
     def until(self, file_, line):
@@ -169,13 +174,13 @@ class DebugController(QObject):
         if rec.type_ == GdbOutput.EXEC_ASYN and rec.class_ == GdbOutput.STOPPED:
             self.handleStoppedRecord(rec)
         elif rec.type_ == GdbOutput.EXEC_ASYN and rec.class_ == GdbOutput.RUNNING:
-            self.signalProxy.emitInferiorIsRunning(rec)
+            self.signalProxy.inferiorIsRunning.emit(rec)
         elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.THREAD_CREATED:
-            self.signalProxy.emitThreadCreated(rec)
+            self.signalProxy.threadCreated.emit(rec)
         elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.THREAD_EXITED:
-            self.signalProxy.emitThreadExited(rec)
+            self.signalProxy.threadExited.emit(rec)
         elif rec.type_ == GdbOutput.NOTIFY_ASYN and rec.class_ == GdbOutput.BREAKPOINT_MODIFIED:
-            self.signalProxy.emitBreakpointModified(rec)
+            self.signalProxy.breakpointModified.emit(rec)
 
     def handleStoppedRecord(self, rec):
         # With reverse debugging, some stopped records might not contain a
@@ -189,7 +194,7 @@ class DebugController(QObject):
                 field[r.dest] = r.src
 
         if field["reason"] in ['exited-normally', 'exited']:
-            self.signalProxy.emitInferiorHasExited(rec)
+            self.signalProxy.inferiorHasExited.emit(rec)
         elif field["reason"] == 'breakpoint-hit':
             # Ok, we're kind of frantically trying to cover all bases here. We
             # cannot simply check for file:line combination reported in the
@@ -222,23 +227,23 @@ class DebugController(QObject):
 
             if tp:
                 # this will cause the variable pool to update all variables
-                self.do.signalProxy.emitTracepointOccurred()
+                self.do.signalProxy.tracepointOccurred.emit()
                 tp.recordData()
 
             if self.lastCmdWasStep or bp:
-                self.signalProxy.emitInferiorStoppedNormally(rec)
+                self.signalProxy.inferiorStoppedNormally.emit(rec)
                 self.lastCmdWasStep = False
             else:
                 assert tp  # if this was not a breakpoint, it must have been a tracepoint
                 self.connector.cont()
         elif field["reason"] == "signal-received":
             logging.warning("Inferior received signal <b>%s</b> (%s) at <b>%s:%s</b>.", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
-            self.signalProxy.emitInferiorReceivedSignal(rec)
+            self.signalProxy.inferiorReceivedSignal.emit(rec)
         elif field["reason"] == "watchpoint-trigger":
             logging.warning("Watchpoint %s on expression <b>%s</b> triggered; old value: %s, new value: %s.", field["wpt"].number, self.do.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
-            self.signalProxy.emitInferiorStoppedNormally(rec)
+            self.signalProxy.inferiorStoppedNormally.emit(rec)
         else:
-            self.signalProxy.emitInferiorStoppedNormally(rec)
+            self.signalProxy.inferiorStoppedNormally.emit(rec)
 
     def executePythonCode(self, code):
         exec(code, {'do': self.do})

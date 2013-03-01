@@ -55,7 +55,7 @@ class DataGraphController(QObject):
         self.variableList = VariableList(DataGraphVariableFactory, self.distributedObjects)
 
         # register with session manager to save Graph
-        self.signalProxy.emitRegisterWithSessionManager(self, "Graph")
+        self.signalProxy.registerWithSessionManager.emit(self, "Graph")
 
         # connect signals
         self.signalProxy.cleanupModels.connect(self.clearDataGraph)

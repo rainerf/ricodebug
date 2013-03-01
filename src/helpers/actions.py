@@ -23,114 +23,111 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, pyqtSignal
-from PyQt4.QtGui import QStyle, QApplication, QIcon, QAction
+from PyQt4.QtGui import QStyle, QApplication, QIcon, QAction, QPixmap, QImage
 from helpers.icons import Icons
 
-"""
-general information:
- * to add a action write a enum-Key-word into list below class declaration
-   and raise range in both, range after list AND range for
-   self.actions = rang(N) dont forget "\" if line is ending
- * then create the action using createAction function in initActions
-   from Actions class:
-    ...
-    def initActions(self):
-        # your action name
-        self.createActions(<params for your action as string>)
-    ...
- * connect your actions via connectAction or connectActionEx or your own Implementation
-"""
+
+class ActionEx(QAction):
+    triggeredEx = pyqtSignal('PyQt_PyObject')
+
+    def __init__(self, parameter, parent=None):
+        QAction.__init__(self, parent)
+        self.parameter = parameter
+        self.triggered.connect(self.commit)
+
+    def commit(self):
+        assert(self.parameter is not None)
+        self.triggeredEx.emit(self.parameter)
 
 
 class Actions(QObject):
-    class ActionEx(QAction):
-        triggeredEx = pyqtSignal('PyQt_PyObject')
-
-        def __init__(self, parameter, parent=None):
-            QAction.__init__(self, parent)
-            self.parameter = parameter
-            self.triggered.connect(self.commit)
-
-        def commit(self):
-            assert(self.parameter is not None)
-            self.triggeredEx.emit(self.parameter)
-
-    def __init__(self):
+    def __init__(self, do):
         QObject.__init__(self)
 
-        def _icon(type_):
-            return
+        def _mirrored(icon):
+            return QPixmap.fromImage(QImage(QPixmap(icon)).mirrored(True, False))
 
         ###############################################
         # # file/program control
         ###############################################
-        # open
         self.Open = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
                 None, "Open executable file")
+        self.Open.triggered.connect(do.mainwindow.showOpenExecutableDialog)
 
         self.OpenMenu = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
                 "Ctrl+O", "Open executable file")
-        # exit
+        self.OpenMenu.triggered.connect(do.mainwindow.showOpenExecutableDialog)
+
         self.Exit = self.__createAction(QStyle.SP_DialogCloseButton, "Exit",
                 "Ctrl+Q", "Close Program")
-        # save source file
+        self.Exit.triggered.connect(do.mainwindow.close)
+
         self.SaveFile = self.__createAction(QStyle.SP_DialogSaveButton,
                 "Save File", "Ctrl+S", "Save source file")
+        self.SaveFile.triggered.connect(do.signalProxy.saveFile.emit)
 
         ###############################################
         # # file control
         ###############################################
-        # run
         self.Run = self.__createAction(":/icons/images/run.png", "Run", "F5",
                 "Run current executable")
-        # continue
+        self.Run.triggered.connect(do.debugController.run)
+
         self.Continue = self.__createAction(":/icons/images/continue.png",
                 "Continue", "F6", "Continue current executable")
-        # interrupt
+        self.Continue.triggered.connect(do.debugController.cont)
+
         self.Interrupt = self.__createAction(":/icons/images/interrupt.png",
                 "Interrupt", "F4", "Interrupt current executable")
-        # next
+        self.Interrupt.triggered.connect(do.debugController.interrupt)
+
         self.Next = self.__createAction(":/icons/images/next.png", "Next", "F10",
                 "Execute next line")
-        # step
+        self.Next.triggered.connect(do.debugController.next_)
+
         self.Step = self.__createAction(":/icons/images/step.png", "Step", "F11",
                 "Next Step")
-        # record
-        self.Record = self.__createAction(":/icons/images/record.png", "Record",
-                None, "Record gdb executions")
-        # previous
-        self.ReverseNext = self.__createAction(":/icons/images/rnext.png",
-                "Reverse Next", None, "Execute previous line")
-        # reverse step
-        self.ReverseStep = self.__createAction(":/icons/images/rstep.png",
-                "Reverse Step", None, "Previous Step")
-        # finish
+        self.Step.triggered.connect(do.debugController.step)
+
         self.Finish = self.__createAction(":/icons/images/finish.png", "Finish",
                 None, "Finish executable")
-        # run to cursor
+        self.Finish.triggered.connect(do.debugController.finish)
+
         self.RunToCursor = self.__createAction(":/icons/images/until.png",
                 "Run to Cursor", None, "Run executable to cursor position")
+        self.RunToCursor.triggered.connect(do.debugController.inferiorUntil)
+
+        self.Record = self.__createAction(":/icons/images/record.png", "Record",
+                None, "Record gdb executions")
+        self.Record.triggered.connect(do.debugController.setRecord)
+
+        self.ReverseNext = self.__createAction(_mirrored(":/icons/images/next.png"),
+                "Reverse Next", None, "Execute previous line")
+        self.ReverseNext.triggered.connect(do.debugController.reverse_next)
+
+        self.ReverseStep = self.__createAction(_mirrored(":/icons/images/step.png"),
+                "Reverse Step", None, "Previous Step")
+        self.ReverseStep.triggered.connect(do.debugController.reverse_step)
+
+        self.ReverseFinish = self.__createAction(_mirrored(":/icons/images/finish.png"),
+                "Reverse Step", None, "Previous Step")  # finish
+        self.ReverseFinish.triggered.connect(do.debugController.reverse_finish)
 
         ###############################################
         # # watch/break/trace points
         ###############################################
-        # toggle breakpoint
         self.ToggleBreak = self.__createAction(":/icons/images/bp.png",
                 "Toggle Breakpoint", "Ctrl+b",
                 "Toggle breakpoint in current line")
-        # add tracepoint
         self.ToggleTrace = self.__createAction(":/icons/images/tp.png",
                 "Toggle Tracepoint", "Ctrl+t",
                 "Toggle tracepoint in current line")
-        # AddTraceVar
         self.AddTraceVar = self.__createAction(":/icons/images/tp_var_plus.png",
                 "Add var to Tracepoint", "+",
                 "Add selected variable to tracepoint")
-        # DelTraceVar
         self.DelTraveVar = self.__createAction(":/icons/images/tp_var_minus.png",
                 "Del var from Tracepoint", "-",
                 "Remove selected variable from tracepoint")
-        # DelWatch
         self.DelWatch = self.__createAction(":/icons/images/watch_minus.png",
                 "Del var from Watch", "+",
                 "Remove selected variable from watchview-window")
@@ -167,7 +164,7 @@ class Actions(QObject):
         return a
 
     def createEx(self, parameter):
-        return self.ActionEx(parameter, self)
+        return ActionEx(parameter, self)
 
     def __createAction(self, icon, text, shortcut, statustip):
         if isinstance(icon, QStyle.StandardPixmap):

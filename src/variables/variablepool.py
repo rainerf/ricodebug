@@ -57,7 +57,7 @@ class VariablePool(QObject):
         """
         self.__updateVars(True)
         # signal TracepointController about finished update
-        self.distributedObjects.signalProxy.emitDataForTracepointsReady()
+        self.distributedObjects.signalProxy.dataForTracepointsReady.emit()
 
     def updateVars(self):
         """ update variables if inferiorStoppedNormally
@@ -76,7 +76,7 @@ class VariablePool(QObject):
             return
         res = res.changelist
 
-        self.signalProxy.emitAboutToUpdateVariables()
+        self.signalProxy.aboutToUpdateVariables.emit()
 
         # update the variable
         # dont use setter method to apply changes because this will cause update to gdb
@@ -89,7 +89,7 @@ class VariablePool(QObject):
             if not isTracePoint:
                 var.emitChanged()
 
-        self.signalProxy.emitVariableUpdateCompleted()
+        self.signalProxy.variableUpdateCompleted.emit()
 
     def getVar(self, factory, exp):
         """ return variable from pool if already existing <br>

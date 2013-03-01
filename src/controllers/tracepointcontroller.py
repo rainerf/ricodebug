@@ -47,7 +47,7 @@ class TracepointController(QObject):
         self.tracepointView.setModel(self._model)
 
         # register with session manager to save Tracepoints
-        self.distributedObjects.signalProxy.emitRegisterWithSessionManager(self, "Tracepoints")
+        self.distributedObjects.signalProxy.registerWithSessionManager.emit(self, "Tracepoints")
 
         self.tracepointView.clicked.connect(self.updateWaveforms)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateWaveforms)

@@ -220,31 +220,28 @@ class GdbConnector(QObject):
                 "-interpreter-exec console \"record stop\"",
                 "Could not record the process.")
 
-    def next_(self):
-        return self.executeAndRaiseIfFailed("-exec-next")
+    def __addReverse(self, cmd, reverse):
+        if reverse:
+            return cmd + " --reverse"
+        else:
+            return cmd
 
-    def reverse_next(self):
-        return self.executeAndRaiseIfFailed("-exec-next --reverse")
+    def next_(self, reverse=False):
+        return self.executeAndRaiseIfFailed(self.__addReverse("-exec-next", reverse))
 
-    def step(self):
-        return self.executeAndRaiseIfFailed("-exec-step")
+    def step(self, reverse=False):
+        return self.executeAndRaiseIfFailed(self.__addReverse("-exec-step", reverse))
 
-    def reverse_step(self):
-        return self.executeAndRaiseIfFailed("-exec-step --reverse")
+    def cont(self, reverse=False):
+        return self.executeAndRaiseIfFailed(self.__addReverse("-exec-continue", reverse))
 
-    def cont(self):
-        return self.executeAndRaiseIfFailed("-exec-continue")
-
-    def reverse_cont(self):
-        return self.executeAndRaiseIfFailed("-exec-continue --reverse")
+    def finish(self, reverse=False):
+        return self.executeAndRaiseIfFailed(self.__addReverse("-exec-finish", reverse))
 
     def interrupt(self):
         # TODO: check if it also works in windows
         self.__gdb.send_signal(signal.SIGINT)
         # return self.executeAndRaiseIfFailed("-exec-interrupt")
-
-    def finish(self):
-        return self.executeAndRaiseIfFailed("-exec-finish")
 
     def until(self, file_, line):
         loc = file_ + ":" + str(line)

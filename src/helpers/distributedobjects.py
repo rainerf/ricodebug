@@ -62,13 +62,13 @@ class DistributedObjects:
         self.settings = QSettings("fh-hagenberg", "ricodebug")
         self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
-        self.actions = Actions()
         self.signalProxy = SignalProxy(self)
+        self.debugController = DebugController(self)
+        self.actions = Actions(self)
         self.sessionManager = SessionManager(self)
 
         self.breakpointModel, _ = self.buildModelAndView(StoppointModel, BreakpointView, "Breakpoints", Icons.bp)
 
-        self.debugController = DebugController(self)
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self)
 

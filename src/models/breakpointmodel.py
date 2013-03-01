@@ -134,7 +134,7 @@ class BreakpointModel(QAbstractTableModel):
         self.breakpoints = []
         self.connector = do.gdb_connector
         do.signalProxy.cleanupModels.connect(self.clearBreakpoints)
-        do.signalProxy.emitRegisterWithSessionManager(self, "Breakpoints")
+        do.signalProxy.registerWithSessionManager.emit(self, "Breakpoints")
         do.signalProxy.breakpointModified.connect(self.__updateBreakpointFromGdbRecord)
         do.signalProxy.runClicked.connect(self.__resetHitCounters)
 

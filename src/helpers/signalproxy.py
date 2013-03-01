@@ -49,6 +49,7 @@ class SignalProxy(QObject):
     threadExited = pyqtSignal('PyQt_PyObject')
     AddWatch = pyqtSignal('PyQt_PyObject')
     breakpointModified = pyqtSignal('PyQt_PyObject')
+    recordStateChanged = pyqtSignal(bool)
 
     def __init__(self, distributedObjects):
         '''CTOR'''
@@ -57,87 +58,8 @@ class SignalProxy(QObject):
         self.pluginDocks = {}
         self.pluginSbWidgets = {}
 
-    ###################################################
-    # passing on signals
-    ###################################################
-    """ ============================================  WATCH  ============================================ """
-    # def addWatchFixed(self, watch):
-    #    self.fixedWatchAdded.emit(watch)
-
-    # def addWatchFloating(self, watch):
-    #    self.floatingWatchAdded.emit(watch)
-
     def addWatch(self, watch):
         self.AddWatch.emit(str(watch))
-    """ ================================================================================================= """
-
-    def emitExecutableOpened(self, filename):
-        '''SLOT is called from signal of main program and passes another signal on to plugins'''
-        self.executableOpened.emit(filename)
-
-    def emitThreadCreated(self, rec):
-        self.threadCreated.emit(rec)
-
-    def emitThreadExited(self, rec):
-        self.threadExited.emit(rec)
-
-    def emitInferiorIsRunning(self, rec):
-        self.inferiorIsRunning.emit(rec)
-
-    def emitInferiorStoppedNormally(self, rec):
-        self.inferiorStoppedNormally.emit(rec)
-
-    def emitInferiorReceivedSignal(self, rec):
-        self.inferiorReceivedSignal.emit(rec)
-
-    def emitInferiorHasExited(self, rec):
-        self.inferiorHasExited.emit(rec)
-
-    def emitFileModified(self, filename, changed):
-        '''Emit signal to mark a file as edited
-        @param filename: string with path to file
-        @param changed: True -> file has changed
-        '''
-        self.fileModified.emit(filename, changed)
-
-    def emitTracepointOccurred(self):
-        self.tracepointOccurred.emit()
-
-    def emitDataForTracepointsReady(self):
-        self.dataForTracepointsReady.emit()
-
-    def emitSaveCurrentFile(self):
-        '''Tell editorview to save current file'''
-        self.saveFile.emit()
-
-    def emitCleanupModels(self):
-        '''Signal is emitted just before a new executable is opened to delete breakpoints, watches, ...'''
-        self.cleanupModels.emit()
-
-    def emitRunClicked(self):
-        '''Signal is emitted after run button was clicked. '''
-        self.runClicked.emit()
-
-    def emitRegisterWithSessionManager(self, regObject, dialogItem):
-        '''Register with session manager to add debug info to xml session file
-            @param regObject: object must implement saveSession(self, XmlHandler) and loadSession(self, XmlHandler)
-            @param dialogItem: String which appears with a checkbox in the save session dialog
-        '''
-        self.registerWithSessionManager.emit(regObject, dialogItem)
-
-    def emitVariableUpdateCompleted(self):
-        """Emitted when the variable pool has finished updating all variables
-        for this step. Use this signal instead of rerendering stuff on the
-        variable's changed() event to avoid multiple renderings."""
-        self.variableUpdateCompleted.emit()
-
-    def emitAboutToUpdateVariables(self):
-        self.aboutToUpdateVariables.emit()
-
-    def emitBreakpointModified(self, rec):
-        self.breakpointModified.emit(rec)
-
-    # pass on further signals here ...
 
     ###################################################
     # functions for plugin placement in the mainwindow
