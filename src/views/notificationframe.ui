@@ -59,7 +59,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="closeButton">
+    <widget class="QToolButton" name="closeButton">
      <property name="text">
       <string>Close</string>
      </property>
@@ -76,12 +76,12 @@
    <slot>deleteLater()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>476</x>
-     <y>43</y>
+     <x>485</x>
+     <y>38</y>
     </hint>
     <hint type="destinationlabel">
-     <x>488</x>
-     <y>66</y>
+     <x>506</x>
+     <y>5</y>
     </hint>
    </hints>
   </connection>

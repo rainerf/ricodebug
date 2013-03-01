@@ -23,35 +23,46 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 import logging
-from PyQt4.QtGui import QApplication, QStyle, QColor, QFrame, QVBoxLayout
+from PyQt4.QtGui import QApplication, QStyle, QColor, QFrame, QVBoxLayout, QToolButton
 
 from views.ui_notificationframe import Ui_NotificationFrame
 
 
 class NotificationFrame(QFrame):
     INFO, WARNING, ERROR = range(3)
+    ICONSIZE = 24
 
-    def __init__(self, parent, message, severity):
+    def __init__(self, parent, message, severity, actions=None):
         QFrame.__init__(self, parent)
         self.ui = Ui_NotificationFrame()
 
         if severity == self.INFO:
             bgcolor = "#4398c8"
             fgcolor = self.palette().base().color().name()
-            icon = QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation).pixmap(36, 36)
+            icon = self._standardIconAsPixmap(QStyle.SP_MessageBoxInformation)
         elif severity == self.WARNING:
             bgcolor = "#d0b05f"
             fgcolor = self.palette().text().color().name()
-            icon = QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning).pixmap(36, 36)
+            icon = self._standardIconAsPixmap(QStyle.SP_MessageBoxWarning)
         elif severity == self.ERROR:
             bgcolor = "#cda8a8"
             fgcolor = self.palette().text().color().name()
-            icon = QApplication.style().standardIcon(QStyle.SP_MessageBoxCritical).pixmap(36, 36)
+            icon = self._standardIconAsPixmap(QStyle.SP_MessageBoxCritical)
 
         self.ui.setupUi(self)
         self.ui.iconLabel.setPixmap(icon)
         self.ui.messageLabel.setText(message)
         self._setColor(bgcolor, fgcolor)
+
+        if actions:
+            for action in reversed(actions):
+                action.triggered.connect(self.deleteLater)
+                b = QToolButton()
+                b.setDefaultAction(action)
+                self.layout().insertWidget(2, b)
+
+    def _standardIconAsPixmap(self, icon):
+        return QApplication.style().standardIcon(icon).pixmap(self.ICONSIZE, self.ICONSIZE)
 
     def _setColor(self, bgcolor, fgcolor):
         stylesheet = \
@@ -66,11 +77,8 @@ class NotificationFrame(QFrame):
           color: %s;
         }"""
 
-        def lighter(c):
-            return QColor(c).lighter(110).name()
-
-        def darker(c):
-            return QColor(c).darker(110).name()
+        lighter = lambda c: QColor(c).lighter(110).name()
+        darker = lambda c: QColor(c).darker(110).name()
 
         self.setStyleSheet(stylesheet % (lighter(bgcolor), bgcolor, darker(bgcolor), "black", fgcolor))
 
@@ -82,13 +90,15 @@ class NotificationFrameHandler(logging.Handler):
         self._notificationArea.setLayout(QVBoxLayout())
 
     def emit(self, record):
-        w = None
-        if record.levelno >= logging.ERROR:
-            w = NotificationFrame(self._notificationArea, record.message, NotificationFrame.ERROR)
-        elif record.levelno >= logging.WARNING:
-            w = NotificationFrame(self._notificationArea, record.message, NotificationFrame.WARNING)
-        elif record.levelno >= logging.INFO:
-            w = NotificationFrame(self._notificationArea, record.message, NotificationFrame.INFO)
+        severity = None
 
-        if w:
-            self._notificationArea.layout().addWidget(w)
+        if record.levelno >= logging.ERROR:
+            severity = NotificationFrame.ERROR
+        elif record.levelno >= logging.WARNING:
+            severity = NotificationFrame.WARNING
+        elif record.levelno >= logging.INFO:
+            severity = NotificationFrame.INFO
+
+        if severity:
+            actions = getattr(record, "actions", None)
+            self._notificationArea.layout().addWidget(NotificationFrame(self._notificationArea, record.message, severity, actions))
