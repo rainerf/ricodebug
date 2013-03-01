@@ -22,7 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import QObject, pyqtSignal
+from PyQt4.QtGui import QStyle, QApplication, QIcon, QAction
 from helpers.icons import Icons
 
 """
@@ -41,12 +42,12 @@ general information:
 """
 
 
-class Actions(QtCore.QObject):
-    class ActionEx(QtGui.QAction):
-        triggeredEx = QtCore.pyqtSignal('PyQt_PyObject')
+class Actions(QObject):
+    class ActionEx(QAction):
+        triggeredEx = pyqtSignal('PyQt_PyObject')
 
         def __init__(self, parameter, parent=None):
-            QtGui.QAction.__init__(self, parent)
+            QAction.__init__(self, parent)
             self.parameter = parameter
             self.triggered.connect(self.commit)
 
@@ -55,21 +56,25 @@ class Actions(QtCore.QObject):
             self.triggeredEx.emit(self.parameter)
 
     def __init__(self):
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
+
+        def _icon(type_):
+            return
+
         ###############################################
         # # file/program control
         ###############################################
         # open
-        self.Open = self.__createAction(":/icons/images/open.png", "Open",
+        self.Open = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
                 "Ctrl+O", "Open executable file")
 
-        self.OpenMenu = self.__createAction(":/icons/images/open.png", "Open",
+        self.OpenMenu = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
                 "Ctrl+O", "Open executable file")
         # exit
-        self.Exit = self.__createAction(":/icons/images/exit.png", "Exit",
+        self.Exit = self.__createAction(QStyle.SP_DialogCloseButton, "Exit",
                 "Ctrl+Q", "Close Program")
         # save source file
-        self.SaveFile = self.__createAction(":/icons/images/save.png",
+        self.SaveFile = self.__createAction(QStyle.SP_DialogSaveButton,
                 "Save File", "Ctrl+S", "Save source file")
 
         ###############################################
@@ -165,7 +170,12 @@ class Actions(QtCore.QObject):
         return self.ActionEx(parameter, self)
 
     def __createAction(self, icon, text, shortcut, statustip):
-        newAction = QtGui.QAction(QtGui.QIcon(icon), text, self)
+        if isinstance(icon, basestring):
+            icon = QIcon(icon)
+        else:
+            icon = QApplication.style().standardIcon(icon)
+
+        newAction = QAction(icon, text, self)
 
         if shortcut is not None:
             newAction.setShortcut(shortcut)
