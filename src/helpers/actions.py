@@ -66,7 +66,7 @@ class Actions(QObject):
         ###############################################
         # open
         self.Open = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
-                "Ctrl+O", "Open executable file")
+                None, "Open executable file")
 
         self.OpenMenu = self.__createAction(QStyle.SP_DialogOpenButton, "Open",
                 "Ctrl+O", "Open executable file")
