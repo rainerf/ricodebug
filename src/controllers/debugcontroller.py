@@ -26,7 +26,8 @@ import os
 import logging
 from collections import defaultdict
 
-from PyQt4.QtCore import QObject, pyqtSignal, Qt
+from PyQt4.QtCore import QObject, pyqtSignal, Qt, QFileSystemWatcher
+from PyQt4.QtGui import QAction
 
 from helpers.ptyhandler import PtyHandler
 from helpers.gdboutput import GdbOutput
@@ -65,9 +66,23 @@ class DebugController(QObject):
         self.distributedObjects.configStore.registerConfigSet(self.__config)
         self.__config.itemsHaveChanged.connect(self.updateConfig)
 
+        self.__binaryWatcher = QFileSystemWatcher()
+        self.__binaryWatcher.fileChanged.connect(self.__binaryChanged)
+
+    def __reloadAction(self):
+        a = QAction("Reload", self)
+        a.triggered.connect(lambda: self.openExecutable(self.executableName))
+        return a
+
+    def __binaryChanged(self):
+        """ Slot for FileWatcher - Using QtMessagebox for interaction"""
+        logging.warning("The executable was changed on the disc. Please reload the file.",
+                        extra={"actions": [self.__reloadAction()]})
+
     def updateConfig(self):
         if self.executableName:
-            logging.warning("Please reload executable for changes to take effect!")
+            logging.warning("Configuration changed. Please reload executable for changes to take effect!",
+                            extra={"actions": [self.__reloadAction()]})
 
     def openExecutable(self, filename):
         # make sure we only open absolute paths, otherwise eg. RecentFileHandler
@@ -83,6 +98,7 @@ class DebugController(QObject):
             if self.executableName is not None:
                 # clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
+                self.__binaryWatcher.removePath(self.executableName)
 
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
@@ -90,6 +106,7 @@ class DebugController(QObject):
                 self.distributedObjects.breakpointModel.insertBreakpoint("main", None)
             self.executableOpened.emit(filename)
             self.executableName = filename
+            self.__binaryWatcher.addPath(self.executableName)
 
     def run(self, args=None):
         self.connector.setTty(self.ptyhandler.ptyname)

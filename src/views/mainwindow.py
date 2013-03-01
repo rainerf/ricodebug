@@ -24,8 +24,7 @@
 
 from PyQt4.QtGui import QMainWindow, QFileDialog, QLabel, QPixmap, \
         QMenu, QLineEdit, QWidgetAction, QHBoxLayout, QWidget, QFrame
-from PyQt4.QtCore import QFileSystemWatcher, Qt
-from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 from .ui_mainwindow import Ui_MainWindow
 from helpers.distributedobjects import DistributedObjects
@@ -68,7 +67,6 @@ class MainWindow(QMainWindow):
         # init RecentFileHandler
         self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
         self.debugController.executableOpened.connect(self.recentFileHandler.addToRecentFiles)
-        self.debugController.executableOpened.connect(self.__observeWorkingBinary)
         self.debugController.executableOpened.connect(self.showExecutableName)
         self.debugController.executableOpened.connect(self.disableButtons)
         # signal proxy
@@ -97,10 +95,6 @@ class MainWindow(QMainWindow):
         self.readSettings()
 
         self.quickwatch = QuickWatch(self, self.distributedObjects)
-
-        self.binaryName = None
-        self.fileWatcher = QFileSystemWatcher()
-        self.fileWatcher.fileChanged.connect(self.__binaryChanged)
 
     def __makeRunWithArgumentsMenu(self):
         self.__runWithArgumentsMenu = QMenu(self)
@@ -338,23 +332,6 @@ class MainWindow(QMainWindow):
         self.act.RunToCursor.setEnabled(False)
         self.act.Record.setChecked(False)
         self.act.Record.setEnabled(False)
-
-    def __observeWorkingBinary(self, filename):
-        """ Private Method to Observe Debugged Binary """
-        if self.binaryName is not None:
-            self.fileWatcher.removePath(self.binaryName)
-        self.fileWatcher.addPath(filename)
-        self.binaryName = filename
-
-    def __binaryChanged(self):
-        """ Slot for FileWatcher - Using QtMessagebox for interaction"""
-        box = QtGui.QMessageBox()
-        if box.question(self, "Binary Changed!", "Reload File?",
-                        QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
-            self.debugController.openExecutable(self.binaryName)
-        else:
-            self.fileWatcher.removePath(self.binaryName)
-            self.fileWatcher.addPath(self.binaryName)
 
     def dockToolBar(self, area):
         return self.dockToolBarManager.bar(area)
