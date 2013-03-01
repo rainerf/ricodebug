@@ -44,15 +44,15 @@ class DebugConfig(ConfigSet):
 class DebugController(QObject):
     executableOpened = pyqtSignal('PyQt_PyObject')
 
-    def __init__(self, distributedObjects):
+    def __init__(self, do):
         QObject.__init__(self)
 
         self.ptyhandler = PtyHandler()
 
-        self.distributedObjects = distributedObjects
+        self.do = do
 
-        self.connector = self.distributedObjects.gdb_connector
-        self.signalProxy = self.distributedObjects.signalProxy
+        self.connector = self.do.gdb_connector
+        self.signalProxy = self.do.signalProxy
 
         self.executableName = None
         self.lastCmdWasStep = False
@@ -63,7 +63,7 @@ class DebugController(QObject):
         self.connector.reader.asyncRecordReceived.connect(self.handleAsyncRecord, Qt.QueuedConnection)
 
         self.__config = DebugConfig()
-        self.distributedObjects.configStore.registerConfigSet(self.__config)
+        self.do.configStore.registerConfigSet(self.__config)
         self.__config.itemsHaveChanged.connect(self.updateConfig)
 
         self.__binaryWatcher = QFileSystemWatcher()
@@ -94,7 +94,7 @@ class DebugController(QObject):
             logging.error("File %s was not found.", filename)
             return
 
-        if self.distributedObjects.editorController.closeOpenedFiles():  # closing source files may be canceled by user
+        if self.do.editorController.closeOpenedFiles():  # closing source files may be canceled by user
             if self.executableName is not None:
                 # clear variables, tracepoints, watches,... by connecting to this signal
                 self.signalProxy.emitCleanupModels()
@@ -103,7 +103,7 @@ class DebugController(QObject):
             self.connector.changeWorkingDirectory(os.path.dirname(filename))
             self.connector.openFile(filename)
             if self.__config.breakAtMain.value:
-                self.distributedObjects.breakpointModel.insertBreakpoint("main", None)
+                self.do.breakpointModel.insertBreakpoint("main", None)
             self.executableOpened.emit(filename)
             self.executableName = filename
             self.__binaryWatcher.addPath(self.executableName)
@@ -210,19 +210,19 @@ class DebugController(QObject):
             # the breakpoint, both of which would cause the program to suspend
             # on yet another line), but that's about as good as our guessing
             # currently gets.
-            tp = self.distributedObjects.tracepointController.model().breakpointByNumber(int(field["bkptno"]))
-            bp = self.distributedObjects.breakpointModel.breakpointByNumber(int(field["bkptno"]))
+            tp = self.do.tracepointController.model().breakpointByNumber(int(field["bkptno"]))
+            bp = self.do.breakpointModel.breakpointByNumber(int(field["bkptno"]))
             assert tp or bp  # either a TP or a BP must have been hit
 
             # now that we have one, check if the other is here too
             if bp and not tp:
-                tp = self.distributedObjects.tracepointController.model().breakpointByLocation(bp.fullname, bp.line)
+                tp = self.do.tracepointController.model().breakpointByLocation(bp.fullname, bp.line)
             elif tp and not bp:
-                bp = self.distributedObjects.breakpointModel.breakpointByLocation(tp.fullname, tp.line)
+                bp = self.do.breakpointModel.breakpointByLocation(tp.fullname, tp.line)
 
             if tp:
                 # this will cause the variable pool to update all variables
-                self.distributedObjects.signalProxy.emitTracepointOccurred()
+                self.do.signalProxy.emitTracepointOccurred()
                 tp.recordData()
 
             if self.lastCmdWasStep or bp:
@@ -235,16 +235,16 @@ class DebugController(QObject):
             logging.warning("Inferior received signal <b>%s</b> (%s) at <b>%s:%s</b>.", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
             self.signalProxy.emitInferiorReceivedSignal(rec)
         elif field["reason"] == "watchpoint-trigger":
-            logging.warning("Watchpoint %s on expression <b>%s</b> triggered; old value: %s, new value: %s.", field["wpt"].number, self.distributedObjects.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
+            logging.warning("Watchpoint %s on expression <b>%s</b> triggered; old value: %s, new value: %s.", field["wpt"].number, self.do.breakpointModel.breakpointByNumber(field["wpt"].number).where, field["value"].old, field["value"].new)
             self.signalProxy.emitInferiorStoppedNormally(rec)
         else:
             self.signalProxy.emitInferiorStoppedNormally(rec)
 
     def executePythonCode(self, code):
-        exec(code, {'do': self.distributedObjects})
+        exec(code, {'do': self.do})
 
     def inferiorUntil(self):
-        current_opened_file = self.distributedObjects.editorController.editor_view.getCurrentOpenedFile()
+        current_opened_file = self.do.editorController.editor_view.getCurrentOpenedFile()
         line, _ = current_opened_file.getCursorPosition()
         self.until(current_opened_file.filename, line + 1)
 

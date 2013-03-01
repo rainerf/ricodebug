@@ -54,18 +54,17 @@ class MainWindow(QMainWindow):
 
         self.ui.actionSaveSession.setEnabled(False)
 
-        self.distributedObjects = DistributedObjects(self)
+        self.do = DistributedObjects(self)
 
-        self.act = self.distributedObjects.actions
-        self.debugController = self.distributedObjects.debugController
-        self.settings = self.distributedObjects.settings
-        self.signalproxy = self.distributedObjects.signalProxy
-        self.pluginloader = PluginLoader(self.distributedObjects)
-        self.editorController = self.distributedObjects.editorController
+        self.act = self.do.actions
+        self.debugController = self.do.debugController
+        self.settings = self.do.settings
+        self.signalproxy = self.do.signalProxy
+        self.pluginloader = PluginLoader(self.do)
 
-        self.act = self.distributedObjects.actions
+        self.act = self.do.actions
         # init RecentFileHandler
-        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.distributedObjects)
+        self.recentFileHandler = RecentFileHandler(self, self.ui.menuRecentlyUsedFiles, self.do)
         self.debugController.executableOpened.connect(self.recentFileHandler.addToRecentFiles)
         self.debugController.executableOpened.connect(self.showExecutableName)
         self.debugController.executableOpened.connect(self.disableButtons)
@@ -81,7 +80,7 @@ class MainWindow(QMainWindow):
         self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)
 
         # Add editor to main window.
-        self.ui.verticalLayout.addWidget(self.distributedObjects.editorController.editor_view)
+        self.ui.verticalLayout.addWidget(self.do.editorController.editor_view)
 
         dw = self.newDockWidget("Log View", Qt.BottomDockWidgetArea, True)
         self.logviewhandler = LogViewHandler(dw)
@@ -94,7 +93,7 @@ class MainWindow(QMainWindow):
         self.setupUi()
         self.readSettings()
 
-        self.quickwatch = QuickWatch(self, self.distributedObjects)
+        self.quickwatch = QuickWatch(self, self.do)
 
     def __makeRunWithArgumentsMenu(self):
         self.__runWithArgumentsMenu = QMenu(self)
@@ -203,10 +202,10 @@ class MainWindow(QMainWindow):
         self.act.RunToCursor.triggered.connect(self.debugController.inferiorUntil)
 
         self.ui.actionRestoreSession.triggered.connect(
-                self.distributedObjects.sessionManager.showRestoreSessionDialog)
+                self.do.sessionManager.showRestoreSessionDialog)
         self.ui.actionSaveSession.triggered.connect(
-                self.distributedObjects.sessionManager.showSaveSessionDialog)
-        self.ui.actionConfigure.triggered.connect(self.distributedObjects.configStore.edit)
+                self.do.sessionManager.showSaveSessionDialog)
+        self.ui.actionConfigure.triggered.connect(self.do.configStore.edit)
 
     def insertDockWidget(self, widget, name, area, addToggleViewAction, icon=None):
         d = AlertableDockWidget(name, self)
@@ -290,7 +289,7 @@ class MainWindow(QMainWindow):
         logging.info("Inferior exited.")
 
     def closeEvent(self, event):
-        if not self.distributedObjects.editorController.closeOpenedFiles():
+        if not self.do.editorController.closeOpenedFiles():
             event.ignore()  # closing source files may be canceled by user
         else:
             self.settings.setValue("geometry", self.saveGeometry())
