@@ -35,6 +35,8 @@ class NotificationFrame(QFrame):
     def __init__(self, parent, message, severity, actions=None):
         QFrame.__init__(self, parent)
         self.ui = Ui_NotificationFrame()
+        self.ui.setupUi(self)
+        self.ui.closeButton.setIcon(QApplication.style().standardIcon(QStyle.SP_DialogCloseButton))
 
         if severity == self.INFO:
             bgcolor = "#4398c8"
@@ -49,7 +51,6 @@ class NotificationFrame(QFrame):
             fgcolor = self.palette().text().color().name()
             icon = self._standardIconAsPixmap(QStyle.SP_MessageBoxCritical)
 
-        self.ui.setupUi(self)
         self.ui.iconLabel.setPixmap(icon)
         self.ui.messageLabel.setText(message)
         self._setColor(bgcolor, fgcolor)
