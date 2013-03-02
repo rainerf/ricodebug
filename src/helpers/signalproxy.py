@@ -52,7 +52,6 @@ class SignalProxy(QObject):
     recordStateChanged = pyqtSignal(bool)
 
     def __init__(self, distributedObjects):
-        '''CTOR'''
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
         self.pluginDocks = {}
@@ -84,12 +83,6 @@ class SignalProxy(QObject):
     ###################################################
     # functions for variable operations
     ###################################################
-
-    def getVariable(self, exp):
-        return self.distributedObjects.variablePool.getVar(str(exp))
-
-    def getVariableChildren(self, name, childList, access):
-        self.distributedObjects.variablePool.getChildren(name, childList, access)
 
     def getStlVectorSize(self, vector):
         return self.distributedObjects.stlvectorParser.getSize(vector)
