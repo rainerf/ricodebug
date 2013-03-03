@@ -157,10 +157,6 @@ class DebugController(QObject):
         self.connector.finish(True)
         self.lastCmdWasStep = False
 
-    def until(self, file_, line):
-        self.connector.until(file_, line)
-        self.lastCmdWasStep = False
-
     def evaluateExpression(self, exp):
         if exp == "":
             return None
@@ -251,7 +247,8 @@ class DebugController(QObject):
     def inferiorUntil(self):
         current_opened_file = self.do.editorController.editor_view.getCurrentOpenedFile()
         line, _ = current_opened_file.getCursorPosition()
-        self.until(current_opened_file.filename, line + 1)
+        self.connector.until(current_opened_file.filename, line + 1)
+        self.lastCmdWasStep = False
 
     def getExecutableName(self):
         return self.executableName
