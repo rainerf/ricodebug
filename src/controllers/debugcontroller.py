@@ -110,6 +110,8 @@ class DebugController(QObject):
 
     def run(self, args=None):
         self.connector.setTty(self.ptyhandler.ptyname)
+        if not args:
+            args = ""
         self.connector.setArgs(args)
         try:
             self.connector.run()

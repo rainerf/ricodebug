@@ -192,11 +192,7 @@ class GdbConnector(QObject):
         return self.executeAndRaiseIfFailed("-environment-cd " + dir_)
 
     def setArgs(self, args):
-        if args is not None:
-            args = '"%s"' % args
-        else:
-            args = ""
-        return self.executeAndRaiseIfFailed("-exec-arguments " + args,
+        return self.executeAndRaiseIfFailed('-exec-arguments "%s"' % args,
                 "Failed to set arguments")
 
     def run(self):
