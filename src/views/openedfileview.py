@@ -24,6 +24,7 @@
 
 import re
 from math import log, ceil
+from collections import defaultdict
 import logging
 
 from PyQt4 import QtCore, QtGui, Qsci
@@ -215,7 +216,8 @@ class OpenedFileView(ScintillaWrapper):
         self.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
         self.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE_PERMANENT, 1 << self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
-        self.INDICATOR_TOOLTIP = self.indicatorDefine(self.BoxIndicator, -1)
+        self.INDICATOR_TOOLTIP = self.indicatorDefine(self.BoxIndicator)
+        self.setIndicatorDrawUnder(True, self.INDICATOR_TOOLTIP)
 
         self.setReadOnly(False)
 
@@ -277,6 +279,12 @@ class OpenedFileView(ScintillaWrapper):
         self.__fileChangedTimer.setSingleShot(True)
         self.__fileChangedTimer.setInterval(100)
 
+        self.__wordHighlightTimer = QTimer()
+        self.cursorPositionChanged.connect(lambda: self.__wordHighlightTimer.start())
+        self.__wordHighlightTimer.setSingleShot(True)
+        self.__wordHighlightTimer.setInterval(250)
+        self.__wordHighlightTimer.timeout.connect(self.highlightWordFromCursorPosition)
+
     def updateConfig(self):
         qs = Qsci.QsciScintilla
         c = self.distributedObjects.editorController.config
@@ -333,7 +341,6 @@ class OpenedFileView(ScintillaWrapper):
             # try evaluating the expression before doing anything else: this will return None if the
             # expression is not valid (ie. something that is not a variable)
             if self.debugController.evaluateExpression(exp.strip()) is not None:
-                self.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
                 startPos = self.positionFromLineIndex(line, start)
                 x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
                 y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
@@ -341,14 +348,12 @@ class OpenedFileView(ScintillaWrapper):
 
     def onDwellEnd(self, _1, _2, _3):
         self.distributedObjects.toolTipController.hideToolTip()
-        self.clearIndicatorRange(0, 0, self.lines(), 1, self.INDICATOR_TOOLTIP)
 
     def showContextMenu(self, point):
         scipos = self.SendScintilla(
                 Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.mapToGlobal(point)
         exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(scipos)
-        self.fillIndicatorRange(line, start, line, end, self.INDICATOR_TOOLTIP)
 
         # self.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContextMenuLine = int(self.lineIndexFromPosition(scipos)[0])
@@ -403,27 +408,63 @@ class OpenedFileView(ScintillaWrapper):
                 return "", (None, None, None)
         else:
             line, start, end = self.getWordRangeFromPosition(position)
-        l = str(self.text(line))
-        return l[start:end], (line, start, end)
+        return self.getWordFromRange(line, start, end), (line, start, end)
 
     def getWordRangeFromPosition(self, position):
         line, col = self.lineIndexFromPosition(position)
+        start, end = self.getWordRangeFromLineCol(line, col)
+        return line, start, end
+
+    def getWordRangeFromLineCol(self, line, col):
         s = str(self.text(line))
         start = col - 1
         end = col
 
-        r = re.compile(r'[\w\d_\.]')
+        a = 0
+
         while start >= 0:
-            if not r.match(s[start]):
+            if s[start].isalnum() or s[start] in [".", "_"]:
+                pass
+            elif s[start] == ">" and start >= 1 and s[start - 1] == "-":
+                start -= 1
+            elif s[start] == "]":
+                a -= 1
+            elif s[start] == "[":
+                a += 1
+            else:
                 break
             start -= 1
         start += 1
-        r = re.compile(r'[\w\d_]')
+
         while end < len(s):
-            if not r.match(s[end]):
+            if a >= 0:
+                pass
+            if s[end].isalnum() or s[end] == "_":
+                pass
+            elif s[end] == "]":
+                a -= 1
+            else:
                 break
             end += 1
-        return (line, start, end)
+
+        if a == 0:
+            return start, end
+        else:
+            return 0, 0
+
+    def getWordFromLineCol(self, line, col):
+        self.clearIndicatorRange(0, 0, self.lines(), 1, self.INDICATOR_TOOLTIP)
+
+        start, end = self.getWordRangeFromLineCol(line, col)
+        word = self.getWordFromRange(line, start, end)
+        if word:
+            for i, line in enumerate(self.text().split('\n')):
+                for match in re.finditer(r"\b%s\b" % word, line):
+                    self.fillIndicatorRange(i, match.start(), i, match.end(), self.INDICATOR_TOOLTIP)
+                
+
+    def getWordFromRange(self, line, start, end):
+        return str(self.text(line))[start:end]
 
     def editDoubleClicked(self, position, line, modifiers):
         line, start, end = self.getWordRangeFromPosition(position)
@@ -459,6 +500,10 @@ class OpenedFileView(ScintillaWrapper):
                 self.removeHighlightLinePermanent(line)
         elif margin == self.MARGIN_MARKER_TP:
             self.toggleTracepointWithLine(line)
+
+    def highlightWordFromCursorPosition(self):
+        line, col = self.getCursorPosition()
+        print self.getWordFromLineCol(line, col)
 
     def toggleBreakpointWithLine(self, line):
         self.__bpModel.toggleBreakpoint(self.filename, line + 1)
