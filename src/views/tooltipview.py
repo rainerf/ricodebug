@@ -24,7 +24,7 @@
 
 from PyQt4.QtCore import Qt, QTimer, QModelIndex
 from PyQt4.QtGui import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, \
-        QSizeGrip, QSpacerItem, QSizePolicy, QStylePainter, QStyleOptionFrame, QStyle, QToolTip
+        QSizeGrip, QSpacerItem, QSizePolicy, QStylePainter, QStyleOptionFrame, QStyle, QToolTip, QAbstractItemView
 
 from .treeitemview import TreeItemView
 from helpers.icons import Icons
@@ -40,6 +40,9 @@ class ToolTipView(QWidget):
         self.__do = distributedObjects
         self.__allowHide = True
         self.treeItemView = TreeItemView()
+        self.treeItemView.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
+        self.treeItemView.verticalScrollBar().rangeChanged.connect(self.resizeViewVertically)
+
         self.hide()
 
         self.exp = None
@@ -110,7 +113,7 @@ class ToolTipView(QWidget):
         self.__do.breakpointModel.insertWatchpoint(self.exp)
 
     def show(self, exp):
-        self.resize(300, 90)
+        self.resize(400, 90)
 
         # store the expression for __addToWatch and __addToDatagraph
         self.exp = exp
@@ -130,3 +133,8 @@ class ToolTipView(QWidget):
         opt = QStyleOptionFrame()
         opt.initFrom(self)
         painter.drawPrimitive(QStyle.PE_PanelTipLabel, opt)
+
+    def resizeViewVertically(self, _, max_):
+        itemHeight = self.treeItemView.indexRowSizeHint(self.treeItemView.model().index(0, 0, QModelIndex()))
+        self.resize(self.width(), self.height() + max_ * itemHeight)
+        self.treeItemView.verticalScrollBar().setRange(0, 0)
