@@ -73,7 +73,14 @@ class GdbReader(QThread):
                     self.forwardMultipleBreakPointInfo(asString)
                 # FIXME: the line below might throw an execption; we should
                 # handle this gracefully
-                results = GdbResultParser.parse(lines)
+                try:
+                    results = GdbResultParser.parse(lines)
+                except GdbError as e:
+                    # we can't use logging here since this will run inside a
+                    # thread. for now, use brute force
+                    print e
+                    raise
+                    
                 lines = []
                 for res in results:
                     self.forwardResult(res)
