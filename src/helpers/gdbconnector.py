@@ -32,6 +32,7 @@ from PyQt4.QtCore import QObject, pyqtSignal
 from .gdbreader import GdbReader
 from .gdboutput import GdbOutput
 import helpers
+import os
 
 
 class GdbConnector(QObject):
@@ -97,7 +98,9 @@ class GdbConnector(QObject):
 
         files = []
         for f in res.files:
-            if hasattr(f, "fullname"):
+            # don't return files where we don't know the full name or files that
+            # do not exist
+            if hasattr(f, "fullname") and os.path.isfile(f.fullname):
                 files.append(f.fullname)
 
         # gdb reports some files multiple times, uniqify the list
