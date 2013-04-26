@@ -38,23 +38,29 @@ from .tools import unBackslashify
 
 
 reserved = {
-    "done": "DONE",
-    "running": "RUNNING",
-    "connected": "CONNECTED",
-    "error": "ERROR",
-    "exit": "EXIT",
-    "stopped": "STOPPED",
-    "thread-created": "THREAD_CREATED",
-    "thread-group-created": "THREAD_GROUP_CREATED",
-    "thread-group-added": "THREAD_GROUP_ADDED",
-    "thread-group-started": "THREAD_GROUP_STARTED",
-    "thread-exited": "THREAD_EXITED",
-    "thread-group-exited": "THREAD_GROUP_EXITED",
-    "thread-selected": "THREAD_SELECTED",
-    "library-loaded": "LIBRARY_LOADED",
-    "library-unloaded": "LIBRARY_UNLOADED",
-    "breakpoint-modified": "BREAKPOINT_MODIFIED",
-    "breakpoint-created": "BREAKPOINT_CREATED"
+    x : x.upper().replace("-", "_") for x in [
+        "done",
+        "running",
+        "connected",
+        "error",
+        "exit",
+        "stopped",
+        "thread-created",
+        "thread-group-created",
+        "thread-group-added",
+        "thread-group-started",
+        "thread-exited",
+        "thread-group-exited",
+        "thread-selected",
+        "library-loaded",
+        "library-unloaded",
+        "breakpoint-modified",
+        "breakpoint-created",
+        "breakpoint-deleted",
+        "record-started",
+        "record-stopped",
+        "cmd-param-changed"
+    ]
 }
 
 tokens = [
@@ -171,7 +177,11 @@ def p_async_class(p):
                    | LIBRARY_LOADED
                    | LIBRARY_UNLOADED
                    | BREAKPOINT_MODIFIED
-                   | BREAKPOINT_CREATED'''
+                   | BREAKPOINT_CREATED
+                   | BREAKPOINT_DELETED
+                   | RECORD_STARTED
+                   | RECORD_STOPPED
+                   | CMD_PARAM_CHANGED'''
     if p[1] == "stopped":
         p[0] = GdbOutput.STOPPED
     elif p[1] == "running":
@@ -198,6 +208,14 @@ def p_async_class(p):
         p[0] = GdbOutput.BREAKPOINT_MODIFIED
     elif p[1] == "breakpoint-created":
         p[0] = GdbOutput.BREAKPOINT_CREATED
+    elif p[1] == "breakpoint-deleted":
+        p[0] = GdbOutput.BREAKPOINT_DELETED
+    elif p[1] == "record-started":
+        p[0] = GdbOutput.RECORD_STARTED
+    elif p[1] == "record-stopped":
+        p[0] = GdbOutput.RECORD_STOPPED
+    elif p[1] == "cmd-param-changed":
+        p[0] = GdbOutput.CMD_PARAM_CHANGED
     else:
         raise helpers.excep.GdbError("Got " + p[1] + " which cannot occur here!")
 
@@ -271,8 +289,7 @@ def p_value_list(p):
 
 def p_error(p):
     if p:
-        raise helpers.excep.GdbError("Syntax error in input, line %d, col %d: %s", \
-            p.lineno, p.lexpos, p.type)
+        raise helpers.excep.GdbError("Syntax error in input, line %d, col %d: %s" % (p.lineno, p.lexpos, p.type))
     else:
         raise helpers.excep.GdbError("Syntax error in input!")
 
