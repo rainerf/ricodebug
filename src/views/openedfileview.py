@@ -156,7 +156,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
 class OpenedFileView(ScintillaWrapper):
     MARGIN_NUMBERS, MARGIN_MARKER_FOLD, MARGIN_MARKER_BP, MARGIN_MARKER_TP, MARGIN_MARKER_EXEC, \
-    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARKER_HIGHLIGHTED_LINE_PERMANENT, MARGIN_MARKER_STACK, MARGIN_MARKER_BP_DIS = range(10)
+    MARGIN_MARKER_EXEC_SIGNAL, MARKER_HIGHLIGHTED_LINE, MARGIN_MARKER_STACK, MARGIN_MARKER_BP_DIS = range(9)
 
     def __init__(self, distributedObjects, filename, parent):
         ScintillaWrapper.__init__(self, parent)
@@ -199,7 +199,6 @@ class OpenedFileView(ScintillaWrapper):
         self.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
         self.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
         self.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
-        self.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
         # define width and mask to show margin
         self.setMarginWidth(self.MARGIN_MARKER_BP, 10)
@@ -212,9 +211,7 @@ class OpenedFileView(ScintillaWrapper):
                 1 << self.MARGIN_MARKER_EXEC_SIGNAL |
                 1 << self.MARGIN_MARKER_STACK)
         self.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE, 0)
-        self.setMarginWidth(self.MARKER_HIGHLIGHTED_LINE_PERMANENT, 0)
         self.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE, 1 << self.MARKER_HIGHLIGHTED_LINE)
-        self.setMarginMarkerMask(self.MARKER_HIGHLIGHTED_LINE_PERMANENT, 1 << self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
         self.INDICATOR_TOOLTIP = self.indicatorDefine(self.BoxIndicator)
         self.setIndicatorDrawUnder(True, self.INDICATOR_TOOLTIP)
@@ -307,7 +304,6 @@ class OpenedFileView(ScintillaWrapper):
         self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
         self.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
         self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
-        self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
 
         # check whether we're supposed to use overlays and reload everything
         # that uses them
@@ -494,10 +490,6 @@ class OpenedFileView(ScintillaWrapper):
         # if breakpoint should be toggled
         if margin == self.MARGIN_NUMBERS or margin == self.MARGIN_MARKER_BP:
             self.toggleBreakpointWithLine(line)
-            if self.__bpModel.breakpointByLocation(self.filename, line + 1):
-                self.highlightLinePermanent(line)
-            else:
-                self.removeHighlightLinePermanent(line)
         elif margin == self.MARGIN_MARKER_TP:
             self.toggleTracepointWithLine(line)
 
@@ -525,7 +517,6 @@ class OpenedFileView(ScintillaWrapper):
             if bp.fullname == self.filename:
                 self.markerAdd(bp.line - 1, self.MARGIN_MARKER_BP if bp.enabled else self.MARGIN_MARKER_BP_DIS)
                 self.__addBreakpointOverlay(bp)
-                self.highlightLinePermanent(int(bp.line) - 1)
 
     def __addBreakpointOverlay(self, bp):
         if not self.__useBreakpointOverlays:
@@ -591,13 +582,3 @@ class OpenedFileView(ScintillaWrapper):
 
     def removeHighlightedLines(self):
         self.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)
-
-    def highlightLinePermanent(self, line):
-        self.removeHighlightedLines()
-        self.markerAdd(line, self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
-
-    def removeHighlightLinePermanent(self, line):
-        self.markerDelete(line, self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
-
-    def removeHighlightLinesPermanent(self):
-        self.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE_PERMANENT)
