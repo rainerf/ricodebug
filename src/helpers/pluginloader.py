@@ -123,6 +123,11 @@ class PluginLoader(QObject):
         """Load plugin from plugin folder. Name of class and file of plugin must be the same."""
         try:
             pluginmodule = __import__("plugins.%s.%s" % (plugin.modulename, plugin.classname))
+        except ImportError as e:
+            logging.error("Error while loading plugin " + plugin.modulename + ". Error: %s", e)
+            return False
+        
+        try:
             module = getattr(getattr(pluginmodule, plugin.modulename), plugin.classname)
             class_ = getattr(module, plugin.classname)
 
