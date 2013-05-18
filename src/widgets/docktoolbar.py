@@ -94,9 +94,9 @@ class DockToolBar(QToolBar):
         if self.hasDock(dock):
             return
 
-        tb = self.manager.bar(self.manager.dockWidgetAreaToToolBarArea(self.manager.main.dockWidgetArea(dock)))
-        if tb and tb.hasDock(dock):
-            tb.removeDock(dock)
+        for tb in self.manager.bars.itervalues():
+            if tb.hasDock(dock):
+                tb.removeDock(dock)
 
         # create button
         pb = RotatableToolButton(self, self.manager.toolBarAreaToBoxLayoutDirection(self.manager.main.toolBarArea(self)))
