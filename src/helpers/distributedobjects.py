@@ -76,15 +76,8 @@ class DistributedObjects:
         self.stackController = StackController(self)
 
         self.threadModel, _ = self.buildModelAndView(ThreadModel, ThreadView, "Threads", Icons.thread)
-
         self.watchModel, _ = self.buildModelAndView(WatchModel, WatchView, "Watch", Icons.watch)
-        # watchView = WatchView()
-        # watchController = WatchController(self, watchView)
-        # self.watchModel = watchController.model
-
-        _1, _2 = self.buildModelAndView(LocalsModel, TreeItemView, "Locals", Icons.locals)
-        # localsView = LocalsView()
-        # localsController = LocalsController(self, localsView)
+        self.buildModelAndView(LocalsModel, TreeItemView, "Locals", Icons.locals)
 
         self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
 
