@@ -83,7 +83,7 @@ class MainWindow(QMainWindow):
         # Add editor to main window.
         self.ui.verticalLayout.addWidget(self.do.editorController.editor_view)
 
-        dw = self.newDockWidget("Log View", Qt.BottomDockWidgetArea, True)
+        dw = self.insertDockWidget(None, "Log View", Qt.BottomDockWidgetArea, True)
         self.logviewhandler = LogViewHandler(dw)
         dw.setWidget(self.logviewhandler)
         self.notificationFrameHandler = NotificationFrameHandler(self.ui.notificationArea)
@@ -190,19 +190,11 @@ class MainWindow(QMainWindow):
     def insertDockWidget(self, widget, name, area, addToggleViewAction, icon=None):
         d = AlertableDockWidget(name, self)
         d.setObjectName(name)
-        d.setWidget(widget)
+        if widget:
+            d.setWidget(widget)
         if icon:
             d.setWindowIcon(icon)
 
-        self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d)
-        if addToggleViewAction:
-            self.ui.menuShow_View.addAction(d.toggleViewAction())
-
-        return d
-
-    def newDockWidget(self, name, area, addToggleViewAction):
-        d = AlertableDockWidget(name, self)
-        d.setObjectName(name)
         self.dockToolBar(self.dockToolBarManager.dockWidgetAreaToToolBarArea(area)).addDock(d)
         if addToggleViewAction:
             self.ui.menuShow_View.addAction(d.toggleViewAction())

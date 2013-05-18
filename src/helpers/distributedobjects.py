@@ -107,7 +107,7 @@ class DistributedObjects:
         return model, view
 
     def buildView(self, ViewCls, name, icon=None):
-        dw = self.mainwindow.newDockWidget(name, Qt.BottomDockWidgetArea, True)
+        dw = self.mainwindow.insertDockWidget(None, name, Qt.BottomDockWidgetArea, True)
         if icon:
             dw.setWindowIcon(icon)
         view = ViewCls(self, dw)
