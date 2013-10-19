@@ -10,11 +10,11 @@
 	var.templateHandler.plot(g)
 %>\
 %	if role == Role.VALUE_ONLY:
-<img src="file://${g}?${time.time()}" />
+<img alt="" src="file://${g}?${time.time()}" />
 %	else:
 <%call expr="common.complex_entry(role, id, 'struct.png', var)">
 <tr><td>
-<img src="file://${g}?${time.time()}" />
+<img alt="" src="file://${g}?${time.time()}" />
 </td></tr>
 </%call>
 %	endif

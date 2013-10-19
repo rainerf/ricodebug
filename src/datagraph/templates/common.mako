@@ -6,9 +6,9 @@
 ##
 <%def name="open_close_entry(id_, var)">
 %	if var.isOpen:
-		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png">
+		<img alt="" style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png" />
 %	else:
-		<img style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png">
+		<img alt="" style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png" />
 %	endif
 </%def>
 ##
@@ -16,32 +16,32 @@
 ##
 <%def name="simple_entry(role, id_, icon, var, openclose=False, allowEdit=True)">
 %	if not role == Role.VALUE_ONLY:
-	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')";>
-		<td nowrap class="varaccess">
+	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')">
+		<td class="varaccess">
 <%	if var.access in ['private', 'protected']:
 		iconprefix = var.access + "_"
 	else:
 		iconprefix = ""
 %>\
-			<img src="qrc:icons/images/${iconprefix}${icon}">
+			<img alt="" src="qrc:icons/images/${iconprefix}${icon}" />
 %		if var.access:
 			<span class="varaccess"> ${var.access | h}</span>
 %		endif
 		</td>
-		<td nowrap class="vartype">
+		<td class="vartype">
 			<span class="vartype"> ${var.type | h}</span>
 		</td>
-		<td nowrap class="varname">
+		<td class="varname">
 			<span class="varname"> ${var.exp | h}</span>
 		</td>
-		<td nowrap class="open_close">
+		<td class="open_close">
 %		if openclose:
 			${open_close_entry(id_, var)}
 %		else:
 			=
 %		endif
 		</td>
-		<td nowrap class="varvalue" id="${id_}value" \
+		<td class="varvalue" id="${id_}value" \
 %		if allowEdit:
 ondblclick="showChangeInput('${id_}', '${id_}value')" \
 %		endif
@@ -58,17 +58,17 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 ##
 <%def name="complex_entry(role, id_, icon, var)">
 %	if role == Role.INCLUDE_HEADER:
-	<tr class="header" id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
-		<td nowrap>
-			<img src="qrc:icons/images/${icon}">
+	<tr class="header" id="${id}_header" oncontextmenu="contextmenu(${id}, '${id}')">
+		<td>
+			<img alt="" src="qrc:icons/images/${icon}" />
 			<span class="vartype"> ${var.type | h}</span> 
 			<span class="varname"> ${var.exp | h}</span>
 			${open_close_entry(id_, var)}
 		</td>
 	</tr>
 %		if var.isOpen:
-	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')";>
-		<td nowrap>
+	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
+		<td>
 			<table>
 				${caller.body()}
 			</table>

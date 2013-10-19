@@ -1,24 +1,27 @@
 <%!
   from datagraph.datagraphvariables import Role
 %>\
-<html>
-<body>
-<style>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
 span.vartype { color: rgb(0, 0, 120); vertical-align:top; }
 span.varname { font-weight: bold; vertical-align:top; }
 span.varaccess { color: rgb(90, 90, 90); vertical-align:top; }
 span.gdbconsole_output_ok { color: green; }
 span.gdbconsole_output_error { color: red; }
 table { border-spacing: 0pt; }
-td {padding: 2pt; }
+td {padding: 2pt; white-space: nowrap; }
 td.vartype {vertical-align:top;}
 td.varname {vertical-align:top;}
 td.varaccess {vertical-align:top;}
 td.varvalue {vertical-align:top;}
 td.open_close {vertical-align:top;}
 td.withborder { border-left: 1pt solid; border-left-color: rgba(200, 200, 200, 1)}
-table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; }
-table.variablechild {border: 1pt solid rgba(200, 200, 200, 1);}
+table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; border-radius:5px;}
+table.variablechild {border: 1pt solid rgba(200, 200, 200, 1); border-radius:5px;}
 div.removediv {position:absolute; left:2px; top:2px; z-index:1; opacity:0.2}
 div.removediv:hover {opacity:1;}
 tr.header {background-color: rgba(240, 240, 240, 1); border: 0;}
@@ -43,13 +46,15 @@ function setValue(obj, td) {
   obj.setValue(value);
 }
 </script>
+</head>
+<body>
 <% assert(top) %>\
 %  if var.inScope:
 <table class="variabletop">
 ${var.render(Role.INCLUDE_HEADER)}
 </table>
 <div class="removediv">
-<img onclick="${id}.remove()" src="qrc:icons/images/exit.png" width="16px" height="16px">
+<img alt="" onclick="${id}.remove()" src="qrc:icons/images/exit.png" width="16px" height="16px" />
 </div>
 %  endif
 </body>
