@@ -24,7 +24,7 @@ table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(25
 table.variablechild {border: 1pt solid rgba(200, 200, 200, 1); border-radius:5px;}
 div.removediv {position:absolute; left:2px; top:2px; z-index:1; opacity:0.2}
 div.removediv:hover {opacity:1;}
-tr.header {background-color: rgba(240, 240, 240, 1); border: 0;}
+tr.header {background: -webkit-linear-gradient(top, rgba(220,220,220,1) 0%,rgba(255,255,255,1) 100%); border: 0;}
 a {border-bottom:1px dotted;}
 * {-webkit-user-select: none; user-select: none; font-family: sans-serif;}
 input {-webkit-user-select: text; user-select: text; border: 1px solid rgba(200, 200, 200, 1); }
