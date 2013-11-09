@@ -129,7 +129,8 @@ class GdbReader(QThread):
         m = self.resultRecordMutex
         s = self.resultRecordSem
 
-        s.acquire()
+        if not s.tryAcquire(1, 2000):
+            return None
         m.lock()
         res = q.popleft()
         m.unlock()
