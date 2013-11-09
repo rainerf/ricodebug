@@ -95,7 +95,7 @@ class SessionManager(QObject):
                 if (exists(exeName)):
                     self.distributedObjects.debugController.openExecutable(exeName)
 
-                    for dialogItem, regObject in self.registeredObjects.iteritems():
+                    for dialogItem, regObject in iter(self.registeredObjects.items()):
                         if self.xmlHandler.getNode("save" + dialogItem) != None:
                             try:
                                 regObject.loadSession(self.xmlHandler)
@@ -192,7 +192,7 @@ class XmlHandler():
         attribs = {}
         if isinstance(node, QDomElement) or isinstance(node, QDomNode):
             namedNodeMap = node.attributes()
-            for i in xrange(namedNodeMap.count()):
+            for i in range(namedNodeMap.count()):
                 item = namedNodeMap.item(i)
                 attribs[str(item.nodeName())] = str(item.nodeValue())
         return attribs

@@ -200,7 +200,7 @@ class EntryModel(TreeModel):
         groups = sort_and_group(entries, attrgetter("scope"))
 
         # the first group is "None", ie. the top one
-        _, x = groups.next()
+        _, x = next(groups)
         entries = list(x)
 
         for name, elements in groups:

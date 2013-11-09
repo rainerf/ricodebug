@@ -38,6 +38,7 @@ class DockToolBarManager(QObject):
         self.bars = {}
 
     def bar(self, area):
+        area = int(area)
         if area not in self.bars:
             direction, name = {
                     Qt.LeftDockWidgetArea: (Qt.Vertical, "Left"),
@@ -91,12 +92,12 @@ class DockToolBarManager(QObject):
         areas = settings.childGroups()
 
         for area in areas:
-            area, ok = area.toInt()
-            assert ok
-
             bar = self.bar(area)
-            bar.exclusive = settings.value("%s/Exclusive" % area).toBool()
-            names = map(str, list(settings.value("%s/Widgets" % area).toStringList()))
+            bar.exclusive = bool(settings.value("%s/Exclusive" % area))
+            names = settings.value("%s/Widgets" % area)
+            if names is None:
+                continue
+
             for name in names:
                 dock = self.main.findChild(QDockWidget, name)
                 if dock:

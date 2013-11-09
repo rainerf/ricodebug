@@ -48,7 +48,7 @@ class GdbConnector(QObject):
 
         try:
             self.__gdb = subprocess.Popen(['gdb', '-i', 'mi', '-q', '-nx'], \
-                    shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                    shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         except OSError as e:
             logging.critical("Could not start _gdb. Error message: %s", e)
         self.reader.startReading(self.__gdb.stdout)
@@ -61,7 +61,8 @@ class GdbConnector(QObject):
         __start = time.time()
 
         logging.debug("Running command %s", cmd)
-        self.__gdb.stdin.write(cmd + "\n")
+        self.__gdb.stdin.write(bytes(cmd, 'ascii')+b'\n')
+        self.__gdb.stdin.flush()
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
 
         if res.class_ == GdbOutput.ERROR:

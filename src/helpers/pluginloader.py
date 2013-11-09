@@ -126,7 +126,7 @@ class PluginLoader(QObject):
         except ImportError as e:
             logging.error("Error while loading plugin " + plugin.modulename + ". Error: %s", e)
             return False
-        
+
         try:
             module = getattr(getattr(pluginmodule, plugin.modulename), plugin.classname)
             class_ = getattr(module, plugin.classname)
@@ -197,7 +197,7 @@ class PluginLoader(QObject):
         rootNode = Xml.createElement("SysCDbgActivePlugins")
         Xml.appendChild(rootNode)
 
-        for i in self.pluginActions.itervalues():
+        for i in iter(self.pluginActions.values()):
             pluginNode = Xml.createElement("plugin")
             pluginNode.setAttribute("path", i.path)
             if i.isChecked():
@@ -207,7 +207,5 @@ class PluginLoader(QObject):
             rootNode.appendChild(pluginNode)
 
         # create and write xml file
-        fileObject = QFile(filename)
-        fileObject.open(QIODevice.WriteOnly)
-        fileObject.writeData(Xml.toString())
-        fileObject.close()
+        with open(filename, "w") as f:
+            f.write(Xml.toString())

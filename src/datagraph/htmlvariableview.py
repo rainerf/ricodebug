@@ -77,7 +77,7 @@ class HtmlVariableView(QGraphicsWebView):
                 self.source = self.htmlTemplate.render(var=self.var, top=True, id=self.id)
                 self.setHtml(self.source)
 
-                for template, id_ in self.uniqueIds.iteritems():
+                for template, id_ in iter(self.uniqueIds.items()):
                     self.page().mainFrame().addToJavaScriptWindowObject(id_, template)
             except Exception as e:
                 logging.error("Rendering failed: %s", str(e))
@@ -104,9 +104,8 @@ class HtmlVariableView(QGraphicsWebView):
     def saveHtml(self):
         name = QFileDialog.getSaveFileName(filter="HTML (*.html)")
         if name != "":
-            out = file(name, 'w')
-            out.write(self.source)
-            out.close()
+            with open(name, 'w') as out:
+                out.write(self.page().mainFrame().toHtml())
 
     def contextMenuEvent(self, event):
         pass

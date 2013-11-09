@@ -159,7 +159,7 @@ class EditorView(QWidget):
         return file_, line
 
     def __removeExecutionPositionMarkers(self):
-        for f in self.openedFiles.itervalues():
+        for f in iter(self.openedFiles.values()):
             f.clearExecutionPositionMarkers()
 
     def targetStoppedNormally(self, rec):
