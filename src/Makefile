@@ -6,7 +6,7 @@ views/ui_%.py: views/%.ui
 	 pyuic4 $^ > $@
 
 resources_rc.py: resources.qrc
-	pyrcc4 $^ > $@
+	pyrcc4 -py3 $^ > $@
 
 .PHONY: clean pylint
 clean:

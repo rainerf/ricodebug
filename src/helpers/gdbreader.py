@@ -63,7 +63,7 @@ class GdbReader(QThread):
         """
         lines = []
         while True:
-            line = self.stdout.readline()
+            line = str(self.stdout.readline(), "UTF-8")
             if line.startswith("(gdb)"):
                 # Check if there is a multiple break
                 if lines[0].startswith("&\"info break "):
@@ -78,9 +78,8 @@ class GdbReader(QThread):
                 except GdbError as e:
                     # we can't use logging here since this will run inside a
                     # thread. for now, use brute force
-                    print e
                     raise
-                    
+
                 lines = []
                 for res in results:
                     self.forwardResult(res)
@@ -130,7 +129,8 @@ class GdbReader(QThread):
         m = self.resultRecordMutex
         s = self.resultRecordSem
 
-        s.acquire()
+        if not s.tryAcquire(1, 2000):
+            return None
         m.lock()
         res = q.popleft()
         m.unlock()

@@ -93,7 +93,7 @@ class FilteredLogModel(QSortFilterProxyModel):
         self.minimum = 0
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
-        data = self.sourceModel().index(sourceRow, 1, sourceParent).data().toInt()[0]
+        data = self.sourceModel().index(sourceRow, 1, sourceParent).data()
         return data >= self.minimum
 
     def setMinimum(self, minimum):

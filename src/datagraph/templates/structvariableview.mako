@@ -9,7 +9,7 @@
 %		endfor
 %	else:
 %		for idx, childVW in enumerate(var.getChildren()):
-		<td nowrap title="${childVW.access | h} ${childVW.type | h} ${childVW.exp | h}" ${'class="withborder"' if idx != 0 else ''}>
+		<td title="${childVW.access | h} ${childVW.type | h} ${childVW.exp | h}" ${'class="withborder"' if idx != 0 else ''}>
 		${childVW.render(Role.VALUE_ONLY)}
 		</td>
 %		endfor

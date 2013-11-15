@@ -60,7 +60,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
         return ret
 
     def updateOverlayPositions(self):
-        for line in xrange(0, self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINECOUNT)):
+        for line in range(0, self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINECOUNT)):
             if self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINEVISIBLE, line):
                 if line in self.__overlayWidgets:
                     overlay = self.__overlayWidgets[line]
@@ -146,7 +146,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
         self.__overlayWidgets = {}
 
     def scrollContentsBy(self, dx, dy):
-        for w in self.__overlayWidgets.itervalues():
+        for w in iter(self.__overlayWidgets.values()):
             # simply assume that all lines are of equal height
             p = w.pos() + QPoint(dx, dy * self.textHeight(0))
             w.move(p)
@@ -457,7 +457,7 @@ class OpenedFileView(ScintillaWrapper):
             for i, line in enumerate(self.text().split('\n')):
                 for match in re.finditer(r"\b%s\b" % word, line):
                     self.fillIndicatorRange(i, match.start(), i, match.end(), self.INDICATOR_TOOLTIP)
-                
+
 
     def getWordFromRange(self, line, start, end):
         return str(self.text(line))[start:end]
@@ -495,7 +495,6 @@ class OpenedFileView(ScintillaWrapper):
 
     def highlightWordFromCursorPosition(self):
         line, col = self.getCursorPosition()
-        print self.getWordFromLineCol(line, col)
 
     def toggleBreakpointWithLine(self, line):
         self.__bpModel.toggleBreakpoint(self.filename, line + 1)
@@ -542,7 +541,7 @@ class OpenedFileView(ScintillaWrapper):
         self.removeOverlayWidget(self.breakpointOverlays[bp.number], bp.line)
 
     def __validBreakpoints(self, startRow, endRow):
-        for i in xrange(startRow, endRow + 1):
+        for i in range(startRow, endRow + 1):
             # the column has no meaning here, all columns will return the
             # breakpoint object for role InternalDataRole
             bp = self.__bpModel.data(self.__bpModel.index(i, 0), self.__bpModel.InternalDataRole)

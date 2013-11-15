@@ -68,7 +68,7 @@ if os.environ['QT_API'] == 'pyqt':
     try:
         from PyQt4.QtGui import QFormLayout
     except ImportError:
-        raise ImportError, "formlayout requires PyQt4 4.4+ (or PySide)"
+        raise ImportError("formlayout requires PyQt4 4.4+ (or PySide)")
     from PyQt4.QtGui import (QWidget, QLineEdit, QComboBox, QLabel, QSpinBox, #@UnresolvedImport
                      QIcon, QStyle, QDialogButtonBox, QHBoxLayout, #@UnresolvedImport
                      QVBoxLayout, QDialog, QColor, QPushButton, QCheckBox, #@UnresolvedImport
@@ -257,12 +257,6 @@ class FormWidget(QWidget):
         if comment:
             self.formlayout.addRow(QLabel(comment))
             self.formlayout.addRow(QLabel(" "))
-        if DEBUG:
-            print "\n" + ("*"*80)
-            print "DATA:", self.data
-            print "*"*80
-            print "COMMENT:", comment
-            print "*"*80
 
     def get_dialog(self):
         """Return FormDialog instance"""
@@ -273,8 +267,6 @@ class FormWidget(QWidget):
 
     def setup(self):
         for label, value in self.data:
-            if DEBUG:
-                print "value:", value
             if label is None and value is None:
                 # Separator: (None, None)
                 frame = QFrame()
@@ -510,22 +502,22 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None):
     """
     Create form dialog and return result
     (if Cancel button is pressed, return None)
-    
+
     data: datalist, datagroup
     title: string
     comment: string
     icon: QIcon instance
     parent: parent QWidget
     apply: apply callback (function)
-    
+
     datalist: list/tuple of (field_name, field_value)
     datagroup: list/tuple of (datalist *or* datagroup, title, comment)
-    
+
     -> one field for each member of a datalist
     -> one tab for each member of a top-level datagroup
     -> one page (of a multipage widget, each page can be selected with a combo
        box) for each member of a datagroup inside a datagroup
-       
+
     Supported types for field_value:
       - int, float, str, unicode, bool
       - colors: in Qt-compatible text form, i.e. in hex format or name (red,...)
@@ -544,48 +536,3 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None):
     if dialog.exec_():
         return dialog.get()
 
-
-
-if __name__ == "__main__":
-
-    def create_datalist_example():
-        return [('str', 'this is a string'),
-                ('list', [0, '1', '3', '4']),
-                ('list2', ['--', ('none', 'None'), ('--', 'Dashed'),
-                           ('-.', 'DashDot'), ('-', 'Solid'),
-                           ('steps', 'Steps'), (':', 'Dotted')]),
-                ('float', 1.2),
-                (None, 'Other:'),
-                ('int', 12),
-                ('font', ('Arial', 10, False, True)),
-                ('color', '#123409'),
-                ('bool', True),
-                ('date', datetime.date(2010, 10, 10)),
-                ('datetime', datetime.datetime(2010, 10, 10)),
-                ]
-
-    def create_datagroup_example():
-        datalist = create_datalist_example()
-        return ((datalist, "Category 1", "Category 1 comment"),
-                (datalist, "Category 2", "Category 2 comment"),
-                (datalist, "Category 3", "Category 3 comment"))
-
-    #--------- datalist example
-    datalist = create_datalist_example()
-    def apply_test(data):
-        print "data:", data
-    print "result:", fedit(datalist, title="Example",
-                           comment="This is just an <b>example</b>.",
-                           apply=apply_test)
-
-    #--------- datagroup example
-    datagroup = create_datagroup_example()
-    print "result:", fedit(datagroup, "Global title")
-
-    #--------- datagroup inside a datagroup example
-    datalist = create_datalist_example()
-    datagroup = create_datagroup_example()
-    print "result:", fedit(((datagroup, "Title 1", "Tab 1 comment"),
-                            (datalist, "Title 2", "Tab 2 comment"),
-                            (datalist, "Title 3", "Tab 3 comment")),
-                            "Global title")

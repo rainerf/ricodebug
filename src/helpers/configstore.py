@@ -124,11 +124,11 @@ class ConfigSet(QObject):
                 if settings.contains(desc):
                     # use the item's default value to check the type we should read
                     if isinstance(i._default, bool):
-                        i.value = settings.value(desc).toBool()
-                    elif isinstance(i._default, basestring):
-                        i.value = str(settings.value(desc).toString())
+                        i.value = bool(settings.value(desc))
+                    elif isinstance(i._default, str):
+                        i.value = str(settings.value(desc))
                     elif isinstance(i._default, int):
-                        i.value = int(settings.value(desc).toInt()[0])
+                        i.value = int(settings.value(desc))
         settings.endGroup()
 
 

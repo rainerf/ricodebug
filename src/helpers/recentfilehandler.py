@@ -97,7 +97,7 @@ class RecentFileHandler():
         self.settings.beginReadArray("RecentlyUsedFiles")
         for i in range(self.nrRecentFiles):
             self.settings.setArrayIndex(i)
-            filename = self.settings.value("Filename").toString()
+            filename = self.settings.value("Filename")
 
             if not filename in self.recentFiles:
                 self.recentFiles.append(filename)

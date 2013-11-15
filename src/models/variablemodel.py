@@ -24,7 +24,7 @@
 
 import logging
 
-from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QStringList, QMimeData
+from PyQt4.QtCore import QAbstractItemModel, Qt, QModelIndex, QMimeData
 from PyQt4.QtGui import QPixmap, QBrush, QPainter
 
 from variables.ptrvariable import PtrVariable
@@ -335,7 +335,7 @@ class VariableModel(QAbstractItemModel):
             return False
 
         self.beginRemoveRows(parent, position, position + rows - 1)
-        for i in xrange(position, position + rows):
+        for i in range(position, position + rows):
             self._vars.removeIdx(i)
 
         # fix the _row members of the remaining elements
@@ -351,7 +351,7 @@ class VariableModel(QAbstractItemModel):
 
     def setData(self, index, value, role):
         if index.isValid() and role == Qt.EditRole:
-            index.internalPointer().assignValue(value.toString())
+            index.internalPointer().assignValue(value)
             return True
         return False
 

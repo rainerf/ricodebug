@@ -30,6 +30,13 @@ from PyQt4.QtCore import QObject
 
 from helpers.gdboutput import GdbOutput
 from helpers.excep import VariableNotFoundException
+from helpers.configstore import ConfigSet, ConfigItem
+
+
+class VariablePoolConfig(ConfigSet):
+    def __init__(self):
+        ConfigSet.__init__(self, "Variables", "Variable Handling Settings")
+        self.mergeBaseClassMembers = ConfigItem(self, "Merge base class members into class", True)
 
 
 class VariablePool(QObject):
@@ -46,10 +53,12 @@ class VariablePool(QObject):
         self.connector = distributedObjects.gdb_connector
         self.variables = {}
 
-        # signalproxy
         self.signalProxy = distributedObjects.signalProxy
         self.distributedObjects.signalProxy.tracepointOccurred.connect(self.justUpdateValues)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateVars)
+        
+        self.config = VariablePoolConfig()
+        self.distributedObjects.configStore.registerConfigSet(self.config)
 
     def justUpdateValues(self):
         """ just update variables for tracepoints, dont signal changes to connected views
@@ -136,7 +145,7 @@ class VariablePool(QObject):
                 if not hasattr(child.src, "type"):  # public, private, protected
                     access = child.src.exp
                     self.getChildren(factory, child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
-                elif child.src.exp == child.src.type:  # base classes
+                elif self.config.mergeBaseClassMembers.value and child.src.exp == child.src.type:  # base classes
                     self.getChildren(factory, child.src.name, childList, access, parentName, "%(parent)s.%(child)s")
                 else:
                     var = self.__createVariable(factory, child.src, parentName, None, access, childformat)

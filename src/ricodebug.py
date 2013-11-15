@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # ricodebug - A GDB frontend which focuses on visually supported
 # debugging using data structure graphs and SystemC features.

@@ -63,7 +63,7 @@ class DockToolBar(QToolBar):
 
         self.setOrientation(orientation)
 
-    docks = property(lambda self: self.__dockToButton.iterkeys())
+    docks = property(lambda self: iter(self.__dockToButton.keys()))
     count = property(lambda self: len(self.__dockToButton))
     exclusive = property(lambda self: self.aToggleExclusive.isChecked(), lambda self, value: self.aToggleExclusive.setChecked(value))
 
@@ -94,7 +94,7 @@ class DockToolBar(QToolBar):
         if self.hasDock(dock):
             return
 
-        for tb in self.manager.bars.itervalues():
+        for tb in self.manager.bars.values():
             if tb.hasDock(dock):
                 tb.removeDock(dock)
 
