@@ -19,6 +19,7 @@ td.varname {vertical-align:top;}
 td.varaccess {vertical-align:top;}
 td.varvalue {vertical-align:top;}
 td.open_close {vertical-align:top;}
+td.valuechanged {background-color:yellow;}
 td.withborder { border-left: 1pt solid; border-left-color: rgba(200, 200, 200, 1)}
 table.variabletop {border: 1pt solid rgba(200, 200, 200, 1); background: rgba(255, 255, 255, 1); position: absolute; left:0px; top:0px; border-radius:5px;}
 table.variablechild {border: 1pt solid rgba(200, 200, 200, 1); border-radius:5px;}
@@ -30,6 +31,7 @@ a {border-bottom:1px dotted;}
 input {-webkit-user-select: text; user-select: text; border: 1px solid rgba(200, 200, 200, 1); }
 form {margin: 0px; }
 </style>
+<script src="file://${path}/lib/jquery-latest.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 function contextmenu(obj, id) {
   document.getElementById(id).style.background = 'rgba(245, 245, 245, 1)';

@@ -74,7 +74,7 @@ class HtmlVariableView(QGraphicsWebView):
             # the page's viewport will not shrink if new content is set, so set it to it's minimum
             self.page().setViewportSize(QSize(0, 0))
             try:
-                self.source = self.htmlTemplate.render(var=self.var, top=True, id=self.id)
+                self.source = self.htmlTemplate.render(var=self.var, top=True, id=self.id, path=sys.path[0] + '/datagraph')
                 self.setHtml(self.source)
 
                 for template, id_ in iter(self.uniqueIds.items()):
@@ -114,7 +114,8 @@ class HtmlVariableView(QGraphicsWebView):
     def remove(self):
         """remove ourselves from the datagraph"""
         self.removing.emit()
-        self.distributedObjects.datagraphController.removeVar(self.var)
+        # ugh, this is hacky :/
+        self.var._vp.distributedObjects.datagraphController.removeVar(self.var)
 
     def getUniqueId(self, template):
         if not template in self.uniqueIds:
