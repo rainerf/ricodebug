@@ -91,15 +91,14 @@ class HtmlTemplateHandler(QObject):
     def remove(self):
         self.die()
 
+    def cheapUpdate(self):
+        return False
+
 
 class ComplexTemplateHandler(HtmlTemplateHandler):
     def __init__(self, var, template):
         HtmlTemplateHandler.__init__(self, var, template)
         self.vertical = True
-
-    @QtCore.pyqtSlot()
-    def toggleCollapsed(self):
-        self.var.setOpen(not self.var.isOpen)
 
     @QtCore.pyqtSlot()
     def toggleVertical(self):
@@ -115,14 +114,9 @@ class ComplexTemplateHandler(HtmlTemplateHandler):
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
 
-        action = menu.addAction(QIcon(":/icons/images/collapse.png"), "Collapse %s" % self.var.exp, self.toggleCollapsed)
+        action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.var.exp, self.toggleVertical)
         action.setCheckable(True)
-        action.setChecked(not self.var.isOpen)
-
-        if self.var.isOpen:
-            action = menu.addAction(QIcon(":/icons/images/vertical.png"), "Vertical view for %s" % self.var.exp, self.toggleVertical)
-            action.setCheckable(True)
-            action.setChecked(self.vertical)
+        action.setChecked(self.vertical)
 
     def render(self, role, **kwargs):
         return HtmlTemplateHandler.render(self, role, vertical=self.vertical, **kwargs)
@@ -161,7 +155,10 @@ class DataGraphVariableBase:
 
     @QtCore.pyqtSlot()
     def setDirty(self, render_immediately=False):
+        if self.templateHandler.cheapUpdate():
+            return
         self.dirty = True
+        assert self.parent
         if self.parent:
             self.parent.setDirty(render_immediately)
 
@@ -191,11 +188,6 @@ class DataGraphVariableBase:
 class ComplexDataGraphVariableBase(DataGraphVariableBase):
     def __init__(self, templateHandler):
         DataGraphVariableBase.__init__(self, templateHandler)
-        self.isOpen = True
-
-    def setOpen(self, open_):
-        self.isOpen = open_
-        self.setDirty(True)
 
     def getChildren(self):
         return self.childs

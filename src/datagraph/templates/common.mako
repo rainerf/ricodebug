@@ -5,11 +5,7 @@
 ###############################################################################
 ##
 <%def name="open_close_entry(id_, var)">
-%	if var.isOpen:
-		<img alt="" style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/opened.png" />
-%	else:
-		<img alt="" style="padding-top:5px" onclick="${id_}.toggleCollapsed()" src="qrc:icons/images/closed.png" />
-%	endif
+	<img alt="" style="padding-top:5px" onclick="if ($('#${id_}value').css('display') == 'none') $('#${id_}valuecollapsed').fadeOut(100, function() { $('#${id_}value').fadeIn(100); }); else $('#${id_}value').fadeOut(100, function() { $('#${id_}valuecollapsed').fadeIn(100); });" src="qrc:icons/images/opened.png" />
 </%def>
 ##
 ###############################################################################
@@ -48,6 +44,9 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 >
 			${caller.body()}\
 		</td>
+		<td class="varvalue" id="${id_}valuecollapsed" style="display: none">
+			...
+		</td>
 	</tr>
 %	else:
 		${caller.body()}
@@ -66,7 +65,6 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 			${open_close_entry(id_, var)}
 		</td>
 	</tr>
-%		if var.isOpen:
 	<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td>
 			<table>
@@ -74,17 +72,12 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 			</table>
 		</td>
 	</tr>
-%		endif
 ##
 %	else:
 ##
-<%call expr="simple_entry(role, id, 'struct.png', var, True)">
+<%call expr="simple_entry(role, id, 'struct.png', var, True, False)">
 			<table class="variablechild">
-%		if var.isOpen:
 			${caller.body()}
-%		else:
-			<tr id="${id}" oncontextmenu="contextmenu(${id}, '${id}')"><td>...</td></tr>
-%		endif
 			</table>
 </%call>
 %	endif

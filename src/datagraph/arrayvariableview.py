@@ -116,9 +116,8 @@ class ArrayVariableTemplateHandler(ComplexTemplateHandler):
 
         graphicalViewPossible = all(isinstance(var, DataGraphStdVariable) for var in self.var.childs)
 
-        # we only allow the graphical view if all contained elements are standard variables; also,
-        # do not show the menu if the variable view is collapsed
-        if self.var.isOpen and graphicalViewPossible:
+        # we only allow the graphical view if all contained elements are standard variables
+        if graphicalViewPossible:
             action = menu.addAction(Icons.graph, "Graphical view for %s" % self.var.exp, self.toggleGraphicalView)
             action.setCheckable(True)
             action.setChecked(self.graphicalView)

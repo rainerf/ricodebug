@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QIcon
+import logging
 
 from .datagraphvariables import DataGraphVariableBase, HtmlTemplateHandler
 from variables import filters
@@ -38,6 +39,11 @@ class StdVariableTemplateHandler(HtmlTemplateHandler):
     def prepareContextMenu(self, menu):
         HtmlTemplateHandler.prepareContextMenu(self, menu)
         filters.add_actions_for_all_filters(menu.addMenu(QIcon(":/icons/images/filter.png"), "Set Filter for %s..." % self.var.exp), self.var)
+
+    def cheapUpdate(self):
+        logging.debug("Doing cheap update for %s", self.var.exp)
+        self.var.getView().evaluateJavaScript('$("#%svalue").html("%s")' % (self.id, self.var.value))
+        return True
 
 
 class DataGraphStdVariable(StdVariable, DataGraphVariableBase):

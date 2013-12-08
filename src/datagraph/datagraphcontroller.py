@@ -25,6 +25,7 @@ from PyQt4.QtCore import QObject, Qt
 from PyQt4.QtGui import QIcon
 
 from helpers.excep import VariableNotFoundException
+from helpers.configstore import ConfigSet, ConfigItem
 from .datagraphview import DataGraphView
 from variables.variablelist import VariableList
 from .pointer import Pointer
@@ -39,6 +40,12 @@ class DataGraphVariableFactory:
     ArrayVariable = DataGraphArrayVariable
     PtrVariable = DataGraphPtrVariable
     StructVariable = DataGraphStructVariable
+
+
+class DataGraphConfig(ConfigSet):
+    def __init__(self):
+        ConfigSet.__init__(self, "Data Graph", "Data Graph Options")
+        self.showAccess = ConfigItem(self, "Show access type (public, private, protected)", True)
 
 
 class DataGraphController(QObject):
@@ -61,6 +68,10 @@ class DataGraphController(QObject):
         self.signalProxy.cleanupModels.connect(self.clearDataGraph)
 
         self.distributedObjects.mainwindow.insertDockWidget(self._view, "Graph", Qt.LeftDockWidgetArea, True, QIcon(":/icons/images/datagraph.png"))
+
+        self.config = DataGraphConfig()
+        self.distributedObjects.configStore.registerConfigSet(self.config)
+        #self.config.itemsHaveChanged.connect(...)
 
     def addWatch(self, watch, xPos=0, yPos=0):
         """ adds `watch' to the DataGraph
