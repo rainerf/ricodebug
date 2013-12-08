@@ -291,7 +291,7 @@ class VariableModel(QAbstractItemModel):
         self.dataChanged.emit(tl, br)
 
     def mimeTypes(self):
-        return QStringList([variable.MIME_TYPE])
+        return [variable.MIME_TYPE]
 
     def mimeData(self, indexes):
         if len(indexes) == 1:
