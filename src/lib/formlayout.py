@@ -130,9 +130,10 @@ def text_to_qcolor(text):
     Avoid warning from Qt when an invalid QColor is instantiated
     """
     color = QColor()
-    if not isinstance(text, basestring): # testing for QString (PyQt API#1)
+    print(text)
+    if not isinstance(text, str): # testing for QString (PyQt API#1)
         text = str(text)
-    if not isinstance(text, (unicode, str)):
+    if not isinstance(text, (str, str)):
         return color
     if text.startswith('#') and len(text) == 7:
         correct = '#0123456789abcdef'
@@ -174,7 +175,7 @@ class ColorLayout(QHBoxLayout):
 
 def font_is_installed(font):
     """Check if font is installed"""
-    return [fam for fam in QFontDatabase().families() if unicode(fam) == font]
+    return [fam for fam in QFontDatabase().families() if str(fam) == font]
 
 def tuple_to_qfont(tup):
     """
@@ -196,7 +197,7 @@ def tuple_to_qfont(tup):
     return font
 
 def qfont_to_tuple(font):
-    return (unicode(font.family()), int(font.pointSize()),
+    return (str(font.family()), int(font.pointSize()),
             font.italic(), font.bold())
 
 class FontLayout(QGridLayout):
@@ -284,7 +285,7 @@ class FormWidget(QWidget):
                 field = FontLayout(value, self)
             elif text_to_qcolor(value).isValid():
                 field = ColorLayout(QColor(value), self)
-            elif isinstance(value, (str, unicode)):
+            elif isinstance(value, (str, str)):
                 field = QLineEdit(value, self)
             elif isinstance(value, (list, tuple)):
                 value = list(value)  # in case this is a tuple
@@ -339,8 +340,8 @@ class FormWidget(QWidget):
                 continue
             elif tuple_to_qfont(value) is not None:
                 value = field.get_font()
-            elif isinstance(value, (str, unicode)):
-                value = unicode(field.text())
+            elif isinstance(value, (str, str)):
+                value = str(field.text())
             elif isinstance(value, (list, tuple)):
                 # offset index by +1 since the first element in the list is the
                 # default value which is not shown in the combo box
@@ -519,7 +520,7 @@ def fedit(data, title="", comment="", icon=None, parent=None, apply=None):
        box) for each member of a datagroup inside a datagroup
 
     Supported types for field_value:
-      - int, float, str, unicode, bool
+      - int, float, str, bool
       - colors: in Qt-compatible text form, i.e. in hex format or name (red,...)
                 (automatically detected from a string)
       - list/tuple:
