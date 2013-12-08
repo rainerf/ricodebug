@@ -14,9 +14,9 @@ span.gdbconsole_output_ok { color: green; }
 span.gdbconsole_output_error { color: red; }
 table { border-spacing: 0pt; }
 td {padding: 2pt; white-space: nowrap; }
-td.vartype {vertical-align:top;}
-td.varname {vertical-align:top;}
-td.varaccess {vertical-align:top;}
+td.tctype {vertical-align:top;}
+td.tcname {vertical-align:top;}
+td.tcaccess {vertical-align:top;}
 td.varvalue {vertical-align:top;}
 td.open_close {vertical-align:top;}
 td.valuechanged {background-color:yellow;}

@@ -13,7 +13,7 @@
 <%def name="simple_entry(role, id_, icon, var, openclose=False, allowEdit=True)">
 %	if not role == Role.VALUE_ONLY:
 	<tr id="${id_}" oncontextmenu="contextmenu(${id_}, '${id_}')">
-		<td class="varaccess">
+		<td class="tcaccess">
 <%	if var.access in ['private', 'protected']:
 		iconprefix = var.access + "_"
 	else:
@@ -24,10 +24,10 @@
 			<span class="varaccess"> ${var.access | h}</span>
 %		endif
 		</td>
-		<td class="vartype">
+		<td class="tctype">
 			<span class="vartype"> ${var.type | h}</span>
 		</td>
-		<td class="varname">
+		<td class="tcname">
 			<span class="varname"> ${var.exp | h}</span>
 		</td>
 		<td class="open_close">
@@ -60,7 +60,7 @@ ondblclick="showChangeInput('${id_}', '${id_}value')" \
 	<tr class="header" id="${id}_header" oncontextmenu="contextmenu(${id}, '${id}')">
 		<td>
 			<img alt="" src="qrc:icons/images/${icon}" />
-			<span class="vartype"> ${var.type | h}</span> 
+			<span class="vartype"> ${var.type | h}</span>
 			<span class="varname"> ${var.exp | h}</span>
 			${open_close_entry(id_, var)}
 		</td>
