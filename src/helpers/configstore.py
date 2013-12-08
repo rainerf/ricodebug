@@ -25,6 +25,7 @@
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QObject
 
 from lib.formlayout import fedit
+import logging
 
 
 class ConfigItem(QObject):
@@ -125,7 +126,10 @@ class ConfigSet(QObject):
                 if settings.contains(desc):
                     # use the item's default value to check the type we should read
                     if isinstance(i._default, bool):
-                        i.value = bool(settings.value(desc))
+                        try:
+                            i.value = {"true": True, "false": False}[settings.value(desc)]
+                        except KeyError:
+                            logging.error("Illegal value %s for boolean key %s/%s in settings, using default value.", settings.value(desc), self._name, desc)
                     elif isinstance(i._default, str):
                         i.value = str(settings.value(desc))
                     elif isinstance(i._default, int):
