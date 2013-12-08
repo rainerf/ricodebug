@@ -31,11 +31,12 @@ from PyQt4.QtCore import QObject
 from helpers.gdboutput import GdbOutput
 from helpers.excep import VariableNotFoundException
 from helpers.configstore import ConfigSet, ConfigItem
+from helpers.icons import Icons
 
 
 class VariablePoolConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Variables", "Variable Handling Settings")
+        ConfigSet.__init__(self, "Variables", "Variable Handling Settings", Icons.var)
         self.mergeBaseClassMembers = ConfigItem(self, "Merge base class members into class", True)
 
 
@@ -56,7 +57,7 @@ class VariablePool(QObject):
         self.signalProxy = distributedObjects.signalProxy
         self.distributedObjects.signalProxy.tracepointOccurred.connect(self.justUpdateValues)
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateVars)
-        
+
         self.config = VariablePoolConfig()
         self.distributedObjects.configStore.registerConfigSet(self.config)
 

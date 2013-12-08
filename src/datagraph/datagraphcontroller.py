@@ -26,6 +26,7 @@ from PyQt4.QtGui import QIcon
 
 from helpers.excep import VariableNotFoundException
 from helpers.configstore import ConfigSet, ConfigItem
+from helpers.icons import Icons
 from .datagraphview import DataGraphView
 from variables.variablelist import VariableList
 from .pointer import Pointer
@@ -44,7 +45,7 @@ class DataGraphVariableFactory:
 
 class DataGraphConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Data Graph", "Data Graph Options")
+        ConfigSet.__init__(self, "Data Graph", "Data Graph Options", Icons.datagraph)
         self.showAccess = ConfigItem(self, "Show access type (public, private, protected)", True)
 
 

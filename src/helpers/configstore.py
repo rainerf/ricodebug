@@ -82,15 +82,16 @@ class Separator:
 class ConfigSet(QObject):
     itemsHaveChanged = pyqtSignal()
 
-    def __init__(self, name, comment):
+    def __init__(self, name, comment, icon=None):
         QObject.__init__(self)
         self._name = name
         self._comment = comment
+        self._icon = icon
         self.items = []
         self.__itemHasChanged = False
 
     def getConfigTuple(self):
-        return ([v.getConfigTuple() for v in self.items], self._name, self._comment)
+        return ([v.getConfigTuple() for v in self.items], self._name, self._comment, self._icon)
 
     def appendConfigItem(self, i):
         self.items.append(i)

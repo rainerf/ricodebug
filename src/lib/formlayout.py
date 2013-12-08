@@ -75,7 +75,8 @@ if os.environ['QT_API'] == 'pyqt':
                      QColorDialog, QPixmap, QTabWidget, QApplication, #@UnresolvedImport
                      QStackedWidget, QDateEdit, QDateTimeEdit, QFont, #@UnresolvedImport
                      QFontComboBox, QFontDatabase, QGridLayout, #@UnresolvedImport
-                     QDoubleValidator, QFrame)  #@UnresolvedImport
+                     QDoubleValidator, QFrame, QListWidget, QListView, #@UnresolvedImport
+                     QStackedWidget, QListWidgetItem)  #@UnresolvedImport
     from PyQt4.QtCore import Qt, SIGNAL, SLOT, QSize
     from PyQt4.QtCore import pyqtSlot as Slot
     from PyQt4.QtCore import pyqtProperty as Property
@@ -87,7 +88,8 @@ if os.environ['QT_API'] == 'pyside':
                      QColorDialog, QPixmap, QTabWidget, QApplication, #@UnresolvedImport
                      QStackedWidget, QDateEdit, QDateTimeEdit, QFont, #@UnresolvedImport
                      QFontComboBox, QFontDatabase, QGridLayout, #@UnresolvedImport
-                     QDoubleValidator, QFormLayout, QFrame)  #@UnresolvedImport
+                     QDoubleValidator, QFormLayout, QFrame, QListWidget, QListView, #@UnresolvedImport
+                     QStackedWidget, QListWidgetItem)  #@UnresolvedImport
     from PySide.QtCore import Qt, SIGNAL, SLOT, QSize, Slot, Property  #@UnresolvedImport
 
 
@@ -130,7 +132,6 @@ def text_to_qcolor(text):
     Avoid warning from Qt when an invalid QColor is instantiated
     """
     color = QColor()
-    print(text)
     if not isinstance(text, str): # testing for QString (PyQt API#1)
         text = str(text)
     if not isinstance(text, (str, str)):
@@ -256,7 +257,7 @@ class FormWidget(QWidget):
         self.widgets = []
         self.formlayout = QFormLayout(self)
         if comment:
-            self.formlayout.addRow(QLabel(comment))
+            self.formlayout.addRow(QLabel("<b>%s</b>" % comment))
             self.formlayout.addRow(QLabel(" "))
 
     def get_dialog(self):
@@ -397,19 +398,46 @@ class FormComboWidget(QWidget):
 class FormTabWidget(QWidget):
     def __init__(self, datalist, comment="", parent=None):
         QWidget.__init__(self, parent)
-        layout = QVBoxLayout()
-        self.tabwidget = QTabWidget()
-        layout.addWidget(self.tabwidget)
+        layout = QHBoxLayout()
+        self.contentsWidget = QListWidget()
+        self.contentsWidget.setViewMode(QListView.ListMode)
+        self.contentsWidget.setMovement(QListView.Static)
+        self.contentsWidget.setMaximumWidth(128)
+
+        self.pagesWidget = QStackedWidget()
+        layout.addWidget(self.contentsWidget)
+        layout.addWidget(self.pagesWidget)
         self.setLayout(layout)
         self.widgetlist = []
-        for data, title, comment in datalist:
+
+        for elem in datalist:
+            if len(elem) == 4:
+                data, title, comment, icon = elem
+            else:
+                data, title, comment = elem
+                icon = None
+
             if len(data[0]) == 3:
                 widget = FormComboWidget(data, comment=comment, parent=self)
             else:
                 widget = FormWidget(data, comment=comment, parent=self)
-            index = self.tabwidget.addTab(widget, title)
-            self.tabwidget.setTabToolTip(index, comment)
+            #index = self.tabwidget.addTab(widget, title)
+            #self.tabwidget.setTabToolTip(index, comment)
+            self.pagesWidget.addWidget(widget)
+            contentItem = QListWidgetItem(self.contentsWidget)
+            if icon:
+                contentItem.setIcon(icon)
+            contentItem.setText(title)
+            contentItem.setToolTip(comment)
+            contentItem.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            self.contentsWidget.addItem(contentItem)
             self.widgetlist.append(widget)
+
+        self.contentsWidget.currentRowChanged.connect(self.changePage)
+
+    def changePage(self, current):
+        if current != -1:
+            self.pagesWidget.setCurrentIndex(current)
 
     def setup(self):
         for widget in self.widgetlist:

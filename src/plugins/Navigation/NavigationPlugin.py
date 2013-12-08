@@ -84,7 +84,7 @@ class NavigationView(QTreeView):
 
 class NavigationPluginConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Navigation Plugin", "Navigation Plugin Settings")
+        ConfigSet.__init__(self, "Navigation Plugin", "Navigation Plugin Settings", Icons.navigation)
         self.groupByFiles = ConfigItem(self, "Group by Files", True)
         self.ignorePaths = ConfigItem(self, "Ignore Files in Paths", "/usr:/opt")
 

@@ -33,11 +33,12 @@ from helpers.ptyhandler import PtyHandler
 from helpers.gdboutput import GdbOutput
 from helpers.configstore import ConfigSet, ConfigItem
 from helpers.excep import GdbError
+from helpers.icons import Icons
 
 
 class DebugConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Debugging", "Debugging Options")
+        ConfigSet.__init__(self, "Debugging", "Debugging Options", Icons.namespace)
         self.breakAtMain = ConfigItem(self, "Break at main function", True)
 
 

@@ -29,7 +29,7 @@ from helpers.icons import Icons
 
 class QuickWatchConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Quick Watch", "Quick Watch Settings")
+        ConfigSet.__init__(self, "Quick Watch", "Quick Watch Settings", Icons.watch)
         self.addTo = SelectionConfigItem(self, "Enter adds element to...", "nothing", ["nothing", "Watch View", "Data Graph View"])
 
 

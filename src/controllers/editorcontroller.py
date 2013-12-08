@@ -25,11 +25,12 @@
 from PyQt4.QtCore import QObject
 from views.editorview import EditorView
 from helpers.configstore import ConfigSet, ConfigItem, Separator
+from helpers.icons import Icons
 
 
 class EditorConfig(ConfigSet):
     def __init__(self):
-        ConfigSet.__init__(self, "Editor", "Editor Settings")
+        ConfigSet.__init__(self, "Editor", "Editor Settings", Icons.vertical)
         self.backgroundColor = ConfigItem(self, "Background Color", "#ffffff")
         self.identifierColor = ConfigItem(self, "Identifier Color", "#000000")
         self.keywordColor = ConfigItem(self, "Keyword Color", "#00007f")
