@@ -91,6 +91,9 @@ class HtmlTemplateHandler(QObject):
     def remove(self):
         self.die()
 
+    def cheapUpdate(self):
+        return False
+
 
 class ComplexTemplateHandler(HtmlTemplateHandler):
     def __init__(self, var, template):
@@ -152,7 +155,10 @@ class DataGraphVariableBase:
 
     @QtCore.pyqtSlot()
     def setDirty(self, render_immediately=False):
+        if self.templateHandler.cheapUpdate():
+            return
         self.dirty = True
+        assert self.parent
         if self.parent:
             self.parent.setDirty(render_immediately)
 

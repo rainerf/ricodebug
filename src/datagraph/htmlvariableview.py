@@ -122,3 +122,6 @@ class HtmlVariableView(QGraphicsWebView):
             self.lastId += 1
             self.uniqueIds[template] = "tmpl%d" % self.lastId
         return self.uniqueIds[template]
+
+    def evaluateJavaScript(self, x):
+        self.page().mainFrame().evaluateJavaScript(x)
