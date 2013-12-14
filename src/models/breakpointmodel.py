@@ -348,7 +348,7 @@ class BreakpointModel(QAbstractTableModel):
         column = index.column()
 
         if self.LAYOUT[column][0] == 'condition':
-            cond = str(value.toString())
+            cond = str(value)
             if cond == "":
                 cond = "true"
             try:
@@ -357,22 +357,23 @@ class BreakpointModel(QAbstractTableModel):
                 logging.error("Could not set condition: %s", str(e))
                 return False
         elif self.LAYOUT[column][0] == 'skip':
-            validSkip = QVariant(value).toInt()
-            if not validSkip[1]:
+            try:
+                skip = int(value)
+            except ValueError:
                 logging.error("Invalid _value for skip, must be an integer.")
                 return False
-            self.changeSkip(bp.number, int(validSkip[0]))
+            self.changeSkip(bp.number, skip)
         elif self.LAYOUT[column][0] == 'enabled':
             if role == Qt.CheckStateRole:
-                if not QVariant(value).toBool():
+                if not value:
                     self.disableBreakpoint(bp.number)
                 else:
                     self.enableBreakpoint(bp.number)
         elif self.LAYOUT[column][0] == 'name':
-            bp.name = str(value.toString())
+            bp.name = str(value)
 
             # make sure the view is updated
-            self.__emitDataChangedForRow(index.row())
+            self.__emitDataChangedForRows(index.row())
 
         return True
 
