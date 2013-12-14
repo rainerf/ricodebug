@@ -42,9 +42,7 @@ class TracepointController(QObject):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
 
-        self._model = TracepointModel(self.distributedObjects)
-        self.tracepointView = TracepointView(self.distributedObjects)
-        self.tracepointView.setModel(self._model)
+        self._model, self.tracepointView = self.distributedObjects.buildModelAndView(TracepointModel, TracepointView, "Tracepoints", Icons.tp)
 
         # register with session manager to save Tracepoints
         self.distributedObjects.signalProxy.registerWithSessionManager.emit(self, "Tracepoints")
@@ -53,8 +51,6 @@ class TracepointController(QObject):
         self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.updateWaveforms)
         self.distributedObjects.signalProxy.cleanupModels.connect(self._model.clearBreakpoints)
         self.distributedObjects.signalProxy.runClicked.connect(self._model.clearTracepointData)
-
-        self.distributedObjects.mainwindow.insertDockWidget(self.tracepointView, "Tracepoints", Qt.BottomDockWidgetArea, True, Icons.tp)
 
     def updateWaveforms(self):
         '''update tracepoint waveforms'''
