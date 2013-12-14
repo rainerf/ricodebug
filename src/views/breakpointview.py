@@ -22,7 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QTableView, QHeaderView, QAbstractItemView
+from PyQt4.QtGui import QTableView, QHeaderView, QAbstractItemView, QAction
+from helpers.icons import Icons
 
 
 class BreakpointView(QTableView):
@@ -44,6 +45,19 @@ class BreakpointView(QTableView):
         self.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         self.horizontalHeader().setStretchLastSection(True)
 
+        enableAction = QAction(Icons.bp, "Enable all breakpoints", self)
+        enableAction.triggered.connect(self.onEnableAll)
+        parent.titleBarWidget().addAction(enableAction)
+        disableAction = QAction(Icons.bp_dis, "Disable all breakpoints", self)
+        disableAction.triggered.connect(self.onDisableAll)
+        parent.titleBarWidget().addAction(disableAction)
+
     def onDoubleClicked(self, index):
         bp = self.model().breakpoints[index.row()]
         self.do.signalProxy.openFile(bp.fullname, int(bp.line))
+
+    def onEnableAll(self):
+        self.model().setAllBreakpoints(True)
+
+    def onDisableAll(self):
+        self.model().setAllBreakpoints(False)

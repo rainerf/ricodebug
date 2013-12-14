@@ -239,7 +239,7 @@ class BreakpointModel(QAbstractTableModel):
         if row is not None:
             self.connector.enableBreakpoint(number)
             bp.enabled = True
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def disableBreakpoint(self, number):
         """ disable breakpoint with number number
@@ -248,7 +248,17 @@ class BreakpointModel(QAbstractTableModel):
         if row is not None:
             self.connector.disableBreakpoint(number)
             bp.enabled = False
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
+
+    def setAllBreakpoints(self, enabled):
+        """ set all breakpoints to enabled (enabled==True) or disabled (enabled==False)"""
+        for bp in self.breakpoints:
+            if enabled:
+                self.connector.enableBreakpoint(bp.number)
+            else:
+                self.connector.disableBreakpoint(bp.number)
+            bp.enabled = enabled
+        self.__emitDataChangedForRows(0, len(self.breakpoints)-1)
 
     def changeCondition(self, number, condition):
         """ sets a condition condition to the specified breakpoint with number number
@@ -258,7 +268,7 @@ class BreakpointModel(QAbstractTableModel):
         if row is not None:
             self.connector.setConditionBreakpoint(number, condition)
             bp.condition = condition
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def changeSkip(self, number, skip):
         """ gdb will skip the breakpoint number number skip times
@@ -268,7 +278,7 @@ class BreakpointModel(QAbstractTableModel):
         if row is not None:
             self.connector.setSkipBreakpoint(number, skip)
             bp.skip = int(skip)
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def __updateBreakpointFromGdbRecord(self, rec):
         for info in rec.results:
@@ -276,12 +286,12 @@ class BreakpointModel(QAbstractTableModel):
             row, bp = self.__findRowForNumber(int(info.src.number))
             if row is not None:
                 bp.fromGdbRecord(info.src)
-                self.__emitDataChangedForRow(row)
+                self.__emitDataChangedForRows(row)
 
     def __resetHitCounters(self):
         for row, bp in enumerate(self.breakpoints):
             bp.times = 0
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def rowCount(self, parent):
         return len(self.breakpoints)
@@ -338,9 +348,11 @@ class BreakpointModel(QAbstractTableModel):
 
         return f
 
-    def __emitDataChangedForRow(self, row):
-        firstIndex = self.index(row, 0, QModelIndex())
-        secondIndex = self.index(row, self.columnCount(None) - 1, QModelIndex())
+    def __emitDataChangedForRows(self, first, last=None):
+        if last is None:
+            last = first
+        firstIndex = self.index(first, 0, QModelIndex())
+        secondIndex = self.index(last, self.columnCount(None) - 1, QModelIndex())
         self.dataChanged.emit(firstIndex, secondIndex)
 
     def setData(self, index, value, role):
