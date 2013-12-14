@@ -24,7 +24,6 @@
 
 import re
 from math import log, ceil
-from collections import defaultdict
 import logging
 
 from PyQt4 import QtCore, QtGui, Qsci
