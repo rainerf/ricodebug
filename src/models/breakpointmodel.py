@@ -225,7 +225,7 @@ class BreakpointModel(QAbstractTableModel):
         self.breakpoints.remove(bp)
         self.endRemoveRows()
 
-    def __findRowForNumber(self, number):
+    def findRowForNumber(self, number):
         for i, bp in enumerate(self.breakpoints):
             if bp.number == number:
                 return i, bp
@@ -235,7 +235,7 @@ class BreakpointModel(QAbstractTableModel):
     def enableBreakpoint(self, number):
         """ enable breakpoint with number number
         @param number: (int), the number of breakpoint that should be enabled"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.enableBreakpoint(number)
             bp.enabled = True
@@ -244,7 +244,7 @@ class BreakpointModel(QAbstractTableModel):
     def disableBreakpoint(self, number):
         """ disable breakpoint with number number
         @param number: (int), the number of breakpoint that should be disabled"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.disableBreakpoint(number)
             bp.enabled = False
@@ -264,7 +264,7 @@ class BreakpointModel(QAbstractTableModel):
         """ sets a condition condition to the specified breakpoint with number number
         @param number: (int), the number of breakpoint
         @param condition: (string), a condition like "var == 2" """
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.setConditionBreakpoint(number, condition)
             bp.condition = condition
@@ -274,7 +274,7 @@ class BreakpointModel(QAbstractTableModel):
         """ gdb will skip the breakpoint number number skip times
         @param number: (int), the number of breakpoint
         @param skip: (int), specifies how often breakpoint should be skipped"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.setSkipBreakpoint(number, skip)
             bp.skip = int(skip)
@@ -283,7 +283,7 @@ class BreakpointModel(QAbstractTableModel):
     def __updateBreakpointFromGdbRecord(self, rec):
         for info in rec.results:
             assert info.dest == "bkpt"
-            row, bp = self.__findRowForNumber(int(info.src.number))
+            row, bp = self.findRowForNumber(int(info.src.number))
             if row is not None:
                 bp.fromGdbRecord(info.src)
                 self.__emitDataChangedForRows(row)
@@ -312,6 +312,8 @@ class BreakpointModel(QAbstractTableModel):
             ret = bp
         elif role == Qt.DisplayRole:
             ret = getattr(bp, self.LAYOUT[column][0]) if self.LAYOUT[column][0] != 'enabled' else None
+        elif role == Qt.EditRole:
+            ret = getattr(bp, self.LAYOUT[column][0])
         elif role == Qt.CheckStateRole:
             if self.LAYOUT[column][0] == 'enabled':
                 ret = Qt.Checked if bp.enabled else Qt.Unchecked
@@ -376,11 +378,10 @@ class BreakpointModel(QAbstractTableModel):
                 return False
             self.changeSkip(bp.number, skip)
         elif self.LAYOUT[column][0] == 'enabled':
-            if role == Qt.CheckStateRole:
-                if not value:
-                    self.disableBreakpoint(bp.number)
-                else:
-                    self.enableBreakpoint(bp.number)
+            if not value:
+                self.disableBreakpoint(bp.number)
+            else:
+                self.enableBreakpoint(bp.number)
         elif self.LAYOUT[column][0] == 'name':
             bp.name = str(value)
 
