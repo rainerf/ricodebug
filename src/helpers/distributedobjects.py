@@ -40,8 +40,8 @@ from .sessionmanager import SessionManager
 from helpers.actions import Actions
 from helpers.configstore import ConfigStore
 from views.watchview import WatchView
-from controllers.tooltipcontroller import ToolTipController
-from views.tooltipview import ToolTipView
+from controllers.variableviewtooltipcontroller import VariableViewToolTipController
+from views.variableviewtooltip import VariableViewToolTip
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
 from views.inferiorioview import InferiorIoView
@@ -79,7 +79,7 @@ class DistributedObjects:
         self.watchModel, _ = self.buildModelAndView(WatchModel, WatchView, "Watch", Icons.watch)
         self.buildModelAndView(LocalsModel, TreeItemView, "Locals", Icons.locals)
 
-        self.toolTipController = ToolTipController(self, ToolTipView(self, self.editorController.editor_view))
+        self.toolTipController = VariableViewToolTipController(self, VariableViewToolTip(self, self.editorController.editor_view))
 
         self.tracepointController = TracepointController(self)
 

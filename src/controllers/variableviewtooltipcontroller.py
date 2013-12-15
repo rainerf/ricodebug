@@ -27,7 +27,7 @@ from helpers.excep import VariableNotFoundException
 from models.variablemodel import VariableModel
 
 
-class ToolTipController(QObject):
+class VariableViewToolTipController(QObject):
     def __init__(self, do, view, parent=None):
         QObject.__init__(self, parent)
 
@@ -44,9 +44,8 @@ class ToolTipController(QObject):
 
     def showToolTip(self, exp, pos, parent):
         self.__setVar(exp)
-        self.view.move(parent.mapToGlobal(pos))
-        self.view.raise_()
-        self.view.show(exp)
+        self.view.setExp(exp)
+        self.view.showToolTip(pos, parent)
 
     def hideToolTip(self):
         self.view.hideLater()

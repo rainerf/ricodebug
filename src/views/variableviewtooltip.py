@@ -22,28 +22,24 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtCore import Qt, QTimer, QModelIndex
-from PyQt4.QtGui import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, \
-        QSizeGrip, QSpacerItem, QSizePolicy, QStylePainter, QStyleOptionFrame, QStyle, QToolTip, QAbstractItemView
+from PyQt4.QtCore import QModelIndex
+from PyQt4.QtGui import QPushButton, QHBoxLayout, QVBoxLayout, QSizeGrip, QSpacerItem, QSizePolicy, QAbstractItemView
 
 from .treeitemview import TreeItemView
 from helpers.icons import Icons
+from widgets.complextooltip import ComplexToolTip
 
 
-class ToolTipView(QWidget):
+class VariableViewToolTip(ComplexToolTip):
     ICON_SIZE = 22
 
     def __init__(self, distributedObjects, parent=None):
-        QWidget.__init__(self, parent, Qt.Tool | Qt.FramelessWindowHint)
-        self.setPalette(QToolTip.palette())
+        ComplexToolTip.__init__(self, parent)
 
         self.__do = distributedObjects
-        self.__allowHide = True
         self.treeItemView = TreeItemView()
         self.treeItemView.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
         self.treeItemView.verticalScrollBar().rangeChanged.connect(self.resizeViewVertically)
-
-        self.hide()
 
         self.exp = None
 
@@ -77,31 +73,14 @@ class ToolTipView(QWidget):
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
 
-        self.__hideTimer = QTimer()
-        self.__hideTimer.setSingleShot(True)
-        self.__hideTimer.timeout.connect(self.hideNow)
-
-        self.treeItemView.contextMenuOpen.connect(self.__setDisallowHide)
+        self.treeItemView.contextMenuOpen.connect(self.setDisallowHide)
         self.treeItemView.setRootIsDecorated(False)
         self.treeItemView.setHeaderHidden(True)
 
-    def hideNow(self):
-        if self.__allowHide:
-            QWidget.hide(self)
-            self.treeItemView.model().clear()
+        self.hidden.connect(self.onHidden)
 
-    def __setDisallowHide(self, x):
-        self.__allowHide = not x
-
-    def enterEvent(self, _):
-        self.__hideTimer.stop()
-
-    def hideLater(self):
-        self.__hideTimer.start(250)
-
-    # hide the widget when the mouse leaves it
-    def leaveEvent(self, _):
-        self.hideLater()
+    def onHidden(self):
+        self.treeItemView.model().clear()
 
     def __addToWatch(self):
         self.__do.signalProxy.addWatch(self.exp)
@@ -112,27 +91,21 @@ class ToolTipView(QWidget):
     def __setWatchpoint(self):
         self.__do.breakpointModel.insertWatchpoint(self.exp)
 
-    def show(self, exp):
-        self.resize(400, 90)
-
+    def setExp(self, exp):
         # store the expression for __addToWatch and __addToDatagraph
         self.exp = exp
+
+    def show(self):
+        self.resize(400, 90)
 
         # expand the item shown in the tool tip to save the user some work ;)
         self.treeItemView.setExpanded(self.treeItemView.model().index(0, 0, QModelIndex()), True)
         self.updateGeometry()
 
-        QWidget.show(self)
+        ComplexToolTip.show(self)
 
     def setModel(self, model):
         self.treeItemView.setModel(model)
-
-    def paintEvent(self, _):
-        # this makes the tool tip use the system's tool tip color as its background
-        painter = QStylePainter(self)
-        opt = QStyleOptionFrame()
-        opt.initFrom(self)
-        painter.drawPrimitive(QStyle.PE_PanelTipLabel, opt)
 
     def resizeViewVertically(self, _, max_):
         itemHeight = self.treeItemView.indexRowSizeHint(self.treeItemView.model().index(0, 0, QModelIndex()))

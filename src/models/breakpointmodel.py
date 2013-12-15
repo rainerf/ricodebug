@@ -225,7 +225,7 @@ class BreakpointModel(QAbstractTableModel):
         self.breakpoints.remove(bp)
         self.endRemoveRows()
 
-    def __findRowForNumber(self, number):
+    def findRowForNumber(self, number):
         for i, bp in enumerate(self.breakpoints):
             if bp.number == number:
                 return i, bp
@@ -235,53 +235,63 @@ class BreakpointModel(QAbstractTableModel):
     def enableBreakpoint(self, number):
         """ enable breakpoint with number number
         @param number: (int), the number of breakpoint that should be enabled"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.enableBreakpoint(number)
             bp.enabled = True
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def disableBreakpoint(self, number):
         """ disable breakpoint with number number
         @param number: (int), the number of breakpoint that should be disabled"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.disableBreakpoint(number)
             bp.enabled = False
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
+
+    def setAllBreakpoints(self, enabled):
+        """ set all breakpoints to enabled (enabled==True) or disabled (enabled==False)"""
+        for bp in self.breakpoints:
+            if enabled:
+                self.connector.enableBreakpoint(bp.number)
+            else:
+                self.connector.disableBreakpoint(bp.number)
+            bp.enabled = enabled
+        self.__emitDataChangedForRows(0, len(self.breakpoints)-1)
 
     def changeCondition(self, number, condition):
         """ sets a condition condition to the specified breakpoint with number number
         @param number: (int), the number of breakpoint
         @param condition: (string), a condition like "var == 2" """
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.setConditionBreakpoint(number, condition)
             bp.condition = condition
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def changeSkip(self, number, skip):
         """ gdb will skip the breakpoint number number skip times
         @param number: (int), the number of breakpoint
         @param skip: (int), specifies how often breakpoint should be skipped"""
-        row, bp = self.__findRowForNumber(number)
+        row, bp = self.findRowForNumber(number)
         if row is not None:
             self.connector.setSkipBreakpoint(number, skip)
             bp.skip = int(skip)
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def __updateBreakpointFromGdbRecord(self, rec):
         for info in rec.results:
             assert info.dest == "bkpt"
-            row, bp = self.__findRowForNumber(int(info.src.number))
+            row, bp = self.findRowForNumber(int(info.src.number))
             if row is not None:
                 bp.fromGdbRecord(info.src)
-                self.__emitDataChangedForRow(row)
+                self.__emitDataChangedForRows(row)
 
     def __resetHitCounters(self):
         for row, bp in enumerate(self.breakpoints):
             bp.times = 0
-            self.__emitDataChangedForRow(row)
+            self.__emitDataChangedForRows(row)
 
     def rowCount(self, parent):
         return len(self.breakpoints)
@@ -302,6 +312,8 @@ class BreakpointModel(QAbstractTableModel):
             ret = bp
         elif role == Qt.DisplayRole:
             ret = getattr(bp, self.LAYOUT[column][0]) if self.LAYOUT[column][0] != 'enabled' else None
+        elif role == Qt.EditRole:
+            ret = getattr(bp, self.LAYOUT[column][0])
         elif role == Qt.CheckStateRole:
             if self.LAYOUT[column][0] == 'enabled':
                 ret = Qt.Checked if bp.enabled else Qt.Unchecked
@@ -338,9 +350,11 @@ class BreakpointModel(QAbstractTableModel):
 
         return f
 
-    def __emitDataChangedForRow(self, row):
-        firstIndex = self.index(row, 0, QModelIndex())
-        secondIndex = self.index(row, self.columnCount(None) - 1, QModelIndex())
+    def __emitDataChangedForRows(self, first, last=None):
+        if last is None:
+            last = first
+        firstIndex = self.index(first, 0, QModelIndex())
+        secondIndex = self.index(last, self.columnCount(None) - 1, QModelIndex())
         self.dataChanged.emit(firstIndex, secondIndex)
 
     def setData(self, index, value, role):
@@ -348,7 +362,7 @@ class BreakpointModel(QAbstractTableModel):
         column = index.column()
 
         if self.LAYOUT[column][0] == 'condition':
-            cond = str(value.toString())
+            cond = str(value)
             if cond == "":
                 cond = "true"
             try:
@@ -357,22 +371,22 @@ class BreakpointModel(QAbstractTableModel):
                 logging.error("Could not set condition: %s", str(e))
                 return False
         elif self.LAYOUT[column][0] == 'skip':
-            validSkip = QVariant(value).toInt()
-            if not validSkip[1]:
+            try:
+                skip = int(value)
+            except ValueError:
                 logging.error("Invalid _value for skip, must be an integer.")
                 return False
-            self.changeSkip(bp.number, int(validSkip[0]))
+            self.changeSkip(bp.number, skip)
         elif self.LAYOUT[column][0] == 'enabled':
-            if role == Qt.CheckStateRole:
-                if not QVariant(value).toBool():
-                    self.disableBreakpoint(bp.number)
-                else:
-                    self.enableBreakpoint(bp.number)
+            if not value:
+                self.disableBreakpoint(bp.number)
+            else:
+                self.enableBreakpoint(bp.number)
         elif self.LAYOUT[column][0] == 'name':
-            bp.name = str(value.toString())
+            bp.name = str(value)
 
             # make sure the view is updated
-            self.__emitDataChangedForRow(index.row())
+            self.__emitDataChangedForRows(index.row())
 
         return True
 

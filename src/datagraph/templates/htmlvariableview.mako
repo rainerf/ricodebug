@@ -31,7 +31,7 @@ a {border-bottom:1px dotted;}
 input {-webkit-user-select: text; user-select: text; border: 1px solid rgba(200, 200, 200, 1); }
 form {margin: 0px; }
 </style>
-<script src="file://${path}/lib/jquery-latest.min.js" type="text/javascript"></script>
+<script src="file://${path}/lib/jquery-2.0.0.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 function contextmenu(obj, id) {
   document.getElementById(id).style.background = 'rgba(245, 245, 245, 1)';

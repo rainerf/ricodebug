@@ -23,8 +23,9 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtGui import QPixmap, QLabel, QFrame, QHBoxLayout, QColor, QPainter, QPolygon, QPen, QLinearGradient
-from PyQt4.QtCore import Qt, QPoint, QSize
+from PyQt4.QtCore import Qt, QPoint, QSize, QEvent
 from helpers.clickablelabel import ClickableLabel
+from views.breakpointwidget import BreakpointWidget
 
 
 class PointyLabel(QLabel):
@@ -81,6 +82,8 @@ class BreakpointOverlayWidget(OverlayWidget):
         self.layout().addWidget(self.__text, 0)
         self.__icon.setCursor(Qt.ArrowCursor)
 
+        self.toolTip = None
+
     def update(self):
         if self.bp.name:
             self.__text.setText("Breakpoint '%s', hit %s times" % (self.bp.name, self.bp.times))
@@ -94,3 +97,15 @@ class BreakpointOverlayWidget(OverlayWidget):
             self.__bpModel.disableBreakpoint(self.bp.number)
         else:
             self.__bpModel.enableBreakpoint(self.bp.number)
+
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            self.toolTip = BreakpointWidget(self.__bpModel, self.bp, None)
+            self.toolTip.showToolTip(QPoint(self.height()/2, self.height()), self)
+            return True
+        return OverlayWidget.event(self, event)
+
+    def leaveEvent(self, *args, **kwargs):
+        if self.toolTip:
+            self.toolTip.hideLater()
+        return OverlayWidget.leaveEvent(self, *args, **kwargs)
