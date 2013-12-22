@@ -26,7 +26,7 @@ import os
 import logging
 from collections import defaultdict
 
-from PyQt4.QtCore import QObject, pyqtSignal, Qt, QFileSystemWatcher
+from PyQt4.QtCore import QObject, pyqtSignal, Qt, QFileSystemWatcher, pyqtSlot
 from PyQt4.QtGui import QAction
 
 from helpers.ptyhandler import PtyHandler
@@ -34,6 +34,7 @@ from helpers.gdboutput import GdbOutput
 from helpers.configstore import ConfigSet, ConfigItem
 from helpers.excep import GdbError
 from helpers.icons import Icons
+from helpers.tracer import trace
 
 
 class DebugConfig(ConfigSet):
@@ -85,6 +86,8 @@ class DebugController(QObject):
             logging.warning("Configuration changed. Please reload executable for changes to take effect!",
                             extra={"actions": [self.__reloadAction()]})
 
+    @trace
+    @pyqtSlot(str)
     def openExecutable(self, filename):
         # make sure we only open absolute paths, otherwise eg. RecentFileHandler
         # will not know _where_ the file was we opened and store different
@@ -109,6 +112,8 @@ class DebugController(QObject):
             self.executableName = filename
             self.__binaryWatcher.addPath(self.executableName)
 
+    @trace
+    @pyqtSlot(str)
     def run(self, args=None):
         self.connector.setTty(self.ptyhandler.ptyname)
         if not args:
@@ -128,44 +133,63 @@ class DebugController(QObject):
             self.connector.record_stop()
         self.signalProxy.recordStateChanged.emit(state)
 
+    @trace
+    @pyqtSlot()
     def next_(self):
         self.connector.next_()
         self.lastCmdWasStep = True
 
+    @trace
+    @pyqtSlot()
     def reverse_next(self):
         self.connector.next_(True)
         self.lastCmdWasStep = True
 
+    @trace
+    @pyqtSlot()
     def step(self):
         self.connector.step()
         self.lastCmdWasStep = True
 
+    @trace
+    @pyqtSlot()
     def reverse_step(self):
         self.connector.step(True)
         self.lastCmdWasStep = True
 
+    @trace
+    @pyqtSlot()
     def cont(self):
         self.connector.cont()
         self.lastCmdWasStep = False
 
+    @trace
+    @pyqtSlot()
     def interrupt(self):
         self.connector.interrupt()
         self.lastCmdWasStep = False
 
+    @trace
+    @pyqtSlot()
     def finish(self):
         self.connector.finish()
         self.lastCmdWasStep = False
 
+    @trace
+    @pyqtSlot()
     def reverse_finish(self):
         self.connector.finish(True)
         self.lastCmdWasStep = False
 
+    @pyqtSlot(str)
     def evaluateExpression(self, exp):
         if exp == "":
             return None
         exp = exp.replace('"', '\"')
         return self.connector.evaluate("\"" + exp + "\"")
 
+    @trace
+    @pyqtSlot(str)
     def executeCliCommand(self, cmd):
         return self.connector.executeCliCommand(cmd)
 
@@ -247,6 +271,8 @@ class DebugController(QObject):
     def executePythonCode(self, code):
         exec(code, {'do': self.do})
 
+    @trace
+    @pyqtSlot()
     def inferiorUntil(self):
         current_opened_file = self.do.editorController.editor_view.getCurrentOpenedFile()
         line, _ = current_opened_file.getCursorPosition()
@@ -256,8 +282,12 @@ class DebugController(QObject):
     def getExecutableName(self):
         return self.executableName
 
+    @trace
+    @pyqtSlot()
     def getStackDepth(self):
         return self.connector.getStackDepth()
 
+    @trace
+    @pyqtSlot()
     def selectStackFrame(self, exp):
         return self.connector.selectStackFrame(exp)
