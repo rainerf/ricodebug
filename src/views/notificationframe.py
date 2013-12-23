@@ -70,7 +70,7 @@ class NotificationFrame(QFrame):
         """
         #NotificationFrame {
           border-radius: 5px;
-          padding: 2px;
+          padding: 0px;
           background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %s, stop: 0.1 %s, stop: 1 %s);
           border: 1px solid %s;
         }
