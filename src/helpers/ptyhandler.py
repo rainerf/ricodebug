@@ -56,7 +56,7 @@ class PtyHandler(QThread):
         while not self.stop:
             if select.select([self.master], [], [], 0.2) != ([], [], []):
                 ret = os.read(self.master, 100)
-                self.dataAvailable.emit(ret)
+                self.dataAvailable.emit(ret.decode())
 
     def write(self, s):
         """Writes to the pseudo terminal
