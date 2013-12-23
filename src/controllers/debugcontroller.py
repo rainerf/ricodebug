@@ -35,6 +35,7 @@ from helpers.configstore import ConfigSet, ConfigItem
 from helpers.excep import GdbError
 from helpers.icons import Icons
 from helpers.tracer import trace
+import itertools
 
 
 class DebugConfig(ConfigSet):
@@ -70,6 +71,9 @@ class DebugController(QObject):
 
         self.__binaryWatcher = QFileSystemWatcher()
         self.__binaryWatcher.fileChanged.connect(self.__binaryChanged)
+
+        self.do.signalProxy.addProxy(["openExecutable", "run", "next_", "reverse_next", "step", "reverse_step", "cont", "interrupt", "finish", "reverse_finish", "evaluateExpression", "executeCliCommand", "inferiorUntil", "getStackDepth", "selectStackFrame"], self)
+
 
     def __reloadAction(self):
         a = QAction("Reload", self)
@@ -185,7 +189,7 @@ class DebugController(QObject):
     def evaluateExpression(self, exp):
         if exp == "":
             return None
-        exp = exp.replace('"', '\"')
+        exp = str(exp).replace('"', '\"')
         return self.connector.evaluate("\"" + exp + "\"")
 
     @trace
@@ -238,26 +242,28 @@ class DebugController(QObject):
             # the breakpoint, both of which would cause the program to suspend
             # on yet another line), but that's about as good as our guessing
             # currently gets.
-            tp = self.do.tracepointController.model().breakpointByNumber(int(field["bkptno"]))
-            bp = self.do.breakpointModel.breakpointByNumber(int(field["bkptno"]))
-            assert tp or bp  # either a TP or a BP must have been hit
+            p = self.do.tracepointController.model().breakpointByNumber(int(field["bkptno"])) or self.do.breakpointModel.breakpointByNumber(int(field["bkptno"]))  # either a TP or a BP must have been hit
 
-            # now that we have one, check if the other is here too
-            if bp and not tp:
-                tp = self.do.tracepointController.model().breakpointByLocation(bp.fullname, bp.line)
-            elif tp and not bp:
-                bp = self.do.breakpointModel.breakpointByLocation(tp.fullname, tp.line)
+            # now that we have one, check if others are here too
+            tps = self.do.tracepointController.model().breakpointsByLocation(p.fullname, p.line)
+            bps = self.do.breakpointModel.breakpointsByLocation(p.fullname, p.line)
 
-            if tp:
+            # before any breakpoint actions are executed, make sure all tracepoints gather their data
+            if tps:
                 # this will cause the variable pool to update all variables
                 self.do.signalProxy.tracepointOccurred.emit()
-                tp.recordData()
+                for i in tps:
+                    i.recordData()
 
-            if self.lastCmdWasStep or bp:
+            for i in bps:
+                if i.action:
+                    self.do.scriptEnv.exec_(i.action)
+
+            # if the last command was a step or any breakpoint tells us to not auto-continue, stop here
+            if self.lastCmdWasStep or any(not p.autoContinue for p in itertools.chain(bps, tps)):
                 self.signalProxy.inferiorStoppedNormally.emit(rec)
                 self.lastCmdWasStep = False
             else:
-                assert tp  # if this was not a breakpoint, it must have been a tracepoint
                 self.connector.cont()
         elif field["reason"] == "signal-received":
             logging.warning("Inferior received signal <b>%s</b> (%s) at <b>%s:%s</b>.", field["signal-name"], field["signal-meaning"], field["frame"].file, field["frame"].line)
@@ -267,9 +273,6 @@ class DebugController(QObject):
             self.signalProxy.inferiorStoppedNormally.emit(rec)
         else:
             self.signalProxy.inferiorStoppedNormally.emit(rec)
-
-    def executePythonCode(self, code):
-        exec(code, {'do': self.do})
 
     @trace
     @pyqtSlot()

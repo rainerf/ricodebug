@@ -22,46 +22,42 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QWidget, QTextCursor
+from PyQt4.QtGui import QWidget, QGridLayout, QTextEdit, QComboBox, QPushButton, QSizePolicy
 
 
 class PyIoView(QWidget):
     def __init__(self, do, parent=None):
         QWidget.__init__(self, parent)
 
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
+        layout = QGridLayout(self)
+        layout.setMargin(0)
 
-        self.pyIoEdit = QtGui.QTextEdit(self)
-        self.pyIoEdit.setReadOnly(True)
-        self.gridLayout.addWidget(self.pyIoEdit, 0, 0, 1, 2)
+        self.__pyIoEdit = QTextEdit(self)
+        self.__pyIoEdit.setReadOnly(True)
+        layout.addWidget(self.__pyIoEdit, 0, 0, 1, 2)
 
-        self.pyInputEdit = QtGui.QComboBox(self)
-        self.pyInputEdit.setEditable(True)
-        self.gridLayout.addWidget(self.pyInputEdit, 1, 0, 1, 1)
+        self.__pyInputEdit = QComboBox(self)
+        self.__pyInputEdit.setEditable(True)
+        layout.addWidget(self.__pyInputEdit, 1, 0, 1, 1)
 
-        self.pySendButton = QtGui.QPushButton(self)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        self.__sendButton = QPushButton(self)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pySendButton.sizePolicy().hasHeightForWidth())
-        self.pySendButton.setSizePolicy(sizePolicy)
-        self.pySendButton.setText("Send")
-        self.gridLayout.addWidget(self.pySendButton, 1, 1, 1, 1)
+        sizePolicy.setHeightForWidth(self.__sendButton.sizePolicy().hasHeightForWidth())
+        self.__sendButton.setSizePolicy(sizePolicy)
+        self.__sendButton.setText("Send")
+        layout.addWidget(self.__sendButton, 1, 1, 1, 1)
 
-        self.debugController = do.debugController
+        self.do = do
 
-        self.pyInputEdit.lineEdit().returnPressed.connect(self.pySendButton.click)
-        self.pySendButton.clicked.connect(self.executePythonCode)
+        self.__pyInputEdit.lineEdit().returnPressed.connect(self.__sendButton.click)
+        self.__sendButton.clicked.connect(self.executePythonCode)
 
     def executePythonCode(self):
-        cmd = str(self.pyInputEdit.lineEdit().text())
-        self.pyInputEdit.lineEdit().setText("")
-        self.debugController.executePythonCode(cmd)
+        cmd = str(self.__pyInputEdit.lineEdit().text())
+        self.__pyInputEdit.lineEdit().setText("")
+        self.do.scriptEnv.exec_(cmd)
 
-        # print the command in the IO edit
-        s = "<font color=\"green\">" + cmd + "</font><br>\n"
-        self.pyIoEdit.moveCursor(QTextCursor.End)
-        self.pyIoEdit.insertHtml(s)
-        self.pyIoEdit.moveCursor(QTextCursor.End)
+    def appendTranscript(self, t):
+        self.__pyIoEdit.append(t)

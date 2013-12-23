@@ -22,33 +22,39 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from functools import wraps
-import inspect
+import logging
+from helpers.tracer import trace
 
-__CLASSNAME__ = None
-__CALLBACK__ = None
-
-def setClassName(c):
-    global __CLASSNAME__
-    __CLASSNAME__ = c
-
-def setCallback(c):
-    global __CALLBACK__
-    __CALLBACK__ = c
-
-def _quote(x):
-    if isinstance(x, str):
-        return '"%s"' % x
-    else:
-        return x
+CLASSNAME = "d"
 
 
-def trace(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        fa = inspect.getcallargs(fn, *args, **kwargs)
-        arglist = ("%s=%s" % (k, _quote(v)) for k, v in fa.items() if k != "self")
-        __CALLBACK__("%s.%s(%s)" % (__CLASSNAME__, fn.__name__, ", ".join(arglist)))
+class ScriptEnv:
+    def __init__(self, do):
+        self.sp = do.signalProxy
+        self.sp.addProxy(["note", "warn", "error", "print_"], self)
 
-        return fn(*args, **kwargs)
-    return wrapper
+    def exec_(self, code):
+        try:
+            exec(code, {CLASSNAME: self.sp})
+        except Exception as e:
+            logging.exception(e)
+
+    @trace
+    def note(self, *args, **kwargs):
+        """show something as a note in the main window"""
+        logging.info(*args, **kwargs)
+
+    @trace
+    def warn(self, *args, **kwargs):
+        """show something as a warning in the main window"""
+        logging.warning(*args, **kwargs)
+
+    @trace
+    def error(self, *args, **kwargs):
+        """show something as an error in the main window"""
+        logging.error(*args, **kwargs)
+
+    @trace
+    def print_(self, var):
+        """show a variable in the main window"""
+        self.note("%s = %s" % (var, self.sp.evaluateExpression(var)))

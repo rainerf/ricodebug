@@ -54,11 +54,17 @@ from models.stoppointmodel import StoppointModel
 from models.watchmodel import WatchModel
 from models.localsmodel import LocalsModel
 from views.treeitemview import TreeItemView
+from helpers import scriptenv
+from helpers import tracer
 
 
 class DistributedObjects:
     def __init__(self, mainwindow):
         self.mainwindow = mainwindow
+
+        tracer.setClassName(scriptenv.CLASSNAME)
+        self.pyIoView = self.buildView(PyIoView, "Python Console", Icons.python)
+        tracer.setCallback(self.pyIoView.appendTranscript)
         self.settings = QSettings("fh-hagenberg", "ricodebug")
         self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
@@ -83,7 +89,6 @@ class DistributedObjects:
 
         self.tracepointController = TracepointController(self)
 
-        self.buildView(PyIoView, "Python Console", Icons.python)
         self.buildView(InferiorIoView, "Output", Icons.console)
         self.buildView(GdbIoView, "GDB Console")
 
@@ -92,6 +97,8 @@ class DistributedObjects:
         self.tracepointwaveController = TracepointWaveController(self)
 
         self.miView = self.buildView(MiTraceView, "MI Trace")
+
+        self.scriptEnv = scriptenv.ScriptEnv(self)
 
     def buildModelAndView(self, ModelCls, ViewCls, name, icon=None):
         view = self.buildView(ViewCls, name, icon)

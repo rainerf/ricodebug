@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject, pyqtSignal
+import logging
 
 
 class SignalProxy(QObject):
@@ -56,6 +57,9 @@ class SignalProxy(QObject):
         self.distributedObjects = distributedObjects
         self.pluginDocks = {}
         self.pluginSbWidgets = {}
+
+
+        self.__mapping = {}
 
     def addWatch(self, watch):
         self.AddWatch.emit(str(watch))
@@ -109,3 +113,17 @@ class SignalProxy(QObject):
         return self.distributedObjects.debugController.selectStackFrame(nr)
 
     # define further GDB command functions here ...
+
+    def addProxy(self, attrs, obj):
+        for i in attrs:
+            if i in self.__mapping:
+                logging.error("Cannot proxy %s from both %s and %s", i, self.__mapping[i], obj)
+                continue
+            if not hasattr(obj, i):
+                logging.warning("Proxying non-existing element %s from %s", i, obj)
+            self.__mapping[i] = obj
+
+    def __getattr__(self, attr):
+        if attr in self.__mapping:
+            return getattr(self.__mapping[attr], attr)
+        raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))

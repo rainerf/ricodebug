@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>151</height>
+    <height>347</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -148,6 +148,16 @@
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Action</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QPlainTextEdit" name="action"/>
         </item>
        </layout>
       </item>

@@ -23,11 +23,11 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 import logging
 
-from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
+from PyQt4.QtCore import QAbstractTableModel, Qt, QModelIndex
 
 from helpers.excep import GdbError
 from helpers.icons import Icons
-
+from helpers.tracer import trace
 
 class AbstractBreakpoint(object):
     def __init__(self):
@@ -40,6 +40,8 @@ class AbstractBreakpoint(object):
         self.name = None
         self.fullname = None
         self.tooltip = None
+        self.action = None
+        self.autoContinue = False
 
     def fromGdbRecord(self, _):
         raise NotImplementedError()
@@ -126,7 +128,9 @@ class BreakpointModel(QAbstractTableModel):
               ('condition', 'Condition'),
               ('skip', 'Skip'),
               ('times', 'Hits'),
-              ('name', 'Name')]
+              ('autoContinue', 'Auto-Continue'),
+              ('name', 'Name'),
+              ('action', 'Action')]
     InternalDataRole = Qt.UserRole
 
     def __init__(self, do, parent=None):
@@ -138,19 +142,18 @@ class BreakpointModel(QAbstractTableModel):
         do.signalProxy.breakpointModified.connect(self.__updateBreakpointFromGdbRecord)
         do.signalProxy.runClicked.connect(self.__resetHitCounters)
 
+        do.signalProxy.addProxy(["insertBreakpoint", "enableBreakpoint", "disableBreakpoint", "changeCondition", "changeSkip"], self)
+
     def _newBreakpoint(self, breakpoint, connector, **kwargs):
         return Breakpoint(breakpoint, connector)
 
-    def breakpointByLocation(self, fullname, line):
-        """ search for breakpoint in file fullname on linenumber line
+    def breakpointsByLocation(self, fullname, line):
+        """ search for breakpoints in file fullname on linenumber line
         @param fullname: (string), name of file
         @param line: (int), number of line
-        @return: (bool), True if breakpoint found in list, False else
+        @return: list of all breakpoints at the specified location
         """
-        for bp in self.breakpoints:
-            if bp.line == int(line) and bp.fullname == fullname:
-                return bp
-        return None
+        return [bp for bp in self.breakpoints if bp.line == int(line) and bp.fullname == fullname]
 
     def breakpointByNumber(self, number):
         """ search for breakpoint with given number
@@ -171,6 +174,7 @@ class BreakpointModel(QAbstractTableModel):
             # name is unknown
             self.deleteBreakpointByNumber(number)
 
+    @trace
     def insertBreakpoint(self, file_, line):
         """ inserts a breakpoint in file file_ on linenumber line
         @param file_: (string), name of file
@@ -187,18 +191,18 @@ class BreakpointModel(QAbstractTableModel):
         return bp
 
     def toggleBreakpoint(self, fullname, line):
-        """ toggles the breakpoint in file fullname with linenumber line
+        """ toggles the (the first) breakpoint in file fullname with linenumber line
         @param fullname: (string), fullname of file
         @param line: (int), linenumber where the breakpoint should be toggled
         """
-        if self.breakpointByLocation(fullname, line):
+        if self.breakpointsByLocation(fullname, line):
             self.deleteBreakpointByLocation(fullname, line)
             return None
         else:
             return self.insertBreakpoint(fullname, line)
 
     def deleteBreakpointByLocation(self, file_, line):
-        """ deletes breakpoint in file file_ on linenumber line
+        """ deletes (the first) breakpoint in file file_ on linenumber line
         @param file_: (string), name of file
         @param line: (int), number of line
         """
@@ -232,6 +236,7 @@ class BreakpointModel(QAbstractTableModel):
         else:
             return None, None
 
+    @trace
     def enableBreakpoint(self, number):
         """ enable breakpoint with number number
         @param number: (int), the number of breakpoint that should be enabled"""
@@ -241,6 +246,7 @@ class BreakpointModel(QAbstractTableModel):
             bp.enabled = True
             self.__emitDataChangedForRows(row)
 
+    @trace
     def disableBreakpoint(self, number):
         """ disable breakpoint with number number
         @param number: (int), the number of breakpoint that should be disabled"""
@@ -260,6 +266,7 @@ class BreakpointModel(QAbstractTableModel):
             bp.enabled = enabled
         self.__emitDataChangedForRows(0, len(self.breakpoints)-1)
 
+    @trace
     def changeCondition(self, number, condition):
         """ sets a condition condition to the specified breakpoint with number number
         @param number: (int), the number of breakpoint
@@ -270,6 +277,7 @@ class BreakpointModel(QAbstractTableModel):
             bp.condition = condition
             self.__emitDataChangedForRows(row)
 
+    @trace
     def changeSkip(self, number, skip):
         """ gdb will skip the breakpoint number number skip times
         @param number: (int), the number of breakpoint
@@ -311,12 +319,13 @@ class BreakpointModel(QAbstractTableModel):
         if role == self.InternalDataRole:
             ret = bp
         elif role == Qt.DisplayRole:
-            ret = getattr(bp, self.LAYOUT[column][0]) if self.LAYOUT[column][0] != 'enabled' else None
+            if self.LAYOUT[column][0] != 'enabled' and self.LAYOUT[column][0] != 'autoContinue':
+                ret = getattr(bp, self.LAYOUT[column][0])
         elif role == Qt.EditRole:
             ret = getattr(bp, self.LAYOUT[column][0])
         elif role == Qt.CheckStateRole:
-            if self.LAYOUT[column][0] == 'enabled':
-                ret = Qt.Checked if bp.enabled else Qt.Unchecked
+            if self.LAYOUT[column][0] == 'enabled' or self.LAYOUT[column][0] == 'autoContinue':
+                ret = Qt.Checked if getattr(bp, self.LAYOUT[column][0]) else Qt.Unchecked
         elif role == Qt.DecorationRole:
             if self.LAYOUT[column][0] == 'number':
                 ret = bp.icon
@@ -341,11 +350,15 @@ class BreakpointModel(QAbstractTableModel):
 
         if self.LAYOUT[column][0] == 'enabled':
             f |= Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
+        elif self.LAYOUT[column][0] == 'autoContinue':
+            f |= Qt.ItemIsEnabled | Qt.ItemIsUserCheckable
         elif self.LAYOUT[column][0] == 'condition':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
         elif self.LAYOUT[column][0] == 'skip':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
         elif self.LAYOUT[column][0] == 'name':
+            f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
+        elif self.LAYOUT[column][0] == 'action':
             f |= Qt.ItemIsEnabled | Qt.ItemIsEditable
 
         return f
@@ -382,11 +395,17 @@ class BreakpointModel(QAbstractTableModel):
                 self.disableBreakpoint(bp.number)
             else:
                 self.enableBreakpoint(bp.number)
+        elif self.LAYOUT[column][0] == 'autoContinue':
+            bp.autoContinue = value
         elif self.LAYOUT[column][0] == 'name':
             bp.name = str(value)
 
             # make sure the view is updated
             self.__emitDataChangedForRows(index.row())
+        elif self.LAYOUT[column][0] == 'action':
+            bp.action = str(value)
+        else:
+            logging.error("Received setData for unexpected column %d.", column)
 
         return True
 

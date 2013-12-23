@@ -43,7 +43,8 @@ class BreakpointWidget(ComplexToolTip):
         self.mapper.addMapping(self.ui.condition, 4)
         self.mapper.addMapping(self.ui.skip, 5)
         self.mapper.addMapping(self.ui.hits, 6)
-        self.mapper.addMapping(self.ui.name, 7)
+        self.mapper.addMapping(self.ui.name, 8)
+        self.mapper.addMapping(self.ui.action, 9)
         self.mapper.setCurrentIndex(row)
 
         # workaround: QDataWidgetMapper does not auto-submit on changing a QCheckBox

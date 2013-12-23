@@ -67,6 +67,7 @@ class Tracepoint(Breakpoint):
         self.name = "TP #%s" % nr
         self.variableList = VariableList(PlainVariableFactory, do)
         self.wave = []
+        self.autoContinue = True
 
         self.tooltip = "Tracepoint"
 
