@@ -54,41 +54,50 @@ class EditorConfig(ConfigSet):
 
 
 class EditorController(QObject):
-    def __init__(self, distributedObjects):
+    def __init__(self, distributedObjects, view):
         QObject.__init__(self)
         self.distributedObjects = distributedObjects
 
-        self.editor_view = EditorView(self.distributedObjects)
+        self.__view = view
+        view.init(distributedObjects)
 
-        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.editor_view.targetStoppedNormally)
-        self.distributedObjects.signalProxy.inferiorReceivedSignal.connect(self.editor_view.targetStoppedWithSignal)
-        self.distributedObjects.signalProxy.inferiorHasExited.connect(self.editor_view.targetExited)
+        self.distributedObjects.signalProxy.inferiorStoppedNormally.connect(self.__view.targetStoppedNormally)
+        self.distributedObjects.signalProxy.inferiorReceivedSignal.connect(self.__view.targetStoppedWithSignal)
+        self.distributedObjects.signalProxy.inferiorHasExited.connect(self.__view.targetExited)
         self.distributedObjects.signalProxy.saveFile.connect(self.saveCurrentFile)
-        self.distributedObjects.signalProxy.fileModified.connect(self.editor_view.setFileModified)
+        self.distributedObjects.signalProxy.fileModified.connect(self.__view.setFileModified)
 
         self.config = EditorConfig()
         self.distributedObjects.configStore.registerConfigSet(self.config)
 
     def jumpToLine(self, filename, line):
         line = int(line) - 1
-        self.editor_view.openFile(filename)
-        editor = self.editor_view.openedFiles[filename]
+        self.__view.openFile(filename)
+        editor = self.__view.openedFiles[filename]
         editor.showLine(line)
         editor.highlightLine(line)
 
     def addStackMarker(self, filename, line):
         line = int(line) - 1
-        self.editor_view.openFile(filename)
-        editor = self.editor_view.openedFiles[filename]
+        self.__view.openFile(filename)
+        editor = self.__view.openedFiles[filename]
         editor.markerAdd(line, editor.MARGIN_MARKER_STACK)
 
     def delStackMarkers(self, filename):
-        if self.editor_view.isOpen(filename):
-            editor = self.editor_view.openedFiles[filename]
+        if self.__view.isOpen(filename):
+            editor = self.__view.openedFiles[filename]
             editor.markerDeleteAll(editor.MARGIN_MARKER_STACK)
 
     def saveCurrentFile(self):
-        self.editor_view.getCurrentOpenedFile().saveFile()
+        self.__view.getCurrentOpenedFile().saveFile()
 
     def closeOpenedFiles(self):
-        return self.editor_view.removeAllTabs()
+        return self.__view.removeAllTabs()
+
+    def getCursorPosition(self):
+        file_ = self.__view.getCurrentOpenedFile()
+        line, _ = file_.getCursorPosition()
+        return (file_.filename, line+1)
+
+    def getView(self):
+        return self.__view

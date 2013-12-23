@@ -274,9 +274,8 @@ class DebugController(QObject):
     @trace
     @pyqtSlot()
     def inferiorUntil(self):
-        current_opened_file = self.do.editorController.editor_view.getCurrentOpenedFile()
-        line, _ = current_opened_file.getCursorPosition()
-        self.connector.until(current_opened_file.filename, line + 1)
+        file_, line = self.do.editorController.getCursorPosition()
+        self.connector.until(file_, line)
         self.lastCmdWasStep = False
 
     def getExecutableName(self):

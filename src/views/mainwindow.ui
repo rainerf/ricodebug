@@ -27,6 +27,9 @@
     <item>
      <widget class="QWidget" name="notificationArea" native="true"/>
     </item>
+    <item>
+     <widget class="EditorView" name="editorView"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -35,7 +38,7 @@
      <x>0</x>
      <y>0</y>
      <width>881</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -176,6 +179,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EditorView</class>
+   <extends>QTabWidget</extends>
+   <header>views.editorview</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>

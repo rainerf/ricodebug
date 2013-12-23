@@ -70,7 +70,7 @@ class DistributedObjects:
         self.breakpointModel, _ = self.buildModelAndView(StoppointModel, BreakpointView, "Breakpoints", Icons.bp)
 
         self.variablePool = VariablePool(self)
-        self.editorController = EditorController(self)
+        self.editorController = EditorController(self, mainwindow.ui.editorView)
 
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
@@ -79,7 +79,7 @@ class DistributedObjects:
         self.watchModel, _ = self.buildModelAndView(WatchModel, WatchView, "Watch", Icons.watch)
         self.buildModelAndView(LocalsModel, TreeItemView, "Locals", Icons.locals)
 
-        self.toolTipController = VariableViewToolTipController(self, VariableViewToolTip(self, self.editorController.editor_view))
+        self.toolTipController = VariableViewToolTipController(self, VariableViewToolTip(self, self.editorController.getView()))
 
         self.tracepointController = TracepointController(self)
 

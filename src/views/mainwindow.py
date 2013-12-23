@@ -80,9 +80,6 @@ class MainWindow(QMainWindow):
         self.ui.actionSavePlugins.triggered.connect(self.showSavePluginsDialog)
         self.ui.actionLoadPlugins.triggered.connect(self.showLoadPluginsDialog)
 
-        # Add editor to main window.
-        self.ui.verticalLayout.addWidget(self.do.editorController.editor_view)
-
         dw = self.insertDockWidget(None, "Log View", Qt.BottomDockWidgetArea, True)
         self.logviewhandler = LogViewHandler(dw)
         dw.setWidget(self.logviewhandler)

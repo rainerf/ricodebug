@@ -32,7 +32,7 @@ import helpers.excep
 
 
 class EditorView(QTabWidget):
-    def __init__(self, distributedObjects, parent=None):
+    def __init__(self, parent=None):
         QTabWidget.__init__(self, parent)
 
         self.setDocumentMode(True)
@@ -41,12 +41,18 @@ class EditorView(QTabWidget):
 
         self.setCurrentIndex(-1)
 
-        self.distributedObjects = distributedObjects
         self.tabCloseRequested.connect(self.hideTab)
         self.currentChanged.connect(self.__changedTab)
-        self.act = self.distributedObjects.actions
+
+        # set by calling init()
+        self.distributedObjects = None
+        self.act = None
 
         self.openedFiles = {}
+
+    def init(self, do):
+        self.distributedObjects = do
+        self.act = do.actions
 
     def hideTab(self, idx):
         """ Close an opened file tab. Show message box if file has been modified. """
