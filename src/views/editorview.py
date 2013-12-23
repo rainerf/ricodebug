@@ -25,44 +25,37 @@
 import os
 import logging
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QWidget, QMessageBox
+from PyQt4.QtGui import QTabWidget, QMessageBox
 
 from .openedfileview import OpenedFileView
 import helpers.excep
 
 
-class EditorView(QWidget):
+class EditorView(QTabWidget):
     def __init__(self, distributedObjects, parent=None):
-        QWidget.__init__(self, parent)
+        QTabWidget.__init__(self, parent)
 
-        self.gridLayout = QtGui.QGridLayout(self)
-        self.gridLayout.setMargin(0)
+        self.setDocumentMode(True)
+        self.setTabsClosable(True)
+        self.setMovable(True)
 
-        self.tabWidget = QtGui.QTabWidget(self)
-        self.tabWidget.setDocumentMode(True)
-        self.tabWidget.setTabsClosable(True)
-        self.tabWidget.setMovable(True)
-
-        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
-
-        self.tabWidget.setCurrentIndex(-1)
+        self.setCurrentIndex(-1)
 
         self.distributedObjects = distributedObjects
-        self.tabWidget.tabCloseRequested.connect(self.hideTab)
-        self.tabWidget.currentChanged.connect(self.__changedTab)
+        self.tabCloseRequested.connect(self.hideTab)
+        self.currentChanged.connect(self.__changedTab)
         self.act = self.distributedObjects.actions
 
         self.openedFiles = {}
 
     def hideTab(self, idx):
         """ Close an opened file tab. Show message box if file has been modified. """
-        w = self.tabWidget.widget(idx)
+        w = self.widget(idx)
 
         ret = QMessageBox.Discard
         if self.__getFileModified(idx):
             msgBox = QMessageBox(QMessageBox.Question, "Save Resources", "'" +
-                    self.tabWidget.tabText(idx)[:-1] +
+                    self.tabText(idx)[:-1] +
                     "' has been modified. Save changes?", QMessageBox.Cancel |
                     QMessageBox.Save | QMessageBox.Discard, self)
             ret = msgBox.exec_()
@@ -73,7 +66,7 @@ class EditorView(QWidget):
             for i in self.openedFiles.values():
                 if w == i:
                     if i.shown:
-                        self.tabWidget.removeTab(self.tabWidget.indexOf(i))
+                        self.removeTab(self.indexOf(i))
                         i.shown = False
                     if i.filename in self.openedFiles:
                         del self.openedFiles[i.filename]
@@ -87,7 +80,7 @@ class EditorView(QWidget):
             self.act.SaveFile.setEnabled(False)
 
     def getCurrentOpenedFile(self):
-        w = self.tabWidget.currentWidget()
+        w = self.currentWidget()
         for i in self.openedFiles.values():
             if w == i:
                 return i
@@ -96,7 +89,7 @@ class EditorView(QWidget):
         """ Method goes through opened files and asks user to save changes.
             returns false if user canceled operation
         """
-        i = self.tabWidget.count()
+        i = self.count()
         success = True
         while i > 0 and success:
             success = self.hideTab(i - 1)
@@ -110,31 +103,31 @@ class EditorView(QWidget):
         if not self.isOpen(filename):
             self.openedFiles[filename] = OpenedFileView(self.distributedObjects, filename, self)
             self.showFile(filename)
-        self.tabWidget.setCurrentWidget(self.openedFiles[filename])
+        self.setCurrentWidget(self.openedFiles[filename])
 
     def showFile(self, filename):
         opened_file = self.openedFiles[filename]
         if not opened_file.shown:
-            self.tabWidget.addTab(opened_file, os.path.basename(filename))
-            self.tabWidget.setCurrentWidget(opened_file)
+            self.addTab(opened_file, os.path.basename(filename))
+            self.setCurrentWidget(opened_file)
             opened_file.shown = True
 
     def setFileModified(self, filename, modified):
         """ Adds a '*' to name of modified file in the editors tab widget.  """
         if filename in self.openedFiles:
             if modified:
-                self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.setTabText(self.indexOf(
                     self.openedFiles[filename]),
                     os.path.basename(filename) + '*')
             else:
-                self.tabWidget.setTabText(self.tabWidget.indexOf(
+                self.setTabText(self.indexOf(
                     self.openedFiles[filename]),
                     os.path.basename(filename))
             self.act.SaveFile.setEnabled(modified)
 
     def __getFileModified(self, idx):
         """ Method returns true if filename in tabwidget ends with '*'. """
-        return str(self.tabWidget.tabText(idx)).endswith('*')
+        return str(self.tabText(idx)).endswith('*')
 
     def _targetStopped(self, rec):
         self.__removeExecutionPositionMarkers()
