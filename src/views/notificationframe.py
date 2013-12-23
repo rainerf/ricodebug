@@ -100,6 +100,6 @@ class NotificationFrameHandler(logging.Handler):
         elif record.levelno >= logging.INFO:
             severity = NotificationFrame.INFO
 
-        if severity:
+        if severity is not None:
             actions = getattr(record, "actions", None)
             self._notificationArea.layout().addWidget(NotificationFrame(self._notificationArea, record.message, severity, actions))
