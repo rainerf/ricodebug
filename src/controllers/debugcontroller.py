@@ -72,7 +72,7 @@ class DebugController(QObject):
         self.__binaryWatcher = QFileSystemWatcher()
         self.__binaryWatcher.fileChanged.connect(self.__binaryChanged)
 
-        self.do.signalProxy.addProxy(["openExecutable", "run", "next_", "reverse_next", "step", "reverse_step", "cont", "interrupt", "finish", "reverse_finish", "evaluateExpression", "executeCliCommand", "inferiorUntil", "getStackDepth", "selectStackFrame"], self)
+        self.do.signalProxy.addProxy(["openExecutable", "run", "setRecord", "next_", "reverse_next", "step", "reverse_step", "cont", "interrupt", "finish", "reverse_finish", "evaluateExpression", "executeCliCommand", "inferiorUntil", "getStackDepth", "selectStackFrame"], self)
 
 
     def __reloadAction(self):
@@ -130,6 +130,8 @@ class DebugController(QObject):
         except GdbError:
             pass
 
+    @trace
+    @pyqtSlot(int)
     def setRecord(self, state):
         if state:
             self.connector.record_start()
