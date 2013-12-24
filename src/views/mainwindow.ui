@@ -19,13 +19,13 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
-     <number>2</number>
+     <number>-1</number>
     </property>
     <property name="margin">
      <number>0</number>
     </property>
     <item>
-     <widget class="QWidget" name="notificationArea" native="true"/>
+     <widget class="MinimumSizeScrollArea" name="notificationArea" native="true"/>
     </item>
     <item>
      <widget class="EditorView" name="editorView"/>
@@ -184,6 +184,12 @@
    <class>EditorView</class>
    <extends>QTabWidget</extends>
    <header>views.editorview</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MinimumSizeScrollArea</class>
+   <extends>QWidget</extends>
+   <header>widgets.minimumsizescrollarea</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

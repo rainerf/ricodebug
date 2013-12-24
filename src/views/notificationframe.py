@@ -88,7 +88,6 @@ class NotificationFrameHandler(logging.Handler):
     def __init__(self, notificationArea):
         logging.Handler.__init__(self)
         self._notificationArea = notificationArea
-        self._notificationArea.setLayout(QVBoxLayout())
 
     def emit(self, record):
         severity = None
@@ -102,4 +101,4 @@ class NotificationFrameHandler(logging.Handler):
 
         if severity is not None:
             actions = getattr(record, "actions", None)
-            self._notificationArea.layout().addWidget(NotificationFrame(self._notificationArea, record.message, severity, actions))
+            self._notificationArea.addWidget(NotificationFrame(self._notificationArea, record.message, severity, actions))
