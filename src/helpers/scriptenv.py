@@ -55,6 +55,7 @@ class ScriptEnv:
         logging.error(*args, **kwargs)
 
     @trace
-    def print_(self, var):
-        """show a variable in the main window"""
-        self.note("%s = %s" % (var, self.sp.evaluateExpression(var)))
+    def print_(self, *args):
+        """show variables in the main window"""
+        for var in args:
+            self.note("%s = %s" % (var, self.sp.evaluateExpression(var)))
