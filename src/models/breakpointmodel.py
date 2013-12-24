@@ -396,7 +396,8 @@ class BreakpointModel(QAbstractTableModel):
             else:
                 self.enableBreakpoint(bp.number)
         elif self.LAYOUT[column][0] == 'autoContinue':
-            bp.autoContinue = value
+            bp.autoContinue = bool(value)
+            self.__emitDataChangedForRows(index.row())
         elif self.LAYOUT[column][0] == 'name':
             bp.name = str(value)
 
@@ -404,8 +405,6 @@ class BreakpointModel(QAbstractTableModel):
             self.__emitDataChangedForRows(index.row())
         elif self.LAYOUT[column][0] == 'action':
             bp.action = str(value)
-        else:
-            logging.error("Received setData for unexpected column %d.", column)
 
         return True
 
