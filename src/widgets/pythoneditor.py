@@ -6,6 +6,9 @@ from .commonscintilla import CommonScintilla
 class PythonEditor(CommonScintilla):
     def __init__(self, parent):
         CommonScintilla.__init__(self, parent)
+        # don't show the symbol margin
+        self.setMarginWidth(1, 0)
+
         self.setLexer(QsciLexerPython())
 
     def getUser(self):
