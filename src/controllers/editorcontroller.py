@@ -50,6 +50,7 @@ class EditorConfig(ConfigSet):
         self.tabWidth = ConfigItem(self, "Tab Width", 4)
         self.wrapLines = ConfigItem(self, "Wrap Lines", True)
         self.folding = ConfigItem(self, "Allow Folding", True)
+        self.braceMatching= ConfigItem(self, "Highlight matching braces", False)
         # self.font = ConfigItem(self, "Font", ('DejaVu Sans Mono', 10, False, True))
         Separator(self, None)
         self.useBreakpointOverlays = ConfigItem(self, "Use Breakpoint Overlays", True)

@@ -30,6 +30,7 @@ class CommonScintilla(QsciScintilla):
         self.setIndentationGuides(c.showIndentationGuides.value)
         self.setTabWidth(int(c.tabWidth.value))
         self.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
+        self.setBraceMatching(qs.SloppyBraceMatch if c.braceMatching.value else qs.NoBraceMatch)
         l = self.__lexer
         #font = QFont("DejaVu Sans Mono", 10)
         l.setFont(formlayout.tuple_to_qfont(c.font.value))
