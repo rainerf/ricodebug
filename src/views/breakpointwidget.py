@@ -28,13 +28,14 @@ from widgets.complextooltip import ComplexToolTip
 
 
 class BreakpointWidget(ComplexToolTip):
-    def __init__(self, model, bp, parent):
+    def __init__(self, do, model, bp, parent):
         ComplexToolTip.__init__(self, parent)
         self.ui = Ui_BreakpointWidget()
         self.ui.setupUi(self)
 
         self.ui.description.setText("Breakpoint %s at %s (%s)" % (bp.number, bp.where, bp.addr))
         self.ui.icon.setPixmap(bp.icon.pixmap(16, 16))
+        self.ui.action.init(do)
 
         row, _ = model.findRowForNumber(bp.number)
         self.mapper = QDataWidgetMapper(self)

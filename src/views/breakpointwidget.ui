@@ -163,7 +163,7 @@
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QPlainTextEdit" name="action"/>
+         <widget class="PythonEditor" name="action"/>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="label_6">
@@ -189,6 +189,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PythonEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>widgets.pythoneditor</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

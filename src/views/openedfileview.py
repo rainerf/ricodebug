@@ -26,14 +26,15 @@ import re
 from math import log, ceil
 import logging
 
-from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.QtGui import QPixmap, QFont, QColor, QFrame, QHBoxLayout, QLayout
-from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint
+from PyQt4.QtGui import QPixmap, QFont, QFrame, QHBoxLayout, QLayout, QColor, QMenu
+from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint, QIODevice, QFile
+from PyQt4.Qsci import QsciScintilla, QsciLexerCPP
 
 from views.overlays import BreakpointOverlayWidget
+from widgets.commonscintilla import CommonScintilla
 
 
-class ScintillaWrapper(Qsci.QsciScintilla):
+class ScintillaWrapper(CommonScintilla):
     """
     A wrapper around QsciScintilla:
     * Only emits dwellStart events if the mouse is really dwelling over the
@@ -45,7 +46,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
     dwellEnd = pyqtSignal(int, int, int)
 
     def __init__(self, parent):
-        Qsci.QsciScintilla.__init__(self, parent)
+        CommonScintilla.__init__(self, parent)
         self.__mouseInWidget = False
         self.__overlayWidgets = {}
 
@@ -54,13 +55,13 @@ class ScintillaWrapper(Qsci.QsciScintilla):
         self.SCN_MARGINCLICK.connect(self.updateOverlayPositions)
 
     def ensureLineVisible(self, *args, **kwargs):
-        ret = Qsci.QsciScintilla.ensureLineVisible(self, *args, **kwargs)
+        ret = QsciScintilla.ensureLineVisible(self, *args, **kwargs)
         self.updateOverlayPositions()
         return ret
 
     def updateOverlayPositions(self):
-        for line in range(0, self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINECOUNT)):
-            if self.SendScintilla(Qsci.QsciScintilla.SCI_GETLINEVISIBLE, line):
+        for line in range(0, self.SendScintilla(QsciScintilla.SCI_GETLINECOUNT)):
+            if self.SendScintilla(QsciScintilla.SCI_GETLINEVISIBLE, line):
                 if line in self.__overlayWidgets:
                     overlay = self.__overlayWidgets[line]
                     self.__moveOverlayToLine(overlay, line)
@@ -71,11 +72,11 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
     def enterEvent(self, event):
         self.__mouseInWidget = True
-        return Qsci.QsciScintilla.enterEvent(self, event)
+        return QsciScintilla.enterEvent(self, event)
 
     def leaveEvent(self, event):
         self.__mouseInWidget = False
-        return Qsci.QsciScintilla.leaveEvent(self, event)
+        return QsciScintilla.leaveEvent(self, event)
 
     def __dwellStartEvent(self, pos, x, y):
         if self.__mouseInWidget:
@@ -83,7 +84,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
     def __moveOverlayToLine(self, overlay, line):
         pos = self.positionFromLineIndex(int(line), 0)
-        y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, pos)
+        y = self.SendScintilla(QsciScintilla.SCI_POINTYFROMPOSITION, 0, pos)
         overlay.move(overlay.x(), y)
 
     def addOverlayWidget(self, w, line, col=None, offset=0, minX=0):
@@ -105,7 +106,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
 
             self.__moveOverlayToLine(cont, line)
             pos = self.positionFromLineIndex(int(line), col)
-            x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, pos)
+            x = self.SendScintilla(QsciScintilla.SCI_POINTXFROMPOSITION, 0, pos)
             cont.move(max(x + offset, minX), cont.y())
 
             cont.resize(10, self.textHeight(line))
@@ -150,7 +151,7 @@ class ScintillaWrapper(Qsci.QsciScintilla):
             p = w.pos() + QPoint(dx, dy * self.textHeight(0))
             w.move(p)
 
-        return Qsci.QsciScintilla.scrollContentsBy(self, dx, dy)
+        return QsciScintilla.scrollContentsBy(self, dx, dy)
 
 
 class OpenedFileView(ScintillaWrapper):
@@ -177,14 +178,13 @@ class OpenedFileView(ScintillaWrapper):
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
 
-        self.font = QFont("DejaVu Sans Mono", 10)
-        self.font.setStyleHint(QFont.TypeWriter)
-        self.lexer = Qsci.QsciLexerCPP()
-        self.lexer.setFont(self.font)
+        font = QFont("DejaVu Sans Mono", 10)
+        font.setStyleHint(QFont.TypeWriter)
+        lexer = QsciLexerCPP()
+        lexer.setFont(font)
 
         self.setToolTip("")
         self.setWhatsThis("")
-        self.setLexer(self.lexer)
         self.setMarginLineNumbers(self.MARGIN_NUMBERS, True)
         # set sensitivity
         self.setMarginSensitivity(self.MARGIN_NUMBERS, True)
@@ -197,7 +197,7 @@ class OpenedFileView(ScintillaWrapper):
         self.markerDefine(self.markerExec, self.MARGIN_MARKER_EXEC)
         self.markerDefine(self.markerStack, self.MARGIN_MARKER_STACK)
         self.markerDefine(self.markerExecSignal, self.MARGIN_MARKER_EXEC_SIGNAL)
-        self.markerDefine(Qsci.QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
+        self.markerDefine(QsciScintilla.Background, self.MARKER_HIGHLIGHTED_LINE)
 
         # define width and mask to show margin
         self.setMarginWidth(self.MARGIN_MARKER_BP, 10)
@@ -217,11 +217,11 @@ class OpenedFileView(ScintillaWrapper):
 
         self.setReadOnly(False)
 
-        if not (QtCore.QFile.exists(filename)):
+        if not (QFile.exists(filename)):
             logging.error("Could not open file %s", filename)
 
-        self.file_ = QtCore.QFile(filename)
-        self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+        self.file_ = QFile(filename)
+        self.file_.open(QIODevice.ReadOnly | QIODevice.Text)
         self.read(self.file_)
         self.file_.close()
 
@@ -229,10 +229,10 @@ class OpenedFileView(ScintillaWrapper):
         self.modificationChanged.connect(self.__setFileModified)
 
         self.setMarginWidthByLineNumbers()
-        self.SendScintilla(Qsci.QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
+        self.SendScintilla(QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
 
         # override scintillas context menu with our own
-        self.SendScintilla(Qsci.QsciScintilla.SCI_USEPOPUP, 0)
+        self.SendScintilla(QsciScintilla.SCI_USEPOPUP, 0)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
 
@@ -252,9 +252,6 @@ class OpenedFileView(ScintillaWrapper):
 
         act = self.distributedObjects.actions
         act.ToggleTrace.triggered.connect(self.toggleTracepoint)
-
-        self.distributedObjects.editorController.config.itemsHaveChanged.connect(self.updateConfig)
-        self.updateConfig()
 
         # initially, read all breakpoints and tracepoints from the model
         self.getTracepointsFromModel()
@@ -281,33 +278,26 @@ class OpenedFileView(ScintillaWrapper):
         self.__wordHighlightTimer.setInterval(250)
         self.__wordHighlightTimer.timeout.connect(self.highlightWordFromCursorPosition)
 
-    def updateConfig(self):
-        qs = Qsci.QsciScintilla
-        c = self.distributedObjects.editorController.config
-        self.setWhitespaceVisibility(qs.WsVisible if c.showWhiteSpaces.value else qs.WsInvisible)
-        self.setIndentationGuides(c.showIndentationGuides.value)
-        self.setTabWidth(int(c.tabWidth.value))
-        self.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
-        self.setFolding(qs.BoxedTreeFoldStyle if c.folding.value else qs.NoFoldStyle, self.MARGIN_MARKER_FOLD)
-        self.lexer.setPaper(QColor(c.backgroundColor.value))
-        self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Identifier)
-        self.lexer.setColor(QColor(c.identifierColor.value), self.lexer.Operator)
-        self.setCaretForegroundColor(QColor(c.identifierColor.value))
-        self.lexer.setColor(QColor(c.keywordColor.value), self.lexer.Keyword)
-        self.lexer.setColor(QColor(c.stringColor.value), self.lexer.SingleQuotedString)
-        self.lexer.setColor(QColor(c.stringColor.value), self.lexer.DoubleQuotedString)
-        self.lexer.setColor(QColor(c.numberColor.value), self.lexer.Number)
-        self.lexer.setColor(QColor(c.preprocessorColor.value), self.lexer.PreProcessor)
-        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.Comment)
-        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentLine)
-        self.lexer.setColor(QColor(c.commentColor.value), self.lexer.CommentDoc)
-        self.setIndicatorForegroundColor(QColor(c.tooltipIndicatorColor.value))
-        self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
+        ScintillaWrapper.init(self, distributedObjects)
+        self.setLexer(lexer)
 
+    def updateConfig(self):
+        if not ScintillaWrapper.updateConfig(self):
+            return False
         # check whether we're supposed to use overlays and reload everything
         # that uses them
+        qs = QsciScintilla
+        c = self.distributedObjects.editorController.config
+        l = self.lexer()
+        self.setFolding(qs.BoxedTreeFoldStyle if c.folding.value else qs.NoFoldStyle, self.MARGIN_MARKER_FOLD)
+        self.setMarkerBackgroundColor(QColor(c.highlightColor.value), self.MARKER_HIGHLIGHTED_LINE)
+        l.setColor(QColor(c.preprocessorColor.value), l.PreProcessor)
+        l.setColor(QColor(c.commentColor.value), l.CommentLine)
+        l.setColor(QColor(c.commentColor.value), l.CommentDoc)
         self.__useBreakpointOverlays = c.useBreakpointOverlays.value
         self.getBreakpointsFromModel()
+
+        return True
 
     def __fileChanged(self):
         if not self.__fileChangedTimer.isActive():
@@ -316,11 +306,11 @@ class OpenedFileView(ScintillaWrapper):
 
     def saveFile(self):
         ''' Save source file '''
-        if (QtCore.QFile.exists(self.filename)):
+        if (QFile.exists(self.filename)):
             f = open(self.filename, 'w')
             f.write(self.text())
             f.close()
-            self.file_.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)
+            self.file_.open(QIODevice.ReadOnly | QIODevice.Text)
             self.read(self.file_)
             self.file_.close()
             self.__setFileModified(False)
@@ -337,23 +327,23 @@ class OpenedFileView(ScintillaWrapper):
             # expression is not valid (ie. something that is not a variable)
             if self.debugController.evaluateExpression(exp.strip()) is not None:
                 startPos = self.positionFromLineIndex(line, start)
-                x = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
-                y = self.SendScintilla(Qsci.QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
-                self.distributedObjects.toolTipController.showToolTip(exp, QtCore.QPoint(x + 3, y + 3 + self.textHeight(line)), self)
+                x = self.SendScintilla(QsciScintilla.SCI_POINTXFROMPOSITION, 0, startPos)
+                y = self.SendScintilla(QsciScintilla.SCI_POINTYFROMPOSITION, 0, startPos)
+                self.distributedObjects.toolTipController.showToolTip(exp, QPoint(x + 3, y + 3 + self.textHeight(line)), self)
 
     def onDwellEnd(self, _1, _2, _3):
         self.distributedObjects.toolTipController.hideToolTip()
 
     def showContextMenu(self, point):
         scipos = self.SendScintilla(
-                Qsci.QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
+                QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.mapToGlobal(point)
         exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(scipos)
 
         # self.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContextMenuLine = int(self.lineIndexFromPosition(scipos)[0])
 
-        self.__popupMenu = QtGui.QMenu(self)
+        self.__popupMenu = QMenu(self)
         self.__popupMenu.addAction(self.distributedObjects.actions.ToggleTrace)
 
         if exp:
@@ -363,7 +353,7 @@ class OpenedFileView(ScintillaWrapper):
 
             listOfTracepoints = self.tracepointController.getTracepointsFromModel()
             if listOfTracepoints:
-                subPopupMenu = QtGui.QMenu(self)
+                subPopupMenu = QMenu(self)
                 subPopupMenu.setTitle("Add variable " + exp + " to tracepoint...")
 
                 for tp in listOfTracepoints:
@@ -520,7 +510,7 @@ class OpenedFileView(ScintillaWrapper):
         if not self.__useBreakpointOverlays:
             return
 
-        l = BreakpointOverlayWidget(self.viewport(), bp, self.__bpModel)
+        l = BreakpointOverlayWidget(self.viewport(), self.distributedObjects, bp, self.__bpModel)
         self.breakpointOverlays[bp.number] = l
         self.__updateBreakpointOverlay(bp)
         l.show()

@@ -68,11 +68,12 @@ class OverlayWidget(QFrame):
 class BreakpointOverlayWidget(OverlayWidget):
     color = "#ff6060"
 
-    def __init__(self, parent, bp, bpModel):
+    def __init__(self, parent, do, bp, bpModel):
         OverlayWidget.__init__(self, parent, self.color)
         self.markerBp = QPixmap(":/markers/bp.png")
         self.markerBpDisabled = QPixmap(":/markers/bp_dis.png")
         self.bp = bp
+        self.__do = do
         self.__bpModel = bpModel
         self.__icon = ClickableLabel()
         self.__icon.clicked.connect(self.toggleEnabled)
@@ -100,7 +101,7 @@ class BreakpointOverlayWidget(OverlayWidget):
 
     def event(self, event):
         if event.type() == QEvent.ToolTip:
-            self.toolTip = BreakpointWidget(self.__bpModel, self.bp, None)
+            self.toolTip = BreakpointWidget(self.__do, self.__bpModel, self.bp, None)
             self.toolTip.showToolTip(QPoint(self.height()/2, self.height()), self)
             return True
         return OverlayWidget.event(self, event)

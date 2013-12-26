@@ -23,7 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from PyQt4.QtCore import QObject
-from views.editorview import EditorView
+from PyQt4.QtGui import QFont
 from helpers.configstore import ConfigSet, ConfigItem, Separator
 from helpers.icons import Icons
 
@@ -31,6 +31,8 @@ from helpers.icons import Icons
 class EditorConfig(ConfigSet):
     def __init__(self):
         ConfigSet.__init__(self, "Editor", "Editor Settings", Icons.vertical)
+        self.font = ConfigItem(self, "Font", ("DejaVu Sans Mono", 10))
+        Separator(self, None)
         self.backgroundColor = ConfigItem(self, "Background Color", "#ffffff")
         self.identifierColor = ConfigItem(self, "Identifier Color", "#000000")
         self.keywordColor = ConfigItem(self, "Keyword Color", "#00007f")
