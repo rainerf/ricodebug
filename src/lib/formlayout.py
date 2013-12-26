@@ -51,6 +51,7 @@ DEBUG = False
 import os
 import sys
 import datetime
+import itertools
 
 STDERR = sys.stderr
 
@@ -183,62 +184,45 @@ def tuple_to_qfont(tup):
     Create a QFont from tuple:
         (family [string], size [int], italic [bool], bold [bool])
     """
-    if not isinstance(tup, tuple) or len(tup) != 4 \
+    if not isinstance(tup, tuple) or len(tup) != 2 \
        or not font_is_installed(tup[0]) \
-       or not isinstance(tup[1], int) \
-       or not isinstance(tup[2], bool) \
-       or not isinstance(tup[3], bool):
+       or not isinstance(tup[1], int):
         return None
     font = QFont()
-    family, size, italic, bold = tup
+    family, size = tup
     font.setFamily(family)
     font.setPointSize(size)
-    font.setItalic(italic)
-    font.setBold(bold)
     return font
 
 def qfont_to_tuple(font):
-    return (str(font.family()), int(font.pointSize()),
-            font.italic(), font.bold())
+    return (str(font.family()), int(font.pointSize()))
 
-class FontLayout(QGridLayout):
+class FontLayout(QHBoxLayout):
     """Font selection"""
     def __init__(self, value, parent=None):
-        QGridLayout.__init__(self)
+        QHBoxLayout.__init__(self)
         font = tuple_to_qfont(value)
         assert font is not None
 
         # Font family
         self.family = QFontComboBox(parent)
         self.family.setCurrentFont(font)
-        self.addWidget(self.family, 0, 0, 1, -1)
+        self.addWidget(self.family)
 
         # Font size
         self.size = QComboBox(parent)
         self.size.setEditable(True)
-        sizelist = range(6, 12) + range(12, 30, 2) + [36, 48, 72]
+        sizelist = list(itertools.chain(range(6, 12), range(12, 30, 2), [36, 48, 72]))
         size = font.pointSize()
         if size not in sizelist:
             sizelist.append(size)
             sizelist.sort()
         self.size.addItems([str(s) for s in sizelist])
         self.size.setCurrentIndex(sizelist.index(size))
-        self.addWidget(self.size, 1, 0)
-
-        # Italic or not
-        self.italic = QCheckBox(self.tr("Italic"), parent)
-        self.italic.setChecked(font.italic())
-        self.addWidget(self.italic, 1, 1)
-
-        # Bold or not
-        self.bold = QCheckBox(self.tr("Bold"), parent)
-        self.bold.setChecked(font.bold())
-        self.addWidget(self.bold, 1, 2)
+        self.addWidget(self.size)
 
     def get_font(self):
         font = self.family.currentFont()
-        font.setItalic(self.italic.isChecked())
-        font.setBold(self.bold.isChecked())
         font.setPointSize(int(self.size.currentText()))
         return qfont_to_tuple(font)
 
