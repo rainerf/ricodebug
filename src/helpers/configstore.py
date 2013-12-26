@@ -134,6 +134,10 @@ class ConfigSet(QObject):
                         i.value = str(settings.value(desc))
                     elif isinstance(i._default, int):
                         i.value = int(settings.value(desc))
+                    elif isinstance(i._default, tuple):
+                        i.value = tuple(settings.value(desc))
+                    else:
+                        logging.warning("Unsupported type for reading value %s's settings.", i.description)
         settings.endGroup()
 
 
