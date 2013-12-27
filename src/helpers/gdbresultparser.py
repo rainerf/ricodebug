@@ -76,6 +76,7 @@ tokens = [
     "TILDE",
     "AT",
     "AMP",
+    "TOKEN",
     "C_STRING",
     "STRING",
 ] + list(reserved.values())
@@ -92,6 +93,11 @@ t_PLUS = r'\+'
 t_TILDE = r'~'
 t_AT = r'@'
 t_AMP = r'&'
+
+
+def t_TOKEN(t):
+    r'\d+'
+    return t
 
 
 def t_STRING(t):
@@ -294,30 +300,41 @@ def p_error(p):
         raise helpers.excep.GdbError("Syntax error in input!")
 
 
+def p_token(p):
+    ''' token :
+              | TOKEN'''
+    p[0] = None if len(p) == 1 else p[1]
+
+
 def p_top(p):
-    '''top : HAT result_record
-           | STAR async_output
-           | PLUS async_output
-           | ASSIGN async_output
+    '''top : token HAT result_record
+           | token STAR async_output
+           | token PLUS async_output
+           | token ASSIGN async_output
            | TILDE stream_output
            | AT stream_output
            | AMP stream_output'''
 
-    p[0] = p[2]
-    if p[1] == '^':
+    l = len(p)
+    p[0] = p[l-1]
+
+    if p[l-2] == '^':
         p[0].type_ = GdbOutput.RESULT_RECORD
-    elif p[1] == '*':
+    elif p[l-2] == '*':
         p[0].type_ = GdbOutput.EXEC_ASYN
-    elif p[1] == '+':
+    elif p[l-2] == '+':
         p[0].type_ = GdbOutput.STATUS_ASYN
-    elif p[1] == '=':
+    elif p[l-2] == '=':
         p[0].type_ = GdbOutput.NOTIFY_ASYN
-    elif p[1] == '~':
+    elif p[l-2] == '~':
         p[0].type_ = GdbOutput.CONSOLE_STREAM
-    elif p[1] == '@':
+    elif p[l-2] == '@':
         p[0].type_ = GdbOutput.TARGET_STREAM
-    elif p[1] == '&':
+    elif p[l-2] == '&':
         p[0].type_ = GdbOutput.LOG_STREAM
+
+    if l == 4:
+        p[0].token = p[1]
 
 
 class GdbResultParser:

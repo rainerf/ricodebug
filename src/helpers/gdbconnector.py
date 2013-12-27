@@ -42,6 +42,7 @@ class GdbConnector(QObject):
         QObject.__init__(self)
         self.__gdb = None
         self.reader = GdbReader(self)
+        self.__cmdId = 0
 
     def start(self):
         self.kill()
@@ -56,14 +57,18 @@ class GdbConnector(QObject):
     def kill(self):
         if self.__gdb:
             self.__gdb.kill()
+        self.__cmdId = 0
 
     def execute(self, cmd, error_msg=None):
         __start = time.time()
 
-        logging.debug("Running command %s", cmd)
-        self.__gdb.stdin.write(bytes(cmd, 'ascii')+b'\n')
+        self.__cmdId += 1
+        logging.debug("Running command %s as id %d", cmd, self.__cmdId)
+        token = "%04d" % self.__cmdId
+        self.__gdb.stdin.write(bytes("%s%s" % (token, cmd), 'ascii')+b'\n')
         self.__gdb.stdin.flush()
         res = self.reader.getResult(GdbOutput.RESULT_RECORD)
+        assert (res.token == token)
 
         if res.class_ == GdbOutput.ERROR:
             logging.debug("Command '%s' failed with %s (%s, '%s')",

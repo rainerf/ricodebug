@@ -61,4 +61,5 @@ class GdbOutput:
     def __init__(self):
         self.class_ = None  # done, running,...
         self.string = None  # the string of a stream output
-        self.type_ = None  # the type of a async response
+        self.type_ = None   # the type of a async response
+        self.token = None   # the token of the command this is the result to
