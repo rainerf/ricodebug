@@ -1,5 +1,5 @@
 from PyQt4.Qsci import QsciScintilla
-from PyQt4.QtGui import QFont, QColor
+from PyQt4.QtGui import QColor
 from lib import formlayout
 
 
@@ -32,7 +32,6 @@ class CommonScintilla(QsciScintilla):
         self.setWrapMode(qs.WrapWord if c.wrapLines.value else qs.WrapNone)
         self.setBraceMatching(qs.SloppyBraceMatch if c.braceMatching.value else qs.NoBraceMatch)
         l = self.__lexer
-        #font = QFont("DejaVu Sans Mono", 10)
         l.setFont(formlayout.tuple_to_qfont(c.font.value))
         l.setPaper(QColor(c.backgroundColor.value))
         l.setColor(QColor(c.identifierColor.value), l.Identifier)
