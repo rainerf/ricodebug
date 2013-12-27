@@ -22,7 +22,8 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QWidget, QGridLayout, QTextEdit, QComboBox, QPushButton, QSizePolicy
+from PyQt4.QtGui import QWidget, QGridLayout, QComboBox, QPushButton, QSizePolicy
+from widgets.pythoneditor import PythonEditor
 
 
 class PyIoView(QWidget):
@@ -32,8 +33,9 @@ class PyIoView(QWidget):
         layout = QGridLayout(self)
         layout.setMargin(0)
 
-        self.__pyIoEdit = QTextEdit(self)
+        self.__pyIoEdit = PythonEditor(self)
         self.__pyIoEdit.setReadOnly(True)
+        self.__pyIoEdit.init(do)
         layout.addWidget(self.__pyIoEdit, 0, 0, 1, 2)
 
         self.__pyInputEdit = QComboBox(self)
@@ -60,4 +62,4 @@ class PyIoView(QWidget):
         self.do.scriptEnv.exec_(cmd)
 
     def appendTranscript(self, t):
-        self.__pyIoEdit.append(t)
+        self.__pyIoEdit.append(t+"\n")

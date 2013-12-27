@@ -63,8 +63,6 @@ class DistributedObjects:
         self.mainwindow = mainwindow
 
         tracer.setClassName(scriptenv.CLASSNAME)
-        self.pyIoView = self.buildView(PyIoView, "Python Console", Icons.python)
-        tracer.setCallback(self.pyIoView.appendTranscript)
         self.settings = QSettings("fh-hagenberg", "ricodebug")
         self.configStore = ConfigStore(self.settings)
         self.gdb_connector = GdbConnector()
@@ -77,6 +75,8 @@ class DistributedObjects:
 
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self, mainwindow.ui.editorView)
+        self.pyIoView = self.buildView(PyIoView, "Python Console", Icons.python)
+        tracer.setCallback(self.pyIoView.appendTranscript)
 
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
