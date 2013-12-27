@@ -45,7 +45,7 @@ from views.variableviewtooltip import VariableViewToolTip
 from views.breakpointview import BreakpointView
 from views.gdbioview import GdbIoView
 from views.inferiorioview import InferiorIoView
-from views.pyioview import PyIoView
+from views.scriptview import ScriptView
 from views.threadview import ThreadView
 from models.threadmodel import ThreadModel
 from views.mitraceview import MiTraceView
@@ -75,8 +75,8 @@ class DistributedObjects:
 
         self.variablePool = VariablePool(self)
         self.editorController = EditorController(self, mainwindow.ui.editorView)
-        self.pyIoView = self.buildView(PyIoView, "Python Console", Icons.python)
-        tracer.setCallback(self.pyIoView.appendTranscript)
+        scriptView = self.buildView(ScriptView, "Python Console", Icons.python)
+        tracer.setCallback(scriptView.appendTranscript)
 
         self.filelistController = FileListController(self)
         self.stackController = StackController(self)
