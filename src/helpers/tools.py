@@ -23,6 +23,7 @@
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
 from itertools import groupby
+from PyQt4.QtGui import QColor
 
 
 def unBackslashify(s):
@@ -47,3 +48,10 @@ def cpp2py(v):
 
 def sort_and_group(cont, key):
     return groupby(sorted(cont, key=key), key=key)
+
+
+def mixColor(color1, x, color2):
+    return QColor(color1.red()   * x + color2.red()   * (1-x),
+                  color1.green() * x + color2.green() * (1-x),
+                  color1.blue()  * x + color2.blue()  * (1-x)
+                  )

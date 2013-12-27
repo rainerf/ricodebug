@@ -28,10 +28,12 @@ import logging
 
 from PyQt4.QtGui import QPixmap, QFont, QFrame, QHBoxLayout, QLayout, QColor, QMenu
 from PyQt4.QtCore import Qt, QFileSystemWatcher, QTimer, pyqtSignal, QPoint, QIODevice, QFile
-from PyQt4.Qsci import QsciScintilla, QsciLexerCPP
+from PyQt4.Qsci import QsciScintilla, QsciLexerCPP, QsciStyle
 
 from views.overlays import BreakpointOverlayWidget
 from widgets.commonscintilla import CommonScintilla
+from lib import formlayout
+from helpers.tools import mixColor
 
 
 class ScintillaWrapper(CommonScintilla):
@@ -261,6 +263,8 @@ class OpenedFileView(ScintillaWrapper):
 
         self.__popupMenu = None
 
+        self.__disAsmStyle = QsciStyle()
+
         self.__fileWatcher = QFileSystemWatcher([self.filename])
         self.__fileWatcher.fileChanged.connect(self.__fileChanged)
 
@@ -294,8 +298,17 @@ class OpenedFileView(ScintillaWrapper):
         l.setColor(QColor(c.preprocessorColor.value), l.PreProcessor)
         l.setColor(QColor(c.commentColor.value), l.CommentLine)
         l.setColor(QColor(c.commentColor.value), l.CommentDoc)
+
+        self.__disAsmStyle.setFont(formlayout.tuple_to_qfont(self.distributedObjects.editorController.config.font.value))
+        # make the annotation's background slightly shaded with the identifier color
+        bg = QColor(self.distributedObjects.editorController.config.backgroundColor.value)
+        fg = QColor(self.distributedObjects.editorController.config.identifierColor.value)
+        self.__disAsmStyle.setPaper(mixColor(bg, .8, fg))
+        self.__disAsmStyle.setColor(fg)
+
         self.__useBreakpointOverlays = c.useBreakpointOverlays.value
         self.getBreakpointsFromModel()
+        self.setDisassemble(self.distributedObjects.editorController.config.showDisassemble.value)
 
         return True
 
@@ -570,3 +583,17 @@ class OpenedFileView(ScintillaWrapper):
 
     def removeHighlightedLines(self):
         self.markerDeleteAll(self.MARKER_HIGHLIGHTED_LINE)
+
+    def setDisassemble(self, enable):
+        self.clearAnnotations()
+
+        if not enable:
+            return
+
+        ret = self.distributedObjects.gdb_connector.disassemble(self.filename)
+
+        for i in ret.asm_insns:
+            assert i.dest=="src_and_asm_line"
+            insns = "\n".join((j.address + " "*4 + j.inst for j in i.src.line_asm_insn))
+            if insns:
+                self.annotate(int(i.src.line)-1, insns, self.__disAsmStyle)

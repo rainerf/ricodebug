@@ -54,6 +54,7 @@ class EditorConfig(ConfigSet):
         # self.font = ConfigItem(self, "Font", ('DejaVu Sans Mono', 10, False, True))
         Separator(self, None)
         self.useBreakpointOverlays = ConfigItem(self, "Use Breakpoint Overlays", True)
+        self.showDisassemble = ConfigItem(self, "Show Disassembly", False)
 
 
 class EditorController(QObject):

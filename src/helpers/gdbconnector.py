@@ -292,3 +292,6 @@ class GdbConnector(QObject):
 
     def selectThread(self, id_):
         return self.executeAndRaiseIfFailed("-thread-select %s" % id_)
+
+    def disassemble(self, file_):
+        return self.executeAndRaiseIfFailed("-data-disassemble -f %s -l 1 -- 1" % file_)
