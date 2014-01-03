@@ -213,19 +213,8 @@ class OpenedFileView(ScintillaWrapper):
         self.setIndicatorDrawUnder(True, self.INDICATOR_TOOLTIP)
 
         self.setReadOnly(False)
-
-        if not (QFile.exists(filename)):
-            logging.error("Could not open file %s", filename)
-
-        self.file_ = QFile(filename)
-        self.file_.open(QIODevice.ReadOnly | QIODevice.Text)
-        self.read(self.file_)
-        self.file_.close()
-
-        self.changed = False
         self.modificationChanged.connect(self.__setFileModified)
 
-        self.setMarginWidthByLineNumbers()
         self.SendScintilla(QsciScintilla.SCI_SETMOUSEDWELLTIME, 500)
 
         # override scintillas context menu with our own
@@ -249,9 +238,6 @@ class OpenedFileView(ScintillaWrapper):
 
         act = self.distributedObjects.actions
         act.ToggleTrace.triggered.connect(self.toggleTracepoint)
-
-        # initially, read all breakpoints and tracepoints from the model
-        self.getTracepointsFromModel()
 
         self.__allowToolTip = True
         self.__enableToolTip(True)
@@ -279,6 +265,8 @@ class OpenedFileView(ScintillaWrapper):
 
         ScintillaWrapper.init(self, distributedObjects)
         self.setLexer(QsciLexerCPP())
+
+        self.openFile()
 
     def updateConfig(self):
         if not ScintillaWrapper.updateConfig(self):
@@ -318,10 +306,22 @@ class OpenedFileView(ScintillaWrapper):
             f = open(self.filename, 'w')
             f.write(self.text())
             f.close()
-            self.file_.open(QIODevice.ReadOnly | QIODevice.Text)
-            self.read(self.file_)
-            self.file_.close()
-            self.__setFileModified(False)
+            self.openFile()
+
+    def openFile(self):
+        if not (QFile.exists(self.filename)):
+            logging.error("Could not open file %s", self.filename)
+
+        self.file_ = QFile(self.filename)
+        self.file_.open(QIODevice.ReadOnly | QIODevice.Text)
+        self.read(self.file_)
+        self.file_.close()
+        self.setMarginWidthByLineNumbers()
+        self.__setFileModified(False)
+
+        # read all breakpoints and tracepoints from the model
+        self.getTracepointsFromModel()
+        self.getBreakpointsFromModel()
 
     def __setFileModified(self, modified):
         ''' Method called whenever current file is marked as modified '''
