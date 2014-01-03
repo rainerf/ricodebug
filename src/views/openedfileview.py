@@ -257,12 +257,6 @@ class OpenedFileView(ScintillaWrapper):
         self.__fileChangedTimer.setSingleShot(True)
         self.__fileChangedTimer.setInterval(100)
 
-        self.__wordHighlightTimer = QTimer()
-        self.cursorPositionChanged.connect(lambda: self.__wordHighlightTimer.start())
-        self.__wordHighlightTimer.setSingleShot(True)
-        self.__wordHighlightTimer.setInterval(250)
-        self.__wordHighlightTimer.timeout.connect(self.highlightWordFromCursorPosition)
-
         ScintillaWrapper.init(self, distributedObjects)
         self.setLexer(QsciLexerCPP())
 
@@ -329,7 +323,7 @@ class OpenedFileView(ScintillaWrapper):
 
     def onDwellStart(self, pos, x, y):
         if self.__allowToolTip:
-            exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(pos)
+            exp, (line, start, _) = self.getWordOrSelectionAndRangeFromPosition(pos)
 
             # try evaluating the expression before doing anything else: this will return None if the
             # expression is not valid (ie. something that is not a variable)
@@ -346,7 +340,7 @@ class OpenedFileView(ScintillaWrapper):
         scipos = self.SendScintilla(
                 QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y())
         point = self.mapToGlobal(point)
-        exp, (line, start, end) = self.getWordOrSelectionAndRangeFromPosition(scipos)
+        exp, _ = self.getWordOrSelectionAndRangeFromPosition(scipos)
 
         # self.lineIndexFromPosition(..) returns tuple. first element is line
         self.lastContextMenuLine = int(self.lineIndexFromPosition(scipos)[0])
@@ -489,9 +483,6 @@ class OpenedFileView(ScintillaWrapper):
             self.toggleBreakpointWithLine(line)
         elif margin == self.MARGIN_MARKER_TP:
             self.toggleTracepointWithLine(line)
-
-    def highlightWordFromCursorPosition(self):
-        line, col = self.getCursorPosition()
 
     def toggleBreakpointWithLine(self, line):
         self.__bpModel.toggleBreakpoint(self.filename, line + 1)
