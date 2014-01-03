@@ -22,7 +22,7 @@
 #
 # For further information see <http://syscdbg.hagenberg.servus.at/>.
 
-from PyQt4.QtGui import QPixmap, QLabel, QFrame, QHBoxLayout, QColor, QPainter, QPolygon, QPen, QLinearGradient
+from PyQt4.QtGui import QPixmap, QLabel, QFrame, QHBoxLayout, QColor, QPainter, QPolygon, QPen, QLinearGradient, QSizePolicy
 from PyQt4.QtCore import Qt, QPoint, QSize, QEvent
 from helpers.clickablelabel import ClickableLabel
 from views.breakpointwidget import BreakpointWidget
@@ -60,10 +60,18 @@ class OverlayWidget(QFrame):
         color1 = QColor(color2).lighter(150).name()
         layout.addWidget(PointyLabel(self, color1, color2))
         self.setStyleSheet("QLabel { background-color : QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %s, stop: 1 %s) }" % (color1, color2))
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred))
 
-    def update(self):
-        raise NotImplementedError()
+    def sizeHint(self):
+        return self.layout().minimumSize()
 
+    def __recalcSize(self):
+        self.setMaximumSize(self.layout().minimumSize().width(), self.maximumSize().height())
+
+    def event(self, e):
+        if e.type() == QEvent.LayoutRequest:
+            self.__recalcSize()
+        return QFrame.event(self, e)
 
 class BreakpointOverlayWidget(OverlayWidget):
     color = "#ff6060"
@@ -91,7 +99,6 @@ class BreakpointOverlayWidget(OverlayWidget):
         else:
             self.__text.setText("Breakpoint #%s, hit %s times" % (self.bp.number, self.bp.times))
         self.__icon.setPixmap(self.markerBp if self.bp.enabled else self.markerBpDisabled)
-        self.resize(self.sizeHint().width(), self.height())
 
     def toggleEnabled(self):
         if self.bp.enabled:
