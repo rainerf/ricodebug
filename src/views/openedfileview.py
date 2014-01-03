@@ -180,11 +180,6 @@ class OpenedFileView(ScintillaWrapper):
         self.markerExecSignal = QPixmap(":/markers/exec_pos_signal.png")
         self.shown = False
 
-        font = QFont("DejaVu Sans Mono", 10)
-        font.setStyleHint(QFont.TypeWriter)
-        lexer = QsciLexerCPP()
-        lexer.setFont(font)
-
         self.setToolTip("")
         self.setWhatsThis("")
         self.setMarginLineNumbers(self.MARGIN_NUMBERS, True)
@@ -283,7 +278,7 @@ class OpenedFileView(ScintillaWrapper):
         self.__wordHighlightTimer.timeout.connect(self.highlightWordFromCursorPosition)
 
         ScintillaWrapper.init(self, distributedObjects)
-        self.setLexer(lexer)
+        self.setLexer(QsciLexerCPP())
 
     def updateConfig(self):
         if not ScintillaWrapper.updateConfig(self):
