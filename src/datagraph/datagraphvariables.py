@@ -155,9 +155,11 @@ class DataGraphVariableBase:
 
     @QtCore.pyqtSlot()
     def setDirty(self, render_immediately=False):
+        # dirty will be true even if we to a cheap update, since our source is out of date
+        self.dirty = True
         if self.templateHandler.cheapUpdate():
             return
-        self.dirty = True
+
         assert self.parent
         if self.parent:
             self.parent.setDirty(render_immediately)
