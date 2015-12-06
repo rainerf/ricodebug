@@ -268,8 +268,12 @@ class MainWindow(QMainWindow):
             self.pluginloader.savePluginInfo()
 
     def readSettings(self):
-        self.restoreGeometry(self.settings.value("geometry"))
-        self.restoreState(self.settings.value("windowState"))
+        geometry = self.settings.value("geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        windowState = self.settings.value("windowState")
+        if windowState:
+            self.restoreState(windowState)
         self.dockToolBarManager.restoreState(self.settings)
 
     def setReverseDebugButtonsState(self, check):
