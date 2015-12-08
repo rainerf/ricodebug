@@ -213,10 +213,10 @@ class DebugController(QObject):
 
     def handleStoppedRecord(self, rec):
         # With reverse debugging, some stopped records might not contain a
-        # reason. Predefine it as None, since all unknown reasons will be
+        # reason. Predefine it as str(), since all unknown reasons will be
         # handled as the inferior having stopped normally.
         fields = ["reason", "frame", "signal-name", "signal-meaning", "bkptno", "wpt", "value"]
-        field = defaultdict(None)
+        field = defaultdict(str)
 
         for r in rec.results:
             if r.dest in fields:
